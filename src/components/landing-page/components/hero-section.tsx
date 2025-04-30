@@ -24,7 +24,7 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-[#0c2842] to-[#1a3a5f] overflow-hidden">
+    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-[#1a3a5f] to-dark-slate-gray overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-[#34C759] blur-3xl"></div>
@@ -39,7 +39,7 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <h1 className="text-4xl md:text-6xl font-bold font-heading leading-tight">
-            AI-Powered Healthcare, <span className="text-[#34C759]">Ancient Wisdom Reborn</span>
+            AI-Powered Healthcare, <span className="text-mint-green">Ancient Wisdom Reborn</span>
           </h1>
         </motion.div>
 
@@ -68,7 +68,7 @@ export default function HeroSection() {
             "Secure and private health data management",
           ].map((feature, index) => (
             <div key={index} className="flex items-center">
-              <CheckCircle className="w-5 h-5 text-[#34C759] mr-2 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-mint-green mr-2 flex-shrink-0" />
               <span className="text-gray-200">{feature}</span>
             </div>
           ))}
@@ -80,7 +80,7 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4"
         >
-          <Button  onClick={() => router.push('/patient/login')} className="bg-gradient-to-r from-[#34C759] to-[#2A5C82] hover:from-[#2A5C82] hover:to-[#34C759] text-white px-8 py-6 text-lg rounded-full shadow-lg transition-all duration-300 hover:scale-105 group">
+          <Button  onClick={() => router.push('/patient/login')} className="bg-gradient-to-r from-mint-green to-[#2A5C82] hover:from-[#2A5C82] hover:to-[#34C759] text-white px-8 py-6 text-lg rounded-full shadow-lg transition-all duration-300 hover:scale-105 group">
             <span className="relative flex items-center">
               Start Your Health Journey
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -121,7 +121,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 1.2 }}
             className="absolute -left-16 top-1/4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
-            <div className="text-[#2A5C82] font-bold text-xl">95%</div>
+            <div className="text-mint-green font-bold text-xl">95%</div>
             <div className="text-xs text-gray-600">Accuracy</div>
           </motion.div>
 
@@ -132,7 +132,7 @@ export default function HeroSection() {
             className="absolute -right-16 top-2/3 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
             <div className="text-[#34C759] font-bold text-xl">5M+</div>
-            <div className="text-xs text-gray-600">Users</div>
+            <div className="text-xs text-mint-green">Users</div>
           </motion.div>
         </div>
       </div>
