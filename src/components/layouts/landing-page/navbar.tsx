@@ -25,10 +25,9 @@ export default function Navbar() {
   }, [])
 
   const navItems = [
-    { name: "Home", href: "#" },
-    { name: "Features", href: "#features" },
+    { name: "Home", href: "/" },
     { name: "How It Works", href: "#how-it-works" },
-    { name: "Testimonials", href: "#testimonials" },
+    { name: "Order Now", href: "/pharmacy" },
     { name: "Blog", href: "#blog" },
     { name: "Contact", href: "#contact" },
   ]
@@ -37,7 +36,7 @@ export default function Navbar() {
   return (
     <motion.header
       style={{ backgroundColor }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 bg-dark-slate-gray right-0 z-50 transition-all duration-300 ${
         isScrolled ? "py-3 shadow-lg" : "py-5"
       }`}
     >
@@ -117,7 +116,7 @@ export default function Navbar() {
                 
                 onClick={() => router.push('/patient/login')}
             
-               className="bg-blue-500 hover:bg-blue-600 text-white">Get Started</Button>
+               className="bg-soft-blue hover:bg-blue-600 text-white">Get Started</Button>
             </nav>
           </div>
         </motion.div>

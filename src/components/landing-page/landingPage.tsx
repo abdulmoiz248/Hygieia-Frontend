@@ -12,6 +12,7 @@ import Faq from "@/components/landing-page/components/faq"
 import FloatingAvatar from "@/components/landing-page/components/floating-avatar"
 import PartnershipMarquee from "@/components/landing-page/components/partnership-marquee"
 import Navbar from "@/components/layouts/landing-page/navbar"
+import Footer from "../layouts/landing-page/Footer"
 
 export default function LandingPage() {
   return (
@@ -28,7 +29,7 @@ export default function LandingPage() {
       <Testimonials />
       <BlogNewsletter />
       <Faq />
-      <PartnershipMarquee />
+      <Footer/>
       <FloatingAvatar />
     </main>
   )
