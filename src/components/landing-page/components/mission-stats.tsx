@@ -22,7 +22,7 @@ export default function MissionStats() {
 
   const router=useRouter();
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-[#f8fafc] to-[#e2f1ff]">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-white to-mint-green">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-12">
           {/* Mission Statement */}
@@ -33,7 +33,7 @@ export default function MissionStats() {
             viewport={{ once: true }}
             className="w-full md:w-1/2 relative"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0c2842] mb-6">Democratizing AI-Driven Healthcare</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-6">Democratizing AI-Driven Healthcare</h2>
             <p className="text-lg text-gray-700 mb-8">
               At Hygieia, we believe that quality healthcare should be accessible to everyone, regardless of location or
               economic status. By combining ancient wisdom with cutting-edge AI technology, we're creating a future
@@ -41,7 +41,7 @@ export default function MissionStats() {
             </p>
 
             {/* Heartbeat SVG */}
-            <div className="relative h-20 mb-8">
+            <div className="relative h-20 mb-8 ">
               <svg
                 ref={heartbeatRef}
                 width="100%"
@@ -60,7 +60,8 @@ export default function MissionStats() {
                   fill="none"
                   strokeDasharray="1000"
                   strokeDashoffset={dashOffset}
-                  style={{ transition: "stroke-dashoffset 1.5s ease-in-out" }}
+                  style={{ transition: "stroke-dashoffset  1.5s ease-in-out" }}
+                
                 />
               </svg>
             </div>
@@ -118,11 +119,11 @@ export default function MissionStats() {
                     <User className="w-8 h-8 text-[#2A5C82]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#2A5C82]">Are you a healthcare provider?</h3>
+                    <h3 className="text-xl font-bold text-soft-blue">Are you a healthcare provider?</h3>
                     <p className="text-gray-600 mb-2">Join our network of top doctors</p>
                   </div>
                 </div>
-                <Button  onClick={() => router.push('/staff/roles')} className="w-full mt-4 bg-[#2A5C82] hover:bg-[#1a3a5f] text-white">
+                <Button  onClick={() => router.push('/staff/roles')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
                   Join Hygieia <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Card>
@@ -141,9 +142,9 @@ export default function MissionStats() {
             <div className="grid grid-cols-2 gap-6">
               {[
                 { label: "Diagnoses", value: "2M+", color: "#34C759", icon: <Activity className="w-6 h-6" /> },
-                { label: "Accuracy", value: "95%", color: "#8A2BE2", icon: <Brain className="w-6 h-6" /> },
+                { label: "Accuracy", value: "95%", color: "#ff6f61", icon: <Brain className="w-6 h-6" /> },
                 { label: "Countries", value: "120+", color: "#2A5C82", icon: <Users className="w-6 h-6" /> },
-                { label: "Users", value: "5M+", color: "#FF9500", icon: <User className="w-6 h-6" /> },
+                { label: "Users", value: "5M+", color: "#2c3e50", icon: <User className="w-6 h-6" /> },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -200,12 +201,12 @@ export default function MissionStats() {
 
             {/* CTA Buttons */}
             <div className="space-y-4 mt-8">
-              <Button  onClick={() => router.push('/patient/login')} className="w-full py-6 bg-gradient-to-r from-[#8A2BE2] to-[#6A5ACD] hover:from-[#6A5ACD] hover:to-[#8A2BE2] text-white text-lg relative overflow-hidden group">
+              <Button  onClick={() => router.push('/patient/login')} className="w-full py-6 bg-soft-blue text-white text-lg relative overflow-hidden group">
                 <span>Login / Register</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
 
-              <Button  onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-gradient-to-r from-[#34C759] to-[#32CD32] hover:from-[#32CD32] hover:to-[#34C759] text-white text-lg relative overflow-hidden group">
+              <Button  onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-soft-coral text-white text-lg relative overflow-hidden group">
                 <span>Order Meds Now</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
@@ -217,7 +218,7 @@ export default function MissionStats() {
   )
 }
 
-// CountUp component for animated stats
+
 function CountUp({ value, color, delay = 0 }: { value: string; color: string; delay?: number }) {
   const [count, setCount] = useState(0)
   const finalValue = Number.parseInt(value.replace(/\D/g, "")) || 100
