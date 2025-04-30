@@ -10,7 +10,6 @@ import Testimonials from "@/components/landing-page/components/testimonials"
 import BlogNewsletter from "@/components/landing-page/components/blog-newsletter"
 import Faq from "@/components/landing-page/components/faq"
 import FloatingAvatar from "@/components/landing-page/components/floating-avatar"
-import PartnershipMarquee from "@/components/landing-page/components/partnership-marquee"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "../layouts/landing-page/Footer"
 

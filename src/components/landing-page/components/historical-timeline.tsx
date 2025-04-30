@@ -55,7 +55,7 @@ export default function HistoricalTimeline() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0c2842] mb-4">From Ancient Wisdom to AI Innovation</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">From Ancient Wisdom to AI Innovation</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Trace the evolution of healthcare from the goddess Hygieia to our AI-powered future
           </p>
@@ -63,7 +63,7 @@ export default function HistoricalTimeline() {
 
         <div ref={ref} className="relative">
           {/* Timeline line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#2A5C82] to-[#8A2BE2] rounded-full"></div>
+          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-dark-slate-gray to-soft-blue rounded-full"></div>
 
           {/* Timeline items */}
           <div className="relative">
@@ -81,9 +81,9 @@ export default function HistoricalTimeline() {
                     whileHover={{ scale: 1.05 }}
                     className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
                   >
-                    <span className="text-sm font-semibold text-[#8A2BE2]">{item.year}</span>
-                    <h3 className="text-xl font-bold text-[#2A5C82] mt-1">{item.era}</h3>
-                    <p className="text-gray-600 mt-2">{item.description}</p>
+                    <span className="text-sm font-semibold text-soft-coral">{item.year}</span>
+                    <h3 className="text-xl font-bold text-soft-blue mt-1">{item.era}</h3>
+                    <p className="text-cool-gray mt-2">{item.description}</p>
                   </motion.div>
                 </div>
 
@@ -91,7 +91,7 @@ export default function HistoricalTimeline() {
                 <div className="w-2/12 flex justify-center">
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 10 }}
-                    className="w-16 h-16 rounded-full bg-white border-4 border-[#34C759] flex items-center justify-center z-10 shadow-lg text-[#2A5C82]"
+                    className="w-16 h-16 rounded-full bg-white border-4 border-mint-green flex items-center justify-center z-10 shadow-lg text-[#2A5C82]"
                   >
                     {item.icon}
                   </motion.div>
