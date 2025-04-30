@@ -43,6 +43,7 @@ const timelineItems = [
 ]
 
 export default function HistoricalTimeline() {
+  
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: false, amount: 0.2 })
 
