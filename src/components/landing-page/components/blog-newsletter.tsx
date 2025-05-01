@@ -43,7 +43,7 @@ export default function BlogNewsletter() {
   }
 
   return (
-    <section className="py-20 px-4 md:px-10 bg-white">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-mint-green to-snow-white">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-12">
           {/* Blog */}
@@ -54,7 +54,7 @@ export default function BlogNewsletter() {
             viewport={{ once: true }}
             className="w-full md:w-2/3"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0c2842] mb-8">Latest Health Insights</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-8">Latest Health Insights</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {blogPosts.map((post, index) => (
@@ -71,19 +71,19 @@ export default function BlogNewsletter() {
                   <Card className="overflow-hidden border-0 shadow-md h-full">
                     <div className="relative h-40 overflow-hidden">
                       <img
-                        src={post.image || "/placeholder.svg"}
+                        src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                       />
-                      <div className="absolute top-2 left-2 bg-[#2A5C82] text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute top-2 left-2 bg-soft-coral text-white text-xs px-2 py-1 rounded">
                         {post.category}
                       </div>
                     </div>
 
                     <div className="p-4">
-                      <h3 className="text-lg font-bold text-[#0c2842] mb-2 line-clamp-2">{post.title}</h3>
+                      <h3 className="text-lg font-bold text-dark-slate-gray mb-2 line-clamp-2">{post.title}</h3>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
-                      <Button variant="link" className="p-0 h-auto text-[#2A5C82] hover:text-[#1a3a5f]">
+                      <Button variant="link" className="p-0 h-auto text-soft-coral hover:text-soft-blue">
                         Read More →
                       </Button>
                     </div>
@@ -93,7 +93,7 @@ export default function BlogNewsletter() {
             </div>
 
             <div className="mt-8 text-center">
-              <Button className="bg-[#2A5C82] hover:bg-[#1a3a5f] text-white">View All Articles</Button>
+              <Button className="bg-soft-blue hover:bg-[#1a3a5f] text-white">View All Articles</Button>
             </div>
           </motion.div>
 
@@ -106,7 +106,7 @@ export default function BlogNewsletter() {
             className="w-full md:w-1/3"
           >
             <Card className="p-8 border-0 shadow-lg bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe] h-full">
-              <h2 className="text-2xl font-bold text-[#0c2842] mb-4">Subscribe to Our Newsletter</h2>
+              <h2 className="text-2xl font-bold text-dark-slate-gray mb-4">Subscribe to Our Newsletter</h2>
               <p className="text-gray-600 mb-6">
                 Get the latest health tips, AI insights, and exclusive offers delivered to your inbox.
               </p>
@@ -125,7 +125,7 @@ export default function BlogNewsletter() {
                       />
                     </div>
 
-                    <Button type="submit" className="w-full bg-[#34C759] hover:bg-[#2DC653] text-white">
+                    <Button type="submit" className="w-full bg-soft-coral hover:bg-[#2DC653] text-white">
                       Subscribe Now
                     </Button>
                   </div>
@@ -147,19 +147,19 @@ export default function BlogNewsletter() {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center mb-4">
                   <div className="w-8 h-8 rounded-full bg-[#2A5C82]/20 flex items-center justify-center mr-3">
-                    <Check className="w-4 h-4 text-[#2A5C82]" />
+                    <Check className="w-4 h-4 text-soft-coral" />
                   </div>
                   <p className="text-sm text-gray-600">Weekly health tips</p>
                 </div>
                 <div className="flex items-center mb-4">
                   <div className="w-8 h-8 rounded-full bg-[#2A5C82]/20 flex items-center justify-center mr-3">
-                    <Check className="w-4 h-4 text-[#2A5C82]" />
+                    <Check className="w-4 h-4 text-soft-coral" />
                   </div>
                   <p className="text-sm text-gray-600">Exclusive AI insights</p>
                 </div>
                 <div className="flex items-center">
                   <div className="w-8 h-8 rounded-full bg-[#2A5C82]/20 flex items-center justify-center mr-3">
-                    <Check className="w-4 h-4 text-[#2A5C82]" />
+                    <Check className="w-4 h-4 text-soft-coral" />
                   </div>
                   <p className="text-sm text-gray-600">Special offers</p>
                 </div>
