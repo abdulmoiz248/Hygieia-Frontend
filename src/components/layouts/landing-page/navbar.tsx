@@ -49,7 +49,7 @@ export default function Navbar() {
             className="flex items-center"
           >
             <div className="relative h-12 w-12 mr-3">
-              <img src="/logo/hygieia-logo.png" alt="Hygieia Logo" className="h-full w-full object-contain" />
+              <img src="/logo/logo-2.png" alt="Hygieia Logo" className="h-full w-full object-contain" />
             </div>
             <motion.span style={{ color: textColor }} className="text-2xl font-bold tracking-tight">
               HYGIEIA

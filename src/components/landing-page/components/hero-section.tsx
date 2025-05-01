@@ -24,7 +24,7 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-[#1a3a5f] to-dark-slate-gray overflow-hidden">
+    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-dark-slate-gray to-mint-green overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-[#34C759] blur-3xl"></div>
@@ -103,7 +103,7 @@ export default function HeroSection() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#34C759]/20 to-[#8A2BE2]/20 rounded-full blur-xl"></div>
-              <img src="/logo/hygieia-logo.png" alt="Hygieia Logo" className="w-full h-auto relative z-10" />
+              <img src="/logo/logo-2.png" alt="Hygieia Logo" className="w-full h-auto relative z-10" />
             </div>
           </motion.div>
 
