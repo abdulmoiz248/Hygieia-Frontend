@@ -87,21 +87,6 @@ const weatherAdvice = {
   },
 }
 
-const weatherColors = {
-  Clear: "#FF9500",
-  Clouds: "#8A2BE2",
-  Rain: "#2A5C82",
-  Snow: "#64D2FF",
-  Thunderstorm: "#FF3B30",
-  Drizzle: "#5AC8FA",
-  Mist: "#8E8E93",
-  Fog: "#8E8E93",
-  Haze: "#C7C7CC",
-  Dust: "#C7C7CC",
-  Smoke: "#8E8E93",
-  default: "#FF3B30",
-}
-
 // Enhanced body facts with more detailed information
 const bodyFacts = [
   {
@@ -191,16 +176,13 @@ export default function ClimateHealth() {
         setLocationPermission(true)
         try {
           const { latitude, longitude } = position.coords
-     
-          const apiKey = 'fd11e81de35b7639af57673fd7b7b71c';
-          
+
+          const apiKey = process.env.WEATHER_API_KEY;
 
           const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`,
           )
           const data = await response.json()
-
-      
 
           setWeatherData(data)
         } catch (err) {
@@ -223,9 +205,28 @@ export default function ClimateHealth() {
   const weatherType = weatherData?.weather?.[0]?.main || "default"
   const weatherIcon = weatherIcons[weatherType as keyof typeof weatherIcons] || weatherIcons.default
   const advice = weatherAdvice[weatherType as keyof typeof weatherAdvice] || weatherAdvice.default
-  const color = weatherColors[weatherType as keyof typeof weatherColors] || weatherColors.default
 
-  // Function to handle body part click
+  const getWeatherColor = (weatherType: string): string => {
+    switch (weatherType) {
+      case "Clear":
+        return "soft-blue" // Using your theme color
+      case "Clouds":
+        return "cool-gray"
+      case "Rain":
+      case "Drizzle":
+        return "soft-blue"
+      case "Snow":
+        return "mint-green"
+      case "Thunderstorm":
+        return "soft-coral"
+      default:
+        return "soft-coral"
+    }
+  }
+
+  const weatherColor = getWeatherColor(weatherType)
+
+
   const handleBodyPartClick = (part: string) => {
     if (selectedBodyPart === part) {
       setSelectedBodyPart(null)
@@ -234,11 +235,36 @@ export default function ClimateHealth() {
     }
   }
 
-  // Find selected body part data
   const selectedPartData = bodyFacts.find((item) => item.part === selectedBodyPart)
 
+  const getWeatherImpact = (weatherType: string): { level: string; value: number } => {
+    if (weatherType === "Clear" || weatherType === "Clouds") {
+      return { level: "Low", value: 30 }
+    } else if (weatherType === "Rain" || weatherType === "Drizzle" || weatherType === "Mist") {
+      return { level: "Moderate", value: 60 }
+    } else {
+      return { level: "High", value: 90 }
+    }
+  }
+
+  const weatherImpact = getWeatherImpact(weatherType)
+
+
+  const getImpactColor = (level: string): string => {
+    switch (level) {
+      case "Low":
+        return "mint-green"
+      case "Moderate":
+        return "soft-blue"
+      case "High":
+        return "soft-coral"
+      default:
+        return "soft-coral"
+    }
+  }
+
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -247,8 +273,8 @@ export default function ClimateHealth() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0c2842] mb-4">Climate & Health Connection</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">Climate & Health Connection</h2>
+          <p className="text-lg text-cool-gray max-w-3xl mx-auto">
             Discover how environmental factors affect your health and get personalized recommendations
           </p>
         </motion.div>
@@ -264,51 +290,50 @@ export default function ClimateHealth() {
           >
             <Card className="overflow-hidden border-0 shadow-lg">
               {locationPermission === false ? (
-                <div className="p-8 bg-gray-50">
+                <div className="p-8 bg-snow-white/50">
                   <div className="text-center py-8">
-                    <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-[#0c2842] mb-2">Location Access Required</h3>
-                    <p className="text-gray-600 mb-4">
+                    <AlertTriangle className="w-12 h-12 text-soft-coral mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Location Access Required</h3>
+                    <p className="text-cool-gray mb-4">
                       Please enable location access to get personalized weather-based health recommendations.
                     </p>
                     <Button
                       onClick={() => window.location.reload()}
-                      className="bg-[#2A5C82] hover:bg-[#1a3a5f] text-white"
+                      className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
                     >
                       Enable Location Access
                     </Button>
                   </div>
                 </div>
               ) : loading ? (
-                <div className="p-8 bg-gray-50 flex items-center justify-center" style={{ minHeight: "300px" }}>
+                <div className="p-8 bg-snow-white/50 flex items-center justify-center" style={{ minHeight: "300px" }}>
                   <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-[#2A5C82] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Fetching weather data...</p>
+                    <div className="w-12 h-12 border-4 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-cool-gray">Fetching weather data...</p>
                   </div>
                 </div>
               ) : error ? (
-                <div className="p-8 bg-gray-50">
+                <div className="p-8 bg-snow-white/50">
                   <div className="text-center py-8">
-                    <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-[#0c2842] mb-2">Couldn't Load Weather Data</h3>
-                    <p className="text-gray-600">{error}</p>
+                    <AlertTriangle className="w-12 h-12 text-soft-coral mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Couldn't Load Weather Data</h3>
+                    <p className="text-cool-gray">{error}</p>
                   </div>
                 </div>
               ) : weatherData ? (
-                <div className="p-8 relative overflow-hidden" style={{ backgroundColor: `${color}10` }}>
+                <div className="p-8 relative overflow-hidden bg-snow-white">
                   {/* Weather Header */}
                   <div className="flex items-center mb-6">
                     <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center mr-4"
-                      style={{ backgroundColor: `${color}20`, color }}
+                      className={`w-20 h-20 rounded-full flex items-center justify-center mr-4 bg-${weatherColor}/20 text-${weatherColor}`}
                     >
                       {weatherIcon}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-[#0c2842]">
+                      <h3 className="text-2xl font-bold text-dark-slate-gray">
                         {weatherData.weather[0].main} • {Math.round(weatherData.main.temp)}°C
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-cool-gray">
                         {weatherData.name}, {weatherData.sys.country} • Feels like{" "}
                         {Math.round(weatherData.main.feels_like)}°C
                       </p>
@@ -317,98 +342,76 @@ export default function ClimateHealth() {
 
                   {/* Weather Details */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white/80 p-3 rounded-lg text-center">
-                      <Droplets className="w-5 h-5 mx-auto mb-1 text-blue-500" />
-                      <div className="text-sm text-gray-500">Humidity</div>
-                      <div className="font-semibold">{weatherData.main.humidity}%</div>
+                    <div className="bg-snow-white/80 p-3 rounded-lg text-center shadow-sm border border-cool-gray/10">
+                      <Droplets className="w-5 h-5 mx-auto mb-1 text-soft-blue" />
+                      <div className="text-sm text-cool-gray">Humidity</div>
+                      <div className="font-semibold text-dark-slate-gray">{weatherData.main.humidity}%</div>
                     </div>
-                    <div className="bg-white/80 p-3 rounded-lg text-center">
-                      <Wind className="w-5 h-5 mx-auto mb-1 text-teal-500" />
-                      <div className="text-sm text-gray-500">Wind</div>
-                      <div className="font-semibold">{weatherData.wind.speed} m/s</div>
+                    <div className="bg-snow-white/80 p-3 rounded-lg text-center shadow-sm border border-cool-gray/10">
+                      <Wind className="w-5 h-5 mx-auto mb-1 text-mint-green" />
+                      <div className="text-sm text-cool-gray">Wind</div>
+                      <div className="font-semibold text-dark-slate-gray">{weatherData.wind.speed} m/s</div>
                     </div>
-                    <div className="bg-white/80 p-3 rounded-lg text-center">
-                      <Umbrella className="w-5 h-5 mx-auto mb-1 text-purple-500" />
-                      <div className="text-sm text-gray-500">Pressure</div>
-                      <div className="font-semibold">{weatherData.main.pressure} hPa</div>
+                    <div className="bg-snow-white/80 p-3 rounded-lg text-center shadow-sm border border-cool-gray/10">
+                      <Umbrella className="w-5 h-5 mx-auto mb-1 text-soft-coral" />
+                      <div className="text-sm text-cool-gray">Pressure</div>
+                      <div className="font-semibold text-dark-slate-gray">{weatherData.main.pressure} hPa</div>
                     </div>
                   </div>
 
                   {/* Health Recommendations */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm mb-6">
-                    <h4 className="text-xl font-bold text-[#0c2842] mb-4">Health Recommendations</h4>
+                  <div className="bg-snow-white p-6 rounded-xl shadow-sm mb-6 border border-cool-gray/10">
+                    <h4 className="text-xl font-bold text-dark-slate-gray mb-4">Health Recommendations</h4>
 
                     <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <TabsList className="grid grid-cols-3 mb-4">
-                        <TabsTrigger value="general">General</TabsTrigger>
-                        <TabsTrigger value="health">Health</TabsTrigger>
-                        <TabsTrigger value="activity">Activity</TabsTrigger>
+                      <TabsList className="grid grid-cols-3 mb-4 bg-cool-gray/10">
+                        <TabsTrigger
+                          value="general"
+                          className="data-[state=active]:bg-soft-blue data-[state=active]:text-snow-white"
+                        >
+                          General
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="health"
+                          className="data-[state=active]:bg-soft-blue data-[state=active]:text-snow-white"
+                        >
+                          Health
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="activity"
+                          className="data-[state=active]:bg-soft-blue data-[state=active]:text-snow-white"
+                        >
+                          Activity
+                        </TabsTrigger>
                       </TabsList>
                       <TabsContent value="general" className="space-y-4">
                         <div className="flex items-start">
-                          <div className="text-3xl mr-3" style={{ color }}>
-                            {weatherIcon}
-                          </div>
-                          <p className="text-gray-700">{advice.general}</p>
+                          <div className={`text-3xl mr-3 text-${weatherColor}`}>{weatherIcon}</div>
+                          <p className="text-cool-gray">{advice.general}</p>
                         </div>
                       </TabsContent>
                       <TabsContent value="health" className="space-y-4">
                         <div className="flex items-start">
-                          <div className="text-3xl mr-3" style={{ color }}>
+                          <div className={`text-3xl mr-3 text-${weatherColor}`}>
                             <Thermometer className="w-8 h-8" />
                           </div>
-                          <p className="text-gray-700">{advice.health}</p>
+                          <p className="text-cool-gray">{advice.health}</p>
                         </div>
                       </TabsContent>
                       <TabsContent value="activity" className="space-y-4">
                         <div className="flex items-start">
-                          <div className="text-3xl mr-3" style={{ color }}>
+                          <div className={`text-3xl mr-3 text-${weatherColor}`}>
                             <Sun className="w-8 h-8" />
                           </div>
-                          <p className="text-gray-700">{advice.activity}</p>
+                          <p className="text-cool-gray">{advice.activity}</p>
                         </div>
                       </TabsContent>
                     </Tabs>
                   </div>
 
                   {/* Weather Impact Gauge */}
-                  <div className="mb-6">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Weather Health Impact</span>
-                      <span className="text-sm font-medium" style={{ color }}>
-                        {weatherType === "Clear" || weatherType === "Clouds"
-                          ? "Low"
-                          : weatherType === "Rain" || weatherType === "Drizzle" || weatherType === "Mist"
-                            ? "Moderate"
-                            : "High"}
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        weatherType === "Clear" || weatherType === "Clouds"
-                          ? 30
-                          : weatherType === "Rain" || weatherType === "Drizzle" || weatherType === "Mist"
-                            ? 60
-                            : 90
-                      }
-                      className="h-2"
-                      indicatorclassname={
-                        weatherType === "Clear" || weatherType === "Clouds"
-                          ? "bg-green-500"
-                          : weatherType === "Rain" || weatherType === "Drizzle" || weatherType === "Mist"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                      }
-                    />
-                  </div>
-
-                  <div className="flex justify-between">
-                    <Button variant="outline" className="border-[#2A5C82] text-[#2A5C82]">
-                      View Details
-                    </Button>
-
-                    <Button className="bg-[#2A5C82] hover:bg-[#1a3a5f] text-white">Get Health Tips</Button>
-                  </div>
+                
+                 
                 </div>
               ) : null}
             </Card>
@@ -424,18 +427,18 @@ export default function ClimateHealth() {
           >
             <Card className="overflow-hidden border-0 shadow-lg h-full">
               <div className="p-8">
-                <h3 className="text-2xl font-bold text-[#0c2842] mb-6">Explore Your Body</h3>
+                <h3 className="text-2xl font-bold text-dark-slate-gray mb-6">Explore Your Body</h3>
 
-                <div className="relative h-[400px] bg-gray-50 rounded-xl overflow-hidden">
+                <div className="relative h-[400px] bg-snow-white/50 rounded-xl overflow-hidden border border-cool-gray/10">
                   {/* Body outline */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <svg width="200" height="350" viewBox="0 0 200 350" fill="none" xmlns="http://www.w3.org/2000/svg">
                       {/* Simple body outline */}
                       <path
                         d="M100 20 C130 20 150 40 150 70 C150 100 130 130 130 160 C130 190 150 220 150 250 C150 280 130 310 100 330 C70 310 50 280 50 250 C50 220 70 190 70 160 C70 130 50 100 50 70 C50 40 70 20 100 20"
-                        stroke="#2A5C82"
+                        stroke="oklch(0.55 0.15 210)" // soft-blue
                         strokeWidth="2"
-                        fill="#2A5C8210"
+                        fill="oklch(0.55 0.15 210 / 0.1)" // soft-blue with opacity
                       />
 
                       {/* Interactive body parts */}
@@ -467,12 +470,16 @@ export default function ClimateHealth() {
                           r="15"
                           fill={
                             selectedBodyPart === item.part
-                              ? "#34C759"
+                              ? "oklch(0.72 0.11 178)" // mint-green
                               : hoveredPart === item.part
-                                ? "#34C75980"
-                                : "#34C75940"
+                                ? "oklch(0.72 0.11 178 / 0.8)" // mint-green with opacity
+                                : "oklch(0.72 0.11 178 / 0.4)" // mint-green with more opacity
                           }
-                          stroke={selectedBodyPart === item.part || hoveredPart === item.part ? "#34C759" : "none"}
+                          stroke={
+                            selectedBodyPart === item.part || hoveredPart === item.part
+                              ? "oklch(0.72 0.11 178)" // mint-green
+                              : "none"
+                          }
                           strokeWidth="2"
                           onMouseEnter={() => setHoveredPart(item.part)}
                           onMouseLeave={() => setHoveredPart(null)}
@@ -492,7 +499,7 @@ export default function ClimateHealth() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 20 }}
                       transition={{ duration: 0.3 }}
-                      className="absolute bg-white p-3 rounded-lg shadow-md max-w-xs z-10"
+                      className="absolute bg-snow-white p-3 rounded-lg shadow-md max-w-xs z-10"
                       style={{
                         top:
                           hoveredPart === "Brain"
@@ -508,17 +515,17 @@ export default function ClimateHealth() {
                         transform: "translateX(-50%)",
                       }}
                     >
-                      <h4 className="font-bold text-[#0c2842] mb-1">{hoveredPart}</h4>
-                      <p className="text-xs text-gray-600">
+                      <h4 className="font-bold text-dark-slate-gray mb-1">{hoveredPart}</h4>
+                      <p className="text-xs text-cool-gray">
                         {bodyFacts.find((item) => item.part === hoveredPart)?.fact}
                       </p>
-                      <p className="text-xs text-[#34C759] mt-1">Click to learn more</p>
+                      <p className="text-xs text-mint-green mt-1">Click to learn more</p>
                     </motion.div>
                   )}
 
                   {/* Instructions */}
                   {!hoveredPart && !selectedBodyPart && (
-                    <div className="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-sm">
+                    <div className="absolute bottom-4 left-0 right-0 text-center text-cool-gray text-sm">
                       Hover over body parts to reveal health facts
                     </div>
                   )}
@@ -534,26 +541,26 @@ export default function ClimateHealth() {
                       transition={{ duration: 0.3 }}
                       className="mt-6 overflow-hidden"
                     >
-                      <Card className="p-6 border border-[#34C759]/30 bg-[#34C759]/5">
+                      <Card className="p-6 border border-mint-green/30 bg-mint-green/5">
                         <div className="flex items-center mb-4">
-                          <div className="w-10 h-10 rounded-full bg-[#34C759]/20 flex items-center justify-center mr-3">
-                            <div className="text-[#34C759] font-bold">{selectedPartData.part.charAt(0)}</div>
+                          <div className="w-10 h-10 rounded-full bg-mint-green/20 flex items-center justify-center mr-3">
+                            <div className="text-mint-green font-bold">{selectedPartData.part.charAt(0)}</div>
                           </div>
-                          <h4 className="text-xl font-bold text-[#0c2842]">{selectedPartData.part}</h4>
+                          <h4 className="text-xl font-bold text-dark-slate-gray">{selectedPartData.part}</h4>
                         </div>
 
-                        <p className="text-gray-700 mb-4">{selectedPartData.details}</p>
+                        <p className="text-cool-gray mb-4">{selectedPartData.details}</p>
 
-                        <div className="bg-white p-4 rounded-lg border border-gray-100">
-                          <h5 className="font-semibold text-[#0c2842] mb-2">Health Tip</h5>
-                          <p className="text-gray-600">{selectedPartData.healthTip}</p>
+                        <div className="bg-snow-white p-4 rounded-lg border border-cool-gray/10">
+                          <h5 className="font-semibold text-dark-slate-gray mb-2">Health Tip</h5>
+                          <p className="text-cool-gray">{selectedPartData.healthTip}</p>
                         </div>
 
                         <div className="mt-4 flex justify-end">
                           <Button
                             onClick={() => setSelectedBodyPart(null)}
                             variant="outline"
-                            className="text-[#34C759] border-[#34C759]"
+                            className="text-mint-green border-mint-green"
                           >
                             Close
                           </Button>
