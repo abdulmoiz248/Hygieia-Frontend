@@ -3,7 +3,6 @@ import HistoricalTimeline from "@/components/landing-page/components/historical-
 import MissionStats from "@/components/landing-page/components/mission-stats"
 import HowItWorks from "@/components/landing-page/components/how-it-works"
 import HealthScoreQuiz from "@/components/landing-page/components/health-score-quiz"
-import Leaderboard from "@/components/landing-page/components/leaderboard"
 import ClimateHealth from "@/components/landing-page/components/climate-health"
 import DoctorQuiz from "@/components/landing-page/components/doctor-quiz"
 import Testimonials from "@/components/landing-page/components/testimonials"
@@ -22,7 +21,7 @@ export default function LandingPage() {
       <MissionStats />
       <HowItWorks />
       <HealthScoreQuiz />
-      <Leaderboard />
+     
       <ClimateHealth />
       <DoctorQuiz />
       <Testimonials />

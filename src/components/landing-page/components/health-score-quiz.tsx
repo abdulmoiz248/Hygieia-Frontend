@@ -46,7 +46,7 @@ export default function HealthScoreQuiz() {
   // Initialize slider value when reaching the slider question
   useEffect(() => {
     if (questions[currentQuestion]?.type === "slider") {
-      setSliderValue([answers[currentQuestion] !== undefined ? answers[currentQuestion] as number : 5])
+      setSliderValue([answers[currentQuestion] !== undefined ? (answers[currentQuestion] as number) : 5])
     }
   }, [currentQuestion, answers])
 
@@ -89,7 +89,7 @@ export default function HealthScoreQuiz() {
 
   const calculateScore = (allAnswers: (number | undefined)[]) => {
     // Check if all questions are answered
-    if (allAnswers.some(answer => answer === undefined)) {
+    if (allAnswers.some((answer) => answer === undefined)) {
       alert("Please answer all questions before seeing your results.")
       return
     }
@@ -100,7 +100,7 @@ export default function HealthScoreQuiz() {
 
     allAnswers.forEach((answer, index) => {
       if (answer === undefined) return
-      
+
       answeredQuestions++
       const question = questions[index]
 
@@ -116,7 +116,7 @@ export default function HealthScoreQuiz() {
 
     // Calculate average score only from answered questions
     const normalizedScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0
-    
+
     // Ensure score is within 0-100 range
     const finalScore = Math.min(100, Math.max(0, normalizedScore))
     setScore(finalScore)
@@ -147,8 +147,22 @@ export default function HealthScoreQuiz() {
   // Calculate progress percentage
   const progressPercentage = Math.round(((currentQuestion + 1) / questions.length) * 100)
 
+  // Get score color based on score value
+  const getScoreColor = () => {
+    if (score > 70) return "text-mint-green"
+    if (score > 40) return "text-soft-coral"
+    return "text-soft-coral"
+  }
+
+  // Get score stroke color based on score value
+  const getScoreStrokeColor = () => {
+    if (score > 70) return "oklch(0.72 0.11 178)" // mint-green
+    if (score > 40) return "oklch(0.65 0.25 10)" // soft-coral
+    return "oklch(0.65 0.25 10)" // soft-coral (for low scores)
+  }
+
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-snow-white to-mint-green/70">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -157,13 +171,13 @@ export default function HealthScoreQuiz() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0c2842] mb-4">What's Your Health Score?</h2>
-          <p className="text-lg text-gray-600">
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">What's Your Health Score?</h2>
+          <p className="text-lg text-cool-gray">
             Take our quick quiz to discover your personal health score and get customized recommendations
           </p>
         </motion.div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
+        <div className="bg-snow-white rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
           <AnimatePresence mode="wait">
             {!showResults ? (
               <motion.div
@@ -174,21 +188,21 @@ export default function HealthScoreQuiz() {
                 transition={{ duration: 0.5 }}
               >
                 <div className="mb-8">
-                  <div className="flex justify-between mb-2 text-sm text-gray-500">
+                  <div className="flex justify-between mb-2 text-sm text-cool-gray">
                     <span>
                       Question {currentQuestion + 1} of {questions.length}
                     </span>
                     <span>{progressPercentage}% Complete</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full">
+                  <div className="w-full h-2 bg-cool-gray/10 rounded-full">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2A5C82] to-[#34C759] rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-soft-blue to-mint-green rounded-full transition-all duration-500"
                       style={{ width: `${progressPercentage}%` }}
                     ></div>
                   </div>
                 </div>
 
-                <h3 className="text-xl md:text-2xl font-bold text-[#0c2842] mb-8">
+                <h3 className="text-xl md:text-2xl font-bold text-dark-slate-gray mb-8">
                   {questions[currentQuestion].question}
                 </h3>
 
@@ -204,12 +218,12 @@ export default function HealthScoreQuiz() {
                           whileTap={{ scale: 0.95 }}
                           className={`p-4 rounded-xl border-2 transition-all duration-300 ${
                             answers[currentQuestion] === index
-                              ? "border-[#34C759] bg-[#34C759]/10"
-                              : "border-gray-200 hover:border-[#2A5C82]"
+                              ? "border-mint-green bg-mint-green/10"
+                              : "border-cool-gray/20 hover:border-soft-blue"
                           }`}
                         >
                           <div className="text-2xl mb-2">{emoji}</div>
-                          <div className="text-sm text-gray-600">{text}</div>
+                          <div className="text-sm text-cool-gray">{text}</div>
                         </motion.button>
                       )
                     })}
@@ -227,18 +241,18 @@ export default function HealthScoreQuiz() {
                       className="mb-8"
                     />
 
-                    <div className="flex justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex justify-between text-sm text-cool-gray mb-4">
                       {questions[currentQuestion].labels?.map((label, index) => (
                         <span key={index}>{label}</span>
                       ))}
                     </div>
 
-                    <div className="text-center mb-8 text-lg font-medium text-[#2A5C82]">
+                    <div className="text-center mb-8 text-lg font-medium text-soft-blue">
                       Selected: {sliderValue[0]}
                     </div>
 
                     <div className="flex justify-end">
-                      <Button onClick={handleNext} className="bg-[#2A5C82] hover:bg-[#1a3a5f] text-white">
+                      <Button onClick={handleNext} className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
                         {currentQuestion < questions.length - 1 ? "Next Question" : "See Results"}
                       </Button>
                     </div>
@@ -253,17 +267,17 @@ export default function HealthScoreQuiz() {
                 transition={{ duration: 0.5 }}
                 className="text-center"
               >
-                <h3 className="text-2xl font-bold text-[#0c2842] mb-6">Your Health Score</h3>
+                <h3 className="text-2xl font-bold text-dark-slate-gray mb-6">Your Health Score</h3>
 
                 <div className="relative w-64 h-64 mx-auto mb-8">
                   <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#f0f0f0" strokeWidth="10" />
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="oklch(0.35 0.05 180 / 0.2)" strokeWidth="10" />
                     <motion.circle
                       cx="50"
                       cy="50"
                       r="45"
                       fill="none"
-                      stroke={score > 70 ? "#34C759" : score > 40 ? "#FFD60A" : "#FF3B30"}
+                      stroke={getScoreStrokeColor()}
                       strokeWidth="10"
                       strokeDasharray={`${score * 2.83} 283`}
                       strokeDashoffset="0"
@@ -280,7 +294,7 @@ export default function HealthScoreQuiz() {
                       textAnchor="middle"
                       fontSize="24"
                       fontWeight="bold"
-                      fill="#0c2842"
+                      fill="oklch(0.15 0.05 210)"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.5, duration: 0.5 }}
@@ -293,7 +307,7 @@ export default function HealthScoreQuiz() {
                       dominantBaseline="middle"
                       textAnchor="middle"
                       fontSize="12"
-                      fill="#666"
+                      fill="oklch(0.35 0.05 180)"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7, duration: 0.5 }}
@@ -304,14 +318,14 @@ export default function HealthScoreQuiz() {
                 </div>
 
                 <div className="mb-8">
-                  <h4 className="text-xl font-bold mb-2 text-[#0c2842]">
+                  <h4 className="text-xl font-bold mb-2 text-dark-slate-gray">
                     {score > 70
                       ? "Excellent Health Habits!"
                       : score > 40
                         ? "Good Progress, Room to Improve"
                         : "Time to Focus on Your Health"}
                   </h4>
-                  <p className="text-gray-600">
+                  <p className="text-cool-gray">
                     {score > 70
                       ? "You're doing great! Keep up these healthy habits for long-term wellness."
                       : score > 40
@@ -320,11 +334,13 @@ export default function HealthScoreQuiz() {
                   </p>
                 </div>
 
-                <div className="flex justify-center space-x-4">
-                  <Button onClick={resetQuiz} variant="outline" className="border-[#2A5C82] text-[#2A5C82]">
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Button onClick={resetQuiz} variant="outline" className="border-soft-blue text-soft-blue">
                     Retake Quiz
                   </Button>
-                  <Button className="bg-[#34C759] hover:bg-[#2DC653] text-white">Get Personalized Plan</Button>
+                  <Button className="bg-mint-green hover:bg-mint-green/90 text-snow-white">
+                    Get Personalized Plan
+                  </Button>
                 </div>
               </motion.div>
             )}
