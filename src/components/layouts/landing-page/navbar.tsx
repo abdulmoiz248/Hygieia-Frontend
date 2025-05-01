@@ -6,13 +6,14 @@ import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
 
-  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", "rgba(10, 37, 64, 0.95)"])
+  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", " rgba(30, 30, 34, 1)"])
 
   const textColor = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"])
 
@@ -49,7 +50,7 @@ export default function Navbar() {
             className="flex items-center"
           >
             <div className="relative h-12 w-12 mr-3">
-              <img src="/logo/logo-2.png" alt="Hygieia Logo" className="h-full w-full object-contain" />
+              <Image width={30} height={30} src="/logo/logo-2.png" alt="Hygieia Logo"  className="h-full w-full object-contain" />
             </div>
             <motion.span style={{ color: textColor }} className="text-2xl font-bold tracking-tight">
               HYGIEIA
@@ -98,7 +99,7 @@ export default function Navbar() {
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
-          className="md:hidden bg-blue-900/95 backdrop-blur-sm"
+          className="md:hidden bg-dark-slate-gray backdrop-blur-sm"
         >
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">

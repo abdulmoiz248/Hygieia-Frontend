@@ -10,7 +10,7 @@ const Footer = () => {
   const [showTermsModal, setShowTermsModal] = useState(false)
 
   return (
-    <footer id="contact" className="w-full bg-gradient-to-br from-slate-800 to-[#2C3E50] text-white">
+    <footer id="contact" className="w-full bg-dark-slate-gray text-white">
       {/* Top wave decoration */}
       <div className="wave-top h-12 w-full overflow-hidden">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="h-full w-full fill-[#FAFAFA]">
