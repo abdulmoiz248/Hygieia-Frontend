@@ -162,7 +162,7 @@ export default function HealthScoreQuiz() {
   }
 
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-snow-white to-mint-green/70">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

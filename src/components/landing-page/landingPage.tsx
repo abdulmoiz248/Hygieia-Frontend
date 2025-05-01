@@ -11,6 +11,7 @@ import Faq from "@/components/landing-page/components/faq"
 import FloatingAvatar from "@/components/landing-page/components/floating-avatar"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "../layouts/landing-page/Footer"
+import { BloodDonationHub } from "./components/blood-donation-hub"
 
 export default function LandingPage() {
   return (
@@ -21,7 +22,7 @@ export default function LandingPage() {
       <MissionStats />
       <HowItWorks />
       <HealthScoreQuiz />
-     
+       <BloodDonationHub/>
       <ClimateHealth />
       <DoctorQuiz />
       <Testimonials />
