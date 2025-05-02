@@ -119,7 +119,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 1.2 }}
-            className="absolute -left-16 top-1/4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
+            className="hidden md:block absolute -left-16 top-1/4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
             <div className="text-mint-green font-bold text-xl">95%</div>
             <div className="text-xs text-gray-600">Accuracy</div>
@@ -129,7 +129,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 1.4 }}
-            className="absolute -right-16 top-2/3 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
+            className=" hidden md:block absolute -right-16 top-2/3 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
             <div className="text-[#34C759] font-bold text-xl">5M+</div>
             <div className="text-xs text-mint-green">Users</div>

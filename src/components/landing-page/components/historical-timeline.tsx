@@ -43,12 +43,11 @@ const timelineItems = [
 ]
 
 export default function HistoricalTimeline() {
-  
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: false, amount: 0.2 })
 
   return (
-    <section className="py-20  px-4 md:px-10 bg-gradient-to-b from-mint-green to-snow-white">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-mint-green to-snow-white">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -56,28 +55,30 @@ export default function HistoricalTimeline() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">From Ancient Wisdom to AI Innovation</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">
+            From Ancient Wisdom to AI Innovation
+          </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Trace the evolution of healthcare from the goddess Hygieia to our AI-powered future
           </p>
         </motion.div>
 
         <div ref={ref} className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-dark-slate-gray to-soft-blue rounded-full"></div>
+          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-dark-slate-gray to-soft-blue rounded-full"></div>
 
-          {/* Timeline items */}
-          <div className="relative">
+          <div className="relative space-y-16">
             {timelineItems.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
-                className={`flex items-center mb-20 ${index % 2 === 0 ? "flex-row-reverse" : ""}`}
+                className={`flex flex-col md:flex-row items-center md:items-start gap-6 ${
+                  index % 2 === 0 ? "md:flex-row-reverse" : ""
+                }`}
               >
                 {/* Content */}
-                <div className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : "pl-8"}`}>
+                <div className="w-full md:w-5/12 text-center md:text-left">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
@@ -89,7 +90,7 @@ export default function HistoricalTimeline() {
                 </div>
 
                 {/* Icon */}
-                <div className="w-2/12 flex justify-center">
+                <div className="w-full md:w-2/12 flex justify-center md:justify-center">
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 10 }}
                     className="w-16 h-16 rounded-full bg-white border-4 border-mint-green flex items-center justify-center z-10 shadow-lg text-[#2A5C82]"
@@ -98,8 +99,8 @@ export default function HistoricalTimeline() {
                   </motion.div>
                 </div>
 
-                {/* Empty space for alignment */}
-                <div className="w-5/12"></div>
+                {/* Spacer */}
+                <div className="hidden md:block w-5/12"></div>
               </motion.div>
             ))}
           </div>

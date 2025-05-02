@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Bot, Home, ArrowLeft } from "lucide-react"
+import {  Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/layouts/landing-page/navbar"
 
