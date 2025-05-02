@@ -80,7 +80,9 @@ export default function Navbar() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, delay: 0.6 }}
           >
-            <Button className="ml-4 bg-blue-500 hover:bg-blue-600 text-white">Get Started</Button>
+            <Button
+                 onClick={() => router.push('/patient/login')}
+            className="ml-4 bg-blue-500 hover:bg-blue-600 text-white">Get Started</Button>
           </motion.div>
         </nav>
 
