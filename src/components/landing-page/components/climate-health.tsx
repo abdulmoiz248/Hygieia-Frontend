@@ -235,32 +235,10 @@ export default function ClimateHealth() {
 
   const selectedPartData = bodyFacts.find((item) => item.part === selectedBodyPart)
 
-  const getWeatherImpact = (weatherType: string): { level: string; value: number } => {
-    if (weatherType === "Clear" || weatherType === "Clouds") {
-      return { level: "Low", value: 30 }
-    } else if (weatherType === "Rain" || weatherType === "Drizzle" || weatherType === "Mist") {
-      return { level: "Moderate", value: 60 }
-    } else {
-      return { level: "High", value: 90 }
-    }
-  }
-
-  const weatherImpact = getWeatherImpact(weatherType)
 
 
-  const getImpactColor = (level: string): string => {
-    switch (level) {
-      case "Low":
-        return "mint-green"
-      case "Moderate":
-        return "soft-blue"
-      case "High":
-        return "soft-coral"
-      default:
-        return "soft-coral"
-    }
-  }
 
+ 
   return (
     <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
       <div className="max-w-7xl mx-auto">
@@ -314,7 +292,7 @@ export default function ClimateHealth() {
                 <div className="p-8 bg-snow-white/50">
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 text-soft-coral mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Couldn't Load Weather Data</h3>
+                    <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Couldn&apos;t Load Weather Data</h3>
                     <p className="text-cool-gray">{error}</p>
                   </div>
                 </div>

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { Bot, RefreshCw, Home } from "lucide-react"
+import {  RefreshCw, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/layouts/landing-page/navbar"
 

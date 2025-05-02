@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Check } from "lucide-react"
+import Image from "next/image"
 
 const blogPosts = [
   {
@@ -70,7 +71,8 @@ export default function BlogNewsletter() {
                 >
                   <Card className="overflow-hidden border-0 shadow-md h-full">
                     <div className="relative h-40 overflow-hidden">
-                      <img
+                      <Image
+                        fill
                         src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
@@ -140,7 +142,7 @@ export default function BlogNewsletter() {
                     <Check className="w-8 h-8 text-[#34C759]" />
                   </div>
                   <h3 className="text-xl font-bold text-[#0c2842] mb-2">Thank You!</h3>
-                  <p className="text-gray-600">You've successfully subscribed to our newsletter.</p>
+                  <p className="text-gray-600">You&apos;ve successfully subscribed to our newsletter.</p>
                 </motion.div>
               )}
 

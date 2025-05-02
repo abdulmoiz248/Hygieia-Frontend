@@ -36,7 +36,7 @@ export default function MissionStats() {
             <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-6">Democratizing AI-Driven Healthcare</h2>
             <p className="text-lg text-gray-700 mb-8">
               At Hygieia, we believe that quality healthcare should be accessible to everyone, regardless of location or
-              economic status. By combining ancient wisdom with cutting-edge AI technology, we're creating a future
+              economic status. By combining ancient wisdom with cutting-edge AI technology, we&apos;re creating a future
               where personalized healthcare is just a tap away.
             </p>
 

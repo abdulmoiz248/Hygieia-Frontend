@@ -147,12 +147,6 @@ export default function HealthScoreQuiz() {
   // Calculate progress percentage
   const progressPercentage = Math.round(((currentQuestion + 1) / questions.length) * 100)
 
-  // Get score color based on score value
-  const getScoreColor = () => {
-    if (score > 70) return "text-mint-green"
-    if (score > 40) return "text-soft-coral"
-    return "text-soft-coral"
-  }
 
   // Get score stroke color based on score value
   const getScoreStrokeColor = () => {
@@ -171,7 +165,7 @@ export default function HealthScoreQuiz() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">What's Your Health Score?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">What&apos;s Your Health Score?</h2>
           <p className="text-lg text-cool-gray">
             Take our quick quiz to discover your personal health score and get customized recommendations
           </p>

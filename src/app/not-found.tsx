@@ -36,7 +36,7 @@ export default function NotFound() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Page Not Found</h2>
 
           <p className="text-gray-600 mb-8">
-            The page you're looking for doesn't exist or has been moved. Let's get you back on the path to wellness.
+            The page you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s get you back on the path to wellness.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -52,7 +52,7 @@ export default function NotFound() {
 
           {/* Health tip */}
           <div className="mt-12 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-[#2A5C82] mb-2">Health Tip While You're Here</h3>
+            <h3 className="font-semibold text-[#2A5C82] mb-2">Health Tip While You&apos;re Here</h3>
             <p className="text-gray-600">
               Taking short breaks to stand up and stretch can improve circulation and reduce strain on your eyes. Try
               the 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds.

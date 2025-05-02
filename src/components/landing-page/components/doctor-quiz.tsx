@@ -194,18 +194,7 @@ export default function DoctorQuiz() {
     },
   }
 
-  const getDifficultyColor = (diff: "easy" | "medium" | "hard") => {
-    switch (diff) {
-      case "easy":
-        return "text-mint-green"
-      case "medium":
-        return "text-soft-blue"
-      case "hard":
-        return "text-soft-coral"
-      default:
-        return "text-mint-green"
-    }
-  }
+
 
   const getDifficultyBg = (diff: "easy" | "medium" | "hard") => {
     switch (diff) {
@@ -245,7 +234,7 @@ export default function DoctorQuiz() {
             Interactive Diagnosis Game
           </h2>
           <p className="text-xl text-dark-slate-gray max-w-2xl mx-auto font-medium">
-            Test your medical knowledge with our "Play Doctor" mini-game
+            Test your medical knowledge with our &quot;Play Doctor&quot; mini-game
           </p>
         </motion.div>
 

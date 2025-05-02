@@ -4,7 +4,8 @@ import type React from "react"
 
 import { motion, useMotionValue, useTransform } from "framer-motion"
 import { useState, useRef } from "react"
-import { User, Quote, Star } from "lucide-react"
+import { User, Quote } from "lucide-react"
+import Image from "next/image"
 
 interface CardRotateProps {
   children: React.ReactNode
@@ -165,18 +166,7 @@ export default function TestimonialStack({
     }
   }
 
-  const getStarColor = (color?: string) => {
-    switch (color) {
-      case "soft-blue":
-        return "text-soft-blue"
-      case "mint-green":
-        return "text-mint-green"
-      case "soft-coral":
-        return "text-soft-coral"
-      default:
-        return "text-soft-blue"
-    }
-  }
+ 
 
   return (
     <div
@@ -240,7 +230,8 @@ export default function TestimonialStack({
                 </div>
                 <div className="flex items-center mt-4 pt-3 border-t border-cool-gray/10">
                   {card.avatar ? (
-                    <img
+                    <Image
+                      fill
                       src={card.avatar }
                       alt={card.name}
                       className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-snow-white shadow-sm"

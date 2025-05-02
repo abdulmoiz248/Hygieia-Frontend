@@ -73,30 +73,8 @@ export default function HowItWorks() {
     },
   }
 
-  const itemVariants = {
-    hidden: { y: 50, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-    },
-  }
-
-  const activeCardVariants = {
-    inactive: {
-      scale: 1,
-      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    },
-    active: {
-      scale: 1.05,
-      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 15,
-      },
-    },
-  }
+ 
+ 
 
   const lineVariants = {
     hidden: { pathLength: 0, opacity: 0 },
@@ -114,26 +92,7 @@ export default function HowItWorks() {
     }),
   }
 
-  const particleVariants = (i: number) => ({
-    initial: {
-      x: `${Math.random() * 100}%`,
-      y: `${Math.random() * 100}%`,
-      opacity: Math.random() * 0.5 + 0.3,
-      scale: Math.random() * 0.5 + 0.5,
-    },
-    animate: {
-      y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-      opacity: [Math.random() * 0.5 + 0.3, Math.random() * 0.5 + 0.3],
-      scale: [Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5],
-      transition: {
-        duration: Math.random() * 10 + 10,
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: "easeInOut",
-        delay: i * 0.2,
-      },
-    },
-  })
+ 
 
   return (
     <section
