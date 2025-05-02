@@ -5,10 +5,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Cloud, CloudRain, Sun, Thermometer, Snowflake, Wind, AlertTriangle, Droplets, Umbrella } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// Weather condition mapping with more detailed icons
+
 const weatherIcons = {
   Clear: <Sun className="w-10 h-10" />,
   Clouds: <Cloud className="w-10 h-10" />,
@@ -87,7 +86,6 @@ const weatherAdvice = {
   },
 }
 
-// Enhanced body facts with more detailed information
 const bodyFacts = [
   {
     part: "Brain",
@@ -170,14 +168,14 @@ export default function ClimateHealth() {
       return
     }
 
-    // Request permission and get location
+    
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         setLocationPermission(true)
         try {
           const { latitude, longitude } = position.coords
 
-          const apiKey = process.env.WEATHER_API_KEY;
+          const apiKey = process.env.WEATHER_API_KEY || "fd11e81de35b7639af57673fd7b7b71c";
 
           const response = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`,

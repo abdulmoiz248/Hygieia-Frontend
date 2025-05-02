@@ -13,7 +13,7 @@ const Footer = () => {
     <footer id="contact" className="w-full bg-dark-slate-gray text-white">
       {/* Top wave decoration */}
       <div className="wave-top h-12 w-full overflow-hidden">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="h-full w-full fill-[#FAFAFA]">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="h-full w-full fill-mint-green">
           <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" />
         </svg>
       </div>
@@ -24,7 +24,7 @@ const Footer = () => {
           {/* Logo and intro */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img src='/logo/logo-2.png' className="h-12 w-12 rounded-full bg-[#FF6F61]"></img>
+              <img src='/logo/logo-2.png' className="h-12 w-12 rounded-full bg-transparent"></img>
               <h2 className="ml-3 text-2xl font-bold">Hygieia</h2>
             </div>
             <p className="text-[#7F8C8D] max-w-xs">

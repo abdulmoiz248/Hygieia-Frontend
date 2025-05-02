@@ -34,10 +34,9 @@ const faqs = [
 ]
 
 export default function Faq() {
-  const [openItem, setOpenItem] = useState<string | null>(null)
 
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-br from-[#f8fafc] to-[#e2f1ff]">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,7 +49,7 @@ export default function Faq() {
           <p className="text-lg text-gray-600">Find answers to common questions about Hygieia</p>
         </motion.div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-transparent rounded-2xl shadow-lg p-8">
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem

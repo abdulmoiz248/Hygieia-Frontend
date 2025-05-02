@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { motion, useMotionValue, useTransform } from "framer-motion"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { User, Quote, Star } from "lucide-react"
 
 interface CardRotateProps {
@@ -110,12 +110,31 @@ export default function TestimonialStack({
 
   const [cards, setCards] = useState(testimonials.length ? testimonials : defaultTestimonials)
 
+  // Use a ref to store rotation values to ensure consistency between renders
+  const rotationValues = useRef<number[]>([])
+
+  // Initialize rotation values if they don't exist yet
+  if (rotationValues.current.length === 0 && randomRotation) {
+    // Generate fixed rotation values for each card
+    rotationValues.current = Array(cards.length)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 8) - 4) // Fixed integer values between -4 and 4
+  }
+
   const sendToBack = (id: number) => {
     setCards((prev) => {
       const newCards = [...prev]
       const index = newCards.findIndex((card) => card.id === id)
       const [card] = newCards.splice(index, 1)
       newCards.unshift(card)
+
+      // Rearrange rotation values to match the new card order
+      if (randomRotation && rotationValues.current.length > 0) {
+        const rotationValue = rotationValues.current[index]
+        rotationValues.current.splice(index, 1)
+        rotationValues.current.unshift(rotationValue)
+      }
+
       return newCards
     })
   }
@@ -163,13 +182,15 @@ export default function TestimonialStack({
     <div
       className="relative mx-auto"
       style={{
-        width: cardDimensions.width,
-        height: cardDimensions.height + 40, // Add extra height for the instruction text
+        width: `${cardDimensions.width}px`,
+        height: `${cardDimensions.height + 40}px`,
         perspective: 1200,
       }}
+      
     >
       {cards.map((card, index) => {
-        const randomRotate = randomRotation ? Math.random() * 8 - 4 : 0 // Random degree between -4 and 4
+        // Use consistent rotation values from the ref
+        const rotateValue = randomRotation ? rotationValues.current[index] || 0 : 0
 
         return (
           <CardRotate key={card.id} onSendToBack={() => sendToBack(card.id)} sensitivity={sensitivity}>
@@ -178,24 +199,33 @@ export default function TestimonialStack({
                 card.accentColor,
               )}`}
               onClick={() => sendToBackOnClick && sendToBack(card.id)}
+              style={{
+                width: `${cardDimensions.width}px`,
+                height: `${cardDimensions.height}px`,
+              }}
+              
               animate={{
-                rotateZ: (cards.length - index - 1) * 3 + randomRotate,
+                rotateZ: (cards.length - index - 1) * 3 + rotateValue,
                 scale: 1 + index * 0.05 - cards.length * 0.05,
-                transformOrigin: "90% 90%",
                 boxShadow:
                   index === cards.length - 1
                     ? "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                     : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                transformOrigin: "90% 90%",
               }}
-              initial={false}
+              initial={{
+                rotateZ: (cards.length - index - 1) * 3 + rotateValue,
+                scale: 1 + index * 0.05 - cards.length * 0.05,
+                boxShadow:
+                  index === cards.length - 1
+                    ? "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                    : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                transformOrigin: "90% 90%",
+              }}
               transition={{
                 type: "spring",
                 stiffness: animationConfig.stiffness,
                 damping: animationConfig.damping,
-              }}
-              style={{
-                width: cardDimensions.width,
-                height: cardDimensions.height,
               }}
             >
               <div className="w-full h-full bg-snow-white p-6 flex flex-col justify-between">
@@ -206,12 +236,12 @@ export default function TestimonialStack({
                   <p className="text-dark-slate-gray text-sm md:text-base flex-1 overflow-hidden">
                     {card.quote.length > 150 ? `${card.quote.substring(0, 150)}...` : card.quote}
                   </p>
-                 
+                   
                 </div>
                 <div className="flex items-center mt-4 pt-3 border-t border-cool-gray/10">
                   {card.avatar ? (
                     <img
-                      src={card.avatar || "/placeholder.svg"}
+                      src={card.avatar }
                       alt={card.name}
                       className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-snow-white shadow-sm"
                     />
@@ -226,7 +256,7 @@ export default function TestimonialStack({
                   )}
                   <div>
                     <h4 className="font-bold text-dark-slate-gray">{card.name}</h4>
-                    
+                    <p className="text-cool-gray text-xs">{card.role}</p>
                   </div>
                 </div>
               </div>
