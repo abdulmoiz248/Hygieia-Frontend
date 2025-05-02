@@ -123,7 +123,7 @@ export default function MissionStats() {
                     <p className="text-gray-600 mb-2">Join our network of top doctors</p>
                   </div>
                 </div>
-                <Button  onClick={() => router.push('/staff/roles')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
+                <Button  onClick={() => router.push('/roles')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
                   Join Hygieia <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Card>
