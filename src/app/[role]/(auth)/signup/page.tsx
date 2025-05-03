@@ -23,7 +23,7 @@ const Signup = () => {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const allowedRoles = ['patient', 'doctor', 'nutritionist', 'admin','lab-technician','pharmacist']
+  const allowedRoles = ['patient']
   if (!allowedRoles.includes(role)) router.replace('/404')
   
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
