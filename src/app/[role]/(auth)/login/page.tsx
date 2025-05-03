@@ -48,6 +48,7 @@ export default  function Login() {
       // }
       router.push(`/${role}/dashboard`)
     } catch (err) {
+      console.log(err);
       setError('Something went wrong. Try again.')
     } finally {
       setIsLoading(false)
@@ -118,7 +119,7 @@ export default  function Login() {
 
             {role=='patient' &&  <GoogleLoginButton/> }
             <div className="mt-4 text-center text-sm text-snow-white animate-slide-in-right delay-500">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link
                 href={`/${role}/signup`}
                 className="text-soft-blue hover:text-blue-300 transition-colors duration-300"
