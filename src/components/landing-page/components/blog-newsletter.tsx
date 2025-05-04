@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Check } from "lucide-react"
 import Image from "next/image"
+import api from "@/lib/axios"
 
 const blogPosts = [
   {
@@ -36,10 +37,21 @@ export default function BlogNewsletter() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
     if (email) {
-      setIsSubmitted(true)
+      try{
+        const res=await api.post('/subscribe-newsletter',{email})
+        console.log("Email submitted:", email)
+        console.log("Response:", res.data)
+        if(res.data.success){
+          setIsSubmitted(true)
+        }
+
+      }catch (error) {
+        console.log("Error submitting email:", error)
+      }
+    
     }
   }
 
