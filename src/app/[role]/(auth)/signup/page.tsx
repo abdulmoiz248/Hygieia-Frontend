@@ -10,7 +10,7 @@ import Navbar from '@/components/layouts/landing-page/navbar'
 import Footer from '@/components/layouts/landing-page/Footer'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import api from '@/lib/axios'
-//import axios from 'axios'
+
 
 const Signup = () => {
   const params=useParams()
@@ -44,6 +44,7 @@ const Signup = () => {
         const res=await api.post(`/signup`,{name,email,password,role:'PATIENT'})
       if(res.data.success)
  {  
+            localStorage.setItem('email',email)
             router.push(`/patient/otp`)
          
           }

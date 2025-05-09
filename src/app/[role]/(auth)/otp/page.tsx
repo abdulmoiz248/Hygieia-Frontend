@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle, ArrowRight } from "lucide-react"
 import type { KeyboardEvent, ClipboardEvent, ChangeEvent } from "react"
+import api from "@/lib/axios"
 
 type VerificationStatus = "idle" | "success" | "error"
 
@@ -14,12 +15,23 @@ export default function OTPVerificationPage() {
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [showModal, setShowModal] = useState(false)
+  const [email,setEmail]=useState('')
   const inputRefs = useRef<Array<HTMLInputElement | null>>(Array(6).fill(null))
   const router = useRouter()
 
   useEffect(() => {
     inputRefs.current[0]?.focus()
   }, [])
+
+  useEffect(()=>{
+    const email=localStorage.getItem('email')
+    if(email){
+      setEmail(email)
+    }
+    else{
+      router.push('/patient/signup')
+    }
+  },[])
 
   const handleChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -80,7 +92,7 @@ export default function OTPVerificationPage() {
     }
   }
 
-  const verifyOtp = () => {
+  const verifyOtp = async() => {
     const otpString = otp.join("")
 
     if (otpString.length !== 6) {
@@ -95,21 +107,27 @@ export default function OTPVerificationPage() {
 
     setIsVerifying(true)
     setVerificationStatus("idle")
-
-    setTimeout(() => {
-      setIsVerifying(false)
-      if (otpString === "123456") {
-        setVerificationStatus("success")
+    try{
+      const res=await api.post(`/verify-otp`,{email,otp:otpString})
+      if(res.data.success){
         setShowModal(true)
-      } else {
+        localStorage.removeItem('email')
+      }
+      else{
+        setErrorMessage(res.data.message)
         setVerificationStatus("error")
-        setErrorMessage("Invalid OTP. Please try again.")
         setTimeout(() => {
           setErrorMessage("")
           setVerificationStatus("idle")
         }, 3000)
       }
-    }, 1500)
+    }
+    catch(err){
+      console.log(err)
+    }finally{
+      
+    }
+  
   }
 
   const resetForm = () => {
