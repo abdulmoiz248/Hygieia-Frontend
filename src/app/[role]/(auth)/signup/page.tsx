@@ -9,6 +9,7 @@ import Link from 'next/link'
 import Navbar from '@/components/layouts/landing-page/navbar'
 import Footer from '@/components/layouts/landing-page/Footer'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
+import api from '@/lib/axios'
 //import axios from 'axios'
 
 const Signup = () => {
@@ -40,20 +41,20 @@ const Signup = () => {
     }
     setLoading(true)
     try {
-         
-     //   const res=await axios.post(`/${role}/auth/login`,{name,email,password})
-    //   if(res.data.success)
+        const res=await api.post(`/signup`,{name,email,password,role:'PATIENT'})
+      if(res.data.success)
  {  
-            if(role=='patient') router.push('/patient/otp')
-            else router.push(`{role}/dashboard`)
+            router.push(`/patient/otp`)
          
           }
-   //    else
-   //        setError(res.data.message) 
+      else
+           setError(res.data.message) 
      
     } catch (err) {
       console.log(err)
       setError('Something went wrong.')
+     
+    }finally{
       setLoading(false)
     }
   }
