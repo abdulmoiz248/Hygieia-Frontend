@@ -136,7 +136,7 @@ export default function Testimonials() {
           className="text-center mt-16"
         >
           <p className="text-lg font-medium text-soft-blue">Join thousands of satisfied users today</p>
-          <button  onClick={()=> router.push('/patient/login')}
+          <button  onClick={()=> router.push('/login')}
           className="mt-4 bg-gradient-to-r from-soft-blue to-mint-green text-snow-white px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             Start Your Health Journey
           </button>

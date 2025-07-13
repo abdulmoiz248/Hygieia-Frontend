@@ -24,7 +24,7 @@ const Footer = () => {
           {/* Logo and intro */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img src='/logo/logo-2.png' className="h-12 w-12 rounded-full bg-transparent"></img>
+              <img alt='logo' src='/logo/logo-2.png' className="h-12 w-12 rounded-full bg-transparent"></img>
               <h2 className="ml-3 text-2xl font-bold">Hygieia</h2>
             </div>
             <p className="text-[#7F8C8D] max-w-xs">

@@ -123,7 +123,7 @@ export default function MissionStats() {
                     <p className="text-gray-600 mb-2">Join our network of top doctors</p>
                   </div>
                 </div>
-                <Button  onClick={() => router.push('/roles')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
+                <Button  onClick={() => router.push('/signup')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
                   Join Hygieia <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Card>
@@ -201,13 +201,13 @@ export default function MissionStats() {
 
             {/* CTA Buttons */}
             <div className="space-y-4 mt-8">
-              <Button  onClick={() => router.push('/patient/login')} className="w-full py-6 bg-soft-blue text-white text-lg relative overflow-hidden group">
+              <Button  onClick={() => router.push('/login')} className="w-full py-6 bg-soft-blue text-white text-lg relative overflow-hidden group">
                 <span>Login / Register</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
 
-              <Button  onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-soft-coral text-white text-lg relative overflow-hidden group">
-                <span>Order Meds Now</span>
+              <Button  onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-cool-gray text-white text-lg relative overflow-hidden group">
+                <span>Track Your Fitness Now</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
             </div>

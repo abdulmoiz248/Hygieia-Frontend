@@ -24,7 +24,7 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-dark-slate-gray to-mint-green overflow-hidden">
+    <section id="#home" className="relative min-h-screen flex flex-col md:flex-row items-center justify-center px-4 md:px-10 py-20 bg-gradient-to-b from-dark-slate-gray to-mint-green overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-[#34C759] blur-3xl"></div>
@@ -80,11 +80,11 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4"
         >
-          <Button  onClick={() => router.push('/patient/login')} className="bg-gradient-to-r from-mint-green to-[#2A5C82] hover:from-[#2A5C82] hover:to-[#34C759] text-white px-8 py-6 text-lg rounded-full shadow-lg transition-all duration-300 hover:scale-105 group">
-            <span className="relative flex items-center">
+          <Button  onClick={() => router.push('/login')} className="bg-gradient-to-r from-mint-green to-[#2A5C82] hover:from-[#2A5C82] hover:to-[#34C759] text-white px-8 py-6 text-lg rounded-full shadow-lg transition-all duration-300 hover:scale-105 group">
+            <span className="relative flex items-center ">
               Start Your Health Journey
               <ArrowRight className="ml-2 w-5 h-5" />
-              <span className="absolute inset-0 bg-white rounded-full opacity-0 group-hover:opacity-20 group-hover:animate-pulse"></span>
+              <span className="absolute inset-0  rounded-full opacity-0 group-hover:opacity-20 group-hover:animate-pulse"></span>
             </span>
           </Button>
 

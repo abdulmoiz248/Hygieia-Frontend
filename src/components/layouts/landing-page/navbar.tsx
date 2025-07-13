@@ -13,7 +13,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
 
-  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", " rgba(30, 30, 34, 1)"])
+  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", " #1e1e22"])
 
   const textColor = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"])
 
@@ -26,9 +26,8 @@ export default function Navbar() {
   }, [])
 
   const navItems = [
-    { name: "Home", href: "/" },
+    { name: "Home", href: "#home" },
     { name: "How It Works", href: "#how-it-works" },
-    { name: "Order Now", href: "/pharmacy" },
     { name: "Blog", href: "#blog" },
     { name: "Contact", href: "#contact" },
   ]
@@ -81,7 +80,7 @@ export default function Navbar() {
             transition={{ duration: 0.3, delay: 0.6 }}
           >
             <Button
-                 onClick={() => router.push('/patient/login')}
+                 onClick={() => router.push('/login')}
             className="ml-4 bg-blue-500 hover:bg-blue-600 text-white">Get Started</Button>
           </motion.div>
         </nav>
@@ -117,7 +116,7 @@ export default function Navbar() {
               ))}
               <Button 
                 
-                onClick={() => router.push('/patient/login')}
+                onClick={() => router.push('//login')}
             
                className="bg-soft-blue hover:bg-blue-600 text-white">Get Started</Button>
             </nav>

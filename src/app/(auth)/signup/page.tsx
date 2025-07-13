@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import {  useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/layouts/landing-page/navbar'
 import Footer from '@/components/layouts/landing-page/Footer'
@@ -13,8 +13,7 @@ import api from '@/lib/axios'
 
 
 const Signup = () => {
-  const params=useParams()
-  const role = params.role as string
+ 
   
   const [showPassword, setShowPassword] = useState(false)
   const [name, setName] = useState('')
@@ -24,9 +23,7 @@ const Signup = () => {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const allowedRoles = ['patient']
-  if (!allowedRoles.includes(role)) router.replace('/404')
-  
+
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
   const handleSubmit = async(e: React.FormEvent) => {
@@ -43,9 +40,9 @@ const Signup = () => {
     try {
         const res=await api.post(`/signup`,{name,email,password,role:'PATIENT'})
       if(res.data.success)
- {  
+         {  
             localStorage.setItem('email',email)
-            router.push(`/patient/otp`)
+            router.push(`/otp`)
          
           }
       else
@@ -129,25 +126,17 @@ const Signup = () => {
               </Button>
             </form>
            
-          {role=='patient' &&  <GoogleLoginButton/> }
+           <GoogleLoginButton/>
           <div className="mt-4 text-center text-sm text-snow-white animate-slide-in-right delay-500">
               Don&apos;t have an account?{' '}
               <Link
-                href={`/${role}/signup`}
+                href={`/signup`}
                 className="text-soft-blue hover:text-blue-300 transition-colors duration-300"
               >
                 Sign up
               </Link>
             </div>
-            <div className="mt-4 text-center text-sm text-snow-white animate-slide-in-right delay-500">
-              Not a {role.charAt(0).toUpperCase() + role.slice(1)}?{' '}
-              <Link
-                href="/roles"
-                className="text-soft-blue hover:text-blue-300 transition-colors duration-300"
-              >
-                Login Here
-              </Link>
-            </div>
+        
           </CardContent>
         </Card>
         

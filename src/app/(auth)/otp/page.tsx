@@ -29,7 +29,7 @@ export default function OTPVerificationPage() {
       setEmail(email)
     }
     else{
-      router.push('/patient/signup')
+      router.push('/signup')
     }
   },[])
 
@@ -142,7 +142,7 @@ export default function OTPVerificationPage() {
 
   const handleModalClose = () => {
     setShowModal(false)
-    router.push("/patient/login")
+    router.push("/login")
   }
 
   return (
@@ -192,7 +192,7 @@ export default function OTPVerificationPage() {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
                 className={`w-10 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-bold rounded-lg 
-                  bg-cool-gray/30 text-snow-white font-bold border-2 
+                  bg-cool-gray/30 text-snow-white  border-2 
                   ${
                     verificationStatus === "error"
                       ? "border-soft-coral animate-shake"
