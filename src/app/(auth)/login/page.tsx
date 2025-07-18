@@ -9,6 +9,7 @@ import Link from 'next/link'
 import Navbar from '@/components/layouts/landing-page/navbar'
 import Footer from '@/components/layouts/landing-page/Footer'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
+import { useRouter } from 'next/navigation'
 
 export default  function Login() {
   
@@ -19,6 +20,7 @@ export default  function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const router=useRouter()
  
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -45,7 +47,7 @@ export default  function Login() {
       // } else {
       //   setError(res.data.message)
       // }
-     // router.push(`/${role}/dashboard`)
+      router.push(`/dashboard`)
     } catch (err) {
       console.log(err);
       setError('Something went wrong. Try again.')
