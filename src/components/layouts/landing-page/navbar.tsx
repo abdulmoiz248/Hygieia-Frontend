@@ -26,10 +26,10 @@ export default function Navbar() {
   }, [])
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "How It Works", href: "#how-it-works" },
-    { name: "Blog", href: "#blog" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/#home" },
+    { name: "How It Works", href: "/#how-it-works" },
+    { name: "Blog", href: "/#blog" },
+    { name: "Contact", href: "/#contact" },
   ]
   const router=useRouter();
 
