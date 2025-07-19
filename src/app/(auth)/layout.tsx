@@ -5,9 +5,10 @@ import Footer from "@/components/layouts/landing-page/Footer";
 
 
 export const metadata: Metadata = {
-  title: "Blogs | Hygieia",
-  description: "Explore insightful health articles, AI trends in medicine, wellness tips, and expert opinions on the Hygieia Blogs page.",
+  title: "Hygieia | Login & Signup",
+  description: "Access your Hygieia account or create a new one to experience personalized healthcare, AI diagnosis, and more.",
 };
+
 
 export default function RootLayout({
   children,

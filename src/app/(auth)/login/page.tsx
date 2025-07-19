@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import Navbar from '@/components/layouts/landing-page/navbar'
-import Footer from '@/components/layouts/landing-page/Footer'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import { useRouter } from 'next/navigation'
 
@@ -57,8 +55,7 @@ export default  function Login() {
   }
  
   return (
-    <>
-      <Navbar />
+   
       <div className="min-h-screen pt-14 flex items-center justify-center bg-gradient-to-b from-mint-green via-snow-white to-mint-green p-4">
         <Card className="w-full max-w-md bg-dark-slate-gray backdrop-blur-md border-0 shadow-xl animate-fade-in">
           <CardHeader className="text-center space-y-1">
@@ -130,7 +127,6 @@ export default  function Login() {
           </CardContent>
         </Card>
       </div>
-      <Footer />
-    </>
+    
   )
 }
