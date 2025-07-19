@@ -8,25 +8,14 @@ interface BlogContentProps {
 }
 
 export function BlogContent({ post }: BlogContentProps) {
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "medical-research":
-        return "bg-soft-blue/10 text-soft-blue border-soft-blue/20"
-      case "nutrition":
-        return "bg-soft-coral/10 text-soft-coral border-soft-coral/20"
-      case "lab-technology":
-        return "bg-mint-green/10 text-mint-green border-mint-green/20"
-      default:
-        return "bg-cool-gray/10 text-cool-gray border-cool-gray/20"
-    }
-  }
+  
 
   return (
     <article className="max-w-4xl mx-auto">
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <Badge variant="outline" className={getCategoryColor(post.category)}>
+          <Badge variant="outline" className='text-white bg-black'>
             {post.category.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
           </Badge>
           {post.featured && <Badge className="bg-soft-coral text-snow-white">Featured</Badge>}
@@ -84,7 +73,7 @@ export function BlogContent({ post }: BlogContentProps) {
       {/* Content */}
       <div className="prose prose-lg max-w-none">
         <div
-          className="text-dark-slate-gray leading-relaxed"
+          className="text-cool-gray leading-relaxed"
           dangerouslySetInnerHTML={{
             __html: post.content
               .replace(/^# /gm, '<h1 class="text-3xl font-bold text-dark-slate-gray mb-6 mt-8">')

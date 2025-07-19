@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,48 +10,36 @@ import { Input } from "@/components/ui/input"
 import { Check } from "lucide-react"
 import Image from "next/image"
 import api from "@/lib/axios"
-
-const blogPosts = [
-  {
-    title: "The Science Behind AI Diagnostics",
-    excerpt:
-      "Discover how machine learning algorithms are revolutionizing healthcare diagnostics with unprecedented accuracy.",
-    category: "Technology",
-    image: "/tech.png",
-  },
-  {
-    title: "Ancient Healing Practices in Modern Medicine",
-    excerpt: "Exploring how traditional remedies from around the world are being validated by modern science.",
-    category: "Wellness",
-    image: "/fit.png",
-  },
-  {
-    title: "Nutrition Myths Debunked by AI",
-    excerpt: "Our AI analysis of thousands of nutrition studies reveals surprising truths about common diet beliefs.",
-    category: "Nutrition",
-    image: "/nut.png",
-  },
-]
+import { blogPosts, blogCategories } from "@/lib/blog-data"
+import type { BlogPost } from "@/types/blog"
 
 export default function BlogNewsletter() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const router = useRouter()
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    blogCategories.forEach((cat) => {
+      map[cat.id.toLowerCase()] = cat.name
+    })
+    return map
+  }, [])
+
+  const featuredPosts = useMemo(() => {
+    const shuffled = [...blogPosts].sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, 3)
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email) {
-      try{
-        const res=await api.post('/subscribe-newsletter',{email})
-        console.log("Email submitted:", email)
-        console.log("Response:", res.data)
-        if(res.data.success){
-          setIsSubmitted(true)
-        }
-
-      }catch (error) {
+      try {
+        const res = await api.post("/subscribe-newsletter", { email })
+        if (res.data.success) setIsSubmitted(true)
+      } catch (error) {
         console.log("Error submitting email:", error)
       }
-    
     }
   }
 
@@ -59,7 +47,6 @@ export default function BlogNewsletter() {
     <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-mint-green to-snow-white">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-12">
-          {/* Blog */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -67,19 +54,23 @@ export default function BlogNewsletter() {
             viewport={{ once: true }}
             className="w-full md:w-2/3"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-8">Latest Health Insights</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-8">
+              Latest Health Insights
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blogPosts.map((post, index) => (
+              {featuredPosts.map((post: BlogPost, index: number) => (
                 <motion.div
                   key={index}
                   whileHover={{
                     scale: 1.03,
                     rotateY: 5,
                     rotateX: 5,
-                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                    boxShadow:
+                      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                   }}
-                  className="transform perspective-1000"
+                  className="transform perspective-1000 cursor-pointer"
+                  onClick={() => router.push(`/blogs/${post.id}`)}
                 >
                   <Card className="overflow-hidden border-0 shadow-md h-full">
                     <div className="relative h-40 overflow-hidden">
@@ -90,14 +81,23 @@ export default function BlogNewsletter() {
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                       />
                       <div className="absolute top-2 left-2 bg-soft-coral text-white text-xs px-2 py-1 rounded">
-                        {post.category}
+                        {categoryMap[post.category.toLowerCase()] ?? post.category}
                       </div>
                     </div>
 
                     <div className="p-4">
-                      <h3 className="text-lg font-bold text-dark-slate-gray mb-2 line-clamp-2">{post.title}</h3>
+                      <h3 className="text-lg font-bold text-dark-slate-gray mb-2 line-clamp-2">
+                        {post.title}
+                      </h3>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
-                      <Button variant="link" className="p-0 h-auto text-soft-coral hover:text-soft-blue">
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-soft-coral hover:text-soft-blue"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/blogs/${post.id}`)
+                        }}
+                      >
                         Read More →
                       </Button>
                     </div>
@@ -107,11 +107,15 @@ export default function BlogNewsletter() {
             </div>
 
             <div className="mt-8 text-center">
-              <Button className="bg-soft-blue hover:bg-[#1a3a5f] text-white">View All Articles</Button>
+              <Button
+                className="bg-soft-blue hover:bg-[#1a3a5f] text-white"
+                onClick={() => router.push("/blogs")}
+              >
+                View All Articles
+              </Button>
             </div>
           </motion.div>
 
-          {/* Newsletter */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -128,18 +132,18 @@ export default function BlogNewsletter() {
               {!isSubmitted ? (
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
-                    <div>
-                      <Input
-                        type="email"
-                        placeholder="Your email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full focus:ring-2 focus:ring-[#2A5C82] transition-all duration-300"
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full bg-soft-coral hover:bg-[#2DC653] text-white">
+                    <Input
+                      type="email"
+                      placeholder="Your email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="w-full focus:ring-2 focus:ring-[#2A5C82] transition-all duration-300"
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full bg-soft-coral hover:bg-[#2DC653] text-white"
+                    >
                       Subscribe Now
                     </Button>
                   </div>
