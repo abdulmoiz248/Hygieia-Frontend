@@ -12,13 +12,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
-import {getUser} from '@/lib/data'
+import { getUser } from '@/lib/data'
+import { useState } from "react"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
 }
 
-const notifications = [
+const initialNotifications = [
   {
     id: "1",
     title: "Appointment Reminder",
@@ -46,6 +47,7 @@ const notifications = [
 
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
+  const [notifications, setNotifications] = useState(initialNotifications)
   const unreadCount = notifications.filter((n) => n.unread).length
   const user = getUser()
 
@@ -126,16 +128,16 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 ))}
               </div>
               <div className="p-2 border-t">
-                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white">
+                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => setNotifications(notifications.map(n => ({ ...n, unread: false })))}>
                  Mark All As Read
                 </Button>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
+          <DropdownMenu >
+            <DropdownMenuTrigger  asChild>
+              <Button variant="ghost" className="flex items-center gap-2 ">
                 <Avatar className="w-8 h-8">
                   {user.avatar?.trim() ? (
                     <AvatarImage src={user.avatar} />

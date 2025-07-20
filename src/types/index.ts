@@ -38,8 +38,7 @@ export interface MedicalRecord {
   title: string
   type: "lab-result" | "prescription" | "scan" | "report"
   date: string
-  fileUrl?: string
-  thumbnail?: string
+  fileUrl: string
   doctorName?: string
 }
 

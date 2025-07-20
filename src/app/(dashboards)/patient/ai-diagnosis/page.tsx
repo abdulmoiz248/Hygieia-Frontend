@@ -159,7 +159,7 @@ export default function AIDiagnosisPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-dark-slate-gray mb-2">AI Diagnosis</h1>
+          <h1 className="text-4xl font-bold text-soft-coral mb-2">AI Diagnosis</h1>
           <p className="text-cool-gray">Get instant AI-powered health insights from your photos</p>
         </div>
 

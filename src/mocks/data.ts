@@ -47,9 +47,9 @@ export const mockAppointments: Appointment[] = [
     id: "2",
     doctorId: "2",
     doctor: mockDoctors[1],
-    date: "2024-01-28",
+    date: "2025-07-28",
     time: "2:30 PM",
-    status: "upcoming",
+    status: "completed",
     type: "follow-up",
   },
 ]
@@ -61,7 +61,7 @@ export const mockMedicalRecords: MedicalRecord[] = [
     type: "lab-result",
     date: "2024-01-15",
     doctorName: "Dr. Sarah Johnson",
-    thumbnail: "/placeholder.svg?height=200&width=150",
+    fileUrl: "/temp/test.pdf",
   },
   {
     id: "2",
@@ -69,7 +69,7 @@ export const mockMedicalRecords: MedicalRecord[] = [
     type: "scan",
     date: "2024-01-10",
     doctorName: "Dr. Michael Chen",
-    thumbnail: "/placeholder.svg?height=200&width=150",
+    fileUrl: "/temp/test.pdf",
   },
 ]
 
