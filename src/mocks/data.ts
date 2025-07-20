@@ -9,7 +9,7 @@ export const mockDoctors: Doctor[] = [
     location: "New York, NY",
     experience: 12,
     consultationFee: 150,
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "/doctor.png",
   },
   {
     id: "2",
@@ -19,7 +19,7 @@ export const mockDoctors: Doctor[] = [
     location: "Los Angeles, CA",
     experience: 8,
     consultationFee: 120,
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "/doctor.png",
   },
   {
     id: "3",
@@ -29,7 +29,7 @@ export const mockDoctors: Doctor[] = [
     location: "Chicago, IL",
     experience: 15,
     consultationFee: 100,
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "/doctor.png",
   },
 ]
 
