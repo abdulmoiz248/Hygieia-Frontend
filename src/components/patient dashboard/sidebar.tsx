@@ -50,8 +50,8 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               exit={{ opacity: 0, x: -20 }}
               className="flex items-center gap-3"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">H</span>
+              <div className="w-10 h-10 bg-transparent from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg">
+                <img src='/logo/logo.png' className="text-white font-bold text-lg"></img>
               </div>
               <div>
                 <span className="font-bold text-xl text-soft-blue">Hygieia</span>
@@ -59,21 +59,13 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               </div>
             </motion.div>
           )}
-          {collapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="w-10 h-10 bg-gradient-to-br from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg mx-auto"
-            >
-              <span className="text-white font-bold text-lg">H</span>
-            </motion.div>
-          )}
+         
         </AnimatePresence>
 
         {/* Toggle button - always visible on desktop */}
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors md:block hidden bg-soft-blue/10 hover:bg-soft-blue/20 flex-shrink-0"
+          className="p-2 rounded-lg  transition-colors md:block hidden bg-soft-blue/10 hover:bg-soft-blue/20 flex-shrink-0"
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <motion.div animate={{ rotate: collapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
