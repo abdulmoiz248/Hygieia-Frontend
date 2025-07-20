@@ -94,7 +94,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
           const Icon = item.icon
 
           return (
-            <Link key={`${item.href}-${index}`} href={item.href} onClick={() => mobileMenuOpen && onMobileToggle()}>
+            <Link key={`${item.href}-${index}`} href={`/patient/${item.href}`} onClick={() => mobileMenuOpen && onMobileToggle()}>
               <motion.div
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer",
