@@ -1,113 +1,185 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
+import { ChatList, ChatContact } from "@/components/patient dashboard/chat/ChatList"
+import { ChatHeader } from "@/components/patient dashboard/chat/ChatHeader"
+import { ChatMessages, ChatMessage } from "@/components/patient dashboard/chat/ChatMessages"
+import { ChatInput } from "@/components/patient dashboard/chat/ChatInput"
+import { EmptyState } from "@/components/patient dashboard/chat/EmptyState"
 
-interface ChatMessage {
-  id: string
-  content: string
-  sender: "user" | "doctor"
-  timestamp: string
-  status: "sent" | "delivered" | "read"
-}
-
-interface ChatContact {
-  id: string
-  name: string
-  avatar?: string
-  lastMessage: string
-  timestamp: string
-  unread: number
-  online: boolean
-  specialty?: string
-}
-
-const mockContacts: ChatContact[] = [
+const initialContacts: ChatContact[] = [
   {
     id: "1",
     name: "Dr. Sarah Johnson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Your test results look good. Let's schedule a follow-up.",
-    timestamp: "2 min ago",
-    unread: 2,
-    online: true,
-    specialty: "Cardiologist",
-  },
-  {
-    id: "2",
-    name: "Dr. Michael Chen",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Please take the medication as prescribed.",
-    timestamp: "1 hour ago",
+    avatar: "/doctor.png",
+    lastMessage: "How are you feeling today?",
+    timestamp: "2 hours ago",
     unread: 0,
     online: false,
-    specialty: "Dermatologist",
-  },
-  {
-    id: "3",
-    name: "Dr. Emily Rodriguez",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "How are you feeling today?",
-    timestamp: "Yesterday",
-    unread: 1,
-    online: true,
-    specialty: "Pediatrician",
-  },
-]
-
-const mockMessages: ChatMessage[] = [
-  {
-    id: "1",
-    content: "Hello! I've reviewed your recent blood work results.",
-    sender: "doctor",
-    timestamp: "10:30 AM",
-    status: "read",
+    specialty: "Cardiologist",
+    lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000),
   },
   {
     id: "2",
-    content: "That's great to hear! What do the results show?",
-    sender: "user",
-    timestamp: "10:32 AM",
-    status: "read",
+    name: "Dr. Emily Rodriguez",
+    avatar: "/doctor.png",
+    lastMessage: "Please take your medication on time",
+    timestamp: "1 hour ago",
+    unread: 2,
+    online: true,
+    specialty: "Pediatrician",
+    lastActivity: new Date(Date.now() - 1 * 60 * 60 * 1000),
   },
   {
     id: "3",
-    content:
-      "Your cholesterol levels have improved significantly since your last visit. The medication is working well.",
-    sender: "doctor",
-    timestamp: "10:35 AM",
-    status: "read",
+    name: "Dr. Michael Chen",
+    avatar: "/placeholder.svg?height=40&width=40&text=DMC",
+    lastMessage: "Your test results look good",
+    timestamp: "30 min ago",
+    unread: 0,
+    online: true,
+    specialty: "Dermatologist",
+    lastActivity: new Date(Date.now() - 30 * 60 * 1000),
   },
   {
     id: "4",
-    content: "That's wonderful news! Should I continue with the same dosage?",
-    sender: "user",
-    timestamp: "10:37 AM",
-    status: "delivered",
+    name: "Dr. Michael Chen",
+    avatar: "/placeholder.svg?height=40&width=40&text=DMC",
+    lastMessage: "Your test results look good",
+    timestamp: "30 min ago",
+    unread: 0,
+    online: true,
+    specialty: "Dermatologist",
+    lastActivity: new Date(Date.now() - 30 * 60 * 1000),
+  },
+  {
+    id: "5",
+    name: "Dr. Michael Chen",
+    avatar: "/placeholder.svg?height=40&width=40&text=DMC",
+    lastMessage: "Your test results look good",
+    timestamp: "30 min ago",
+    unread: 0,
+    online: true,
+    specialty: "Dermatologist",
+    lastActivity: new Date(Date.now() - 30 * 60 * 1000),
   },
 ]
 
-export default function ChatPage() {
-  const [selectedContact, setSelectedContact] = useState<ChatContact>(mockContacts[0])
-  const [messages, setMessages] = useState<ChatMessage[]>(mockMessages)
+const initialMessages: { [key: string]: ChatMessage[] } = {
+  "1": [
+    {
+      id: "1",
+      content: "Hello! How are you feeling today?",
+      sender: "doctor",
+      timestamp: "2:30 PM",
+      status: "read",
+      messageTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    },
+    {
+      id: "2",
+      content: "I'm feeling much better, thank you doctor",
+      sender: "user",
+      timestamp: "2:35 PM",
+      status: "read",
+      messageTime: new Date(Date.now() - 2 * 60 * 60 * 1000 + 5 * 60 * 1000),
+    },
+  ],
+  "2": [
+    {
+      id: "3",
+      content: "Please take your medication on time",
+      sender: "doctor",
+      timestamp: "1:00 PM",
+      status: "delivered",
+      messageTime: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    },
+    {
+      id: "4",
+      content: "Don't forget the evening dose",
+      sender: "doctor",
+      timestamp: "1:05 PM",
+      status: "delivered",
+      messageTime: new Date(Date.now() - 1 * 60 * 60 * 1000 + 5 * 60 * 1000),
+    },
+  ],
+  "3": [
+    {
+      id: "5",
+      content: "Your test results look good",
+      sender: "doctor",
+      timestamp: "12:30 PM",
+      status: "read",
+      messageTime: new Date(Date.now() - 30 * 60 * 1000),
+    },
+  ],
+}
+
+export default function WhatsAppChat({ className }: { className?: string }) {
+  const [contacts, setContacts] = useState<ChatContact[]>(() =>
+    initialContacts.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime()),
+  )
+  const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null)
+  const [allMessages, setAllMessages] = useState<{ [key: string]: ChatMessage[] }>(initialMessages)
   const [inputValue, setInputValue] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isMobileView, setIsMobileView] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const scrollToBottom = () => {
+  // Check if mobile view
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [allMessages, selectedContact?.id, scrollToBottom])
 
-  const sendMessage = () => {
-    if (!inputValue.trim()) return
+  const moveContactToTop = useCallback((contactId: string, newMessage?: string) => {
+    setContacts((prev) => {
+      const updatedContacts = prev.map((contact) => {
+        if (contact.id === contactId) {
+          return {
+            ...contact,
+            lastActivity: new Date(),
+            lastMessage: newMessage || contact.lastMessage,
+            timestamp: "now",
+          }
+        }
+        return contact
+      })
+      return updatedContacts.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime())
+    })
+  }, [])
+
+  const markMessagesAsRead = useCallback((contactId: string) => {
+    setAllMessages((prev) => ({
+      ...prev,
+      [contactId]: prev[contactId]?.map((msg) => (msg.sender === "doctor" ? { ...msg, status: "read" } : msg)) || [],
+    }))
+    setContacts((prev) => prev.map((contact) => (contact.id === contactId ? { ...contact, unread: 0 } : contact)))
+  }, [])
+
+  const handleContactSelect = useCallback(
+    (contact: ChatContact) => {
+      setSelectedContact(contact)
+      markMessagesAsRead(contact.id)
+    },
+    [markMessagesAsRead],
+  )
+
+  const sendMessage = useCallback(() => {
+    if (!inputValue.trim() || !selectedContact) return
 
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -115,182 +187,92 @@ export default function ChatPage() {
       sender: "user",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       status: "sent",
+      messageTime: new Date(),
     }
 
-    setMessages((prev) => [...prev, newMessage])
+    setAllMessages((prev) => ({
+      ...prev,
+      [selectedContact.id]: [...(prev[selectedContact.id] || []), newMessage],
+    }))
+
+    moveContactToTop(selectedContact.id, inputValue)
     setInputValue("")
-  }
+
+    // Simulate message delivery and read status
+    setTimeout(() => {
+      setAllMessages((prev) => ({
+        ...prev,
+        [selectedContact.id]:
+          prev[selectedContact.id]?.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg)) ||
+          [],
+      }))
+    }, 1000)
+
+    setTimeout(() => {
+      setAllMessages((prev) => ({
+        ...prev,
+        [selectedContact.id]:
+          prev[selectedContact.id]?.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "read" } : msg)) || [],
+      }))
+    }, 3000)
+  }, [inputValue, selectedContact, moveContactToTop])
+
+  const currentMessages = selectedContact ? allMessages[selectedContact.id] || [] : []
+
+  // Mobile: Show chat list when no contact selected, show chat when contact selected
+  // Desktop: Always show both
+  const showChatList = !isMobileView || !selectedContact
+  const showChat = !isMobileView || selectedContact
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex">
-      {/* Contacts Sidebar */}
-      <div className="w-80 border-r bg-white">
-        {/* Header */}
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold text-dark-slate-gray mb-3">Messages</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cool-gray w-4 h-4" />
-            <Input placeholder="Search conversations..." className="pl-10" />
-          </div>
-        </div>
-
-        {/* Contacts List */}
-        <div className="overflow-y-auto">
-          {mockContacts.map((contact) => (
-            <motion.div
-              key={contact.id}
-              whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
-              className={`p-4 cursor-pointer border-b transition-colors ${
-                selectedContact.id === contact.id ? "bg-soft-blue/10 border-l-4 border-l-soft-blue" : ""
-              }`}
-              onClick={() => setSelectedContact(contact)}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={contact.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>
-                      {contact.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  {contact.online && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-mint-green rounded-full border-2 border-white" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium text-dark-slate-gray truncate">{contact.name}</h3>
-                    <span className="text-xs text-cool-gray">{contact.timestamp}</span>
-                  </div>
-                  <p className="text-sm text-cool-gray truncate">{contact.lastMessage}</p>
-                  {contact.specialty && (
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {contact.specialty}
-                    </Badge>
-                  )}
-                </div>
-
-                {contact.unread > 0 && (
-                  <div className="w-5 h-5 bg-soft-blue rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white font-medium">{contact.unread}</span>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+    <div className={cn("flex h-full bg-snow-white relative", className)}>
+      {/* Chat List */}
+      <AnimatePresence>
+        {showChatList && (
+          <ChatList
+            contacts={contacts}
+            selectedContactId={selectedContact?.id || null}
+            onSelect={handleContactSelect}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            isMobileView={isMobileView}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="p-4 border-b bg-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={selectedContact.avatar || "/placeholder.svg"} />
-                <AvatarFallback>
-                  {selectedContact.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              {selectedContact.online && (
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-mint-green rounded-full border-2 border-white" />
-              )}
+      <AnimatePresence>
+        {showChat && selectedContact && (
+          <motion.div
+            initial={isMobileView ? { x: 300 } : false}
+            animate={isMobileView ? { x: 0 } : {}}
+            exit={isMobileView ? { x: 300 } : {}}
+            className={cn("flex flex-col bg-snow-white", isMobileView ? "absolute inset-0 z-20" : "flex-1")}
+          >
+            <ChatHeader
+              contact={selectedContact}
+              isMobileView={isMobileView}
+              onBack={() => setSelectedContact(null)}
+            />
+            <div className="flex-1 overflow-y-auto p-4 bg-snow-white">
+              <ChatMessages
+                messages={currentMessages}
+                currentUser="user"
+                ref={messagesEndRef}
+              />
             </div>
-            <div>
-              <h3 className="font-semibold text-dark-slate-gray">{selectedContact.name}</h3>
-              <p className="text-sm text-cool-gray">{selectedContact.online ? "Online" : "Last seen 2 hours ago"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <Phone className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Video className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div className={`max-w-[70%] ${message.sender === "user" ? "order-first" : ""}`}>
-                  <div
-                    className={`p-3 rounded-2xl ${
-                      message.sender === "user" ? "bg-soft-blue text-white" : "bg-white text-dark-slate-gray shadow-sm"
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                  </div>
-                  <div
-                    className={`flex items-center gap-1 mt-1 text-xs text-cool-gray ${
-                      message.sender === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <span>{message.timestamp}</span>
-                    {message.sender === "user" && (
-                      <div className="flex">
-                        <div
-                          className={`w-1 h-1 rounded-full ${
-                            message.status === "read" ? "bg-soft-blue" : "bg-cool-gray"
-                          }`}
-                        />
-                        <div
-                          className={`w-1 h-1 rounded-full ml-0.5 ${
-                            message.status === "read" ? "bg-soft-blue" : "bg-cool-gray"
-                          }`}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Input */}
-        <div className="p-4 bg-white border-t">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <Paperclip className="w-5 h-5" />
-            </Button>
-            <Input
+            <ChatInput
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type a message..."
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              className="flex-1"
+              onSend={sendMessage}
+              disabled={!inputValue.trim()}
             />
-            <Button variant="ghost" size="icon">
-              <Smile className="w-5 h-5" />
-            </Button>
-            <Button onClick={sendMessage} disabled={!inputValue.trim()} className="bg-soft-blue hover:bg-soft-blue/90">
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Empty State for Desktop */}
+      {!isMobileView && !selectedContact && <EmptyState />}
     </div>
   )
 }

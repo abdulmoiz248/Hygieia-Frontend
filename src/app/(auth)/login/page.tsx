@@ -45,7 +45,7 @@ export default  function Login() {
       // } else {
       //   setError(res.data.message)
       // }
-      router.push(`/dashboard`)
+      router.push(`/patient/dashboard`)
     } catch (err) {
       console.log(err);
       setError('Something went wrong. Try again.')
