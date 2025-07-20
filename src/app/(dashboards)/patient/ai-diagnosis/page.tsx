@@ -1,15 +1,14 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Upload, Camera, FileImage, Loader2, CheckCircle, AlertTriangle, X } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import React, { useState, useRef } from "react"
+import { Upload, Camera, FileImage, X } from "lucide-react"
+import Card from "@/components/patient dashboard/ai diagnosis/Card"
+import CardContent from "@/components/patient dashboard/ai diagnosis/CardContent"
+import CardHeader from "@/components/patient dashboard/ai diagnosis/CardHeader"
+import CardTitle from "@/components/patient dashboard/ai diagnosis/CardTitle"
+import Button from "@/components/patient dashboard/ai diagnosis/Button"
+import AnalysisProgressModal from "@/components/patient dashboard/ai diagnosis/AnalysisProgressModal"
+import ResultsModal from "@/components/patient dashboard/ai diagnosis/ResultsModal"
 
 interface DiagnosisResult {
   type: "dental" | "acne"
@@ -19,6 +18,9 @@ interface DiagnosisResult {
   nextSteps: string[]
 }
 
+// UI components with your theme colors
+// Remove the inline definitions of these components and use the imports instead.
+
 export default function AIDiagnosisPage() {
   const [selectedType, setSelectedType] = useState<"dental" | "acne" | null>(null)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -26,6 +28,11 @@ export default function AIDiagnosisPage() {
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [result, setResult] = useState<DiagnosisResult | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -36,6 +43,53 @@ export default function AIDiagnosisPage() {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' } 
+      })
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        setShowCamera(true)
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error)
+      alert('Unable to access camera. Please check permissions or use file upload instead.')
+    }
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current
+      const video = videoRef.current
+      
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(video, 0, 0)
+        const imageData = canvas.toDataURL('image/jpeg')
+        setUploadedImage(imageData)
+        stopCamera()
+      }
+    }
+  }
+
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach(track => track.stop())
+      videoRef.current.srcObject = null
+    }
+    setShowCamera(false)
   }
 
   const analyzeImage = async () => {
@@ -97,39 +151,23 @@ export default function AIDiagnosisPage() {
     setResult(null)
     setShowResults(false)
     setAnalysisProgress(0)
-  }
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "mild":
-        return "text-mint-green"
-      case "moderate":
-        return "text-yellow-600"
-      case "severe":
-        return "text-soft-coral"
-      default:
-        return "text-cool-gray"
-    }
+    stopCamera()
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-dark-slate-gray">AI Diagnosis</h1>
-        <p className="text-cool-gray">Get instant AI-powered health insights from your photos</p>
-      </div>
+    <div className="min-h-screen bg-snow-white p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-dark-slate-gray mb-2">AI Diagnosis</h1>
+          <p className="text-cool-gray">Get instant AI-powered health insights from your photos</p>
+        </div>
 
-      {!selectedType ? (
-        /* Type Selection */
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <motion.div whileHover={{ scale: 1.02 }}>
+        {!selectedType ? (
+          /* Type Selection */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card
-              className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-soft-blue/30"
+              className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-soft-blue/30 bg-snow-white"
               onClick={() => setSelectedType("dental")}
             >
               <CardContent className="p-8 text-center">
@@ -140,11 +178,9 @@ export default function AIDiagnosisPage() {
                 <p className="text-cool-gray">Upload photos of dental concerns for AI-powered analysis</p>
               </CardContent>
             </Card>
-          </motion.div>
 
-          <motion.div whileHover={{ scale: 1.02 }}>
             <Card
-              className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-mint-green/30"
+              className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-mint-green/30 bg-snow-white"
               onClick={() => setSelectedType("acne")}
             >
               <CardContent className="p-8 text-center">
@@ -155,188 +191,105 @@ export default function AIDiagnosisPage() {
                 <p className="text-cool-gray">Analyze skin conditions and get personalized recommendations</p>
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
-      ) : (
-        /* Upload & Analysis */
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{selectedType === "dental" ? "🦷" : "✨"}</span>
-                  {selectedType === "dental" ? "Dental" : "Acne"} Analysis
-                </div>
-                <Button variant="ghost" size="icon" onClick={resetDiagnosis}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {!uploadedImage ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                      <Upload className="w-8 h-8 text-cool-gray" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-dark-slate-gray mb-2">Upload Your Photo</h3>
-                      <p className="text-cool-gray mb-4">Take a clear photo of the area you&apos;d like analyzed</p>
-                    </div>
-                    <div className="flex gap-4 justify-center">
-                      <Button variant="outline" className="flex items-center gap-2 bg-transparent">
-                        <Camera className="w-4 h-4" />
-                        Take Photo
-                      </Button>
-                      <label htmlFor="file-upload">
-                        <Button className="flex items-center gap-2 bg-soft-blue hover:bg-soft-blue/90">
+          </div>
+        ) : (
+          /* Upload & Analysis */
+          <div className="max-w-2xl mx-auto">
+            <Card className="bg-snow-white">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{selectedType === "dental" ? "🦷" : "✨"}</span>
+                    {selectedType === "dental" ? "Dental" : "Acne"} Analysis
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={resetDiagnosis}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!uploadedImage && !showCamera ? (
+                  <div className="border-2 border-dashed border-cool-gray/30 rounded-lg p-12 text-center">
+                    <div className="space-y-4">
+                      <div className="w-16 h-16 bg-cool-gray/10 rounded-full flex items-center justify-center mx-auto">
+                        <Upload className="w-8 h-8 text-cool-gray" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-dark-slate-gray mb-2">Upload Your Photo</h3>
+                        <p className="text-cool-gray mb-4">Take a clear photo of the area you&apos;d like analyzed</p>
+                      </div>
+                      <div className="flex gap-4 justify-center">
+                        
+                        <Button className="flex items-center gap-2 bg-soft-blue hover:bg-soft-blue/90" onClick={handleFileButtonClick}>
                           <FileImage className="w-4 h-4" />
                           Choose File
                         </Button>
-                      </label>
-                      <input
-                        id="file-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="relative">
-                    <img
-                      src={uploadedImage || "/placeholder.svg"}
-                      alt="Uploaded for analysis"
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm"
-                      onClick={() => setUploadedImage(null)}
-                    >
-                      Change Photo
-                    </Button>
-                  </div>
-
-                  {!isAnalyzing && !result && (
-                    <Button onClick={analyzeImage} className="w-full bg-soft-blue hover:bg-soft-blue/90">
-                      Analyze Image
-                    </Button>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Analysis Progress Modal */}
-      <Dialog open={isAnalyzing} onOpenChange={() => {}}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-soft-blue" />
-              Analyzing Your Image
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-6xl mb-4">{selectedType === "dental" ? "🦷" : "✨"}</div>
-              <h3 className="text-lg font-medium text-dark-slate-gray mb-2">AI Analysis in Progress</h3>
-              <p className="text-cool-gray mb-4">Our AI is examining your photo for insights...</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progress</span>
-                <span>{Math.round(analysisProgress)}%</span>
-              </div>
-              <Progress value={analysisProgress} className="h-3" />
-            </div>
-
-            <div className="text-center text-sm text-cool-gray">
-              {analysisProgress < 30 && "Processing image..."}
-              {analysisProgress >= 30 && analysisProgress < 60 && "Analyzing features..."}
-              {analysisProgress >= 60 && analysisProgress < 90 && "Generating insights..."}
-              {analysisProgress >= 90 && "Finalizing results..."}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Results Modal */}
-      <Dialog open={showResults} onOpenChange={setShowResults}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-mint-green" />
-              Analysis Complete
-            </DialogTitle>
-          </DialogHeader>
-
-          {result && (
-            <div className="space-y-6">
-              {/* Confidence Score */}
-              <div className="text-center">
-                <div className="text-4xl font-bold text-soft-blue mb-2">{result.confidence}%</div>
-                <p className="text-cool-gray">Confidence Level</p>
-                <Progress value={result.confidence} className="w-full max-w-xs mx-auto mt-2" />
-              </div>
-
-              {/* Severity */}
-              <div className="flex items-center justify-center gap-2">
-                <AlertTriangle className={`w-5 h-5 ${getSeverityColor(result.severity)}`} />
-                <span className="font-medium">Severity: </span>
-                <Badge className={getSeverityColor(result.severity)}>
-                  {result.severity.charAt(0).toUpperCase() + result.severity.slice(1)}
-                </Badge>
-              </div>
-
-              {/* Recommendation */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-dark-slate-gray mb-2">AI Recommendation</h3>
-                <p className="text-cool-gray">{result.recommendation}</p>
-              </div>
-
-              {/* Next Steps */}
-              <div>
-                <h3 className="font-semibold text-dark-slate-gray mb-3">Recommended Next Steps</h3>
-                <div className="space-y-2">
-                  {result.nextSteps.map((step, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <div className="w-6 h-6 bg-soft-blue/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-medium text-soft-blue">{index + 1}</span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
                       </div>
-                      <p className="text-cool-gray">{step}</p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ) : showCamera ? (
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full h-64 object-cover rounded-lg bg-black"
+                      />
+                      <canvas ref={canvasRef} className="hidden" />
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      <Button onClick={capturePhoto} className="bg-soft-blue hover:bg-soft-blue/90">
+                        Capture Photo
+                      </Button>
+                      <Button variant="outline" onClick={stopCamera}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <img
+                        src={uploadedImage || ""}
+                        alt="Uploaded for analysis"
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute top-2 right-2 bg-snow-white/90"
+                        onClick={() => setUploadedImage(null)}
+                      >
+                        Change Photo
+                      </Button>
+                    </div>
 
-              {/* Actions */}
-              <div className="flex gap-3">
-                <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90">Book Consultation</Button>
-                <Button variant="outline" onClick={resetDiagnosis}>
-                  New Analysis
-                </Button>
-              </div>
+                    {!isAnalyzing && !result && (
+                      <Button onClick={analyzeImage} className="w-full bg-soft-blue hover:bg-soft-blue/90">
+                        Analyze Image
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-              {/* Disclaimer */}
-              <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-                <p className="text-xs text-yellow-800">
-                  <strong>Disclaimer:</strong> This AI analysis is for informational purposes only and should not
-                  replace professional medical advice. Please consult with a qualified healthcare provider for proper
-                  diagnosis and treatment.
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        {/* Analysis Progress Modal */}
+        <AnalysisProgressModal open={isAnalyzing} selectedType={selectedType} analysisProgress={analysisProgress} />
+
+        {/* Results Modal */}
+        <ResultsModal open={showResults} onOpenChange={setShowResults} result={result} resetDiagnosis={resetDiagnosis} />
+      </div>
     </div>
   )
 }
