@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
+import {getUser} from '@/lib/data'
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
@@ -41,16 +42,12 @@ const notifications = [
   },
 ]
 
-function getMockUser() {
-  return {
-    name: "Abdul Muqeet",
-    avatar: "", // leave blank to test fallback
-  }
-}
+
+
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const unreadCount = notifications.filter((n) => n.unread).length
-  const user = getMockUser()
+  const user = getUser()
 
   const userInitials = user.name
     .split(" ")
