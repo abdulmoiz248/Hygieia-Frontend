@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import { Upload, Camera, FileImage, X } from "lucide-react"
+import { Upload,  FileImage, X } from "lucide-react"
 import Card from "@/components/patient dashboard/ai diagnosis/Card"
 import CardContent from "@/components/patient dashboard/ai diagnosis/CardContent"
 import CardHeader from "@/components/patient dashboard/ai diagnosis/CardHeader"
@@ -49,21 +49,7 @@ export default function AIDiagnosisPage() {
     fileInputRef.current?.click()
   }
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
-      })
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setShowCamera(true)
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error)
-      alert('Unable to access camera. Please check permissions or use file upload instead.')
-    }
-  }
+
 
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {

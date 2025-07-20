@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { X, Download, Eye, Trash2 } from "lucide-react"
+import {  Download, Eye, Trash2 } from "lucide-react"
 import type { MedicalRecord } from "@/types"
 
 interface MedicalRecordViewerModalProps {

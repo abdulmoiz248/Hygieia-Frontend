@@ -6,7 +6,7 @@ interface ButtonProps {
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "icon"
   onClick?: () => void
-  [key: string]: any
+  [key: string]: unknown
 }
 
 const Button = ({ children, className = "", variant = "default", size = "default", onClick, ...props }: ButtonProps) => {

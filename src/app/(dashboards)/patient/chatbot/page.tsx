@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, Bot, User, Loader2 } from "lucide-react"
+import { Send, Bot,  Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -97,7 +97,7 @@ export default function ChatbotPage() {
             </h1>
 
             <p className="text-cool-gray text-lg">
-              I'm your AI health assistant. What would you like to ask today?
+              I&apos;m your AI health assistant. What would you like to ask today?
             </p>
             <div className="w-full mt-6 flex gap-2">
               <Input

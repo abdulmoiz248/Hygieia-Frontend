@@ -15,7 +15,6 @@ interface MedicalRecordsGridProps {
 export function MedicalRecordsGrid({
   filteredRecords,
   setViewingRecord,
-  getTypeIcon,
   getTypeColor,
   onShowUpload
 }: MedicalRecordsGridProps) {
