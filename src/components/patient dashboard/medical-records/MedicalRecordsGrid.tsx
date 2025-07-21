@@ -80,7 +80,7 @@ export function MedicalRecordsGrid({
           <p className="text-gray-500 mb-5">Upload your first medical record to get started</p>
           <Button
             onClick={onShowUpload}
-            className="bg-soft-blue hover:bg-soft-blue/90 text-white px-5 py-2.5 text-sm rounded-md"
+            className="bg-mint-green hover:bg-mint-green/90 text-white px-5 py-2.5 text-sm rounded-md"
           >
             <Upload className="w-4 h-4 mr-2" />
             Upload Record

@@ -123,11 +123,7 @@ export function ChatList({ contacts, selectedContactId, onSelect, searchQuery, o
                       </div>
                     )}
                   </div>
-                  {contact.specialty && (
-                    <Badge variant="outline" className="text-xs border-cool-gray text-snow-white bg-soft-coral mt-1">
-                      {contact.specialty}
-                    </Badge>
-                  )}
+                 
                 </div>
               </div>
             </motion.div>

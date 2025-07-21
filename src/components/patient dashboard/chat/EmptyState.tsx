@@ -2,7 +2,7 @@ import { Send } from "lucide-react"
 
 export function EmptyState() {
   return (
-    <div className="flex-1 flex items-center justify-center bg-snow-white">
+    <div className="flex-1 flex items-center justify-center bg-white">
       <div className="text-center">
         <div className="w-32 h-32 mx-auto mb-4 bg-soft-blue rounded-full flex items-center justify-center">
           <Send className="w-16 h-16 text-black" />

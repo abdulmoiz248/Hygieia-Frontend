@@ -61,7 +61,7 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
       </div>
       <Dialog open={showUpload} onOpenChange={setShowUpload}>
         <DialogTrigger asChild>
-          <Button className="bg-soft-blue hover:bg-soft-blue/90 text-white">
+          <Button className="bg-mint-green hover:bg-mint-green/90 text-white">
             <Upload className="w-4 h-4 mr-2" />
             Upload Record
           </Button>
@@ -82,10 +82,10 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent className="bg-snow-white">
-                  <SelectItem value="lab-result" className="hover:text-white hover:bg-soft-blue">Lab Result</SelectItem>
-                  <SelectItem value="prescription" className="hover:text-white hover:bg-soft-blue">Prescription</SelectItem>
-                  <SelectItem value="scan" className="hover:text-white hover:bg-soft-blue">Scan/X-Ray</SelectItem>
-                  <SelectItem value="report" className="hover:text-white hover:bg-soft-blue">Medical Report</SelectItem>
+                  <SelectItem value="lab-result" className="hover:text-white hover:bg-mint-green">Lab Result</SelectItem>
+                  <SelectItem value="prescription" className="hover:text-white hover:bg-mint-green">Prescription</SelectItem>
+                  <SelectItem value="scan" className="hover:text-white hover:bg-mint-green">Scan/X-Ray</SelectItem>
+                  <SelectItem value="report" className="hover:text-white hover:bg-mint-green">Medical Report</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -107,7 +107,7 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
               {file && <p className="mt-2 text-green-600 text-sm">Selected: {file.name}</p>}
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}
-            <Button className="w-full bg-soft-blue hover:bg-soft-blue/90" onClick={handleUpload}>Upload Record</Button>
+            <Button className="w-full bg-mint-green hover:bg-mint-green/90" onClick={handleUpload}>Upload Record</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -247,7 +247,7 @@ export default function WhatsAppChat({ className }: { className?: string }) {
             initial={isMobileView ? { x: 300 } : false}
             animate={isMobileView ? { x: 0 } : {}}
             exit={isMobileView ? { x: 300 } : {}}
-            className={cn("flex flex-col bg-snow-white", isMobileView ? "absolute inset-0 z-20" : "flex-1")}
+            className={cn("flex flex-col bg-white", isMobileView ? "absolute inset-0 z-20" : "flex-1")}
           >
             <ChatHeader
               contact={selectedContact}
