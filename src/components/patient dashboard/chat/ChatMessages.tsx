@@ -17,7 +17,7 @@ interface ChatMessagesProps {
 }
 
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
-  ({ messages, currentUser }, _ref) => {
+  ({ messages, currentUser }) => {
     const scrollRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {

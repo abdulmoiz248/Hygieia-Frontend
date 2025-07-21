@@ -7,10 +7,9 @@ interface ChatInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSend: () => void
   disabled?: boolean
-  onEmojiClick?: () => void
 }
 
-export function ChatInput({ value, onChange, onSend, disabled, onEmojiClick }: ChatInputProps) {
+export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps) {
   return (
     <div className="p-4 bg-snow-white  flex-shrink-0">
       <div className="flex items-center gap-3">

@@ -2,12 +2,10 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Pill, Calendar, Clock, CheckCircle } from "lucide-react"
+import { Pill, Calendar,  CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const containerVariants = {
@@ -107,23 +105,8 @@ export default function PrescriptionsPage() {
   const activePrescriptions = mockPrescriptions.filter((p) => p.status === "active")
   const completedPrescriptions = mockPrescriptions.filter((p) => p.status === "completed")
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-mint-green text-white"
-      case "completed":
-        return "bg-cool-gray text-white"
-      default:
-        return "bg-gray-500 text-white"
-    }
-  }
 
-  const getRemainingDaysColor = (days: number) => {
-    if (days === -1) return "text-blue-600"
-    if (days <= 3) return "text-soft-coral"
-    if (days <= 7) return "text-yellow-600"
-    return "text-mint-green"
-  }
+
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">

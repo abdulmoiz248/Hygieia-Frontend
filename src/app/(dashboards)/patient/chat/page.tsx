@@ -116,7 +116,7 @@ const initialMessages: { [key: string]: ChatMessage[] } = {
   ],
 }
 
-export default function WhatsAppChat({ className }: { className?: string }) {
+export default function WhatsAppChat() {
   const [contacts, setContacts] = useState<ChatContact[]>(() =>
     initialContacts.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime()),
   )
@@ -225,7 +225,7 @@ export default function WhatsAppChat({ className }: { className?: string }) {
   const showChat = !isMobileView || selectedContact
 
   return (
-    <div className={cn("flex h-full bg-snow-white relative", className)}>
+    <div className={cn("flex h-full bg-snow-white relative")}>
       {/* Chat List */}
       <AnimatePresence>
         {showChatList && (
