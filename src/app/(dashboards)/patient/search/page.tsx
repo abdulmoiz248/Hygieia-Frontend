@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { mockDoctors } from "@/mocks/data"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,12 +42,12 @@ export default function SearchPage() {
 
   const specialties = [...new Set(mockDoctors.map((d) => d.specialty))]
   const locations = [...new Set(mockDoctors.map((d) => d.location.split(", ")[1]))]
-
+const router=useRouter()
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-dark-slate-gray">Find Doctors</h1>
+        <h1 className="text-3xl font-bold text-soft-coral">Find Doctors</h1>
         <p className="text-cool-gray">Search and book appointments with qualified healthcare professionals</p>
       </motion.div>
 
@@ -150,7 +151,7 @@ export default function SearchPage() {
                       <Button
                         size="sm"
                         className="flex-1 bg-soft-blue hover:bg-soft-blue/90"
-                        onClick={() => setSelectedDoctor(doctor)}
+                        onClick={() => router.push(`/doctor/${doctor.id}`)}
                       >
                         View Profile
                       </Button>
@@ -174,129 +175,8 @@ export default function SearchPage() {
         )}
       </motion.div>
 
-      {/* Doctor Profile Modal */}
-      <Dialog open={!!selectedDoctor} onOpenChange={() => setSelectedDoctor(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          {selectedDoctor && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={selectedDoctor.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>
-                      {selectedDoctor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-2xl font-semibold">{selectedDoctor.name}</h2>
-                    <p className="text-cool-gray">{selectedDoctor.specialty}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{selectedDoctor.rating}</span>
-                      <span className="text-cool-gray">• {selectedDoctor.experience} years experience</span>
-                    </div>
-                  </div>
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-6">
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-soft-blue/10 rounded-lg">
-                    <div className="text-2xl font-bold text-soft-blue">{selectedDoctor.rating}</div>
-                    <p className="text-sm text-cool-gray">Rating</p>
-                  </div>
-                  <div className="text-center p-4 bg-mint-green/10 rounded-lg">
-                    <div className="text-2xl font-bold text-mint-green">{selectedDoctor.experience}</div>
-                    <p className="text-sm text-cool-gray">Years Exp.</p>
-                  </div>
-                  <div className="text-center p-4 bg-soft-coral/10 rounded-lg">
-                    <div className="text-2xl font-bold text-soft-coral">${selectedDoctor.consultationFee}</div>
-                    <p className="text-sm text-cool-gray">Consultation</p>
-                  </div>
-                </div>
-
-                {/* About */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">About Dr. {selectedDoctor.name.split(" ")[1]}</h3>
-                  <p className="text-cool-gray">
-                    Dr. {selectedDoctor.name.split(" ")[1]} is a highly experienced{" "}
-                    {selectedDoctor.specialty.toLowerCase()} with {selectedDoctor.experience} years of practice. Known
-                    for providing comprehensive care and staying up-to-date with the latest medical advances.
-                  </p>
-                </div>
-
-                {/* Specializations */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Specializations</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">{selectedDoctor.specialty}</Badge>
-                    <Badge variant="outline">General Consultation</Badge>
-                    <Badge variant="outline">Preventive Care</Badge>
-                    <Badge variant="outline">Treatment Planning</Badge>
-                  </div>
-                </div>
-
-                {/* Education & Certifications */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Award className="w-5 h-5" />
-                    Education & Certifications
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-soft-blue rounded-full"></div>
-                      <span className="text-sm">MD from Harvard Medical School</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-mint-green rounded-full"></div>
-                      <span className="text-sm">Board Certified in {selectedDoctor.specialty}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-soft-coral rounded-full"></div>
-                      <span className="text-sm">Fellowship in Advanced {selectedDoctor.specialty}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="flex items-center gap-2 text-cool-gray">
-                  <MapPin className="w-5 h-5" />
-                  <span>{selectedDoctor.location}</span>
-                </div>
-
-                {/* QR Code */}
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <div className="w-32 h-32 bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <QrCode className="w-16 h-16 text-cool-gray" />
-                  </div>
-                  <p className="text-sm text-cool-gray">Scan to share profile</p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90" asChild>
-                    <Link href={`/appointments/new?docId=${selectedDoctor.id}`}>
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Book Appointment
-                    </Link>
-                  </Button>
-                  <Button variant="outline">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                  <Button variant="outline">
-                    <Phone className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+     
+     
     </motion.div>
   )
 }
