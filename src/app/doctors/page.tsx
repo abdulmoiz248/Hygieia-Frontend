@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -38,6 +38,9 @@ export default function DoctorsPage() {
   const [sortBy, setSortBy] = useState("rating")
   const [showFilters, setShowFilters] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  useEffect(()=>{
+setIsLoading(false)
+  },[])
 
   // Get active filters count
   const activeFiltersCount = useMemo(() => {
@@ -408,7 +411,7 @@ export default function DoctorsPage() {
               </div>
               <h3 className="text-2xl font-bold text-soft-coral mb-3">No doctors found</h3>
               <p className="text-cool-gray mb-6 leading-relaxed">
-                We couldn't find any doctors matching your criteria.
+                We couldn&apos;t find any doctors matching your criteria.
                 <br />
                 Try adjusting your filters or search terms to discover more healthcare professionals.
               </p>
