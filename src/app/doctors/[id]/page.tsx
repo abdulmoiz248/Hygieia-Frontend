@@ -95,7 +95,7 @@ export default async function DoctorProfilePage({
           {/* Main Profile Section */}
           <div className="lg:col-span-2 space-y-8">
             {/* Enhanced Doctor Header */}
-            <Card className="overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-white via-soft-blue/5 to-mint-green/10 animate-scale-in relative">
+            <Card className="overflow-hidden border-0 shadow-2xl bg-snow-white animate-scale-in relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-soft-blue/10 to-transparent rounded-bl-full"></div>
               <CardContent className="p-8 relative">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
