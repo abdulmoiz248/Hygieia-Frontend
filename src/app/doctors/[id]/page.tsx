@@ -15,54 +15,49 @@ import {
   Users,
   Phone,
   Mail,
-  MessageCircle,
   Video,
   ArrowLeft,
-  Heart,
   BookmarkPlus,
-  Download,
+  
   Shield,
   Zap,
   Globe,
   CheckCircle,
 } from "lucide-react"
 import Link from "next/link"
-import type { Doctor } from "@/types/index"
 import { ShareProfile } from "@/components/doctor dashboard/doctor profile/share-profile"
 import { ReviewsSection } from "@/components/doctor dashboard/doctor profile/reviews-section"
 import { AchievementsSection } from "@/components/doctor dashboard/doctor profile/achievements-section"
 import { mockDoctors } from "@/mocks/data"
 
-interface DoctorProfilePageProps {
-  params: {
-    id: string
-  }
-}
 
-export default function DoctorProfilePage({ params }: DoctorProfilePageProps) {
-  const doctor = mockDoctors.find((d) => d.id === params.id)
 
-  if (!doctor) {
-    notFound()
-  }
+export default async function DoctorProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const doctor = mockDoctors.find((d) => d.id === id)
+  if (!doctor) notFound()
+ 
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
+  const renderStars = (rating: number) =>
+    Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
         className={`w-4 h-4 ${
           i < Math.floor(rating)
             ? "fill-yellow-400 text-yellow-400"
             : i < rating
-              ? "fill-yellow-400/50 text-yellow-400"
-              : "text-gray-300"
+            ? "fill-yellow-400/50 text-yellow-400"
+            : "text-gray-300"
         }`}
       />
     ))
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-snow-white via-mint-green/5 to-soft-blue/10 relative overflow-hidden">
+    <div className="pt-12 min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-soft-blue/5 rounded-full animate-float"></div>
@@ -78,6 +73,7 @@ export default function DoctorProfilePage({ params }: DoctorProfilePageProps) {
 
       <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
         {/* Enhanced Header */}
+        {/* TODO: if login then search else doctors page */}
         <div className="flex items-center justify-between mb-8 animate-slide-up">
           <Link href="/doctors">
             <Button variant="ghost" className="group hover:bg-soft-blue/10 transition-all duration-300 hover:scale-105">
@@ -88,13 +84,7 @@ export default function DoctorProfilePage({ params }: DoctorProfilePageProps) {
 
           <div className="flex items-center gap-3">
 
-            <Button
-              variant="outline"
-              className="group border-mint-green/20 hover:border-mint-green hover:bg-mint-green/5 bg-transparent"
-            >
-              <Download className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform text-mint-green" />
-              Download Profile
-            </Button>
+    
           
             <ShareProfile doctorId={doctor.id} doctorName={doctor.name} />
           
@@ -415,7 +405,7 @@ export default function DoctorProfilePage({ params }: DoctorProfilePageProps) {
                         <span className="text-cool-gray">{item.label}:</span>
                       </div>
                       <span
-                        className={`font-medium ${item.highlight ? "text-mint-green" : "text-dark-slate-gray"} group-hover:scale-105 transition-transform`}
+                        className={`font-medium ${item.highlight ? "text-soft-coral" : "text-dark-slate-gray"} group-hover:scale-105 transition-transform`}
                       >
                         {item.value}
                       </span>

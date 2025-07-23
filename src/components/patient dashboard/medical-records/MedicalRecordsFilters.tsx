@@ -37,11 +37,11 @@ export function MedicalRecordsFilters({
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent className="rounded-xl bg-snow-white shadow-lg border border-[--color-cool-gray]">
-          <SelectItem value="all" className="hover:text-white hover:bg-soft-blue">All Types</SelectItem>
-          <SelectItem value="lab-result" className="hover:text-white hover:bg-soft-blue">Lab Results</SelectItem>
-          <SelectItem value="prescription" className="hover:text-white hover:bg-soft-blue">Prescriptions</SelectItem>
-          <SelectItem value="scan" className="hover:text-white hover:bg-soft-blue">Scans/X-Rays</SelectItem>
-          <SelectItem value="report" className="hover:text-white hover:bg-soft-blue">Reports</SelectItem>
+          <SelectItem value="all" className="hover:text-white hover:bg-mint-green">All Types</SelectItem>
+          <SelectItem value="lab-result" className="hover:text-white hover:bg-mint-green">Lab Results</SelectItem>
+          <SelectItem value="prescription" className="hover:text-white hover:bg-mint-green">Prescriptions</SelectItem>
+          <SelectItem value="scan" className="hover:text-white hover:bg-mint-green">Scans/X-Rays</SelectItem>
+          <SelectItem value="report" className="hover:text-white hover:bg-mint-green">Reports</SelectItem>
         </SelectContent>
       </Select>
     </div>

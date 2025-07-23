@@ -76,7 +76,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
               asChild
               className="flex w-full justify-start items-center gap-2 bg-gray-50 hover:bg-gray-100 border-0"
             >
-              <Link href="/patient/search">
+              <Link href="/doctors">
                 <Search className="w-4 h-4 text-soft-blue" />
                 <span className="hidden sm:inline text-soft-blue">Search Doctors</span>
               </Link>

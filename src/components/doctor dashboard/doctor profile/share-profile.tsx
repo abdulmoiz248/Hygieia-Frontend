@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Share2, Copy, Facebook, Twitter, Linkedin, Mail, MessageCircle, Download, Check } from "lucide-react"
+import { Share2, Copy, Facebook, Twitter, Linkedin,  MessageCircle, Download, Check } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 interface ShareProfileProps {
@@ -23,7 +23,7 @@ interface ShareProfileProps {
 
 export function ShareProfile({ doctorId, doctorName }: ShareProfileProps) {
   const [copied, setCopied] = useState(false)
-  const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/doctor/${doctorId}`
+  const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/doctors/${doctorId}`
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -68,8 +68,8 @@ export function ShareProfile({ doctorId, doctorName }: ShareProfileProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-snow-white">
         <DialogHeader>
-          <DialogTitle className="gradient-text text-soft-blue">Share {doctorName}'s Profile</DialogTitle>
-          <DialogDescription>Share this doctor's profile with others via link or QR code</DialogDescription>
+          <DialogTitle className="gradient-text text-soft-blue">Share {doctorName}&apos;s Profile</DialogTitle>
+          <DialogDescription>Share this doctor&apos;s profile with others via link or QR code</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="link" className="w-full">

@@ -112,7 +112,7 @@ export function ReviewsSection() {
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${currentReview * 100}%)` }}
           >
-            {mockReviews.map((review, index) => (
+            {mockReviews.map((review) => (
               <div key={review.id} className="w-full flex-shrink-0 px-2">
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">

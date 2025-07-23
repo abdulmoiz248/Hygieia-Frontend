@@ -16,7 +16,7 @@ export default function NotFound() {
             </div>
             <CardTitle className="text-2xl text-dark-slate-gray">Doctor Not Found</CardTitle>
             <CardDescription className="text-cool-gray">
-              The doctor profile you're looking for doesn't exist or has been removed.
+              The doctor profile you&lsquo;re looking for doesn&lsquo;t exist or has been removed.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
