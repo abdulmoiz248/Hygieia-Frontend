@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
 import { specialties, locations, consultationTypes } from "@/mocks/doctor"
 
 interface FiltersState {
@@ -25,7 +24,7 @@ interface ProfessionalFiltersProps {
 }
 
 export function ProfessionalFilters({ filters, onFiltersChange }: ProfessionalFiltersProps) {
-  const updateFilter = (key: keyof FiltersState, value: any) => {
+  const updateFilter = (key: keyof FiltersState, value: unknown) => {
     onFiltersChange({ ...filters, [key]: value })
   }
 
