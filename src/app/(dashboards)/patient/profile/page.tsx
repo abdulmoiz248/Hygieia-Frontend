@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { motion, Variants } from "framer-motion"
-import { User, Camera, Save, Edit, Phone, Mail, Calendar, Heart, AlertTriangle } from "lucide-react"
+import { User,  Save, Edit,  Heart, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+
+
 import { getUser } from "@/lib/data"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
 

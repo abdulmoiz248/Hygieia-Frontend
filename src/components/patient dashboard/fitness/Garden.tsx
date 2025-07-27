@@ -1,6 +1,6 @@
 "use client"
 
-import {  useState } from "react"
+import {  useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
 
@@ -14,6 +14,10 @@ export default function Garden() {
       // Enhanced Virtual Garden Health with edge cases
         const [healthScore, setHealthScore] = useState(100) // Can be changed to 0 to test edge case
  
+
+        useEffect(()=>{
+          setHealthScore(10)
+        },[])
   const getTreeHealth = (score: number) => {
     if (score === 0) return { emoji: "🪴", status: "Just Starting", color: "text-gray-500" }
     if (score >= 80) return { emoji: "🌳", status: "Thriving", color: "text-mint-green" }

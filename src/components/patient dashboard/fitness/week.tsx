@@ -12,7 +12,7 @@ export default function Week() {
   }
 
   const today = new Date()
-  const todayIndex = today.getDay()
+  
 
   const getLast7Days = () => {
     const days = []

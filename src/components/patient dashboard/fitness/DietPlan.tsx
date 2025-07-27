@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
+import { getUser } from "@/lib/data"
 
 interface Meal {
   type: string
@@ -76,9 +77,9 @@ const mockAIGeneratedPlan: DietPlanType = {
 
 interface FormData {
   goal: string
-  currentWeight: string
+  currentWeight: number
   targetWeight: string
-  height: string
+  height: number
   age: string
   activityLevel: string
   dietaryRestrictions: string[]
@@ -95,9 +96,9 @@ export default function DietPlan() {
   const [showConfirmReplace, setShowConfirmReplace] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     goal: "",
-    currentWeight: "",
+    currentWeight: getUser().weight,
     targetWeight: "",
-    height: "",
+    height: getUser().height,
     age: "",
     activityLevel: "",
     dietaryRestrictions: [],
@@ -155,9 +156,9 @@ export default function DietPlan() {
     setShowConfirmReplace(false)
     setFormData({
       goal: "",
-      currentWeight: "",
+      currentWeight: 0,
       targetWeight: "",
-      height: "",
+      height: 0,
       age: "",
       activityLevel: "",
       dietaryRestrictions: [],
