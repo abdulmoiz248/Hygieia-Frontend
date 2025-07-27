@@ -3,60 +3,26 @@
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import Image from "next/image"
-import { Star, Heart, CheckCircle, Calendar, User, MessageSquare, Sparkles } from "lucide-react"
+import { Star, Heart, CheckCircle, Calendar, User,  Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { mockAppointments } from "@/mocks/data"
 import type { Appointment } from "@/types"
+import StarRating from "@/components/patient dashboard/appointments/StarForm"
 
-function StarRating({ rating, onRatingChange, hoverRating, onHoverChange }: any) {
-  const ratingLabels = ["Terrible", "Poor", "Average", "Good", "Excellent"]
-
-  return (
-    <div className="flex flex-col items-center space-y-3">
-      <div className="flex space-x-2">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            className="group transition-all duration-200 hover:scale-110"
-            onClick={() => onRatingChange(star)}
-            onMouseEnter={() => onHoverChange(star)}
-            onMouseLeave={() => onHoverChange(0)}
-          >
-            <Star
-              className={cn(
-                "transition-all duration-200",
-                (hoverRating || rating) >= star
-                  ? "fill-amber-400 text-amber-400 drop-shadow-lg"
-                  : "fill-gray-200 text-gray-300 hover:fill-amber-200 hover:text-amber-200",
-              )}
-              size={40}
-            />
-          </button>
-        ))}
-      </div>
-      {(hoverRating || rating) > 0 && (
-        <div className="text-center">
-          <p className="text-lg font-semibold text-soft-blue">{ratingLabels[(hoverRating || rating) - 1]}</p>
-          <p className="text-sm text-cool-gray">{hoverRating || rating} out of 5 stars</p>
-        </div>
-      )}
-    </div>
-  )
-}
 
 function ReviewForm({ appointment }: { appointment: Appointment }) {
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
-  const [title, setTitle] = useState("")
+
   const [comment, setComment] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const router=useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,13 +33,13 @@ function ReviewForm({ appointment }: { appointment: Appointment }) {
     console.log({
       appointmentId: appointment.id,
       rating,
-      title,
+   
       comment,
     })
 
     setIsSubmitting(false)
     setIsSubmitted(true)
-const router=useRouter()
+
     setTimeout(() => {
       setIsSubmitted(false)
       router.push('/patient/dashboard')
@@ -222,16 +188,24 @@ export default function ReviewPage() {
 
   if (!appointment) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white text-center p-6">
-        <Card className="w-full max-w-md border-0 bg-white/80 backdrop-blur-sm shadow-xl">
-          <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-soft-coral mb-4">Appointment Not Found</h2>
-            <p className="text-cool-gray">
-              No completed appointment found for ID <span className="font-semibold">{appointmentId}</span>.
-            </p>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen flex items-center justify-center text-center p-6">
+  <Card className="w-full max-w-md border-0 bg-white/70 backdrop-blur-xl shadow-2xl rounded-2xl transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)]">
+    <CardContent className="p-10">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-soft-coral/20 text-soft-coral flex items-center justify-center text-3xl font-bold">
+          !
+        </div>
+        <h2 className="text-3xl font-semibold text-soft-coral tracking-tight">Appointment Not Found</h2>
+        <p className="text-cool-gray text-base leading-relaxed">
+          We couldn’t find any completed appointment for ID
+          <br />
+          <span className="font-semibold text-dark-slate-gray">{appointmentId}</span>.
+        </p>
       </div>
+    </CardContent>
+  </Card>
+</div>
+
     )
   }
 

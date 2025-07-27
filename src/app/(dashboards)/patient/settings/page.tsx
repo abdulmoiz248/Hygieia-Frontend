@@ -54,8 +54,8 @@ export default function SettingsPage() {
     try {
       await simulateGetUser(email)
       setEmailValid(true)
-    } catch (err: any) {
-      setError(err)
+    } catch {
+      setError("Error")
     }
   }
 

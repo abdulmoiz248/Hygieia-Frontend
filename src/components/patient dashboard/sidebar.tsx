@@ -51,7 +51,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               className="flex items-center gap-3"
             >
               <div className="w-10 h-10 bg-transparent from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg">
-                <img src='/logo/logo.png' className="text-white font-bold text-lg"></img>
+                <img src='/logo/logo.png' alt="logo" className="text-white font-bold text-lg"></img>
               </div>
               <div>
                 <span className="font-bold text-xl text-soft-blue">Hygieia</span>
@@ -82,7 +82,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item, index) => {
-          const isActive = pathname === item.href
+          const isActive = pathname.startsWith(`/patient${item.href}`)
           const Icon = item.icon
 
           return (
