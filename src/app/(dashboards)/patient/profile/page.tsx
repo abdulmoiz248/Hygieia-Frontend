@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { User, Camera, Save, Edit, Phone, Mail, Calendar, Heart, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getUser } from "@/lib/data"
+import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 }
 
-const itemVariants = {
+const itemVariants:Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
@@ -63,57 +64,11 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Picture & Basic Info */}
-     <motion.div className="border-1 rounded border-dark-slate-gray p-5 bg-white" variants={itemVariants}>
-  <Card className="border-0 shadow-none">
-    <CardContent className="p-6 text-center">
-      <div className="relative inline-block mb-4">
-        <Avatar className="w-32 h-32">
-          <AvatarImage src={profile.avatar} sizes="128px" />
-          <AvatarFallback className="text-2xl">
-            {profile.name
-              ?.split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </AvatarFallback>
-        </Avatar>
-
-        {isEditing && (
-          <Button
-            size="icon"
-            className="absolute bottom-0 right-0 rounded-full w-10 h-10 p-0"
-            variant="outline"
-          >
-            <Camera className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
-
-      <h2 className="text-xl font-semibold text-dark-slate-gray mb-1 break-words">{profile.name}</h2>
-      <p className="text-cool-gray mb-4 text-sm">Patient ID: #12345</p>
-
-      <div className="space-y-2 text-sm">
-       <div className="inline-flex items-center gap-2 text-cool-gray break-words">
-  <Mail className="w-4 h-4" />
-  <span>{profile.email}</span>
-</div>
-
-        <div className="flex items-center justify-center gap-2 text-cool-gray">
-          <Phone className="w-4 h-4" />
-          <span>{profile.phone}</span>
-        </div>
-        <div className="flex items-center justify-center gap-2 text-cool-gray">
-          <Calendar className="w-4 h-4" />
-          <span>
-            Born{" "}
-            {profile.dateOfBirth
-              ? new Date(profile.dateOfBirth).toLocaleDateString()
-              : "N/A"}
-          </span>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-</motion.div>
+  <PatientProfileCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants}  
+  onAvatarChange={(file) => {
+    console.log("Selected avatar file:", file)
+    // upload to server or update profile
+  }} />
 
 
         {/* Personal Information */}
@@ -128,7 +83,7 @@ export default function ProfilePage() {
            <CardContent className="space-y-4 px-4 md:px-6 py-6">
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div className="flex flex-col">
-      <Label className="pb-1" htmlFor="name">Full Name</Label>
+      <Label className="pb-1 text-soft-blue" htmlFor="name">Full Name</Label>
       <Input
         id="name"
         value={profile.name}
@@ -137,7 +92,7 @@ export default function ProfilePage() {
       />
     </div>
     <div className="flex flex-col">
-      <Label className="pb-1" htmlFor="email">Email</Label>
+      <Label className="pb-1 text-soft-blue" htmlFor="email">Email</Label>
       <Input
         id="email"
         type="email"
@@ -146,8 +101,22 @@ export default function ProfilePage() {
         disabled={!isEditing}
       />
     </div>
+     <div>
+              <label className="text-sm font-medium text-soft-blue">Gender</label>
+           <Select value={profile.gender.toLowerCase()}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
+  <SelectTrigger>
+    <SelectValue placeholder="Select gender" />
+  </SelectTrigger>
+  <SelectContent className='bg-snow-white'>
+    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="male">Male</SelectItem>
+    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="female">Female</SelectItem>
+    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="other">Other</SelectItem>
+  </SelectContent>
+</Select>
+
+            </div>
     <div className="flex flex-col">
-      <Label className="pb-1" htmlFor="phone">Phone Number</Label>
+      <Label className="pb-1 text-soft-blue" htmlFor="phone">Phone Number</Label>
       <Input
         id="phone"
         value={profile.phone}
@@ -156,7 +125,7 @@ export default function ProfilePage() {
       />
     </div>
     <div className="flex flex-col">
-      <Label className="pb-1" htmlFor="dob">Date of Birth</Label>
+      <Label className="pb-1 text-soft-blue" htmlFor="dob">Date of Birth</Label>
       <Input
         id="dob"
         type="date"
@@ -168,7 +137,7 @@ export default function ProfilePage() {
   </div>
 
   <div className="flex flex-col">
-    <Label className="pb-1" htmlFor="address">Address</Label>
+    <Label className="pb-1 text-soft-blue" htmlFor="address">Address</Label>
     <Textarea
       id="address"
       value={profile.address}
@@ -179,7 +148,7 @@ export default function ProfilePage() {
   </div>
 
   <div className="flex flex-col">
-    <Label className="pb-1" htmlFor="emergency">Emergency Contact</Label>
+    <Label className="pb-1  text-soft-blue" htmlFor="emergency">Emergency Contact</Label>
     <Input
       id="emergency"
       value={profile.emergencyContact}
@@ -198,7 +167,7 @@ export default function ProfilePage() {
      <motion.div variants={itemVariants}>
   <Card>
     <CardHeader>
-      <CardTitle className="flex items-center gap-2 text-soft-coral">
+      <CardTitle className="flex items-center gap-2 text-dark-slate-gray">
         <Heart className="w-5 h-5 text-soft-coral" />
         Medical Information
       </CardTitle>
@@ -207,13 +176,14 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="bloodType" className="">Blood Type</Label>
-            {isEditing ? (
+            <Label htmlFor="bloodType" className=" text-soft-coral">Blood Type</Label>
+         
               <Select
                 value={profile.bloodType}
                 onValueChange={(value) => setProfile((prev) => ({ ...prev, bloodType: value }))}
+                  disabled={!isEditing}
               >
-                <SelectTrigger className="text-soft-coral">
+                <SelectTrigger className="text-soft-coral border-dark-slate-gray">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-snow-white">
@@ -227,15 +197,11 @@ export default function ProfilePage() {
                   <SelectItem  className="hover:bg-mint-green hover:text-snow-white"value="O-">O-</SelectItem>
                 </SelectContent>
               </Select>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Badge className="bg-soft-coral text-white">{profile.bloodType}</Badge>
-              </div>
-            )}
+          
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="allergies">Allergies</Label>
+            <Label htmlFor="allergies" className=" text-soft-coral">Allergies</Label>
             <Textarea
               id="allergies"
               value={profile.allergies}
@@ -255,7 +221,7 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="conditions">Medical Conditions</Label>
+            <Label htmlFor="conditions" className=" text-soft-coral">Medical Conditions</Label>
             <Textarea
               id="conditions"
               value={profile.conditions}

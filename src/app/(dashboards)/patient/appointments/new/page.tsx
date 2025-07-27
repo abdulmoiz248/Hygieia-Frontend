@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarComponent } from "@/components/ui/calendar"
 import { mockDoctors } from "@/mocks/data"
 import Link from "next/link"
-import DoctorSelector from "@/components/appointments/DoctorSelector"
+import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSelector"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -50,7 +50,7 @@ export default function NewAppointmentPage() {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center gap-4">
         <Button variant="outline" size="icon" className="text-white bg-soft-blue hover:bg-soft-blue/90 " asChild>
-          <Link href="/appointments">
+          <Link href="/patient/appointments">
             <ArrowLeft className="w-4 h-4  " />
           </Link>
         </Button>

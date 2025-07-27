@@ -11,6 +11,9 @@ export function getUser() {
     allergies: "Penicillin, Shellfish",
     conditions: "Hypertension",
     medications: "Lisinopril 10mg daily",
-    avatar:'/king.png'
+    avatar:'/king.png',
+    gender:'Male',
+    weight: 50,
+    height:150,
   }
 }

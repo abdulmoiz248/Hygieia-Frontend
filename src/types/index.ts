@@ -68,7 +68,7 @@ export interface ChatMessage {
 
 export interface FitnessGoal {
   id: string
-  type: "steps" | "weight" | "exercise" | "water"
+  type: "steps" | "weight" | "exercise" | "water" | "sleep"
   target: number
   current: number
   unit: string
