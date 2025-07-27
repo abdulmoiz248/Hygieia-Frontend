@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import {  CalendarComponent } from "@/components/ui/calendar"
 import { mockAppointments } from "@/mocks/data"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
@@ -46,7 +46,7 @@ export default function AppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedAppointment, setSelectedAppointment] = useState<(typeof extendedAppointments)[0] | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-  const [showCalendarView, setShowCalendarView] = useState(false)
+
 
   const filteredAppointments = extendedAppointments.filter((appointment) => {
     if (statusFilter === "all") return true
@@ -74,7 +74,7 @@ export default function AppointmentsPage() {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-dark-slate-gray">Appointments</h1>
+          <h1 className="text-3xl font-bold text-soft-coral">Appointments</h1>
           <p className="text-cool-gray">Manage your medical appointments</p>
         </div>
 
@@ -84,27 +84,23 @@ export default function AppointmentsPage() {
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Appointments</SelectItem>
-              <SelectItem value="upcoming">Upcoming</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectContent className="bg-snow-white">
+              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="all">All Appointments</SelectItem>
+              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="upcoming">Upcoming</SelectItem>
+              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="completed">Completed</SelectItem>
+              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
 
-          <Button variant="outline" onClick={() => setShowCalendarView(!showCalendarView)} className="bg-transparent">
-            <Calendar className="w-4 h-4 mr-2" />
-            {showCalendarView ? "List View" : "Calendar View"}
-          </Button>
+          
 
-          <Button className="bg-soft-blue hover:bg-soft-blue/90" asChild>
-            <Link href="/appointments/new">New Appointment</Link>
+          <Button className="bg-mint-green hover:bg-mint-green/90 text-white" asChild>
+            <Link href="/patient/appointments/new">New Appointment</Link>
           </Button>
         </div>
       </motion.div>
 
-      {/* Calendar View */}
-      {showCalendarView && (
+    
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader>
@@ -134,7 +130,7 @@ export default function AppointmentsPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-4">
+                  <h3 className="font-bold mb-4 text-soft-blue">
                     {selectedDate ? `Appointments on ${selectedDate.toLocaleDateString()}` : "Select a date"}
                   </h3>
                   {selectedDate && (
@@ -142,24 +138,35 @@ export default function AppointmentsPage() {
                       {extendedAppointments
                         .filter((apt) => new Date(apt.date).toDateString() === selectedDate.toDateString())
                         .map((appointment) => (
-                          <div key={appointment.id} className="p-3 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="w-10 h-10">
-                                <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
-                                <AvatarFallback>
-                                  {appointment.doctor.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <h4 className="font-medium">{appointment.doctor.name}</h4>
-                                <p className="text-sm text-cool-gray">{appointment.time}</p>
-                                <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
-                              </div>
-                            </div>
-                          </div>
+                        <div
+  key={appointment.id}
+  className="p-4  bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 w-full max-w-md mx-auto sm:max-w-full"
+>
+  <div className="flex items-start sm:items-center sm:flex-row flex-col gap-4">
+    <Avatar className="w-12 h-12 shrink-0">
+      <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
+      <AvatarFallback>
+        {appointment.doctor.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")}
+      </AvatarFallback>
+    </Avatar>
+
+    <div className="flex-1 space-y-1">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h4 className="font-semibold text-base text-dark-slate-gray break-words">
+          {appointment.doctor.name}
+        </h4>
+        <Badge className={`${getStatusColor(appointment.status)} text-xs px-2 py-0.5`}>
+          {appointment.status}
+        </Badge>
+      </div>
+      <p className="text-sm text-cool-gray">{appointment.time}</p>
+    </div>
+  </div>
+</div>
+
                         ))}
                       {extendedAppointments.filter(
                         (apt) => new Date(apt.date).toDateString() === selectedDate?.toDateString(),
@@ -171,7 +178,7 @@ export default function AppointmentsPage() {
             </CardContent>
           </Card>
         </motion.div>
-      )}
+      
 
       {/* Appointments List */}
       <motion.div variants={itemVariants}>
@@ -179,7 +186,7 @@ export default function AppointmentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-mint-green" />
-              Your Appointments ({filteredAppointments.length})
+              Your Appointments <span className="text-mint-green"> ({filteredAppointments.length}) </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -187,7 +194,7 @@ export default function AppointmentsPage() {
               <motion.div
                 key={appointment.id}
                 whileHover={{ scale: 1.02 }}
-                className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer"
+                className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer border-soft-coral"
                 onClick={() => setSelectedAppointment(appointment)}
               >
                 <div className="flex items-start justify-between">
@@ -203,16 +210,16 @@ export default function AppointmentsPage() {
                     </Avatar>
 
                     <div className="space-y-1">
-                      <h3 className="font-semibold text-dark-slate-gray">{appointment.doctor.name}</h3>
-                      <p className="text-sm text-cool-gray">{appointment.doctor.specialty}</p>
+                      <h3 className="font-semibold text-soft-blue">{appointment.doctor.name}</h3>
+                      <p className="text-sm text-soft-coral">{appointment.doctor.specialty}</p>
 
                       <div className="flex items-center gap-4 text-sm text-cool-gray">
                         <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-4 h-4 text-mint-green" />
                           {appointment.date}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
+                          <Clock className="w-4 h-4 text-mint-green" />
                           {appointment.time}
                         </div>
                       </div>
@@ -221,7 +228,7 @@ export default function AppointmentsPage() {
                         <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
                         <Badge variant="outline">{appointment.type}</Badge>
                         {appointment.meetingRemarks && (
-                          <Badge className="bg-green-100 text-green-800">
+                          <Badge className="bg-soft-blue text-snow-white">
                             <FileText className="w-3 h-3 mr-1" />
                             Report Available
                           </Badge>
@@ -233,10 +240,10 @@ export default function AppointmentsPage() {
                   <div className="flex gap-2">
                     {appointment.status === "upcoming" && (
                       <>
-                        <Button variant="outline" size="sm">
+                        <Button className="bg-soft-blue text-snow-white" variant="outline" size="sm">
                           Reschedule
                         </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 bg-transparent">
+                        <Button variant="outline" size="sm" className="text-white bg-soft-coral hover:bg-soft-coral/90 hover:text-black  border-0">
                           Cancel
                         </Button>
                       </>
@@ -248,10 +255,10 @@ export default function AppointmentsPage() {
 
             {filteredAppointments.length === 0 && (
               <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-cool-gray mx-auto mb-4" />
+                <Calendar className="w-12 h-12 text-soft-coral mx-auto mb-4" />
                 <p className="text-cool-gray">No appointments found</p>
-                <Button variant="outline" className="mt-2 bg-transparent" asChild>
-                  <Link href="/appointments/new">Book Your First Appointment</Link>
+                <Button variant="outline" className="mt-2 bg-soft-blue text-snow-white hover:bg-soft-blue/90" asChild>
+                  <Link href="/patient/appointments/new">Book Your First Appointment</Link>
                 </Button>
               </div>
             )}
@@ -261,7 +268,7 @@ export default function AppointmentsPage() {
 
       {/* Appointment Details Modal */}
       <Dialog open={!!selectedAppointment} onOpenChange={() => setSelectedAppointment(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-snow-white">
           {selectedAppointment && (
             <>
               <DialogHeader>
@@ -380,8 +387,8 @@ export default function AppointmentsPage() {
                 <div className="flex gap-3 pt-4 border-t">
                   {selectedAppointment.status === "upcoming" && (
                     <>
-                      <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90">Join Call</Button>
-                      <Button variant="outline">Reschedule</Button>
+                      <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90">Reschedule</Button>
+                      <Button variant="outline">Cancel</Button>
                     </>
                   )}
                   {selectedAppointment.status === "completed" && selectedAppointment.meetingRemarks && (

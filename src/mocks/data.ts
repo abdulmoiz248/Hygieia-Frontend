@@ -38,9 +38,9 @@ export const mockAppointments: Appointment[] = [
     id: "1",
     doctorId: "1",
     doctor: mockDoctors[0],
-    date: "2024-01-25",
+    date: "2025-07-26",
     time: "10:00 AM",
-    status: "upcoming",
+    status: "cancelled",
     type: "consultation",
   },
   {
@@ -51,6 +51,15 @@ export const mockAppointments: Appointment[] = [
     time: "2:30 PM",
     status: "completed",
     type: "follow-up",
+  },
+   {
+    id: "3",
+    doctorId: "1",
+    doctor: mockDoctors[0],
+    date: "2025-07-26",
+    time: "10:00 AM",
+    status: "upcoming",
+    type: "emergency",
   },
 ]
 
