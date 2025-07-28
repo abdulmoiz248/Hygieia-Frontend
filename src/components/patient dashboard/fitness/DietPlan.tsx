@@ -173,23 +173,34 @@ export default function DietPlan() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ChefHat className="w-5 h-5 text-mint-green" />
-                Active Diet Plan
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="bg-mint-green text-snow-white" asChild>
-                  <Link href="/nutritionists">
-                    <Users className="w-4 h-4 mr-2" />
-                    Find Nutritionist
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="text-mint-green" onClick={handleGenerateAIPlan}>
-                  Generate AI Plan
-                </Button>
-              </div>
-            </CardTitle>
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+  <div className="flex items-center gap-2">
+    <ChefHat className="w-5 h-5 text-mint-green" />
+    <span className="text-base sm:text-lg">Active Diet Plan</span>
+  </div>
+  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <Button
+      variant="outline"
+      size="sm"
+      className="bg-mint-green text-snow-white w-full sm:w-auto"
+      asChild
+    >
+      <Link href="/nutritionists">
+        <Users className="w-4 h-4 mr-2" />
+        Find Nutritionist
+      </Link>
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      className="text-mint-green w-full sm:w-auto"
+      onClick={handleGenerateAIPlan}
+    >
+      Generate AI Plan
+    </Button>
+  </div>
+</CardTitle>
+
           </CardHeader>
           <CardContent className="space-y-6">
             {activeDietPlan ? (

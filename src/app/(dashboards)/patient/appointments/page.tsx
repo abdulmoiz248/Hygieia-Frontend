@@ -72,33 +72,43 @@ export default function AppointmentsPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-soft-coral">Appointments</h1>
-          <p className="text-cool-gray">Manage your medical appointments</p>
-        </div>
+      <motion.div
+  variants={itemVariants}
+  className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0"
+>
+  <div>
+    <h1 className="text-2xl md:text-3xl font-bold text-soft-coral">Appointments</h1>
+    <p className="text-cool-gray text-sm md:text-base">Manage your medical appointments</p>
+  </div>
 
-        <div className="flex items-center gap-4">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-48">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-snow-white">
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="all">All Appointments</SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="upcoming">Upcoming</SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="completed">Completed</SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
+  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
+    <Select value={statusFilter} onValueChange={setStatusFilter}>
+      <SelectTrigger className="w-full sm:w-48">
+        <Filter className="w-4 h-4 mr-2" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="bg-snow-white">
+        <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="all">
+          All Appointments
+        </SelectItem>
+        <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="upcoming">
+          Upcoming
+        </SelectItem>
+        <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="completed">
+          Completed
+        </SelectItem>
+        <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="cancelled">
+          Cancelled
+        </SelectItem>
+      </SelectContent>
+    </Select>
 
-          
+    <Button className="w-full sm:w-auto bg-mint-green hover:bg-mint-green/90 text-white" asChild>
+      <Link href="/patient/appointments/new">New Appointment</Link>
+    </Button>
+  </div>
+</motion.div>
 
-          <Button className="bg-mint-green hover:bg-mint-green/90 text-white" asChild>
-            <Link href="/patient/appointments/new">New Appointment</Link>
-          </Button>
-        </div>
-      </motion.div>
 
     
         <motion.div variants={itemVariants}>

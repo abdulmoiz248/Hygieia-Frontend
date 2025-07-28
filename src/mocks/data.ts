@@ -116,3 +116,8 @@ export const mockFitnessGoals: FitnessGoal[] = [
     unit: "glasses",
   },
 ]
+
+
+export const getHealthScore=()=>{
+  return 80;
+}

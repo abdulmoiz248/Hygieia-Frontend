@@ -82,7 +82,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item, index) => {
-          const isActive = pathname.startsWith(`/patient${item.href}`)
+        const isActive = pathname === `/patient${item.href}`;
           const Icon = item.icon
 
           return (

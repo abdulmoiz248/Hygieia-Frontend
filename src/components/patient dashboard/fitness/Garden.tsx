@@ -9,14 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
 import React from 'react'
+import { getHealthScore } from "@/mocks/data"
 
 export default function Garden() {
       // Enhanced Virtual Garden Health with edge cases
-        const [healthScore, setHealthScore] = useState(100) // Can be changed to 0 to test edge case
+        const [healthScore, setHealthScore] = useState<number>(0) // Can be changed to 0 to test edge case
  
 
         useEffect(()=>{
-          setHealthScore(10)
+          setHealthScore(getHealthScore())
         },[])
   const getTreeHealth = (score: number) => {
     if (score === 0) return { emoji: "🪴", status: "Just Starting", color: "text-gray-500" }

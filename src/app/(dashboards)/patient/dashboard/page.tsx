@@ -23,6 +23,8 @@ import {
   AreaChart,
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { getUser } from "@/lib/data"
+import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -90,69 +92,12 @@ export default function DashboardPage() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Welcome Section */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-dark-slate-gray mb-2">Welcome back, John! 👋</h1>
+        <h1 className="text-3xl font-bold text-dark-slate-gray mb-2"><span className="text-soft-coral">Welcome back,</span> {getUser().name}! 👋</h1>
         <p className="text-cool-gray">Here&apos;s what&apos;s happening with your health today.</p>
       </motion.div>
 
       {/* Quick Stats */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-soft-blue/10 to-soft-blue/5 border-soft-blue/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-cool-gray">Next Appointment</p>
-                <p className="text-2xl font-bold text-soft-blue">Today</p>
-                <p className="text-xs text-cool-gray">10:00 AM</p>
-              </div>
-              <Calendar className="w-8 h-8 text-soft-blue" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-mint-green/10 to-mint-green/5 border-mint-green/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-cool-gray">Active Prescriptions</p>
-                <p className="text-2xl font-bold text-mint-green">3</p>
-                <p className="text-xs text-cool-gray">2 due today</p>
-              </div>
-              <Pill className="w-8 h-8 text-mint-green" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-soft-coral/10 to-soft-coral/5 border-soft-coral/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-cool-gray">Calories Burned</p>
-                <p className="text-2xl font-bold text-soft-coral">520</p>
-                <p className="text-xs text-cool-gray">Today</p>
-              </div>
-              <Flame className="w-8 h-8 text-soft-coral" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-cool-gray">Health Score</p>
-                <p className="text-2xl font-bold text-purple-600">85</p>
-                <p className="text-xs text-green-600 flex items-center">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  +5 this week
-                </p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
-                85
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+   <DashboardStats/>
 
       {/* Enhanced Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
