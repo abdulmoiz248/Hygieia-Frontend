@@ -198,7 +198,7 @@ export default function UploadReport() {
 
       {/* Pending Uploads List */}
       <div className="space-y-4 animate-scale-in">
-        {filteredUploads.map((upload, index) => (
+        {filteredUploads.map((upload) => (
           <Card key={upload.id} className="hover:shadow-lg transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">

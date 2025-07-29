@@ -1,11 +1,9 @@
 import type React from "react"
-import { Inter } from "next/font/google"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/lab-tech/app-sidebar"
 import { Header } from "@/components/lab-tech/header"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: "Hygieia Lab Portal",

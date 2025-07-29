@@ -37,7 +37,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="animate-slide-up">
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's your lab overview.</p>
+        <p className="text-muted-foreground">Welcome back! Here&lsquo;s your lab overview.</p>
       </div>
 
       {/* Stats Cards */}
@@ -172,7 +172,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentReports.map((report, index) => (
+            {recentReports.map((report) => (
               <div
                 key={report.id}
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
