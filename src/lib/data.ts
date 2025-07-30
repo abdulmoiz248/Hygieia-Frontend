@@ -15,5 +15,19 @@ export function getUser() {
     gender:'Male',
     weight: 50,
     height:150,
+ 
+  vaccines: "COVID-19 (Pfizer, 2 doses), Hepatitis B, Tetanus",
+  ongoingMedications: "Levothyroxine 50mcg daily",
+ 
+  surgeryHistory: "Appendectomy (2012), Wisdom Tooth Extraction (2021)",
+  implants: "None",
+  pregnancyStatus: "no",
+  menstrualCycle: "Mild cramps, regular cycle",
+  mentalHealth: "Anxiety (mild, under control), Therapy once a month",
+  familyHistory: "Father - Type 2 Diabetes, Mother - Hypertension",
+  organDonor: "Yes - registered organ donor",
+  disabilities: "None",
+  lifestyle: "Non-smoker, occasional alcohol, regular morning walk, vegetarian",
+
   }
 }
