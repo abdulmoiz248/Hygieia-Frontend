@@ -6,8 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Camera, Mail, Phone, Calendar } from "lucide-react"
-import { Venus, Mars,  Transgender } from "lucide-react"
-
+import { Venus, Mars, Transgender } from "lucide-react"
 
 type PatientProfile = {
   name: string
@@ -15,7 +14,7 @@ type PatientProfile = {
   phone: string
   avatar: string
   dateOfBirth?: string
-  gender:string
+  gender: string
 }
 
 type Props = {
@@ -47,48 +46,45 @@ const PatientProfileCard = ({
     }
   }
 
-
-const renderGenderIcon = (gender: string) => {
-  switch (gender.toLowerCase()) {
-    case "male":
-      return <Mars className="w-5 h-5 text-soft-blue" />
-    case "female":
-      return <Venus className="w-5 h-5 text-soft-coral" />
-    case "other":
-      return <Transgender className="w-5 h-5 text-purple-500" />
-   
-    default:
-      return null
+  const renderGenderIcon = (gender: string) => {
+    switch (gender.toLowerCase()) {
+      case "male":
+        return <Mars className="w-5 h-5 text-soft-blue" />
+      case "female":
+        return <Venus className="w-5 h-5 text-soft-coral" />
+      case "other":
+        return <Transgender className="w-5 h-5 text-purple-500" />
+      default:
+        return null
+    }
   }
-}
 
   return (
     <motion.div
-      className="border rounded-2xl border-dark-slate-gray/30 p-6 bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+      className="border border-dark-slate-gray/20 rounded-3xl p-6 bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
       variants={itemVariants}
     >
       <Card className="border-0 shadow-none bg-transparent">
         <CardContent className="p-0 text-center">
-          <div className="relative inline-block mb-6">
-            <Avatar className="w-36 h-36  shadow-md overflow-hidden">
-              <AvatarImage src={avatarSrc} sizes="144px" />
-              <AvatarFallback className="text-3xl tracking-wide">
-                {profile.name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
+          <div className="relative inline-block mb-6 group">
+            <div className="rounded-full border-[6px] border-soft-blue/20 shadow-xl overflow-hidden w-36 h-36 mx-auto bg-gradient-to-br from-soft-blue/10 to-soft-coral/10 backdrop-blur-sm transition-all duration-300 group-hover:scale-105">
+              <Avatar className="w-full h-full">
+                <AvatarImage src={avatarSrc} sizes="144px" />
+                <AvatarFallback className="text-3xl font-medium text-dark-slate-gray/70">
+                  {profile.name?.split(" ").map(n => n[0]).join("")}
+                </AvatarFallback>
+              </Avatar>
+            </div>
 
             {isEditing && (
               <>
                 <Button
                   size="icon"
                   onClick={handleAvatarClick}
-                  className="absolute bottom-2 right-2 bg-transparent text-dark-slate-gray  ring-dark-slate-gray hover:bg-soft-blue/90 rounded-full w-10 h-10"
+                  className="absolute bottom-2 right-2 bg-white text-dark-slate-gray ring-1 ring-dark-slate-gray hover:bg-soft-blue/90 rounded-full w-10 h-10 shadow-md"
                   variant="outline"
                 >
-                  <Camera className="w-4 h-4 " />
+                  <Camera className="w-4 h-4" />
                 </Button>
                 <input
                   type="file"
@@ -101,27 +97,27 @@ const renderGenderIcon = (gender: string) => {
             )}
           </div>
 
-          <h2 className="text-2xl font-semibold text-soft-coral mb-1 break-words">
+          <h2 className="text-2xl font-bold text-dark-slate-gray mb-1 break-words">
             {profile.name}
           </h2>
-        <div className="flex items-center justify-center gap-2 text-sm text-cool-gray mb-4">
-  {renderGenderIcon(profile.gender)}
-  <span className="capitalize">{profile.gender}</span>
-</div>
 
+          <div className="flex items-center justify-center gap-2 text-base text-cool-gray mb-5">
+            {renderGenderIcon(profile.gender)}
+            <span className="capitalize">{profile.gender}</span>
+          </div>
 
           <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-center gap-2 text-cool-gray break-words">
+            <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Mail className="w-4 h-4 text-soft-blue" />
               <span>{profile.email}</span>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-cool-gray break-words">
+            <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Phone className="w-4 h-4 text-soft-blue" />
               <span>{profile.phone}</span>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-cool-gray break-words">
+            <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Calendar className="w-4 h-4 text-soft-blue" />
               <span>
                 Born{" "}
