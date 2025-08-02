@@ -123,7 +123,14 @@ export default  function Login() {
                 Sign up
               </Link>
             </div>
-          
+             <div className="text-center animate-slide-in-right delay-450">
+              <Link
+                href="/reset-password"
+                className="text-sm text-soft-blue hover:text-blue-300 transition-colors duration-300"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
