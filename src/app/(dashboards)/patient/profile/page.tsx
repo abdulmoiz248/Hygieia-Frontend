@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { User,  Save, Edit,  Heart, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
 
-
-import { getUser } from "@/lib/data"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
+import { ProfileType } from "@/types/patient/profile"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,14 +29,22 @@ const itemVariants:Variants = {
 
 
 export default function ProfilePage() {
+  const dispatch = useDispatch()
+  //const profile = useSelector((state: RootState) => state.profile)
+  const reduxProfile=useSelector((state: RootState) => state.profile)
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState(getUser())
+  const [profile, setProfile] = useState<ProfileType>(reduxProfile)
+
+  useEffect(() => {
+  setProfile(reduxProfile)
+}, [reduxProfile])
 
   const handleSave = () => {
     setIsEditing(false)
-    // Save logic here
+    dispatch(ProfileUpdate(profile))
   }
 
+  
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
@@ -128,8 +138,9 @@ export default function ProfilePage() {
       <Label className="pb-1 text-soft-blue" htmlFor="dob">Date of Birth</Label>
       <Input
         id="dob"
-        type="date"
-        value={profile.dateOfBirth}
+        type="date" 
+      value={profile.dateOfBirth }
+
         onChange={(e) => setProfile((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
         disabled={!isEditing}
       />

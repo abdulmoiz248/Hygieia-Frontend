@@ -7,15 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Camera, Mail, Phone, Calendar } from "lucide-react"
 import { Venus, Mars, Transgender } from "lucide-react"
-
-type PatientProfile = {
-  name: string
-  email: string
-  phone: string
-  avatar: string
-  dateOfBirth?: string
-  gender: string
-}
+import { ProfileType as PatientProfile } from "@/types/patient/profile"
 
 type Props = {
   profile: PatientProfile

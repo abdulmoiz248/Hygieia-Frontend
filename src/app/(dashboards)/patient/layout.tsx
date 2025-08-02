@@ -1,6 +1,8 @@
 import { DashboardLayout } from "@/components/patient dashboard/dashboard-layout";
 import type { Metadata } from "next";
 
+import { PatientProvider } from "@/components/Providers/PatientProvider";
+
 
 
 export const metadata: Metadata = {
@@ -15,9 +17,11 @@ export default function RootLayout({
 }>) {
   return (
    <>
+  <PatientProvider>
     <DashboardLayout>
      {children}
      </DashboardLayout>
+   </PatientProvider>
    </>
   );
 }
