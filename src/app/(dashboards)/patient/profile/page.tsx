@@ -12,9 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
 import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
-
-import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
 import { ProfileType } from "@/types/patient/profile"
+import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
+
 
 const containerVariants = {
   hidden: { opacity: 0 },

@@ -11,6 +11,8 @@ import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
 
+
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -24,10 +26,6 @@ const itemVariants = {
 export default function FitnessPage() {
   const [showLogActivity, setShowLogActivity] = useState(false)
   const [showBMICalculator, setShowBMICalculator] = useState(false)
-
-
-
-
 
 
 

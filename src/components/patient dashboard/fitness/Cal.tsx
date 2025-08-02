@@ -5,7 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Calculator } from 'lucide-react'
-import { getUser } from '@/lib/data'
+
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
+import { ProfileType } from "@/types/patient/profile"
 
 const getBMICategory = (bmi: number, gender: string) => {
   if (gender === 'female') {
@@ -28,7 +32,8 @@ export default function HealthDataModal({
   showDialog: boolean
   setShowDialog: (value: boolean) => void
 }) {
-  const user = getUser()
+  const dispatch = useDispatch()
+  const user =useSelector((state: RootState) => state.profile)
 
   const [weight, setWeight] = useState<number>(user.weight || 0)
   const [height, setHeight] = useState<number>(user.height || 0)
@@ -54,6 +59,7 @@ export default function HealthDataModal({
     setOriginalWeight(weight)
     setOriginalHeight(height)
     setShowDialog(false)
+      dispatch(ProfileUpdate({height,weight}))
   }
 
   return (
