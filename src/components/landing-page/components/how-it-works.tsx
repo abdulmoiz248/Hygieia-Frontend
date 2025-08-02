@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, useAnimation, useInView, useScroll, useTransform } from "framer-motion"
 import { Scan, Brain, Video, LineChart, ArrowRight } from 'lucide-react'
+import { easeInOut } from "framer-motion"
+import type { Variants } from "framer-motion"
+
 
 const steps = [
   {
@@ -76,21 +79,23 @@ export default function HowItWorks() {
  
  
 
-  const lineVariants = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: (custom: number) => ({
-      pathLength: activeStep === custom || activeStep === custom + 1 ? 1 : 0.3,
-      opacity: activeStep === custom || activeStep === custom + 1 ? 1 : 0.3,
-      transition: {
-        pathLength: {
-          duration: 0.8,
-          ease: "easeInOut",
-          delay: activeStep === custom ? 0.2 : 0,
-        },
-        opacity: { duration: 0.4 },
+
+const lineVariants: Variants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: (custom: number) => ({
+    pathLength: activeStep === custom || activeStep === custom + 1 ? 1 : 0.3,
+    opacity: activeStep === custom || activeStep === custom + 1 ? 1 : 0.3,
+    transition: {
+      pathLength: {
+        duration: 0.8,
+        ease: easeInOut,
+        delay: activeStep === custom ? 0.2 : 0,
       },
-    }),
-  }
+      opacity: { duration: 0.4 },
+    },
+  }),
+}
+
 
  
 

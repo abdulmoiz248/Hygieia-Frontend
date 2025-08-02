@@ -9,7 +9,6 @@ import { Calculator } from 'lucide-react'
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
 import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
-import { ProfileType } from "@/types/patient/profile"
 
 const getBMICategory = (bmi: number, gender: string) => {
   if (gender === 'female') {

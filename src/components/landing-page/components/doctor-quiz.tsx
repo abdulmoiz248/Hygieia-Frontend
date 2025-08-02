@@ -8,6 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Stethoscope, Award, Heart, AlertCircle, CheckCircle2, XCircle } from "lucide-react"
+import type { Variants } from "framer-motion"
+
 
 type Scenario = {
   id: number
@@ -185,14 +187,18 @@ export default function DoctorQuiz() {
     },
   }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const, // 👈 fix type error
+      stiffness: 300,
     },
-  }
+  },
+}
 
 
 
