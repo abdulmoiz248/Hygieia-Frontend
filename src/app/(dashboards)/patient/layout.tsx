@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/patient dashboard/dashboard-layout";
 import type { Metadata } from "next";
 
-import { PatientProvider } from "@/components/Providers/PatientProvider";
+import { PatientProvider } from "@/Providers/PatientProvider";
 
 
 

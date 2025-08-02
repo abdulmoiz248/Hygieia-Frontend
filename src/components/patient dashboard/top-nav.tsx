@@ -12,44 +12,28 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
-import { getUser } from '@/lib/data'
-import { useState } from "react"
+import {  useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+import {
+ // addNotification,
+//  markAsRead,
+  markAllAsRead,
+} from "@/types/patient/notificationSlice"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
 }
 
-const initialNotifications = [
-  {
-    id: "1",
-    title: "Appointment Reminder",
-    message: "Your appointment with Dr. Sarah Johnson is in 2 hours",
-    time: "2 min ago",
-    unread: true,
-  },
-  {
-    id: "2",
-    title: "Medication Reminder",
-    message: "Time to take your Lisinopril (10mg)",
-    time: "1 hour ago",
-    unread: true,
-  },
-  {
-    id: "3",
-    title: "Lab Results Ready",
-    message: "Your blood test results are now available",
-    time: "3 hours ago",
-    unread: false,
-  },
-]
 
+//when realtime use this to add  dispatch(addNotification(newNotificationPayload))
 
 
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
-  const [notifications, setNotifications] = useState(initialNotifications)
-  const unreadCount = notifications.filter((n) => n.unread).length
-  const user = getUser()
+  const notifications = useSelector((state: RootState) => state.notifications.notifications)
+  const unreadCount = notifications.filter(n => n.unread).length
+  const user = useSelector((state: RootState) => state.profile)
+  const dispatch=useDispatch()
 
   const userInitials = user.name
     .split(" ")
@@ -128,7 +112,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 ))}
               </div>
               <div className="p-2 border-t">
-                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => setNotifications(notifications.map(n => ({ ...n, unread: false })))}>
+                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => dispatch(markAllAsRead())}>
                  Mark All As Read
                 </Button>
               </div>
