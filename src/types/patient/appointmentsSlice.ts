@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Appointment, AppointmentStatus } from "./appointment"
-import { mockAppointments } from "@/mocks/data"
+
 
 const extendedAppointments: Appointment[] = [
   {

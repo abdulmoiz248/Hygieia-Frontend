@@ -1,13 +1,12 @@
 "use client"
 
-import { useState } from "react"
+//import { useState } from "react"
 import { motion } from "framer-motion"
 import PrescriptionsPage from "@/components/patient dashboard/medicine-tracker/prescriptions"
-import MedicineLogModal from '@/components/patient dashboard/medicine-tracker/medicine-log-modal'
+//import MedicineLogModal from '@/components/patient dashboard/medicine-tracker/medicine-log-modal'
 import TodaysProgressCard from '@/components/patient dashboard/medicine-tracker/TodaysProgressCard'
 import TodaysScheduleCard from '@/components/patient dashboard/medicine-tracker/TodaysScheduleCard'
 import WeeklyProgressCard from '@/components/patient dashboard/medicine-tracker/WeeklyProgressCard'
-import RecentActivityCard from '@/components/patient dashboard/medicine-tracker/RecentActivityCard'
 
 
 import { useSelector, useDispatch } from "react-redux"
@@ -24,15 +23,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
-interface Medicine {
-  id: string
-  name: string
-  dosage: string
-  time: string
-  taken: boolean
-  frequency: string
-  instructions?: string
-}
+
 
 export default function MedicineTrackerPage() {
 
