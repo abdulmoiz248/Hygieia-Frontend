@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Calendar, Flame, Pill, TrendingUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
-import { getHealthScore } from '@/mocks/data'
+
 
 
 import { useSelector } from "react-redux";

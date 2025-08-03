@@ -124,7 +124,3 @@ export const mockFitnessGoals: FitnessGoal[] = [
   },
 ]
 
-
-export const getHealthScore=()=>{
-  return 80;
-}
