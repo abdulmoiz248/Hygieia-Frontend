@@ -130,6 +130,7 @@ export default function AppointmentsPage() {
                     modifiers={{
                       appointment: appointmentDates,
                     }}
+                    showOutsideDays={false}
                     modifiersStyles={{
                       appointment: {
                         backgroundColor: "var(--soft-blue)",
@@ -191,90 +192,100 @@ export default function AppointmentsPage() {
       
 
       {/* Appointments List */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-mint-green" />
-              Your Appointments <span className="text-mint-green"> ({filteredAppointments.length}) </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {filteredAppointments.map((appointment) => (
-              <motion.div
-                key={appointment.id}
-                whileHover={{ scale: 1.02 }}
-                className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer border-soft-coral"
-                onClick={() => setSelectedAppointment(appointment)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
-                      <AvatarFallback>
-                        {appointment.doctor.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
+    <motion.div variants={itemVariants}>
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
+        <Clock className="w-5 h-5 text-mint-green" />
+        Your Appointments
+        <span className="text-mint-green">({filteredAppointments.length})</span>
+      </CardTitle>
+    </CardHeader>
 
-                    <div className="space-y-1">
-                      <h3 className="font-semibold text-soft-blue">{appointment.doctor.name}</h3>
-                      <p className="text-sm text-soft-coral">{appointment.doctor.specialty}</p>
+    <CardContent className="space-y-4">
+      {filteredAppointments.map((appointment) => (
+        <motion.div
+          key={appointment.id}
+          whileHover={{ scale: 1.02 }}
+          className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer border-soft-coral"
+          onClick={() => setSelectedAppointment(appointment)}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex gap-4">
+              <Avatar className="w-12 h-12 shrink-0">
+                <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
+                <AvatarFallback>
+                  {appointment.doctor.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
 
-                      <div className="flex items-center gap-4 text-sm text-cool-gray">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4 text-mint-green" />
-                          {appointment.date}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-mint-green" />
-                          {appointment.time}
-                        </div>
-                      </div>
+              <div className="space-y-1 text-sm">
+                <h3 className="font-semibold text-soft-blue text-base sm:text-lg">
+                  {appointment.doctor.name}
+                </h3>
+                <p className="text-soft-coral">{appointment.doctor.specialty}</p>
 
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
-                        <Badge variant="outline">{appointment.type}</Badge>
-                        {appointment.meetingRemarks && (
-                          <Badge className="bg-soft-blue text-snow-white">
-                            <FileText className="w-3 h-3 mr-1" />
-                            Report Available
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                <div className="flex flex-wrap items-center gap-2 text-cool-gray mt-1">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4 text-mint-green" />
+                    {appointment.date}
                   </div>
-
-                  <div className="flex gap-2">
-                    {appointment.status === "upcoming" && (
-                      <>
-                        <Button className="bg-soft-blue text-snow-white" variant="outline" size="sm">
-                          Reschedule
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-white bg-soft-coral hover:bg-soft-coral/90 hover:text-black  border-0">
-                          Cancel
-                        </Button>
-                      </>
-                    )}
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-mint-green" />
+                    {appointment.time}
                   </div>
                 </div>
-              </motion.div>
-            ))}
 
-            {filteredAppointments.length === 0 && (
-              <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-soft-coral mx-auto mb-4" />
-                <p className="text-cool-gray">No appointments found</p>
-                <Button variant="outline" className="mt-2 bg-soft-blue text-snow-white hover:bg-soft-blue/90" asChild>
-                  <Link href="/patient/appointments/new">Book Your First Appointment</Link>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
+                  <Badge variant="outline">{appointment.type}</Badge>
+                  {appointment.meetingRemarks && (
+                    <Badge className="bg-soft-blue text-snow-white">
+                      <FileText className="w-3 h-3 mr-1" />
+                      Report Available
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {appointment.status === "upcoming" && (
+              <div className="flex gap-2 sm:justify-end justify-start flex-wrap mt-2 sm:mt-0">
+                <Button className="bg-soft-blue text-snow-white" variant="outline" size="sm">
+                  Reschedule
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-white bg-soft-coral hover:bg-soft-coral/90 hover:text-black border-0"
+                >
+                  Cancel
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </motion.div>
+          </div>
+        </motion.div>
+      ))}
+
+      {filteredAppointments.length === 0 && (
+        <div className="text-center py-8">
+          <Calendar className="w-12 h-12 text-soft-coral mx-auto mb-4" />
+          <p className="text-cool-gray">No appointments found</p>
+          <Button
+            variant="outline"
+            className="mt-2 bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+            asChild
+          >
+            <Link href="/patient/appointments/new">Book Your First Appointment</Link>
+          </Button>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+</motion.div>
 
       {/* Appointment Details Modal */}
       <Dialog open={!!selectedAppointment} onOpenChange={() => setSelectedAppointment(null)}>

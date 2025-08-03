@@ -158,6 +158,7 @@ export default function NewAppointmentPage() {
                 onSelect={setSelectedDate}
                 className="rounded-md border-0 w-full"
                 disabled={(date:Date) => date < new Date()}
+                showOutsideDays={false}
               />
             </CardContent>
           </Card>

@@ -146,29 +146,25 @@ function ThemedCalendarDayButton({ className, day, modifiers, ...props }: React.
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
-      className={cn(
-        // Base styles
-        "flex aspect-square size-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal text-dark-slate-gray",
-        // Hover states
-        "hover:bg-mint-green/20 hover:text-dark-slate-gray",
-        // Selected single day
-        "data-[selected-single=true]:bg-soft-blue data-[selected-single=true]:text-snow-white data-[selected-single=true]:font-semibold",
-        // Range styles
-        "data-[range-middle=true]:bg-soft-blue/15 data-[range-middle=true]:text-dark-slate-gray",
-        "data-[range-start=true]:bg-soft-blue data-[range-start=true]:text-snow-white data-[range-start=true]:font-semibold",
-        "data-[range-end=true]:bg-soft-blue data-[range-end=true]:text-snow-white data-[range-end=true]:font-semibold",
-        // Focus styles
-        "group-data-[focused=true]/day:border-soft-blue group-data-[focused=true]/day:ring-soft-blue/30",
-        "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px]",
-        // Border radius for ranges
-        "data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md",
-        "data-[range-middle=true]:rounded-none",
-        "data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md",
-        // Additional text styling
-        "[&>span]:text-xs [&>span]:opacity-70",
-        defaultClassNames.day,
-        className,
-      )}
+     className={cn(
+  "flex aspect-square size-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal text-dark-slate-gray",
+  "hover:bg-mint-green/20 hover:text-dark-slate-gray",
+  "data-[selected-single=true]:bg-soft-blue data-[selected-single=true]:text-snow-white data-[selected-single=true]:font-semibold",
+  "data-[range-middle=true]:bg-soft-blue/15 data-[range-middle=true]:text-dark-slate-gray",
+  "data-[range-start=true]:bg-soft-blue data-[range-start=true]:text-snow-white data-[range-start=true]:font-semibold",
+  "data-[range-end=true]:bg-soft-blue data-[range-end=true]:text-snow-white data-[range-end=true]:font-semibold",
+  "group-data-[focused=true]/day:border-soft-blue group-data-[focused=true]/day:ring-soft-blue/30",
+  "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px]",
+  "data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md",
+  "data-[range-middle=true]:rounded-none",
+  "data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md",
+  "[&>span]:text-xs [&>span]:opacity-70",
+  modifiers.appointment &&
+    "bg-soft-coral/20 text-dark-slate-gray font-semibold rounded-full hover:bg-soft-coral/70",
+  defaultClassNames.day,
+  className,
+)}
+
       {...props}
     />
   )
