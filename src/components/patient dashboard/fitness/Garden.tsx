@@ -9,16 +9,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
 import React from 'react'
-import { getHealthScore } from "@/mocks/data"
+
+
+
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/patient/store";
 
 export default function Garden() {
-      // Enhanced Virtual Garden Health with edge cases
-        const [healthScore, setHealthScore] = useState<number>(0) // Can be changed to 0 to test edge case
+      const user = useSelector((state: RootState) => state.profile);
  
+      const healthScore=user.healthscore
 
-        useEffect(()=>{
-          setHealthScore(getHealthScore())
-        },[])
+       
   const getTreeHealth = (score: number) => {
     if (score === 0) return { emoji: "🪴", status: "Just Starting", color: "text-gray-500" }
     if (score >= 80) return { emoji: "🌳", status: "Thriving", color: "text-mint-green" }

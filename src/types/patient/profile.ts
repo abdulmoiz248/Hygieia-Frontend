@@ -24,4 +24,8 @@ dateOfBirth: string
   organDonor: string
   disabilities: string
   lifestyle: string
+  healthscore:number 
+  adherence :number| string
+  missed_doses:number| string
+  doses_taken:number| string
 }

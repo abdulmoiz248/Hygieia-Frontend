@@ -7,6 +7,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import { getHealthScore } from '@/mocks/data'
 
+
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/patient/store";
+
+
+
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 }
@@ -29,7 +35,15 @@ const iconMap = {
   flame: Flame
 }
 
-const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
+
+
+export default function DashboardStats() {
+  const user = useSelector((state: RootState) => state.profile);
+  const prescriptions = useSelector((state: RootState) => state.medicine);
+  const calories=useSelector((state: RootState) => state.fitness);
+
+
+  const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
   return [
     {
       id: 'appointment',
@@ -39,18 +53,19 @@ const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
       icon: 'calendar',
       color: 'soft-blue'
     },
-    {
-      id: 'prescriptions',
-      title: 'Active Prescriptions',
-      value: 3,
-      subtitle: '2 due today',
-      icon: 'pill',
-      color: 'mint-green'
-    },
+   {
+  id: 'prescriptions',
+  title: 'Active Prescriptions',
+  value: prescriptions.Prescription.filter(p => p.status === 'active').length,
+  subtitle: `${prescriptions.MedicineState.todaysMeds.filter(m => !m.taken).length} due today`,
+  icon: 'pill',
+  color: 'mint-green'
+}
+,
     {
       id: 'calories',
       title: 'Calories Burned',
-      value: 0,
+      value: calories.caloriesBurned,
       subtitle: 'Today',
       icon: 'flame',
       color: 'soft-coral'
@@ -58,16 +73,15 @@ const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
     {
       id: 'healthScore',
       title: 'Health Score',
-      value: getHealthScore(),
+      value: user.healthscore,
       icon: 'score',
       color: 'purple-500',
-      colorText: 'purple-600',
-      trend: '+5 this week'
+      //colorText: 'purple-600',
+     // trend: '+5 this week'
     }
   ]
 }
 
-export default function DashboardStats() {
   const [data, setData] = useState<StatCardData[] | null>(null)
 
   useEffect(() => {

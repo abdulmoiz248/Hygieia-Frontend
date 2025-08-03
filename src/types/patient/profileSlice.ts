@@ -28,6 +28,10 @@ const initialState: ProfileType = {
   organDonor: "Yes - registered organ donor",
   disabilities: "None",
   lifestyle: "Non-smoker, occasional alcohol, regular morning walk, vegetarian",
+  healthscore:80,
+  adherence :70,
+  missed_doses:17,
+  doses_taken:3,
 }
 
 const profileSlice = createSlice({

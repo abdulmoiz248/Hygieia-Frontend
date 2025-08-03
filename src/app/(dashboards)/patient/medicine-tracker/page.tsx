@@ -31,8 +31,7 @@ export default function MedicineTrackerPage() {
   const dispatch = useDispatch()
   const todaysMeds = useSelector((state: RootState) => state.medicine.MedicineState.todaysMeds)
 
-//  const showLogDose = useState(false)
-  const weeklyProgress = 85
+
 
   const toggleTaken = (id: string) => dispatch(toggleMedicineTaken(id))
 
@@ -79,7 +78,7 @@ export default function MedicineTrackerPage() {
 
         {/* Weekly Progress & Reminders */}
         <motion.div variants={itemVariants} className="space-y-6">
-          <WeeklyProgressCard weeklyProgress={weeklyProgress} />
+          <WeeklyProgressCard />
         </motion.div>
       </div>
 
