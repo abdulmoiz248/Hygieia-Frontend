@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSelector, useDispatch } from "react-redux"
+import { RootState } from "@/store/patient/store"
+import { addCalories } from "@/types/patient/fitnessSlice"
+
 
 export default function Calories() {
   const itemVariants = {
@@ -15,29 +19,34 @@ export default function Calories() {
     visible: { opacity: 1, y: 0 },
   }
 
+  const caloriesConsumed = useSelector((state: RootState) => state.fitness.caloriesConsumed)
+  const caloriesBurned = useSelector((state: RootState) => state.fitness.caloriesBurned)
+  const dispatch = useDispatch()
   const [showCalorieTracker, setShowCalorieTracker] = useState(false)
-  const [caloriesConsumed, setCaloriesConsumed] = useState(1850)
-  const [caloriesBurned, setCaloriesBurned] = useState(520)
 
-  const [type, setType] = useState("")
+
+const [type, setType] = useState<"consumed" | "burned" | "">("")
+
   const [amount, setAmount] = useState("")
   const [desc, setDesc] = useState("")
 
-  const handleAddCalories = () => {
-    const numAmount = parseInt(amount)
-    if (!type || !numAmount || numAmount <= 0) return
+const handleAddCalories = () => {
+  const numAmount = parseInt(amount)
+  if (!type || !numAmount || numAmount <= 0) return
 
-    if (type === "consumed") {
-      setCaloriesConsumed(prev => prev + numAmount)
-    } else {
-      setCaloriesBurned(prev => prev + numAmount)
-    }
+  dispatch(addCalories({ type , amount: numAmount }))
 
-    setType("")
-    setAmount("")
-    setDesc("")
-    setShowCalorieTracker(false)
+  setType("")
+  setAmount("")
+  setDesc("")
+  setShowCalorieTracker(false)
+}
+
+const handleTypeChange = (val: string) => {
+  if (val === "consumed" || val === "burned") {
+    setType(val)
   }
+}
 
   return (
     <motion.div variants={itemVariants}>
@@ -62,7 +71,7 @@ export default function Calories() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-soft-blue">Type</label>
-                    <Select value={type} onValueChange={setType}>
+                    <Select value={type} onValueChange={handleTypeChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>

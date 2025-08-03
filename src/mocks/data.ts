@@ -112,8 +112,15 @@ export const mockFitnessGoals: FitnessGoal[] = [
     id: "2",
     type: "water",
     target: 8,
-    current: 5,
+    current: 0,
     unit: "glasses",
+  },
+   {
+    id: "3",
+    type: "sleep",
+    target: 8,
+    current: 5,
+    unit: "hours",
   },
 ]
 

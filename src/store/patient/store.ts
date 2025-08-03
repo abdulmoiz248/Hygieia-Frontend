@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit"
 import profileReducer from "@/types/patient/profileSlice"
 import notificationsReducer from '@/types/patient/notificationSlice'
+import fitnessReducer from '@/types/patient/fitnessSlice'
 
 export const store = configureStore({
   reducer: {
     profile: profileReducer,
-    notifications:notificationsReducer
+    notifications:notificationsReducer,
+    fitness:fitnessReducer
   },
 })
 

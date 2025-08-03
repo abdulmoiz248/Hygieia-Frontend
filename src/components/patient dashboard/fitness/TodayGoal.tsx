@@ -14,7 +14,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { mockFitnessGoals as initialGoals } from "@/mocks/data"
+
+import { useSelector, useDispatch } from "react-redux"
+import { RootState } from "@/store/patient/store"
+import { updateGoalProgress } from "@/types/patient/fitnessSlice"
+
+
+
 
 export default function TodayGoal() {
   const itemVariants = {
@@ -22,29 +28,14 @@ export default function TodayGoal() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   }
 
-  const [goals, setGoals] = useState(() => {
-    const filled = [...initialGoals]
-    if (filled.length === 2) {
-      filled.push({
-        id: "fallback-sleep",
-        type: "sleep",
-        unit: "hrs",
-        current: 6,
-        target: 8,
-      })
-    }
-    return filled
-  })
+  const goals =useSelector((state: RootState) => state.fitness.goals)
+  const dispatch = useDispatch()
+ //const [goals, setGoals] = useState(initialGoals.goals)
 
-  const incrementGoal = (type: string, amount: number) => {
-    setGoals((prev) =>
-      prev.map((goal) =>
-        goal.type === type
-          ? { ...goal, current: Math.min(goal.current + amount, goal.target) }
-          : goal
-      )
-    )
-  }
+const incrementGoal = (type: string, amount: number) => {
+  dispatch(updateGoalProgress({ type, amount }))
+ 
+}
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -114,10 +105,10 @@ export default function TodayGoal() {
                           variant="ghost"
                             className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                         size="sm"
-                          onClick={() => incrementGoal("water", 250)}
+                          onClick={() => incrementGoal("water", 1)}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          250ml
+                          1 glass
                         </Button>
                       )}
                       {goal.type === "steps" && (

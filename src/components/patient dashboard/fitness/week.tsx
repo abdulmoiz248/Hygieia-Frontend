@@ -2,8 +2,8 @@
 import { motion } from "framer-motion"
 import { Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-const fullWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
 
 export default function Week() {
   const itemVariants = {
@@ -11,26 +11,7 @@ export default function Week() {
     visible: { opacity: 1, y: 0 },
   }
 
-  const today = new Date()
-  
-
-  const getLast7Days = () => {
-    const days = []
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today)
-      date.setDate(today.getDate() - i)
-      days.push({
-        day: fullWeek[date.getDay()],
-        date: date.toDateString(),
-        isToday: i === 0,
-        completed: Math.random() > 0.4, // mock random completion
-      })
-    }
-    return days
-  }
-
-  const last7Days = getLast7Days()
-
+ const activityLog = useSelector((state: RootState) => state.fitness.activityLog)
   return (
     <motion.div variants={itemVariants} initial="hidden" animate="visible" className="w-full">
       <Card className="w-full">
@@ -41,29 +22,29 @@ export default function Week() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            {last7Days.map((dayInfo, index) => (
-              <div
-                key={index}
-                className={`rounded-xl p-4 text-center border-2 transition-all flex flex-col items-center justify-center ${
-                  dayInfo.isToday
-                    ? "border-soft-blue bg-soft-blue/10"
-                    : dayInfo.completed
-                    ? "border-mint-green/30 bg-mint-green/5"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="text-sm font-semibold text-dark-slate-gray">{dayInfo.day}</div>
-                <div className="text-3xl py-2">{dayInfo.completed ? "✅" : "⭕"}</div>
-                <div className="text-xs text-cool-gray">
-                  {dayInfo.completed ? "Completed" : "Not Completed"}
-                </div>
-                {dayInfo.isToday && (
-                  <div className="mt-1 text-xs text-soft-blue font-semibold">Today</div>
-                )}
-              </div>
-            ))}
-          </div>
+    
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+  {activityLog.map((dayInfo, index) => (
+    <div
+      key={index}
+      className={`rounded-xl p-4 text-center border-2 transition-all flex flex-col items-center justify-center ${
+        dayInfo.completed
+          ? "border-mint-green/30 bg-mint-green/5"
+          : "border-gray-200"
+      }`}
+    >
+      <div className="text-sm font-semibold text-dark-slate-gray">{new Date(dayInfo.date).toDateString().split(" ")[0]}</div>
+      <div className="text-3xl py-2">{dayInfo.completed ? "✅" : "⭕"}</div>
+      <div className="text-xs text-cool-gray">
+        {dayInfo.completed ? "Completed" : "Not Completed"}
+      </div>
+      {new Date().toDateString() === dayInfo.date && (
+        <div className="mt-1 text-xs text-soft-blue font-semibold">Today</div>
+      )}
+    </div>
+  ))}
+</div>
+
         </CardContent>
       </Card>
     </motion.div>

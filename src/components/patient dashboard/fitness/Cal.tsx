@@ -64,7 +64,7 @@ export default function HealthDataModal({
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-mint-green hover:text-snow-white hover:bg-mint-green">
+        <Button variant="outline" className="text-snow-white hover:text-snow-white bg-mint-green hover:bg-mint-green/90">
           <Calculator className="w-4 h-4 mr-2" />
           Health Info
         </Button>

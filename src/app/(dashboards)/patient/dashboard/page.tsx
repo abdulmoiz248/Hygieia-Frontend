@@ -23,8 +23,11 @@ import {
   AreaChart,
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { getUser } from "@/lib/data"
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -87,12 +90,13 @@ const medicationAdherence = [
 export default function DashboardPage() {
   const upcomingAppointments = mockAppointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
   const recentRecords = mockMedicalRecords.slice(0, 3)
+  const user=useSelector((state: RootState) => state.profile)
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Welcome Section */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-dark-slate-gray mb-2"><span className="text-soft-coral">Welcome back,</span> {getUser().name}! 👋</h1>
+        <h1 className="text-3xl font-bold text-dark-slate-gray mb-2"><span className="text-soft-coral">Welcome back,</span> {user.name}! 👋</h1>
         <p className="text-cool-gray">Here&apos;s what&apos;s happening with your health today.</p>
       </motion.div>
 

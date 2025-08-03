@@ -3,7 +3,7 @@
 import {  useState } from "react"
 import { motion } from "framer-motion"
 
-import LogActivity from "@/components/patient dashboard/fitness/LogActivity"
+//import LogActivity from "@/components/patient dashboard/fitness/LogActivity"
 import HealthDataModal from "@/components/patient dashboard/fitness/Cal"
 import Garden from "@/components/patient dashboard/fitness/Garden"
 import Week from "@/components/patient dashboard/fitness/week"
@@ -24,7 +24,7 @@ const itemVariants = {
 }
 
 export default function FitnessPage() {
-  const [showLogActivity, setShowLogActivity] = useState(false)
+  // const [showLogActivity, setShowLogActivity] = useState(false)
   const [showBMICalculator, setShowBMICalculator] = useState(false)
 
 
@@ -41,7 +41,7 @@ export default function FitnessPage() {
         <div className="flex gap-3">
        
         
-         <LogActivity showLogActivity={showLogActivity} setShowLogActivity={setShowLogActivity} />
+         {/* <LogActivity showLogActivity={showLogActivity} setShowLogActivity={setShowLogActivity} /> */}
      
      <HealthDataModal showDialog={showBMICalculator} setShowDialog={setShowBMICalculator} />
      
