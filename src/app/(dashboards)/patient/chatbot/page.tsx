@@ -7,7 +7,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { getUser } from "@/lib/data"
+
+import {  useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+
 
 interface Message {
   id: string
@@ -22,7 +25,8 @@ export default function ChatbotPage() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const user = getUser()
+
+  const user = useSelector((state: RootState) => state.profile)
   const userName = user.name
   const userDp = user.avatar
 
