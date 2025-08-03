@@ -24,9 +24,8 @@ import {
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
-import { useDispatch, useSelector } from "react-redux"
+import {  useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
-import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
 
 
 const containerVariants = {

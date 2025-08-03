@@ -15,7 +15,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
-import { getUser } from "@/lib/data"
+import {  useSelector } from "react-redux"
+import type { RootState } from "@/store/patient/store"
+
 
 interface Meal {
   type: string
@@ -80,7 +82,7 @@ interface FormData {
   currentWeight: number
   targetWeight: string
   height: number
-  age: string
+  age: number | string
   activityLevel: string
   dietaryRestrictions: string[]
   allergies: string
@@ -94,12 +96,19 @@ export default function DietPlan() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedPlan, setGeneratedPlan] = useState<DietPlanType | null>(null) // Allow null initially
   const [showConfirmReplace, setShowConfirmReplace] = useState(false)
+   const user=useSelector((state: RootState) => state.profile)
+
   const [formData, setFormData] = useState<FormData>({
     goal: "",
-    currentWeight: getUser().weight,
+    currentWeight: user.weight,
     targetWeight: "",
-    height: getUser().height,
-    age: "",
+    height: user.height,
+    age : user.dateOfBirth
+  ? Math.floor(
+      (new Date().getTime() - new Date(user.dateOfBirth).getTime()) /
+        (1000 * 60 * 60 * 24 * 365.25)
+    )
+  : "",
     activityLevel: "",
     dietaryRestrictions: [],
     allergies: "",
