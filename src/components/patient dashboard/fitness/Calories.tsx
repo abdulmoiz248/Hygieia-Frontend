@@ -2,17 +2,16 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Plus, Scale } from "lucide-react"
+import { Plus, Scale, Sparkles } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/store/patient/store"
 import { addCalories } from "@/types/patient/fitnessSlice"
-
-
+import {  Flame, Apple} from "lucide-react"
+import {AiCalorieEstimate} from './action'
 export default function Calories() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -24,29 +23,35 @@ export default function Calories() {
   const dispatch = useDispatch()
   const [showCalorieTracker, setShowCalorieTracker] = useState(false)
 
-
-const [type, setType] = useState<"consumed" | "burned" | "">("")
-
-  const [amount, setAmount] = useState("")
+  const [type, setType] = useState<"consumed" | "burned" | "">("")
   const [desc, setDesc] = useState("")
+  const [generatedCalories, setGeneratedCalories] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
 
-const handleAddCalories = () => {
-  const numAmount = parseInt(amount)
-  if (!type || !numAmount || numAmount <= 0) return
-
-  dispatch(addCalories({ type , amount: numAmount }))
-
-  setType("")
-  setAmount("")
-  setDesc("")
-  setShowCalorieTracker(false)
-}
-
-const handleTypeChange = (val: string) => {
-  if (val === "consumed" || val === "burned") {
-    setType(val)
+  const handleTypeChange = (val: string) => {
+    if (val === "consumed" || val === "burned") {
+      setType(val)
+    }
   }
-}
+
+
+  const handleGenerateCalories = async () => {
+    if (!desc.trim()) return
+    setLoading(true)
+    const cal = await AiCalorieEstimate(desc) || 0
+    setLoading(false)
+    setGeneratedCalories(cal)
+  }
+
+  const handleAddCalories = () => {
+    if (!type || !generatedCalories || generatedCalories <= 0) return
+
+    dispatch(addCalories({ type, amount: generatedCalories }))
+    setType("")
+    setDesc("")
+    setGeneratedCalories(null)
+    setShowCalorieTracker(false)
+  }
 
   return (
     <motion.div variants={itemVariants}>
@@ -69,42 +74,69 @@ const handleTypeChange = (val: string) => {
                   <DialogTitle className="text-soft-coral">Add Calories</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-soft-blue">Type</label>
-                    <Select value={type} onValueChange={handleTypeChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-snow-white">
-                        <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="consumed">Calories Consumed</SelectItem>
-                        <SelectItem  className="hover:bg-mint-green hover:text-snow-white"value="burned">Calories Burned</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleTypeChange("consumed")}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        type === "consumed"
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 hover:border-green-300'
+                      }`}
+                    >
+                      <Apple className="w-5 h-5 mx-auto mb-1" />
+                      <div className="text-sm font-medium">Consumed</div>
+                    </button>
+                    <button
+                      onClick={() => handleTypeChange("burned")}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        type === "burned"
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-gray-200 hover:border-orange-300'
+                      }`}
+                    >
+                      <Flame className="w-5 h-5 mx-auto mb-1" />
+                      <div className="text-sm font-medium">Burned</div>
+                    </button>
                   </div>
+                </div>
+
                   <div>
-                    <label className="text-sm font-medium text-soft-blue">Amount</label>
+                    <label className="text-sm font-medium text-soft-blue">What did you do / eat?</label>
                     <Input
-                      type="number"
-                      placeholder="250"
-                      value={amount}
-                      onChange={e => setAmount(e.target.value)}
-                      min={0}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-soft-blue">Description</label>
-                    <Input
-                      placeholder="e.g., Lunch, 30min run"
+                      placeholder="e.g. Briyani..."
                       value={desc}
-                      onChange={e => setDesc(e.target.value)}
+                      onChange={e => {
+                        setDesc(e.target.value)
+                        setGeneratedCalories(null)
+                      }}
                     />
                   </div>
                   <Button
+                    type="button"
                     className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90"
-                    onClick={handleAddCalories}
+                    onClick={handleGenerateCalories}
+                    disabled={loading || !desc.trim() || !type}
                   >
-                    Add Calories
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {loading ? "Thinking..." : "Ask AI"}
                   </Button>
+
+                  {generatedCalories !== null && (
+                    <div className="text-center text-soft-coral text-sm font-semibold">
+                      Estimated: {generatedCalories} kcal
+                    </div>
+                  )}
+
+                  {generatedCalories !== null && (
+                    <Button
+                      className="w-full bg-mint-green text-snow-white hover:bg-mint-green/90"
+                      onClick={handleAddCalories}
+                    >
+                      Add Calories
+                    </Button>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
