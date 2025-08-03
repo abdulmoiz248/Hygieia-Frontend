@@ -27,7 +27,7 @@ const TodaysProgressCard: React.FC<TodaysProgressCardProps> = ({ takenCount, tot
           </p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-mint-green">{Math.round(todayProgress)}%</div>
+          <div className="text-3xl font-bold text-mint-green">{Math.round(todayProgress)? Math.round(todayProgress) : 0}%</div>
           <p className="text-sm text-snow-white">Complete</p>
         </div>
       </div>

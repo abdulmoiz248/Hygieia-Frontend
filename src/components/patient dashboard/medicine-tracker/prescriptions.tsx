@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
+
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -18,98 +22,24 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
-const mockPrescriptions = [
-  {
-    id: "1",
-    doctorName: "Dr. Sarah Johnson",
-    doctorSpecialty: "Cardiologist",
-    date: "2024-01-20",
-    status: "active",
-    medications: [
-      {
-        id: "1",
-        name: "Lisinopril",
-        dosage: "10mg",
-        frequency: "Once daily",
-        duration: "30 days",
-        instructions: "Take with food in the morning",
-        whenToTake: "Morning (8:00 AM)",
-        remainingDays: 25,
-      },
-      {
-        id: "2",
-        name: "Aspirin",
-        dosage: "81mg",
-        frequency: "Once daily",
-        duration: "Ongoing",
-        instructions: "Take with food to prevent stomach upset",
-        whenToTake: "Evening (8:00 PM)",
-        remainingDays: -1,
-      },
-      {
-        id: "4",
-        name: "fieke",
-        dosage: "81mg",
-        frequency: "Once daily",
-        duration: "Ongoing",
-        instructions: "Take with food to prevent stomach upset",
-        whenToTake: "Evening (8:00 PM)",
-        remainingDays: -1,
-      },
-    ],
-  },
-  {
-    id: "2",
-    doctorName: "Dr. Michael Chen",
-    doctorSpecialty: "Dermatologist",
-    date: "2024-01-15",
-    status: "active",
-    medications: [
-      {
-        id: "3",
-        name: "Tretinoin Cream",
-        dosage: "0.025%",
-        frequency: "Once daily",
-        duration: "60 days",
-        instructions: "Apply thin layer to affected areas at bedtime",
-        whenToTake: "Bedtime (10:00 PM)",
-        remainingDays: 45,
-      },
-    ],
-  },
-  {
-    id: "3",
-    doctorName: "Dr. Emily Rodriguez",
-    doctorSpecialty: "General Practitioner",
-    date: "2023-12-10",
-    status: "completed",
-    medications: [
-      {
-        id: "4",
-        name: "Amoxicillin",
-        dosage: "500mg",
-        frequency: "Three times daily",
-        duration: "7 days",
-        instructions: "Take with meals",
-        whenToTake: "8:00 AM, 2:00 PM, 8:00 PM",
-        remainingDays: 0,
-      },
-    ],
-  },
-]
+
 
 export default function PrescriptionsPage() {
-  const [selectedPrescription, setSelectedPrescription] = useState<(typeof mockPrescriptions)[0] | null>(null)
+
+
+   const Prescriptions = useSelector((state: RootState) => state.medicine.Prescription)
+
+  const [selectedPrescription, setSelectedPrescription] = useState<(typeof Prescriptions)[0] | null>(null)
   const [activeTab, setActiveTab] = useState("active")
 
-  const activePrescriptions = mockPrescriptions.filter((p) => p.status === "active")
-  const completedPrescriptions = mockPrescriptions.filter((p) => p.status === "completed")
+  const activePrescriptions = Prescriptions.filter((p) => p.status === "active")
+  const completedPrescriptions = Prescriptions.filter((p) => p.status === "completed")
 
 
 
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 mt-10">
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold text-soft-coral">Prescriptions</h1>
         <p className="text-cool-gray">Manage your active and previous prescriptions</p>
@@ -224,7 +154,7 @@ export default function PrescriptionsPage() {
       </motion.div>
 
       <Dialog open={!!selectedPrescription} onOpenChange={() => setSelectedPrescription(null)}>
-  <DialogContent className="w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-2xl bg-snow-white px-4 sm:px-6 lg:px-10">
+  <DialogContent className="w-full max-w-10xl max-h-[90vh] overflow-y-auto rounded-2xl bg-snow-white px-4 sm:px-6 lg:px-10">
     {selectedPrescription && (
       <>
         <DialogHeader>
@@ -270,7 +200,7 @@ export default function PrescriptionsPage() {
               <td className="px-3 py-2 break-words text-soft-coral">
                 {med.name} <span className="text-soft-blue">({med.dosage})</span>
               </td>
-              <td className="px-3 py-2 break-words text-sm">{med.whenToTake}</td>
+              <td className="px-3 py-2 break-words text-sm">{med.instructions}</td>
               <td className="px-3 py-2 break-words text-sm">{med.frequency}</td>
               <td className="px-3 py-2 break-words text-sm">{med.duration}</td>
             </tr>
@@ -305,7 +235,7 @@ export default function PrescriptionsPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
               <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Mark as Taken
+                Download PDF
               </Button>
             </div>
           )}

@@ -9,6 +9,11 @@ import TodaysScheduleCard from '@/components/patient dashboard/medicine-tracker/
 import WeeklyProgressCard from '@/components/patient dashboard/medicine-tracker/WeeklyProgressCard'
 import RecentActivityCard from '@/components/patient dashboard/medicine-tracker/RecentActivityCard'
 
+
+import { useSelector, useDispatch } from "react-redux"
+import { RootState } from "@/store/patient/store"
+import { toggleMedicineTaken } from "@/types/patient/medicineSlice"
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -30,54 +35,15 @@ interface Medicine {
 }
 
 export default function MedicineTrackerPage() {
-  const [showLogDose, setShowLogDose] = useState(false)
+
   
+  const dispatch = useDispatch()
+  const todaysMeds = useSelector((state: RootState) => state.medicine.MedicineState.todaysMeds)
 
-  // Mock today's medications with state management
-  const [todaysMeds, setTodaysMeds] = useState<Medicine[]>([
-    {
-      id: "1",
-      name: "Lisinopril",
-      dosage: "10mg",
-      time: "8:00 AM",
-      taken: true,
-      frequency: "Once daily",
-      instructions: "Take with food",
-    },
-    {
-      id: "2",
-      name: "Metformin",
-      dosage: "500mg",
-      time: "12:00 PM",
-      taken: false,
-      frequency: "Twice daily",
-      instructions: "Take with meals",
-    },
-    {
-      id: "3",
-      name: "Vitamin D",
-      dosage: "1000 IU",
-      time: "6:00 PM",
-      taken: false,
-      frequency: "Once daily",
-      instructions: "Take with dinner",
-    },
-    {
-      id: "4",
-      name: "Aspirin",
-      dosage: "81mg",
-      time: "8:00 PM",
-      taken: false,
-      frequency: "Once daily",
-      instructions: "Take with food",
-    },
-  ])
+//  const showLogDose = useState(false)
+  const weeklyProgress = 85
 
-  const weeklyProgress = 85 // Mock weekly adherence
-
-  const toggleMedicineTaken = (medicineId: string) => {
-    setTodaysMeds((prev) => prev.map((med) => (med.id === medicineId ? { ...med, taken: !med.taken } : med)))
-  }
+  const toggleTaken = (id: string) => dispatch(toggleMedicineTaken(id))
 
   const takenCount = todaysMeds.filter((med) => med.taken).length
   const totalCount = todaysMeds.length
@@ -85,8 +51,8 @@ export default function MedicineTrackerPage() {
 
   const upcomingMeds = todaysMeds.filter((med) => !med.taken)
   const nextMedicine = upcomingMeds.length > 0 ? upcomingMeds[0] : null
-
   return (
+     <>
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
@@ -94,7 +60,7 @@ export default function MedicineTrackerPage() {
           <h1 className="text-3xl font-bold text-soft-coral">Medicine Tracker</h1>
           <p className="text-cool-gray">Track your medications and stay on schedule</p>
         </div>
-         <MedicineLogModal  showLogDose={showLogDose}  setShowLogDose={setShowLogDose}/>
+         {/* <MedicineLogModal  showLogDose={showLogDose}  setShowLogDose={setShowLogDose}/> */}
       </motion.div>
 
       {/* Today's Progress Overview */}
@@ -116,7 +82,7 @@ export default function MedicineTrackerPage() {
         <motion.div variants={itemVariants} className="lg:col-span-2">
           <TodaysScheduleCard
             todaysMeds={todaysMeds}
-            toggleMedicineTaken={toggleMedicineTaken}
+            toggleMedicineTaken={toggleTaken}
           />
         </motion.div>
 
@@ -127,7 +93,7 @@ export default function MedicineTrackerPage() {
       </div>
 
       {/* Medication History */}
-      <motion.div variants={itemVariants}>
+      {/* <motion.div variants={itemVariants}>
         <RecentActivityCard
           recentActivity={[
             { medicine: "Lisinopril 10mg", time: "8:00 AM", status: "taken", date: "Today" },
@@ -141,8 +107,11 @@ export default function MedicineTrackerPage() {
           ]}
         />
 
-      </motion.div>
-              <PrescriptionsPage/>
+      </motion.div> */}
+              
     </motion.div>
+   
+    <PrescriptionsPage/>
+    </>
   )
 }
