@@ -5,7 +5,7 @@ import { Calendar, FileText, Activity, Pill, Clock, TrendingUp,  Target, Heart }
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { mockAppointments, mockMedicalRecords, mockFitnessGoals } from "@/mocks/data"
+import {  mockMedicalRecords, mockFitnessGoals } from "@/mocks/data"
 import Link from "next/link"
 import {
   BarChart,
@@ -87,7 +87,8 @@ const medicationAdherence = [
 ]
 
 export default function DashboardPage() {
-  const upcomingAppointments = mockAppointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
+   const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const upcomingAppointments = appointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
   const recentRecords = mockMedicalRecords.slice(0, 3)
   const user=useSelector((state: RootState) => state.profile)
 

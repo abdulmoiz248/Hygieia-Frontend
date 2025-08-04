@@ -35,17 +35,30 @@ export default function DashboardStats() {
   const user = useSelector((state: RootState) => state.profile)
   const prescriptions = useSelector((state: RootState) => state.medicine)
   const calories = useSelector((state: RootState) => state.fitness)
+  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const now = new Date()
+  const upcomingAppointments = appointments
+    .filter((apt) => new Date(apt.date) > now && apt.status === "upcoming")
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const nextAppointment = upcomingAppointments[0]
 
   const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
     return [
-      {
-        id: 'appointment',
-        title: 'No Appointment',
-        value: 'Today',
-        subtitle: '10:00 AM',
-        icon: 'calendar',
-        color: 'soft-blue'
-      },
+    {
+  id: "appointment",
+  title: nextAppointment?.doctor?.name ?? "No Appointment 🎉",
+  value: nextAppointment
+    ? new Date(nextAppointment.date).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : "-",
+  subtitle: nextAppointment?.time ?? "-",
+  icon: "calendar",
+  color: nextAppointment ? "soft-blue" : "mint-green",
+}
+,
       {
         id: 'prescriptions',
         title: 'Active Prescriptions',
