@@ -1,4 +1,4 @@
-import type { Doctor, Appointment, MedicalRecord, Prescription, FitnessGoal } from "@/types"
+import type { Doctor,  MedicalRecord, Prescription, FitnessGoal } from "@/types"
 
 export const mockDoctors: Doctor[] = [
   {
@@ -33,35 +33,6 @@ export const mockDoctors: Doctor[] = [
   },
 ]
 
-export const mockAppointments: Appointment[] = [
-  {
-    id: "1",
-    doctorId: "1",
-    doctor: mockDoctors[0],
-    date: "2025-07-26",
-    time: "10:00 AM",
-    status: "cancelled",
-    type: "consultation",
-  },
-  {
-    id: "2",
-    doctorId: "2",
-    doctor: mockDoctors[1],
-    date: "2025-07-28",
-    time: "2:30 PM",
-    status: "completed",
-    type: "follow-up",
-  },
-   {
-    id: "3",
-    doctorId: "1",
-    doctor: mockDoctors[0],
-    date: "2025-07-26",
-    time: "10:00 AM",
-    status: "upcoming",
-    type: "emergency",
-  },
-]
 
 export const mockMedicalRecords: MedicalRecord[] = [
   {

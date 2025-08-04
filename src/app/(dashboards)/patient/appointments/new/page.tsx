@@ -13,6 +13,13 @@ import { mockDoctors } from "@/mocks/data"
 import Link from "next/link"
 import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSelector"
 
+
+import { useDispatch, useSelector } from "react-redux"
+import { addAppointment } from "@/types/patient/appointmentsSlice"
+import { v4 as uuidv4 } from "uuid"
+import { RootState } from "@/store/patient/store"
+
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -24,11 +31,15 @@ const itemVariants = {
 }
 
 export default function NewAppointmentPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const user=useSelector((store:RootState)=>store.profile)
+const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
+const [showConfirmation, setShowConfirmation] = useState(false)
+
   const [selectedDoctor, setSelectedDoctor] = useState("")
   const [appointmentType, setAppointmentType] = useState("")
   const [selectedTime, setSelectedTime] = useState("")
   const [reason, setReason] = useState("")
+  const dispatch=useDispatch()
 
   const timeSlots = [
     "9:00 AM",
@@ -130,11 +141,11 @@ export default function NewAppointmentPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-soft-blue" >Phone Number</label>
-                  <Input placeholder="+1 (555) 123-4567" />
+                  <Input placeholder="+1 (555) 123-4567" value={user.phone} disabled />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-soft-blue">Email</label>
-                  <Input placeholder="john.doe@example.com" />
+                  <Input placeholder="john.doe@example.com" value={user.email} disabled />
                 </div>
               </div>
             </CardContent>
@@ -205,7 +216,21 @@ export default function NewAppointmentPage() {
                 <Button
                   className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
                   disabled={!selectedDoctor || !selectedDate || !selectedTime || !appointmentType}
-                >
+                onClick={() => {
+    dispatch(
+      addAppointment({
+        id: uuidv4(),
+        doctor: mockDoctors.find((d) => d.id === selectedDoctor)!,
+        date: selectedDate!.toISOString(),
+        time: selectedTime,
+        status: "upcoming",
+        type: appointmentType as any,
+        notes: reason,
+      })
+    )
+     setShowConfirmation(true)
+  }}
+               >
                   <Clock className="w-4 h-4 mr-2" />
                   Book Appointment
                 </Button>
@@ -214,6 +239,64 @@ export default function NewAppointmentPage() {
           </Card>
         </motion.div>
       </div>
+      {showConfirmation && (
+ <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/40 transition-opacity duration-300 ease-in-out">
+  <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full max-w-md p-8 space-y-6 border border-soft-blue/20 animate-fadeIn scale-100">
+    <div className="flex flex-col items-center space-y-3">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-soft-coral/10 text-soft-coral animate-pulse">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold text-dark-slate-gray tracking-wide">Appointment Confirmed</h2>
+      <span className="text-xs font-semibold text-soft-blue bg-soft-blue/10 px-3 py-1 rounded-full shadow-sm">
+        #CONF-{Math.floor(Math.random() * 10000)}
+      </span>
+    </div>
+
+    <div className="space-y-4 text-sm text-dark-slate-gray">
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-soft-blue">Doctor</span>
+        <span>{mockDoctors.find((d) => d.id === selectedDoctor)?.name}</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-soft-blue">Date</span>
+        <span>{selectedDate?.toLocaleDateString()}</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-soft-blue">Time</span>
+        <span>{selectedTime}</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-soft-blue">Type</span>
+        <span>{appointmentType}</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-soft-blue">Fee</span>
+        <span>${mockDoctors.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
+      </div>
+    </div>
+
+    <div className="pt-4">
+      <Button
+        onClick={() => {
+          setShowConfirmation(false)
+          setSelectedDoctor("")
+          setAppointmentType("")
+          setSelectedTime("")
+          setReason("")
+        }}
+        className="w-full bg-soft-blue hover:bg-soft-blue/90 text-white py-3 rounded-xl text-base font-medium transition duration-200 shadow-md"
+      >
+        Close
+      </Button>
+    </div>
+  </div>
+</div>
+
+
+)}
+
     </motion.div>
   )
 }

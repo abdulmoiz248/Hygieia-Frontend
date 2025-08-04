@@ -78,7 +78,7 @@ export default function DoctorSelector({
             aria-controls="doctor-suggestions"
             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {value || placeholder}
+            {doctors.find((d) => d.id === value)?.name || placeholder}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </button>
         </PopoverTrigger>
@@ -88,7 +88,7 @@ export default function DoctorSelector({
             <CommandInput
               ref={inputRef} // Attach ref to CommandInput
               placeholder={placeholder}
-              value={inputValue} // Bind to internal inputValue
+              value={doctors.find((d) => d.id === inputValue)?.name } // Bind to internal inputValue
               onValueChange={(currentValue) => {
                 setInputValue(currentValue) // Update internal state
                 onChange(currentValue) // Also update parent state as user types

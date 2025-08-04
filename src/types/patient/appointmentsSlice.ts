@@ -1,99 +1,99 @@
+
+import {Appointment} from './appointment'
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Appointment, AppointmentStatus } from "./appointment"
+import { mockDoctors } from '@/mocks/data'
+interface AppointmentState {
+  appointments: Appointment[]
+  current: Partial<Appointment>
+}
 
-
-const extendedAppointments: Appointment[] = [
+export const mockAppointments: Appointment[] = [
   {
     id: "1",
-    date: new Date().toISOString().split("T")[0],
+    doctor: mockDoctors[0],
+    date: "2025-07-26",
     time: "10:00 AM",
-    type: "Checkup",
-    status: "upcoming",
-    doctor: {
-      name: "Dr. Ayesha Karim",
-      specialty: "Cardiologist",
-      avatar: "",
-       id: '1',
-     rating: 5,
-  location: 'lahore',
-  experience: 4,
-  consultationFee: 400
-    },
+    status: "cancelled",
+    type: "consultation",
   },
   {
     id: "2",
-    date: new Date().toISOString().split("T")[0],
+    doctor: mockDoctors[1],
+    date: "2025-07-28",
     time: "2:30 PM",
-    type: "Consultation",
     status: "completed",
-    doctor: {
-      name: "Dr. Imran Qureshi",
-      specialty: "General Physician",
-      avatar: "",
-          id: '2',
-     rating: 5,
-  location: 'lahore',
-  experience: 4,
-  consultationFee: 400
-    },
-    meetingRemarks: {
-      diagnosis: "Patient shows good progress with current treatment plan.",
-      symptoms: "Blood pressure has stabilized, no side effects reported.",
-      recommendations: "Continue current medication, schedule follow-up in 3 months.",
-      nextSteps: "Monitor blood pressure daily, maintain low-sodium diet.",
-      prescriptions: "Renewed Lisinopril 10mg daily for 90 days.",
-      doctorNotes: "Patient is responding well to treatment. Encourage continued lifestyle modifications.",
-    },
+    type: "follow-up",
   },
-  {
+   {
     id: "3",
-    date: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-    time: "11:15 AM",
-    type: "Follow-up",
-    status: "cancelled",
-    doctor: {
-      name: "Dr. Sarah Zaman",
-      specialty: "Dermatologist",
-      avatar: "",
-          id: '3',
-     rating: 5,
-  location: 'lahore',
-  experience: 4,
-  consultationFee: 400
-    },
+   
+    doctor: mockDoctors[0],
+    date: "2025-07-26",
+    time: "10:00 AM",
+    status: "upcoming",
+    type: "emergency",
   },
 ]
 
+const extendedAppointments = mockAppointments.map((apt) => ({
+  ...apt,
+  meetingRemarks:
+    apt.status === "completed"
+      ? {
+          diagnosis: "Patient shows good progress with current treatment plan.",
+          symptoms: "Blood pressure has stabilized, no side effects reported.",
+          recommendations: "Continue current medication, schedule follow-up in 3 months.",
+          nextSteps: "Monitor blood pressure daily, maintain low-sodium diet.",
+          prescriptions: "Renewed Lisinopril 10mg daily for 90 days.",
+          doctorNotes: "Patient is responding well to treatment. Encourage continued lifestyle modifications.",
+        }
+      : undefined,
+}))
 
-interface AppointmentsState {
-  appointments: Appointment[]
-  selectedStatus: AppointmentStatus | "all"
-  selectedDate: Date | null
-  selectedAppointment: Appointment | null
-}
 
-const initialState: AppointmentsState = {
+const initialState: AppointmentState = {
   appointments: extendedAppointments,
-  selectedStatus: "all",
-  selectedDate: new Date(),
-  selectedAppointment: null,
+  current: {},
 }
 
-const appointmentsSlice = createSlice({
+const appointmentSlice = createSlice({
   name: "appointments",
   initialState,
   reducers: {
-    setStatusFilter(state, action: PayloadAction<AppointmentStatus | "all">) {
-      state.selectedStatus = action.payload
+    setAppointments(state, action: PayloadAction<Appointment[]>) {
+      state.appointments = action.payload
     },
-    setSelectedDate(state, action: PayloadAction<Date | null>) {
-      state.selectedDate = action.payload
+    addAppointment(state, action: PayloadAction<Appointment>) {
+      state.appointments.push(action.payload)
     },
-    setSelectedAppointment(state, action: PayloadAction<Appointment | null>) {
-      state.selectedAppointment = action.payload
+    updateAppointment(state, action: PayloadAction<Appointment>) {
+      const index = state.appointments.findIndex((apt) => apt.id === action.payload.id)
+      if (index !== -1) state.appointments[index] = action.payload
+    },
+    cancelAppointment(state, action: PayloadAction<string>) {
+      const index = state.appointments.findIndex((apt) => apt.id === action.payload)
+      if (index !== -1) state.appointments[index].status = "cancelled"
+    },
+    setCurrentAppointment(state, action: PayloadAction<Partial<Appointment>>) {
+      state.current = action.payload
+    },
+    clearCurrentAppointment(state) {
+      state.current = {}
     },
   },
 })
 
-export const { setStatusFilter, setSelectedDate, setSelectedAppointment } = appointmentsSlice.actions
-export default appointmentsSlice.reducer
+export const {
+  setAppointments,
+  addAppointment,
+  updateAppointment,
+  cancelAppointment,
+  setCurrentAppointment,
+  clearCurrentAppointment,
+} = appointmentSlice.actions
+
+export default appointmentSlice.reducer
+
+
+
+

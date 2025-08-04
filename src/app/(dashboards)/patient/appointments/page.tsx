@@ -9,10 +9,15 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {  CalendarComponent } from "@/components/ui/calendar"
-import { mockAppointments } from "@/mocks/data"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 
+
+
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
+import { cancelAppointment } from "@/types/patient/appointmentsSlice"
+import { Appointment } from "@/types/patient/appointment"
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -27,34 +32,24 @@ const itemVariants = {
 }
 
 // Extended mock data with meeting remarks
-const extendedAppointments = mockAppointments.map((apt) => ({
-  ...apt,
-  meetingRemarks:
-    apt.status === "completed"
-      ? {
-          diagnosis: "Patient shows good progress with current treatment plan.",
-          symptoms: "Blood pressure has stabilized, no side effects reported.",
-          recommendations: "Continue current medication, schedule follow-up in 3 months.",
-          nextSteps: "Monitor blood pressure daily, maintain low-sodium diet.",
-          prescriptions: "Renewed Lisinopril 10mg daily for 90 days.",
-          doctorNotes: "Patient is responding well to treatment. Encourage continued lifestyle modifications.",
-        }
-      : undefined,
-}))
+
 
 export default function AppointmentsPage() {
+  const dispatch = useDispatch()
+  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedAppointment, setSelectedAppointment] = useState<(typeof extendedAppointments)[0] | null>(null)
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
 
-  const filteredAppointments = extendedAppointments.filter((appointment) => {
+  const filteredAppointments = appointments.filter((appointment) => {
     if (statusFilter === "all") return true
     return appointment.status === statusFilter
   })
 
   // Add appointment dates for calendar
-  const appointmentDates = extendedAppointments.map((apt) => new Date(apt.date))
+  const appointmentDates = appointments.map((apt) => new Date(apt.date))
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -146,7 +141,7 @@ export default function AppointmentsPage() {
                   </h3>
                   {selectedDate && (
                     <div className="space-y-3">
-                      {extendedAppointments
+                      {appointments
                         .filter((apt) => new Date(apt.date).toDateString() === selectedDate.toDateString())
                         .map((appointment) => (
                         <div
@@ -179,7 +174,7 @@ export default function AppointmentsPage() {
 </div>
 
                         ))}
-                      {extendedAppointments.filter(
+                      {appointments.filter(
                         (apt) => new Date(apt.date).toDateString() === selectedDate?.toDateString(),
                       ).length === 0 && <p className="text-cool-gray text-center py-8">No appointments on this date</p>}
                     </div>
@@ -409,7 +404,12 @@ export default function AppointmentsPage() {
                   {selectedAppointment.status === "upcoming" && (
                     <>
                       <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90">Reschedule</Button>
-                      <Button variant="outline">Cancel</Button>
+                      <Button onClick={()=>{
+                        dispatch(cancelAppointment(selectedAppointment.id))
+                        setSelectedAppointment(null)
+                      }
+}
+                       variant="outline">Cancel</Button>
                     </>
                   )}
                   {selectedAppointment.status === "completed" && selectedAppointment.meetingRemarks && (

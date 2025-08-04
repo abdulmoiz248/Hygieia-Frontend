@@ -1,17 +1,12 @@
-// components/DashboardStats.tsx
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Flame, Pill, TrendingUp } from 'lucide-react'
+import { Calendar, Flame, Pill, TrendingUp, HeartPulse } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 
-
-
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/patient/store";
-
-
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -32,55 +27,51 @@ type StatCardData = {
 const iconMap = {
   calendar: Calendar,
   pill: Pill,
-  flame: Flame
+  flame: Flame,
+  score: HeartPulse
 }
-
-
 
 export default function DashboardStats() {
-  const user = useSelector((state: RootState) => state.profile);
-  const prescriptions = useSelector((state: RootState) => state.medicine);
-  const calories=useSelector((state: RootState) => state.fitness);
-
+  const user = useSelector((state: RootState) => state.profile)
+  const prescriptions = useSelector((state: RootState) => state.medicine)
+  const calories = useSelector((state: RootState) => state.fitness)
 
   const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
-  return [
-    {
-      id: 'appointment',
-      title: 'No Appointment',
-      value: 'Today',
-      subtitle: '10:00 AM',
-      icon: 'calendar',
-      color: 'soft-blue'
-    },
-   {
-  id: 'prescriptions',
-  title: 'Active Prescriptions',
-  value: prescriptions.Prescription.filter(p => p.status === 'active').length,
-  subtitle: `${prescriptions.MedicineState.todaysMeds.filter(m => !m.taken).length} due today`,
-  icon: 'pill',
-  color: 'mint-green'
-}
-,
-    {
-      id: 'calories',
-      title: 'Calories Burned',
-      value: calories.caloriesBurned,
-      subtitle: 'Today',
-      icon: 'flame',
-      color: 'soft-coral'
-    },
-    {
-      id: 'healthScore',
-      title: 'Health Score',
-      value: user.healthscore,
-      icon: 'score',
-      color: 'purple-500',
-      //colorText: 'purple-600',
-     // trend: '+5 this week'
-    }
-  ]
-}
+    return [
+      {
+        id: 'appointment',
+        title: 'No Appointment',
+        value: 'Today',
+        subtitle: '10:00 AM',
+        icon: 'calendar',
+        color: 'soft-blue'
+      },
+      {
+        id: 'prescriptions',
+        title: 'Active Prescriptions',
+        value: prescriptions.Prescription.filter(p => p.status === 'active').length,
+        subtitle: `${prescriptions.MedicineState.todaysMeds.filter(m => !m.taken).length} due today`,
+        icon: 'pill',
+        color: 'mint-green'
+      },
+      {
+        id: 'calories',
+        title: 'Calories Burned',
+        value: calories.caloriesBurned,
+        subtitle: 'Today',
+        icon: 'flame',
+        color: 'soft-coral'
+      },
+      {
+        id: 'healthscore',
+        title: 'Health Score',
+        value: user.healthscore,
+        subtitle: 'Today',
+        icon: 'score',
+        color: 'cool-gray'
+      },
+    ]
+  }
 
   const [data, setData] = useState<StatCardData[] | null>(null)
 
@@ -123,13 +114,7 @@ export default function DashboardStats() {
                       </p>
                     )}
                   </div>
-                  {card.icon === 'score' ? (
-                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
-                      {card.value}
-                    </div>
-                  ) : (
-                    Icon && <Icon className={`w-8 h-8 text-${card.color}`} />
-                  )}
+                  {Icon && <Icon className={`w-8 h-8 text-${card.color}`} />}
                 </div>
               </CardContent>
             </Card>
