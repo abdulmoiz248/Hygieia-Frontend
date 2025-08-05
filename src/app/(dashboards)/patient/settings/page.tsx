@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { getUser } from "@/lib/data"
+
 import { useSelector } from "react-redux"
 import { RootState } from "@/store/patient/store"
 
@@ -40,17 +40,6 @@ export default function SettingsPage() {
   const [error, setError] = useState("")
   const user=useSelector((store:RootState)=>store.profile)
 
-  const simulateGetUser = async (email: string) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (getUser().email.includes(email.toLowerCase())) {
-          resolve(true)
-        } else {
-          reject("User not found")
-        }
-      }, 1000)
-    })
-  }
 
   const handleVerifyEmail = async () => {
     setError("")

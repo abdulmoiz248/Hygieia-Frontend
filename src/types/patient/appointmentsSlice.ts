@@ -1,5 +1,5 @@
 
-import {Appointment} from './appointment'
+import {Appointment, AppointmentStatus, AppointmentTypes} from './appointment'
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { mockDoctors } from '@/mocks/data'
 interface AppointmentState {
@@ -13,16 +13,16 @@ export const mockAppointments: Appointment[] = [
     doctor: mockDoctors[0],
     date: "2025-07-26",
     time: "10:00 AM",
-    status: "cancelled",
-    type: "consultation",
+    status: AppointmentStatus.Cancelled,
+    type: AppointmentTypes.Consultation
   },
   {
     id: "2",
     doctor: mockDoctors[1],
     date: "2025-07-28",
     time: "2:30 PM",
-    status: "completed",
-    type: "follow-up",
+    status: AppointmentStatus.Completed,
+    type: AppointmentTypes.Emergency
   },
    {
     id: "3",
@@ -30,8 +30,8 @@ export const mockAppointments: Appointment[] = [
     doctor: mockDoctors[0],
     date: "2025-08-26",
     time: "10:00 AM",
-    status: "upcoming",
-    type: "emergency",
+    status: AppointmentStatus.Upcoming,
+    type: AppointmentTypes.FollowUp
   },
 ]
 
@@ -72,7 +72,7 @@ const appointmentSlice = createSlice({
     },
     cancelAppointment(state, action: PayloadAction<string>) {
       const index = state.appointments.findIndex((apt) => apt.id === action.payload)
-      if (index !== -1) state.appointments[index].status = "cancelled"
+      if (index !== -1) state.appointments[index].status = AppointmentStatus.Cancelled
     },
     setCurrentAppointment(state, action: PayloadAction<Partial<Appointment>>) {
       state.current = action.payload

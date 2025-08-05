@@ -18,7 +18,7 @@ import { Appointment } from "@/types/patient/appointment"
 
 interface ReviewFormProps {
   appointment: Appointment
-  onReviewSubmitted?: (reviewData: any) => void
+  onReviewSubmitted?: (reviewData: unknown) => void
 }
 
 export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFormProps) {
@@ -219,7 +219,7 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                     </div>
 
                     <div className="space-y-3">
-                      <Label className="text-soft-blue font-medium">How clear was the doctor's communication?</Label>
+                      <Label className="text-soft-blue font-medium">How clear was the doctor&aposs communication?</Label>
                       <div className="flex gap-2 flex-wrap">
                         {["Very Clear", "Clear", "Somewhat Clear", "Unclear"].map((val) => (
                           <Button
