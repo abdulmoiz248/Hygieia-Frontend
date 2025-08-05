@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { getUser } from "@/lib/data"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -36,6 +38,7 @@ export default function SettingsPage() {
   const [otpSent, setOtpSent] = useState(false)
   const [otpVerified, setOtpVerified] = useState(false)
   const [error, setError] = useState("")
+  const user=useSelector((store:RootState)=>store.profile)
 
   const simulateGetUser = async (email: string) => {
     return new Promise((resolve, reject) => {
@@ -51,12 +54,18 @@ export default function SettingsPage() {
 
   const handleVerifyEmail = async () => {
     setError("")
-    try {
-      await simulateGetUser(email)
-      setEmailValid(true)
-    } catch {
-      setError("Error")
-    }
+ 
+       if(user.email!=email){
+        setEmailValid(false)
+         setError("Incorrect Email Address")
+       }else{
+           setEmailValid(true)
+            setError("")
+       }
+     
+  
+      
+   
   }
 
   return (
