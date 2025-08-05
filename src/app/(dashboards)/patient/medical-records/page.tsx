@@ -1,12 +1,21 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockMedicalRecords } from "@/mocks/data"
+import { useAppDispatch, useAppSelector } from "@/hooks/redux"
+import {
+  addRecord,
+  deleteRecord,
+  setTypeFilter,
+  setSearchQuery,
+  setViewingRecord,
+  setShowUpload,
+} from "@/types/patient/medicalRecordsSlice"
 import { MedicalRecordsHeader } from "@/components/patient dashboard/medical-records/MedicalRecordsHeader"
 import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-records/MedicalRecordsFilters"
 import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-records/MedicalRecordsGrid"
 import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical-records/MedicalRecordViewerModal"
+import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { MedicalRecord } from "@/types"
 
 const containerVariants = {
@@ -20,18 +29,17 @@ const itemVariants = {
 }
 
 export default function MedicalRecordsPage() {
-  const [records, setRecords] = useState<MedicalRecord[]>(mockMedicalRecords)
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showUpload, setShowUpload] = useState(false)
-  const [viewingRecord, setViewingRecord] = useState<MedicalRecord | null>(null)
+  const dispatch = useAppDispatch()
+  const { records, typeFilter, searchQuery, viewingRecord, showUpload } = useAppSelector(
+    (state) => state.medicalRecords,
+  )
 
   const onUploadRecord = (record: MedicalRecord) => {
-    setRecords(prev => [record, ...prev])
+    dispatch(addRecord(record))
   }
 
   const onDeleteRecord = (recordId: string) => {
-    setRecords(prev => prev.filter(record => record.id !== recordId))
+    dispatch(deleteRecord(recordId))
   }
 
   const filteredRecords = records.filter((record) => {
@@ -72,36 +80,58 @@ export default function MedicalRecordsPage() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      {/* Header */}
       <motion.div variants={itemVariants}>
-        <MedicalRecordsHeader showUpload={showUpload} setShowUpload={setShowUpload} onUploadRecord={onUploadRecord} />
+        <Tabs defaultValue="records" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="records">Medical Records</TabsTrigger>
+            <TabsTrigger value="lab-tests">Lab Tests</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="records" className="space-y-6 mt-6">
+            {/* Header */}
+            <motion.div variants={itemVariants}>
+              <MedicalRecordsHeader
+                showUpload={showUpload}
+                setShowUpload={(show) => dispatch(setShowUpload(show))}
+                onUploadRecord={onUploadRecord}
+              />
+            </motion.div>
+
+            {/* Filters */}
+            <motion.div variants={itemVariants}>
+              <MedicalRecordsFilters
+                searchQuery={searchQuery}
+                setSearchQuery={(query) => dispatch(setSearchQuery(query))}
+                typeFilter={typeFilter}
+                setTypeFilter={(filter) => dispatch(setTypeFilter(filter))}
+              />
+            </motion.div>
+
+            {/* Records Grid */}
+            <motion.div variants={itemVariants}>
+              <MedicalRecordsGrid
+                filteredRecords={filteredRecords}
+                setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+                getTypeIcon={getTypeIcon}
+                getTypeColor={getTypeColor}
+                onShowUpload={() => dispatch(setShowUpload(true))}
+              />
+            </motion.div>
+
+            {/* Record Viewer Modal */}
+            <MedicalRecordViewerModal
+              viewingRecord={viewingRecord}
+              setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+              getTypeIcon={getTypeIcon}
+              onDeleteRecord={onDeleteRecord}
+            />
+          </TabsContent>
+
+          <TabsContent value="lab-tests" className="mt-6">
+            <LabTestsSection />
+          </TabsContent>
+        </Tabs>
       </motion.div>
-      {/* Filters */}
-      <motion.div variants={itemVariants}>
-        <MedicalRecordsFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          typeFilter={typeFilter}
-          setTypeFilter={setTypeFilter}
-        />
-      </motion.div>
-      {/* Records Grid */}
-      <motion.div variants={itemVariants}>
-        <MedicalRecordsGrid
-          filteredRecords={filteredRecords}
-          setViewingRecord={setViewingRecord}
-          getTypeIcon={getTypeIcon}
-          getTypeColor={getTypeColor}
-          onShowUpload={() => setShowUpload(true)}
-        />
-      </motion.div>
-      {/* Record Viewer Modal */}
-      <MedicalRecordViewerModal
-        viewingRecord={viewingRecord}
-        setViewingRecord={setViewingRecord}
-        getTypeIcon={getTypeIcon}
-        onDeleteRecord={onDeleteRecord}
-      />
     </motion.div>
   )
 }
