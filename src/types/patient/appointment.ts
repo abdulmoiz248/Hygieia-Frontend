@@ -1,4 +1,15 @@
-export type AppointmentStatus = "upcoming" | "completed" | "cancelled"
+export enum AppointmentStatus {
+  Upcoming = "upcoming",
+  Completed = "completed",
+  Cancelled = "cancelled"
+}
+
+export enum AppointmentTypes {
+  Consultation = "consultation",
+  FollowUp = "follow-up",
+  Emergency = "emergency"
+}
+
 import { Doctor } from "../doctor/profile"
 
 
@@ -7,8 +18,8 @@ export interface Appointment {
   doctor: Doctor
   date: string
   time: string
-  status: "upcoming" | "completed" | "cancelled"
-  type: "consultation" | "follow-up" | "emergency"
+  status: AppointmentStatus
+  type: AppointmentTypes
   notes?: string
   meetingRemarks?: {
     diagnosis: string

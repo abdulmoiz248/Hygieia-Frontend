@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
 import { RootState } from "@/store/patient/store"
+import { AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 
 
 const containerVariants = {
@@ -223,8 +224,8 @@ const [showConfirmation, setShowConfirmation] = useState(false)
         doctor: mockDoctors.find((d) => d.id === selectedDoctor)!,
         date: selectedDate!.toISOString(),
         time: selectedTime,
-        status: "upcoming",
-        type: appointmentType as any,
+        status: AppointmentStatus.Upcoming,
+        type: appointmentType as AppointmentTypes,
         notes: reason,
       })
     )
