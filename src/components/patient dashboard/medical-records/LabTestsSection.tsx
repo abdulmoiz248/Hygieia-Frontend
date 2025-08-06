@@ -1,7 +1,7 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle,DialogDescription } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
-import { Plus, Calendar, Clock, MapPin, X } from "lucide-react"
+import {  Calendar, Clock, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
