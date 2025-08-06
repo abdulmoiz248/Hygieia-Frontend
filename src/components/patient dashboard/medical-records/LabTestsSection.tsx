@@ -1,14 +1,15 @@
 "use client"
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle,DialogDescription } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
 import { Plus, Calendar, Clock, MapPin, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import { setShowBookingModal, setSelectedTest, cancelLabTest } from "@/types/patient/labTestsSlice"
+import { setShowBookingModal, setSelectedTest, cancelLabTest, BookedLabTest } from "@/types/patient/labTestsSlice"
 import { LabTestBookingModal } from "./LabTestBookingModal"
 import type { LabTest } from "@/types/patient/labTestsSlice"
+import { useState } from "react"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -19,6 +20,7 @@ export function LabTestsSection() {
   const dispatch = useAppDispatch()
   const { availableTests, bookedTests, selectedTest } = useAppSelector((state) => state.labTests)
 
+  const [selectTestModal,setSelectedTestModal]=useState<BookedLabTest | null>()
   const pendingTests = bookedTests.filter((test) => test.status === "pending")
 
   const handleBookTest = (test: LabTest) => {
@@ -33,13 +35,11 @@ export function LabTestsSection() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "completed":
-        return "bg-green-100 text-green-800"
+        return "bg-soft-blue text-snow-white"
+      
       case "cancelled":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-soft-coral text-black"
+    
     }
   }
 
@@ -47,95 +47,155 @@ export function LabTestsSection() {
     <div className="space-y-6">
       {/* Pending Tests */}
       {pendingTests.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                Pending Lab Tests ({pendingTests.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pendingTests.map((test) => (
-                  <div
-                    key={test.id}
-                    className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200"
-                  >
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">{test.testName}</h4>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(test.scheduledDate).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {test.scheduledTime}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {test.location}
-                        </span>
-                      </div>
-                      {test.instructions && (
-                        <div className="mt-2">
-                          <p className="text-xs text-amber-600 font-medium">Preparation required</p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(test.status)}>{test.status}</Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCancelTest(test.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+        <>
+          <div>
+        <h1 className="text-3xl font-bold text-soft-coral">Lab Bookings</h1>
+        <p className="text-cool-gray">Book and view your Lab Reports here</p>
+      </div>
+      
+  <motion.div variants={itemVariants}>
+    <Card className="bg-white/10">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-soft-coral" />
+          Pending Lab Tests ({pendingTests.length})
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {pendingTests.map((test) => (
+            <div
+              key={test.id}
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-cool-gray/10 rounded-lg border border-blue-200"
+            >
+              <div className="flex-1">
+                <h4 className="font-semibold text-soft-blue">{test.testName}</h4>
+                <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
+                  <span className="flex items-center gap-1 text-dark-slate-gray">
+                    <Calendar className="h-4 w-4 text-soft-coral" />
+                    {new Date(test.scheduledDate).toLocaleDateString()}
+                  </span>
+                  <span className="flex items-center gap-1 text-dark-slate-gray">
+                    <Clock className="h-4 w-4 text-soft-coral" />
+                    {test.scheduledTime}
+                  </span>
+                  <span className="flex items-center gap-1 text-dark-slate-gray">
+                    <MapPin className="h-4 w-4 text-soft-coral" />
+                    {test.location}
+                  </span>
+                </div>
+                {test.instructions && (
+                  <div className="mt-2">
+                    <p className="text-s text-mint-green outline-soft-blue font-medium">
+                      Preparation required
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+              <div className="flex flex-col md:flex-row items-end md:items-center gap-2">
+                <Badge className={`text-sm px-3 py-1.5 rounded-2 ${getStatusColor(test.status)}`}>
+                  {test.status}
+                </Badge>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setSelectedTestModal(test)}
+                  className="text-snow-white rounded-2 bg-soft-coral hover:bg-soft-coral/90"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+  </>
+)}
+
+{selectTestModal && (
+  <Dialog open onOpenChange={() => setSelectedTestModal(null)}>
+    <DialogContent className="backdrop-blur-md bg-snow-white border rounded-2xl p-6">
+      <DialogHeader>
+        <DialogTitle className="text-lg text-soft-blue font-bold">
+          Cancel Test: {selectTestModal.testName}
+        </DialogTitle>
+        <DialogDescription className="text-gray-700 mt-1">
+          Are you sure you want to cancel this test scheduled on{" "}
+          <strong>{new Date(selectTestModal.scheduledTime).toLocaleDateString()}</strong> at{" "}
+          <strong>{selectTestModal.scheduledTime}</strong>?
+        </DialogDescription>
+      </DialogHeader>
+      <div className="flex justify-end gap-2 mt-6">
+        <Button
+          variant="ghost"
+          className="bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+          onClick={() => setSelectedTestModal(null)}
+        >
+          No, Go Back
+        </Button>
+        <Button
+          variant="destructive"
+          className="bg-soft-coral text-snow-white hover:bg-soft-coral/90"
+          onClick={() => {
+            handleCancelTest(selectTestModal.id)
+            setSelectedTestModal(null)
+          }}
+        >
+          Yes, Cancel It
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
+)}
+
+  <div>
+        <h1 className="text-3xl mt-10 font-bold text-soft-coral"> Book Lab Tests</h1>
+        <p className="text-cool-gray">Book and view your Lab Reports here</p>
+      </div>
 
       {/* Available Tests */}
       <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-green-600" />
-              Book Lab Tests
-            </CardTitle>
-          </CardHeader>
+        <Card className="border-0">
+        
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {availableTests.map((test) => (
-                <div key={test.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-semibold text-gray-900">{test.name}</h4>
-                    <Badge variant="secondary">{test.category}</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{test.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Clock className="h-4 w-4" />
-                      {test.duration}
-                    </div>
-                    <span className="font-semibold text-green-600">${test.price}</span>
-                  </div>
-                  <Button
-                    onClick={() => handleBookTest(test)}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    size="sm"
-                  >
-                    Book Test
-                  </Button>
-                </div>
+              <Card
+  key={test.id}
+  className="group bg-white/40 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all"
+>
+  <CardContent className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h4 className="font-semibold text-gray-900 text-base line-clamp-2">{test.name}</h4>
+      <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+        {test.category}
+      </Badge>
+    </div>
+
+    <p className="text-sm text-gray-600 line-clamp-3">{test.description}</p>
+
+    <div className="flex items-center justify-between text-sm text-gray-600 pt-1">
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-soft-blue" />
+        <span>{test.duration}</span>
+      </div>
+      <span className="font-semibold text-green-600">${test.price}</span>
+    </div>
+
+    <div className="pt-3">
+      <Button
+        onClick={() => handleBookTest(test)}
+        size="sm"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        Book Test
+      </Button>
+    </div>
+  </CardContent>
+</Card>
+
               ))}
             </div>
           </CardContent>

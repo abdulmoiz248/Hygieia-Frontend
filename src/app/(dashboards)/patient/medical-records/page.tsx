@@ -15,7 +15,6 @@ import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-re
 import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-records/MedicalRecordsGrid"
 import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical-records/MedicalRecordViewerModal"
 import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { MedicalRecord } from "@/types"
 
 const containerVariants = {
@@ -79,59 +78,54 @@ export default function MedicalRecordsPage() {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants}>
-        <Tabs defaultValue="records" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="records">Medical Records</TabsTrigger>
-            <TabsTrigger value="lab-tests">Lab Tests</TabsTrigger>
-          </TabsList>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
+      {/* Medical Records Section */}
+      <section className="space-y-6 pt-2">
 
-          <TabsContent value="records" className="space-y-6 mt-6">
-            {/* Header */}
-            <motion.div variants={itemVariants}>
-              <MedicalRecordsHeader
-                showUpload={showUpload}
-                setShowUpload={(show) => dispatch(setShowUpload(show))}
-                onUploadRecord={onUploadRecord}
-              />
-            </motion.div>
+        <motion.div variants={itemVariants}>
+          <MedicalRecordsHeader
+            showUpload={showUpload}
+            setShowUpload={(show) => dispatch(setShowUpload(show))}
+            onUploadRecord={onUploadRecord}
+          />
+        </motion.div>
 
-            {/* Filters */}
-            <motion.div variants={itemVariants}>
-              <MedicalRecordsFilters
-                searchQuery={searchQuery}
-                setSearchQuery={(query) => dispatch(setSearchQuery(query))}
-                typeFilter={typeFilter}
-                setTypeFilter={(filter) => dispatch(setTypeFilter(filter))}
-              />
-            </motion.div>
+        <motion.div variants={itemVariants}>
+          <MedicalRecordsFilters
+            searchQuery={searchQuery}
+            setSearchQuery={(query) => dispatch(setSearchQuery(query))}
+            typeFilter={typeFilter}
+            setTypeFilter={(filter) => dispatch(setTypeFilter(filter))}
+          />
+        </motion.div>
 
-            {/* Records Grid */}
-            <motion.div variants={itemVariants}>
-              <MedicalRecordsGrid
-                filteredRecords={filteredRecords}
-                setViewingRecord={(record) => dispatch(setViewingRecord(record))}
-                getTypeIcon={getTypeIcon}
-                getTypeColor={getTypeColor}
-                onShowUpload={() => dispatch(setShowUpload(true))}
-              />
-            </motion.div>
+        <motion.div variants={itemVariants}>
+          <MedicalRecordsGrid
+            filteredRecords={filteredRecords}
+            setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+            getTypeIcon={getTypeIcon}
+            getTypeColor={getTypeColor}
+            onShowUpload={() => dispatch(setShowUpload(true))}
+          />
+        </motion.div>
 
-            {/* Record Viewer Modal */}
-            <MedicalRecordViewerModal
-              viewingRecord={viewingRecord}
-              setViewingRecord={(record) => dispatch(setViewingRecord(record))}
-              getTypeIcon={getTypeIcon}
-              onDeleteRecord={onDeleteRecord}
-            />
-          </TabsContent>
+        <MedicalRecordViewerModal
+          viewingRecord={viewingRecord}
+          setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+          getTypeIcon={getTypeIcon}
+          onDeleteRecord={onDeleteRecord}
+        />
+      </section>
 
-          <TabsContent value="lab-tests" className="mt-6">
-            <LabTestsSection />
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+      {/* Lab Tests Section */}
+      <section className="space-y-6">
+     
+      
+
+        <motion.div variants={itemVariants}>
+          <LabTestsSection />
+        </motion.div>
+      </section>
     </motion.div>
   )
 }
