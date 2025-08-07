@@ -156,39 +156,36 @@ export function LabTestsSection() {
       </div>
 
       {/* Available Tests */}
-      <motion.div variants={itemVariants}>
-        <Card className="border-0">
-        
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div variants={itemVariants} className="bg-transparent border-0 shadow-0"> 
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-transparent border-0">
               {availableTests.map((test) => (
               <Card
   key={test.id}
   className="group bg-white/40 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all"
 >
-  <CardContent className="p-4 space-y-3">
+  <CardContent className="p-4 space-y-3 b">
     <div className="flex justify-between items-center">
-      <h4 className="font-semibold text-gray-900 text-base line-clamp-2">{test.name}</h4>
-      <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+      <h4 className="font-semibold text-soft-blue text-base line-clamp-2">{test.name}</h4>
+      <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md bg-soft-coral text-snow-white">
         {test.category}
       </Badge>
     </div>
 
-    <p className="text-sm text-gray-600 line-clamp-3">{test.description}</p>
+    <p className="text-sm text-gray-600 line-clamp-1">{test.description}</p>
 
     <div className="flex items-center justify-between text-sm text-gray-600 pt-1">
       <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4 text-soft-blue" />
+        <Clock className="h-4 w-4 text-soft-coral" />
         <span>{test.duration}</span>
       </div>
-      <span className="font-semibold text-green-600">${test.price}</span>
+      <span className="font-semibold text-cool-gray">${test.price}</span>
     </div>
 
     <div className="pt-3">
       <Button
         onClick={() => handleBookTest(test)}
         size="sm"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-transparent border-soft-blue  text-soft-blue border-1 hover:bg-soft-blue hover:text-snow-white"
       >
         Book Test
       </Button>
@@ -198,8 +195,7 @@ export function LabTestsSection() {
 
               ))}
             </div>
-          </CardContent>
-        </Card>
+       
       </motion.div>
 
       {/* Booking Modal */}

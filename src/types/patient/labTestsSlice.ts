@@ -14,7 +14,7 @@ export interface BookedLabTest {
   id: string
   testId: string
   testName: string
-  scheduledDate: string
+  scheduledDate: Date
   scheduledTime: string
   status: "pending" | "completed" | "cancelled"
   bookedAt: string
@@ -80,7 +80,7 @@ const mockBookedTests: BookedLabTest[] = [
     id: "1",
     testId: "1",
     testName: "Complete Blood Count (CBC)",
-    scheduledDate: "2024-01-15",
+    scheduledDate: new Date("2024-01-15"),
     scheduledTime: "09:00",
     status: "pending",
     bookedAt: "2024-01-10T10:30:00Z",
@@ -91,7 +91,7 @@ const mockBookedTests: BookedLabTest[] = [
     id: "2",
     testId: "3",
     testName: "Thyroid Function Test",
-    scheduledDate: "2024-01-18",
+    scheduledDate: new Date("2024-01-18"),
     scheduledTime: "11:30",
     status: "pending",
     bookedAt: "2024-01-12T14:15:00Z",

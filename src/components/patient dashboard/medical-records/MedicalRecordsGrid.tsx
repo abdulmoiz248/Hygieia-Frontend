@@ -24,7 +24,7 @@ export function MedicalRecordsGrid({
         {filteredRecords.map((record) => (
           <Card
             key={record.id}
-            className="group bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-lg transition-all"
+            className="group bg-white/40 border border-gray-100 rounded-xl shadow-sm hover:shadow-lg transition-all"
           >
             <CardContent className="p-4 space-y-3">
               <div className="flex justify-between items-center">
