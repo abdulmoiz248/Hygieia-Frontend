@@ -17,7 +17,7 @@ import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSe
 import { useDispatch, useSelector } from "react-redux"
 import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
-import { RootState, store } from "@/store/patient/store"
+import { RootState } from "@/store/patient/store"
 import { AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 
 
