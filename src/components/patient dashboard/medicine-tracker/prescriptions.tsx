@@ -64,7 +64,7 @@ export default function PrescriptionsPage() {
                 {activePrescriptions.map((prescription) => (
                   <motion.div key={prescription.id} whileHover={{ scale: 1.02 }}>
                     <Card
-                      className="h-full flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer bg-white"
+                      className="h-full flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer bg-white/40"
                       onClick={() => setSelectedPrescription(prescription)}
                     >
                       <div>

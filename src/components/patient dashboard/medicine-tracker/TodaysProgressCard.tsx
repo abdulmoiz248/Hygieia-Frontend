@@ -33,7 +33,7 @@ const TodaysProgressCard: React.FC<TodaysProgressCardProps> = ({ takenCount, tot
       </div>
       <Progress value={todayProgress} className="h-3 mb-4" />
       {nextMedicine && (
-        <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-snow-white/80 border  rounded-lg">
           <Bell className="w-5 h-5 text-dark-slate-gray" />
           <div>
             <p className="font-medium text-soft-coral">Next: {nextMedicine.name}</p>

@@ -24,7 +24,7 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
   todaysMeds,
   toggleMedicineTaken
 }) => (
-  <Card className="shadow-md rounded-2xl">
+  <Card className="shadow-md rounded-2xl bg-snow-white/20">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <Clock className="w-5 h-5 text-soft-blue" />
@@ -43,10 +43,10 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
           {todaysMeds.map((med) => (
             <div
               key={med.id}
-              className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+              className={`p-4 rounded-xl  transition-all duration-300 ${
                 med.taken
                   ? "border-mint-green/40 bg-mint-green/10"
-                  : "border-gray-200 hover:border-soft-blue/30"
+                  : "bg-cool-gray/10 border-0 hover:border-soft-blue/30"
               }`}
             >
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -84,7 +84,7 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
                   ) : (
                     <Button
                       size="sm"
-                      className="bg-mint-green hover:bg-mint-green/90 transition-all duration-200"
+                      className="bg-mint-green text-snow-white hover:bg-mint-green/90 transition-all duration-200"
                       onClick={() => toggleMedicineTaken(med.id)}
                     >
                       Mark Taken

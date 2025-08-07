@@ -117,7 +117,7 @@ export default function AppointmentsPage() {
 
 
     
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="bg-snow-white/20">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export default function AppointmentsPage() {
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    className="rounded-md border w-full"
+                    className="rounded-3xl border w-full"
                     modifiers={{
                       appointment: appointmentDates,
                     }}
@@ -157,9 +157,9 @@ export default function AppointmentsPage() {
                         .map((appointment) => (
                         <div
   key={appointment.id}
-  className="p-4  bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 w-full max-w-md mx-auto sm:max-w-full"
+  className="p-4  bg-cool-gray/10 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 w-full max-w-md mx-auto sm:max-w-full"
 >
-  <div className="flex items-start sm:items-center sm:flex-row flex-col gap-4">
+  <div className="flex items-start sm:items-center sm:flex-row flex-col gap-4 ">
     <Avatar className="w-12 h-12 shrink-0">
       <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
       <AvatarFallback>
@@ -199,7 +199,7 @@ export default function AppointmentsPage() {
 
       {/* Appointments List */}
     <motion.div variants={itemVariants}>
-  <Card>
+  <Card className="bg-snow-white/20">
     <CardHeader>
       <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
         <Clock className="w-5 h-5 text-mint-green" />
@@ -213,7 +213,7 @@ export default function AppointmentsPage() {
         <motion.div
           key={appointment.id}
           whileHover={{ scale: 1.02 }}
-          className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer border-soft-coral"
+          className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer  bg-white/40"
           onClick={() => setSelectedAppointment(appointment)}
         >
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
