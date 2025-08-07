@@ -43,6 +43,7 @@ const [showConfirmation, setShowConfirmation] = useState(false)
   const [appointmentType, setAppointmentType] = useState("")
   const [selectedTime, setSelectedTime] = useState("")
   const [reason, setReason] = useState("")
+  const [reschedule,setreschedule]=useState(false)
   const dispatch=useDispatch()
 
 
@@ -59,6 +60,27 @@ const [showConfirmation, setShowConfirmation] = useState(false)
 
     }
   },[])
+
+
+  
+  useEffect(()=>{
+    const appointmentId=localStorage.getItem("reschedule")
+    if(appointmentId){
+         const app = appointments.appointments.find((a) => a.id == appointmentId)
+         if(app)
+         {
+          setSelectedDoctor(app.doctor.id)
+          setAppointmentType(app.type)
+          setSelectedTime(app.time)
+          setSelectedDate(new Date(app.date))
+          setreschedule(true)
+          setReason(app.notes || "")
+           localStorage.removeItem("reschedule")
+         }
+
+    }
+  },[])
+
 
   const timeSlots = [
     "9:00 AM",
@@ -251,7 +273,7 @@ const [showConfirmation, setShowConfirmation] = useState(false)
   }}
                >
                   <Clock className="w-4 h-4 mr-2" />
-                  Book Appointment
+                  {reschedule?'Reschedule':'Book Appointment'}
                 </Button>
               </div>
             </CardContent>

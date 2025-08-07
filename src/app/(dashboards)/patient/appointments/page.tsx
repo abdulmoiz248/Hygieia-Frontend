@@ -260,7 +260,8 @@ export default function AppointmentsPage() {
 
             {appointment.status === "upcoming" && (
               <div className="flex gap-2 sm:justify-end justify-start flex-wrap mt-2 sm:mt-0">
-                <Button className="bg-soft-blue text-snow-white" variant="outline" size="sm">
+                <Button
+                className="bg-soft-blue text-snow-white" variant="outline" size="sm">
                   Reschedule
                 </Button>
                 <Button
@@ -346,7 +347,13 @@ export default function AppointmentsPage() {
                 <div className="flex gap-3 pt-4 border-t">
                   {selectedAppointment.status === "upcoming" && (
                     <>
-                      <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">Reschedule</Button>
+                      <Button  onClick={()=>{
+                        //real
+                         localStorage.setItem('reschedule',selectedAppointment.id)
+                        router.push('/patient/appointments/new')
+                     
+                      }}
+                      className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">Reschedule</Button>
                       <Button
                       className="bg-soft-coral text-snow-white border-0"
                       onClick={()=>{
