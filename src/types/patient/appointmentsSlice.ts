@@ -23,6 +23,7 @@ export const mockAppointments: Appointment[] = [
     time: "2:30 PM",
     status: AppointmentStatus.Completed,
     type: AppointmentTypes.Emergency
+    ,report:'/temp/test.pdf'
   },
    {
     id: "3",
@@ -37,17 +38,7 @@ export const mockAppointments: Appointment[] = [
 
 const extendedAppointments = mockAppointments.map((apt) => ({
   ...apt,
-  meetingRemarks:
-    apt.status === "completed"
-      ? {
-          diagnosis: "Patient shows good progress with current treatment plan.",
-          symptoms: "Blood pressure has stabilized, no side effects reported.",
-          recommendations: "Continue current medication, schedule follow-up in 3 months.",
-          nextSteps: "Monitor blood pressure daily, maintain low-sodium diet.",
-          prescriptions: "Renewed Lisinopril 10mg daily for 90 days.",
-          doctorNotes: "Patient is responding well to treatment. Encourage continued lifestyle modifications.",
-        }
-      : undefined,
+  
 }))
 
 

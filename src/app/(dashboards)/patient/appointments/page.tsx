@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/store/patient/store"
 import { cancelAppointment } from "@/types/patient/appointmentsSlice"
 import { Appointment } from "@/types/patient/appointment"
+import { useRouter } from "next/navigation"
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -37,12 +38,22 @@ const itemVariants = {
 export default function AppointmentsPage() {
   const dispatch = useDispatch()
   const appointments = useSelector((state: RootState) => state.appointments.appointments)
-
+  const router=useRouter()
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
 
+  
+    const handleDownload = () => {
+    if (!selectedAppointment?.report) return
+    const link = document.createElement("a")
+    link.href = selectedAppointment.report
+    link.download =  "appointment-report.pdf"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
   const filteredAppointments = appointments.filter((appointment) => {
     if (statusFilter === "all") return true
     return appointment.status === statusFilter
@@ -237,7 +248,7 @@ export default function AppointmentsPage() {
                 <div className="flex flex-wrap items-center gap-2 mt-2">
                   <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
                   <Badge variant="outline">{appointment.type}</Badge>
-                  {appointment.meetingRemarks && (
+                  {appointment.report && (
                     <Badge className="bg-soft-blue text-snow-white">
                       <FileText className="w-3 h-3 mr-1" />
                       Report Available
@@ -328,97 +339,41 @@ export default function AppointmentsPage() {
                   </div>
                 </div>
 
-                {/* Meeting Remarks (if completed) */}
-                {selectedAppointment.meetingRemarks && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-mint-green" />
-                      <h3 className="text-lg font-semibold">Meeting Summary</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Diagnosis</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.diagnosis}</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Symptoms Observed</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.symptoms}</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Recommendations</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.recommendations}</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Next Steps</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.nextSteps}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {selectedAppointment.meetingRemarks.prescriptions && (
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            Prescriptions
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.prescriptions}</p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base">Doctor&apos;s Notes</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-cool-gray">{selectedAppointment.meetingRemarks.doctorNotes}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
+         
+             
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-4 border-t">
                   {selectedAppointment.status === "upcoming" && (
                     <>
-                      <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90">Reschedule</Button>
-                      <Button onClick={()=>{
+                      <Button className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">Reschedule</Button>
+                      <Button
+                      className="bg-soft-coral text-snow-white border-0"
+                      onClick={()=>{
                         dispatch(cancelAppointment(selectedAppointment.id))
                         setSelectedAppointment(null)
+
                       }
+                      
 }
                        variant="outline">Cancel</Button>
                     </>
                   )}
-                  {selectedAppointment.status === "completed" && selectedAppointment.meetingRemarks && (
+                  {selectedAppointment.status === "completed" && selectedAppointment.report && (
                     <>
-                      <Button className="flex-1 bg-mint-green hover:bg-mint-green/90">
+                      <Button onClick={handleDownload}
+                      className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
                         <FileText className="w-4 h-4 mr-2" />
                         Download Report
                       </Button>
-                      <Button variant="outline">Book Follow-up</Button>
+                      <Button variant="outline"
+                      className="hover:bg-mint-green hover:text-snow-white"
+                       onClick={()=>{
+                        localStorage.setItem('appointment',selectedAppointment.id)
+                        router.push('/patient/appointments/new')
+                       }}
+                       
+                      >Book Follow-up</Button>
                     </>
                   )}
                 </div>

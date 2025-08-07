@@ -16,6 +16,7 @@ export function MedicalRecordViewerModal({
   getTypeIcon,
   onDeleteRecord
 }: MedicalRecordViewerModalProps) {
+  
   const handleDownload = () => {
     if (!viewingRecord?.fileUrl) return
     const link = document.createElement("a")

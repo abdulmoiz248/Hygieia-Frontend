@@ -21,12 +21,5 @@ export interface Appointment {
   status: AppointmentStatus
   type: AppointmentTypes
   notes?: string
-  meetingRemarks?: {
-    diagnosis: string
-    symptoms: string
-    recommendations: string
-    nextSteps: string
-    prescriptions: string
-    doctorNotes: string
-  }
+ report?: string
 }

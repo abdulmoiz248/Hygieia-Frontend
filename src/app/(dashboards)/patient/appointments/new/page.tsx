@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, User, FileText, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,7 +17,7 @@ import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSe
 import { useDispatch, useSelector } from "react-redux"
 import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
-import { RootState } from "@/store/patient/store"
+import { RootState, store } from "@/store/patient/store"
 import { AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 
 
@@ -32,7 +32,10 @@ const itemVariants = {
 }
 
 export default function NewAppointmentPage() {
+
+  
   const user=useSelector((store:RootState)=>store.profile)
+  const appointments=useSelector((store:RootState)=>store.appointments)
 const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
 const [showConfirmation, setShowConfirmation] = useState(false)
 
@@ -41,6 +44,21 @@ const [showConfirmation, setShowConfirmation] = useState(false)
   const [selectedTime, setSelectedTime] = useState("")
   const [reason, setReason] = useState("")
   const dispatch=useDispatch()
+
+
+  useEffect(()=>{
+    const appointmentId=localStorage.getItem("appointment")
+    if(appointmentId){
+         const app = appointments.appointments.find((a) => a.id == appointmentId)
+         if(app)
+         {
+          setSelectedDoctor(app.doctor.id)
+          setAppointmentType(AppointmentTypes.FollowUp)
+           localStorage.removeItem("appointment")
+         }
+
+    }
+  },[])
 
   const timeSlots = [
     "9:00 AM",
