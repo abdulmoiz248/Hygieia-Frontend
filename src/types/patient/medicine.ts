@@ -20,6 +20,7 @@ export interface Prescription {
   date: string // 'YYYY-MM-DD'
   status: 'active' | 'completed'
   medications: Medicine[]
+  url:string
 }
 
 

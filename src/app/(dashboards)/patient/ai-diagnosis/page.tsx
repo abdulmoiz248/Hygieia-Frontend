@@ -141,6 +141,7 @@ export default function AIDiagnosisPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-snow-white p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
@@ -160,8 +161,8 @@ export default function AIDiagnosisPage() {
                 <div className="w-16 h-16 bg-soft-blue/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🦷</span>
                 </div>
-                <h3 className="text-xl font-semibold text-dark-slate-gray bg-white/40 mb-2">Dental Analysis</h3>
-                <p className="text-cool-gray bg-cool-gray/10">Upload photos of dental concerns for AI-powered analysis</p>
+                <h3 className="text-xl font-semibold text-dark-slate-gray  mb-2">Dental Analysis</h3>
+                <p className="text-cool-gray ">Upload photos of dental concerns for AI-powered analysis</p>
               </CardContent>
             </Card>
 
@@ -277,5 +278,10 @@ export default function AIDiagnosisPage() {
         <ResultsModal open={showResults} onOpenChange={setShowResults} result={result} resetDiagnosis={resetDiagnosis} />
       </div>
     </div>
+         <AnalysisProgressModal open={isAnalyzing} selectedType={selectedType} analysisProgress={analysisProgress} />
+
+        {/* Results Modal */}
+        <ResultsModal open={showResults} onOpenChange={setShowResults} result={result} resetDiagnosis={resetDiagnosis} />
+     </>
   )
 }

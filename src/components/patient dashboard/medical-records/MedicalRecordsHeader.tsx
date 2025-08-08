@@ -5,6 +5,7 @@ import { Upload } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { MedicalRecord } from "@/types"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 interface MedicalRecordsHeaderProps {
   showUpload: boolean
@@ -45,6 +46,7 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
       fileUrl: URL.createObjectURL(file),
     }
     onUploadRecord(newRecord)
+    patientSuccess(`${title} Report Uploaded Succesfully`)
     setTitle("")
     setType("")
     setDoctorName("")

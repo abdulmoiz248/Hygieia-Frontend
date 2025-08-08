@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import {  Download, Eye, Trash2 } from "lucide-react"
 import type { MedicalRecord } from "@/types"
+import { patientDestructive,  patientSuccess } from "@/toasts/PatientToast"
 
 interface MedicalRecordViewerModalProps {
   viewingRecord: MedicalRecord | null
@@ -25,6 +26,7 @@ export function MedicalRecordViewerModal({
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    patientSuccess(`${viewingRecord.title} Report Downloaded Successfully`)
   }
 
   const handlePreview = () => {
@@ -35,6 +37,7 @@ export function MedicalRecordViewerModal({
   const handleDelete = () => {
     if (!viewingRecord?.id || !onDeleteRecord) return
     onDeleteRecord(viewingRecord.id)
+    patientDestructive(`${viewingRecord.title} Report Deleted Successfully`)
     setViewingRecord(null)
   }
 

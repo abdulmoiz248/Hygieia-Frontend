@@ -19,6 +19,7 @@ import { RootState } from "@/store/patient/store"
 import { cancelAppointment } from "@/types/patient/appointmentsSlice"
 import { Appointment } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
+import { patientDestructive } from "@/toasts/PatientToast"
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -358,8 +359,9 @@ export default function AppointmentsPage() {
                       className="bg-soft-coral text-snow-white border-0"
                       onClick={()=>{
                         dispatch(cancelAppointment(selectedAppointment.id))
+                        
                         setSelectedAppointment(null)
-
+                        patientDestructive(`Appointment with ${selectedAppointment.doctor.name} Cancelled Successfully`) 
                       }
                       
 }

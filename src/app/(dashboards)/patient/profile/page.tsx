@@ -14,6 +14,7 @@ import type { RootState } from "@/store/patient/store"
 import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
 import { ProfileType } from "@/types/patient/profile"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 
 const containerVariants = {
@@ -41,6 +42,7 @@ export default function ProfilePage() {
 
   const handleSave = () => {
     setIsEditing(false)
+    patientSuccess(`${profile.name} profile updated successfully`)
     dispatch(ProfileUpdate(profile))
   }
 

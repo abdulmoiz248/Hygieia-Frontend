@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, Pill, CheckCircle } from "lucide-react"
 import React from "react"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 interface Medicine {
   id: string
@@ -85,7 +86,9 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
                     <Button
                       size="sm"
                       className="bg-mint-green text-snow-white hover:bg-mint-green/90 transition-all duration-200"
-                      onClick={() => toggleMedicineTaken(med.id)}
+                      onClick={() =>{
+                        patientSuccess("Medicine "+med.name+ " marked as Taken")
+                         toggleMedicineTaken(med.id)}}
                     >
                       Mark Taken
                     </Button>

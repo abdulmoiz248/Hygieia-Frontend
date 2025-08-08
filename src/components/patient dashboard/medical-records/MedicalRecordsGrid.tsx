@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Eye, Download, Upload, Calendar, User } from "lucide-react"
 import type { MedicalRecord } from "@/types"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 interface MedicalRecordsGridProps {
   filteredRecords: MedicalRecord[]
@@ -60,6 +61,7 @@ export function MedicalRecordsGrid({
                 </Button>
                 <a href={record.fileUrl} download>
                   <Button
+                  onClick={()=> patientSuccess(`${record.title} Report Downloaded Successfully`)}
                     variant="default"
                     size="sm"
                     className="bg-soft-coral hover:bg-soft-coral/90 text-white px-3"

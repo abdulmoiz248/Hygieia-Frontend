@@ -95,6 +95,7 @@ export default function DashboardPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Welcome Section */}
+      
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold text-dark-slate-gray mb-2"><span className="text-soft-coral">Welcome back,</span> {user.name}! 👋</h1>
         <p className="text-cool-gray">Here&apos;s what&apos;s happening with your health today.</p>

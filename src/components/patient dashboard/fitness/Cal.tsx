@@ -9,6 +9,7 @@ import { Calculator } from 'lucide-react'
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
 import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
+import { patientSuccess } from '@/toasts/PatientToast'
 
 const getBMICategory = (bmi: number, gender: string) => {
   if (gender === 'female') {
@@ -57,7 +58,9 @@ export default function HealthDataModal({
   const handleSave = () => {
     setOriginalWeight(weight)
     setOriginalHeight(height)
+       patientSuccess(`${user.name} Data Updated Successfully`)
     setShowDialog(false)
+ 
       dispatch(ProfileUpdate({height,weight}))
   }
 

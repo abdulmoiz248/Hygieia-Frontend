@@ -1,8 +1,5 @@
 import React from "react";
-import Dialog from "./Dialog";
-import DialogContent from "./DialogContent";
-import DialogHeader from "./DialogHeader";
-import DialogTitle from "./DialogTitle";
+import {Dialog,DialogContent,DialogTitle,DialogHeader} from '@/components/ui/dialog'
 import Progress from "./Progress";
 import Badge from "./Badge";
 import Button from "./Button";
@@ -37,9 +34,10 @@ const getSeverityColor = (severity: string) => {
 };
 
 const ResultsModal: React.FC<ResultsModalProps> = ({ open, onOpenChange, result, resetDiagnosis }) => (
-  <Dialog open={open} onOpenChange={onOpenChange} > 
-    <DialogContent className="w-full max-w-[90vw] xl:max-w-[1600px] 2xl:max-w-[1800px] ">
-      <DialogHeader>
+  <Dialog open={open} onOpenChange={onOpenChange}  > 
+<DialogContent className="w-full bg-snow-white max-w-[80vw] sm:max-w-[600px] md:max-w-[700px] lg:max-w-[850px] xl:max-w-[1000px] 2xl:max-w-[1100px] max-h-[90vh] overflow-y-auto">
+
+  <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <CheckCircle className="w-6 h-6 text-mint-green" />
           Analysis Complete

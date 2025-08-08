@@ -2,6 +2,7 @@ import { DashboardLayout } from "@/components/patient dashboard/dashboard-layout
 import type { Metadata } from "next";
 
 import { PatientProvider } from "@/Providers/PatientProvider";
+import { PatientToastContainer } from "@/toasts/PatientToast";
 
 
 
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
    <>
   <PatientProvider>
+    <PatientToastContainer/>
     <DashboardLayout>
      {children}
      </DashboardLayout>

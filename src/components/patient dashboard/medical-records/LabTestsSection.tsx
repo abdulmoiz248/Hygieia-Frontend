@@ -10,6 +10,7 @@ import { setShowBookingModal, setSelectedTest, cancelLabTest, BookedLabTest } fr
 import { LabTestBookingModal } from "./LabTestBookingModal"
 import type { LabTest } from "@/types/patient/labTestsSlice"
 import { useState } from "react"
+import { patientDestructive } from "@/toasts/PatientToast"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -139,7 +140,9 @@ export function LabTestsSection() {
           variant="destructive"
           className="bg-soft-coral text-snow-white hover:bg-soft-coral/90"
           onClick={() => {
+            const testName=selectTestModal?.testName
             handleCancelTest(selectTestModal.id)
+            patientDestructive(`${testName}  Cancelled Successfully`)
             setSelectedTestModal(null)
           }}
         >

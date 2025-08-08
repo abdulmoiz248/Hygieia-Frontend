@@ -12,6 +12,7 @@ import { bookLabTest, setShowBookingModal, setSelectedTest } from "@/types/patie
 import type { LabTest } from "@/types/patient/labTestsSlice"
 import { CalendarComponent } from "@/components/ui/calendar"
 import TimeSelect from "./TimeSelect"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 interface LabTestBookingModalProps {
   test: LabTest
@@ -41,6 +42,7 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
       }),
     )
 
+    patientSuccess(`${test.name} Booked Successfully`)
     dispatch(setShowBookingModal(false))
     dispatch(setSelectedTest(null))
     setSelectedDate(new Date(Date.now() + 86400 * 1000))
@@ -158,7 +160,7 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
               disabled={!selectedDate || !selectedTime}
               className="flex-1 bg-soft-blue text-snow-white"
             >
-              Book Test - ${test.price}
+              Book Test - Rs.{test.price}
             </Button>
           </div>
         </div>

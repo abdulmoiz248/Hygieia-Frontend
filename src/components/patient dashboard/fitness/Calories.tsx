@@ -12,6 +12,7 @@ import { RootState } from "@/store/patient/store"
 import { addCalories } from "@/types/patient/fitnessSlice"
 import {  Flame, Apple} from "lucide-react"
 import {AiCalorieEstimate} from './action'
+import { patientSuccess } from "@/toasts/PatientToast"
 export default function Calories() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -47,6 +48,7 @@ export default function Calories() {
     if (!type || !generatedCalories || generatedCalories <= 0) return
 
     dispatch(addCalories({ type, amount: generatedCalories }))
+    patientSuccess("Calories added to today's record successfully")
     setType("")
     setDesc("")
     setGeneratedCalories(null)

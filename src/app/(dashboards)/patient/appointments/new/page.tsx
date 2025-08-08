@@ -19,6 +19,7 @@ import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
 import { RootState } from "@/store/patient/store"
 import { AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
+import { patientSuccess } from "@/toasts/PatientToast"
 
 
 const containerVariants = {
@@ -269,8 +270,9 @@ const [showConfirmation, setShowConfirmation] = useState(false)
         notes: reason,
       })
     )
+       patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${mockDoctors.find((d) => d.id === selectedDoctor)?.name} Successfully`)
      setShowConfirmation(true)
-  }}
+   }}
                >
                   <Clock className="w-4 h-4 mr-2" />
                   {reschedule?'Reschedule':'Book Appointment'}
