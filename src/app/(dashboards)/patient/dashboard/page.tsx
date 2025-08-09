@@ -26,6 +26,9 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
 import {  useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
+import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
+import { useState } from "react"
+import TextType from "@/blocks/TextAnimations/TextType/TextType"
 
 
 const containerVariants = {
@@ -92,14 +95,57 @@ export default function DashboardPage() {
   const recentRecords = mockMedicalRecords.slice(0, 3)
   const user=useSelector((state: RootState) => state.profile)
 
+  const [showDes,setShowDes]=useState(false)
+  const handleAnimationComplete = () => {
+  setShowDes(true)
+};
+
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Welcome Section */}
       
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-dark-slate-gray mb-2"><span className="text-soft-coral">Welcome back,</span> {user.name}! 👋</h1>
-        <p className="text-cool-gray">Here&apos;s what&apos;s happening with your health today.</p>
-      </motion.div>
+
+<SplitText
+  text={   <span>
+      <span className="text-soft-coral">Welcome back, </span>
+      <span className="text-dark-slate-gray">{user.name}! 👋</span>
+    </span>
+    }
+  className="text-3xl font-bold mb-2"
+  delay={100}
+  duration={0.4}
+  ease="power3.out"
+  splitType="chars"
+  from={{ opacity: 0, y: 40 }}
+  to={{ opacity: 1, y: 0 }}
+  threshold={0.1}
+  rootMargin="-100px"
+  textAlign="center"
+  onLetterAnimationComplete={handleAnimationComplete}
+/>
+
+{showDes && (
+  <div className="block mt-2 ">
+    <TextType
+      text={[
+        "📅 You have 2 upcoming appointments this week.",
+        "💊 Don’t forget to take your prescribed medicines.",
+        "📈 Your latest health report is ready to view.",
+        "🧠 Remember to take short breaks for mental well-being.",
+        "🏃‍♂️ Stay active — small steps make a big difference."
+      ]}
+      typingSpeed={75}
+      pauseDuration={1500}
+      showCursor={true}
+      cursorCharacter="|"
+    textColors={['-cool-gray']}
+    className="font-bold"
+    />
+  </div>
+)}
+
+   </motion.div>
 
       {/* Quick Stats */}
    <DashboardStats/>
