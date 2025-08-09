@@ -147,6 +147,7 @@ export default function DashboardPage() {
    </motion.div>
 
       {/* Quick Stats */}
+   
    <DashboardStats/>
    <FolderApp/>
 
