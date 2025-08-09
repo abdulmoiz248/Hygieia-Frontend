@@ -40,6 +40,7 @@ const SplitText: React.FC<SplitTextProps> = ({
 }) => {
   const ref = useRef<HTMLParagraphElement>(null);
   const animationCompletedRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const scrollTriggerRef = useRef<any | null>(null);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ const SplitText: React.FC<SplitTextProps> = ({
 
     const textContent = (el.textContent || "").trim();
     const key = `${className}::${textContent}`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalAny = window as any;
     if (!globalAny.__splitTextAnimatedKeys) {
       globalAny.__splitTextAnimatedKeys = new Set<string>();
@@ -64,7 +66,7 @@ const SplitText: React.FC<SplitTextProps> = ({
     const ctx = gsap.context(() => {
       const absoluteLines = splitType === "lines";
       if (absoluteLines) el.style.position = "relative";
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
       let splitter: any;
       try {
         splitter = new GSAPSplitText(el, {
@@ -72,7 +74,7 @@ const SplitText: React.FC<SplitTextProps> = ({
           absolute: absoluteLines,
           linesClass: "split-line",
         });
-      } catch (error) {
+      } catch {
         return;
       }
 
@@ -155,7 +157,7 @@ const SplitText: React.FC<SplitTextProps> = ({
     return () => {
       try {
         ctx.revert();
-      } catch (e) {}
+      } catch {}
     };
   }, [
     text,
