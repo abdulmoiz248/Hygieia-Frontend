@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { ChefHat, Loader2, Check, Clock, Target, Activity, Utensils, AlertCircle, Sparkles, Calendar } from 'lucide-react';
+import { ChefHat,  Check, Clock, Target, Activity, Utensils, AlertCircle, Sparkles, Calendar } from 'lucide-react';
 import { useState } from "react"
 import { motion } from "framer-motion"
 import {  Users } from "lucide-react"
