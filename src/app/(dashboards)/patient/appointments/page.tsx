@@ -128,25 +128,28 @@ export default function AppointmentsPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-3xl border w-full"
-                    modifiers={{
-                      appointment: appointmentDates,
-                    }}
-                    showOutsideDays={false}
-                    modifiersStyles={{
-                      appointment: {
-                        backgroundColor: "var(--soft-blue)",
-                        color: "white",
-                        borderRadius: "50%",
-                      },
-                    }}
-                  />
-                </div>
+              <div className="w-full flex justify-center">
+  <div className="w-full max-w-full overflow-x-auto">
+    <CalendarComponent
+      mode="single"
+      selected={selectedDate}
+      onSelect={setSelectedDate}
+      className="rounded-5 border w-[70vh] p-0 m-0 min-w-[280px] sm:min-w-[350px] md:min-w-[400px]"
+      modifiers={{
+        appointment: appointmentDates,
+      }}
+      showOutsideDays={false}
+      modifiersStyles={{
+        appointment: {
+          backgroundColor: "var(--soft-blue)",
+          color: "white",
+          borderRadius: "50%",
+        },
+      }}
+    />
+  </div>
+</div>
+
                 <div>
                   <h3 className="font-bold mb-4 text-soft-blue">
                     {selectedDate ? `Appointments on ${selectedDate.toLocaleDateString()}` : "Select a date"}

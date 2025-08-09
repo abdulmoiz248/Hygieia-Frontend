@@ -14,6 +14,7 @@ function CalendarComponent({
   buttonVariant = "ghost",
   formatters,
   components,
+  numberOfMonths = 1,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -22,6 +23,7 @@ function CalendarComponent({
 
   return (
     <DayPicker
+      numberOfMonths={numberOfMonths}
       showOutsideDays={showOutsideDays}
       className={cn(
         "rounded-3xl bg-white backdrop-blur-xl p-4 sm:p-6 border border-gray-200 shadow-xl transition-all duration-300",
@@ -35,12 +37,12 @@ function CalendarComponent({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-full", defaultClassNames.root),
+        root: cn("w-full min-w-0", defaultClassNames.root),
         months: cn(
-          "grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 relative",
+          "grid grid-cols-1 gap-6 sm:gap-8 relative min-w-0",
           defaultClassNames.months
         ),
-        month: cn("flex flex-col w-full gap-4 sm:gap-5", defaultClassNames.month),
+        month: cn("flex flex-col w-full gap-4 sm:gap-5 min-w-0", defaultClassNames.month),
         nav: cn("flex items-center gap-2 w-full absolute top-0 inset-x-0 justify-between", defaultClassNames.nav),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
@@ -53,7 +55,7 @@ function CalendarComponent({
           defaultClassNames.button_next,
         ),
         month_caption: cn(
-          "flex items-center justify-center h-8 sm:h-10 w-full px-6 sm:px-10 text-gray-800 font-bold text-base sm:text-lg tracking-wide mb-2",
+          "flex items-center mx-auto whitespace-nowrap justify-center h-8 sm:h-10 w-full px-6 sm:px-10 text-gray-800 font-bold text-base sm:text-lg tracking-wide mb-2",
           defaultClassNames.month_caption,
         ),
         dropdowns: cn(
@@ -63,10 +65,10 @@ function CalendarComponent({
         table: "w-full border-collapse",
         weekdays: cn("flex mb-1 sm:mb-2", defaultClassNames.weekdays),
         weekday: cn(
-          "text-rose-500 flex-1 font-bold text-[10px] sm:text-xs select-none py-1 sm:py-2 text-center uppercase tracking-wider",
+          "text-rose-500 flex-1   font-bold text-[10px] sm:text-xs select-none py-1 sm:py-2 text-center uppercase tracking-wider",
           defaultClassNames.weekday,
         ),
-        week: cn("flex w-full gap-0", defaultClassNames.week),
+        week: cn("flex w-full gap-0  ", defaultClassNames.week),
         day: cn("group/day relative flex-1 aspect-square select-none p-0.5", defaultClassNames.day),
         today: cn(
           "bg-gradient-to-br from-rose-100 to-blue-100 text-gray-800 font-bold rounded-2xl shadow-md ",

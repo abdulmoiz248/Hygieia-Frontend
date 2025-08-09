@@ -116,7 +116,30 @@ const [showConfirmation, setShowConfirmation] = useState(false)
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointment Form */}
         <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card>
+
+                <Card className="mb-3 bg-white/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-mint-green" />
+                Select Date
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+      <CalendarComponent
+  //numberOfMonths={1}
+  mode="single"
+  selected={selectedDate}
+  onSelect={setSelectedDate}
+  className="rounded-5 border-0 w-full max-w-[450px] mx-auto"
+  disabled={(date: Date) => date < new Date()}
+  showOutsideDays={false}
+/>
+
+   
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/40">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5 text-soft-blue" />
@@ -192,32 +215,16 @@ const [showConfirmation, setShowConfirmation] = useState(false)
               </div>
             </CardContent>
           </Card>
+        
         </motion.div>
 
         {/* Calendar & Summary */}
         <motion.div variants={itemVariants} className="space-y-6">
           {/* Calendar */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-mint-green" />
-                Select Date
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border-0 w-full"
-                disabled={(date:Date) => date < new Date()}
-                showOutsideDays={false}
-              />
-            </CardContent>
-          </Card>
+      
 
           {/* Appointment Summary */}
-          <Card className="">
+          <Card className={  (!selectedDoctor || !selectedDate || !selectedTime || !appointmentType)?'bg-cool-gray/10':'bg-white/40'}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 ">
                 <FileText className="w-5 h-5 text-soft-coral" />
