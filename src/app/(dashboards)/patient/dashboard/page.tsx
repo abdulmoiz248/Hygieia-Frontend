@@ -1,12 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Calendar, FileText, Activity, Pill, Clock, TrendingUp,  Target, Heart } from "lucide-react"
+import { Activity, Pill,  TrendingUp,  Target, Heart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+
 import { Progress } from "@/components/ui/progress"
-import {  mockMedicalRecords, mockFitnessGoals } from "@/mocks/data"
-import Link from "next/link"
+import {  mockFitnessGoals } from "@/mocks/data"
+
 import {
   BarChart,
   Bar,
@@ -29,6 +29,7 @@ import type { RootState } from "@/store/patient/store"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
 import { useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
+import FolderApp from "@/components/patient dashboard/dashboard/FolderApp"
 
 
 const containerVariants = {
@@ -92,7 +93,6 @@ const medicationAdherence = [
 export default function DashboardPage() {
    const appointments = useSelector((state: RootState) => state.appointments.appointments)
   const upcomingAppointments = appointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
-  const recentRecords = mockMedicalRecords.slice(0, 3)
   const user=useSelector((state: RootState) => state.profile)
 
   const [showDes,setShowDes]=useState(false)
@@ -129,9 +129,8 @@ export default function DashboardPage() {
   <div className="block mt-2 ">
     <TextType
       text={[
-        "📅 You have 2 upcoming appointments this week.",
+        `📅 You have ${upcomingAppointments.length} upcoming appointments`,
         "💊 Don’t forget to take your prescribed medicines.",
-        "📈 Your latest health report is ready to view.",
         "🧠 Remember to take short breaks for mental well-being.",
         "🏃‍♂️ Stay active — small steps make a big difference."
       ]}
@@ -149,6 +148,9 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
    <DashboardStats/>
+   <FolderApp/>
+
+   
 
       {/* Enhanced Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -434,81 +436,7 @@ export default function DashboardPage() {
         </Card>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Appointments */}
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-soft-blue" />
-                Upcoming Appointments
-              </CardTitle>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/appointments">View All</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingAppointments.map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-soft-blue/20 rounded-full flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-soft-blue" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{appointment.doctor.name}</p>
-                      <p className="text-sm text-cool-gray">
-                        {appointment.date} at {appointment.time}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs bg-soft-blue/20 text-soft-blue px-2 py-1 rounded-full">
-                    {appointment.type}
-                  </span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Recent Medical Records */}
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-mint-green" />
-                Recent Medical Records
-              </CardTitle>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/medical-records">View All</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentRecords.map((record) => (
-                <div
-                  key={record.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-mint-green/20 rounded-full flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-mint-green" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{record.title}</p>
-                      <p className="text-sm text-cool-gray">
-                        {record.date} • {record.doctorName}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs bg-mint-green/20 text-mint-green px-2 py-1 rounded-full">{record.type}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+      
 
       {/* Fitness Progress */}
       <motion.div variants={itemVariants}>
