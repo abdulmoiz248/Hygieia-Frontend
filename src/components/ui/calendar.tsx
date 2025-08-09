@@ -1,4 +1,5 @@
 "use client"
+
 import * as React from "react"
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { type DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
@@ -23,10 +24,10 @@ function CalendarComponent({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "rounded-3xl bg-white/40 backdrop-blur-xl p-6 border border-white/50 shadow-2xl transition-all duration-300",
-        "hover:shadow-[0_0_25px_rgba(0,0,0,0.15)]",
-        "max-w-[380px]",
-        className
+        "rounded-3xl bg-white backdrop-blur-xl p-6 border border-gray-200 shadow-xl transition-all duration-300",
+        "hover:shadow-2xl",
+        "w-full max-w-sm mx-auto",
+        className,
       )}
       captionLayout={captionLayout}
       formatters={{
@@ -40,36 +41,36 @@ function CalendarComponent({
         nav: cn("flex items-center gap-2 w-full absolute top-0 inset-x-0 justify-between", defaultClassNames.nav),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-[--cell-size] p-0 select-none rounded-xl bg-white/50 backdrop-blur-md shadow hover:scale-105 hover:bg-gradient-to-br hover:from-soft-blue hover:to-soft-coral text-dark-slate-gray transition-all duration-200",
-          defaultClassNames.button_previous
+          "h-10 w-10 p-0 select-none rounded-xl bg-white/80 backdrop-blur-md shadow-md hover:scale-105 hover:bg-rose-100 hover:shadow-lg text-gray-700 transition-all duration-200 border border-gray-200/50",
+          defaultClassNames.button_previous,
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-[--cell-size] p-0 select-none rounded-xl bg-white/50 backdrop-blur-md shadow hover:scale-105 hover:bg-gradient-to-br hover:from-soft-blue hover:to-soft-coral text-dark-slate-gray transition-all duration-200",
-          defaultClassNames.button_next
+          "h-10 w-10 p-0 select-none rounded-xl bg-white/80 backdrop-blur-md shadow-md hover:scale-105 hover:bg-rose-100 hover:shadow-lg text-gray-700 transition-all duration-200 border border-gray-200/50",
+          defaultClassNames.button_next,
         ),
         month_caption: cn(
-          "flex items-center justify-center h-[--cell-size] w-full px-[--cell-size] text-dark-slate-gray font-extrabold text-xl tracking-wide",
-          defaultClassNames.month_caption
+          "flex items-center justify-center h-10 w-full px-10 text-gray-800 font-bold text-lg tracking-wide mb-2",
+          defaultClassNames.month_caption,
         ),
         dropdowns: cn(
-          "w-full flex items-center text-sm font-semibold justify-center h-[--cell-size] gap-2 text-soft-coral",
-          defaultClassNames.dropdowns
+          "w-full flex items-center text-sm font-semibold justify-center h-10 gap-2 text-rose-500",
+          defaultClassNames.dropdowns,
         ),
-        table: "w-full border-collapse space-y-1",
+        table: "w-full border-collapse",
         weekdays: cn("flex mb-2", defaultClassNames.weekdays),
         weekday: cn(
-          "text-soft-coral rounded-xl flex-1 font-bold text-sm select-none py-3 text-center uppercase tracking-wider",
-          defaultClassNames.weekday
+          "text-rose-500 flex-1 font-bold text-xs select-none py-2 text-center uppercase tracking-wider",
+          defaultClassNames.weekday,
         ),
-        week: cn("flex w-full mt-2 gap-1", defaultClassNames.week),
-        day: cn("group/day relative aspect-square select-none", defaultClassNames.day),
+        week: cn("flex w-full gap-0", defaultClassNames.week),
+        day: cn("group/day relative flex-1 aspect-square select-none p-0.5", defaultClassNames.day),
         today: cn(
-          "bg-gradient-to-br from-soft-coral/40 to-soft-blue/40 text-dark-slate-gray font-bold rounded-2xl shadow-lg ring-2 ring-soft-coral/40",
-          defaultClassNames.today
+          "bg-gradient-to-br from-rose-100 to-blue-100 text-gray-800 font-bold rounded-2xl shadow-md ",
+          defaultClassNames.today,
         ),
-        outside: cn("text-cool-gray/50", defaultClassNames.outside),
-        disabled: cn("text-cool-gray/30 opacity-40", defaultClassNames.disabled),
+        outside: cn("text-gray-400/60", defaultClassNames.outside),
+        disabled: cn("text-gray-300 opacity-40", defaultClassNames.disabled),
         hidden: cn("invisible", defaultClassNames.hidden),
         ...classNames,
       }}
@@ -79,18 +80,18 @@ function CalendarComponent({
         },
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
-            return <ChevronLeftIcon className={cn("size-5 text-soft-coral", className)} {...props} />
+            return <ChevronLeftIcon className={cn("size-5 text-rose-500", className)} {...props} />
           }
           if (orientation === "right") {
-            return <ChevronRightIcon className={cn("size-5 text-soft-coral", className)} {...props} />
+            return <ChevronRightIcon className={cn("size-5 text-rose-500", className)} {...props} />
           }
-          return <ChevronDownIcon className={cn("size-5 text-dark-slate-gray", className)} {...props} />
+          return <ChevronDownIcon className={cn("size-5 text-gray-700", className)} {...props} />
         },
         DayButton: ThemedCalendarDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
-              <div className="flex size-[--cell-size] items-center justify-center text-center text-cool-gray font-medium rounded-lg hover:bg-cool-gray/10 transition-colors">
+              <div className="flex size-10 items-center justify-center text-center text-gray-500 font-medium rounded-lg hover:bg-gray-100 transition-colors">
                 {children}
               </div>
             </td>
@@ -117,19 +118,21 @@ function ThemedCalendarDayButton({ className, day, modifiers, ...props }: React.
       variant="ghost"
       size="icon"
       className={cn(
-        "flex aspect-square w-full min-w-[--cell-size] items-center justify-center font-medium text-dark-slate-gray rounded-2xl transition-all duration-200 relative overflow-hidden",
-        "bg-white/50 backdrop-blur-md hover:scale-105 hover:shadow-lg hover:bg-gradient-to-br hover:from-mint-green/40 hover:to-soft-blue/40",
-        "data-[selected-single=true]:bg-gradient-to-br data-[selected-single=true]:from-soft-blue data-[selected-single=true]:to-soft-coral data-[selected-single=true]:text-white data-[selected-single=true]:font-bold",
-        "data-[range-middle=true]:bg-soft-blue/20 data-[range-start=true]:bg-soft-blue data-[range-end=true]:bg-soft-blue",
-        "group-data-[focused=true]/day:ring-2 group-data-[focused=true]/day:ring-soft-blue/40",
+        "h-10 w-10 p-0 flex items-center justify-center font-medium text-gray-700 rounded-xl transition-all duration-200 relative overflow-hidden",
+        "hover:scale-105 hover:shadow-md hover:bg-gradient-to-br hover:from-emerald-50 hover:to-blue-50 hover:text-gray-800",
+        "data-[selected-single=true]:bg-gradient-to-br data-[selected-single=true]:from-rose-400 data-[selected-single=true]:to-pink-500 data-[selected-single=true]:text-white data-[selected-single=true]:font-bold data-[selected-single=true]:shadow-lg data-[selected-single=true]:scale-105",
+        "data-[range-middle=true]:bg-blue-100 data-[range-start=true]:bg-blue-500 data-[range-start=true]:text-white data-[range-end=true]:bg-blue-500 data-[range-end=true]:text-white",
+        "group-data-[focused=true]/day:ring-2 group-data-[focused=true]/day:ring-blue-300",
+        modifiers.outside && "text-gray-400",
+        modifiers.today && "bg-gradient-to-br from-rose-100 to-blue-100 font-bold ring-2 ring-rose-400 ring-offset-2 ring-offset-white",
         defaultClassNames.day,
-        className
+        className,
       )}
       {...props}
     >
-      {day.date.getDate()}
+      <span className="text-sm font-medium">{day.date.getDate()}</span>
       {modifiers.appointment && (
-        <span className="absolute bottom-1 w-2 h-2 rounded-full bg-soft-coral shadow-md" />
+        <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-rose-400 shadow-sm" />
       )}
     </Button>
   )

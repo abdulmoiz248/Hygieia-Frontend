@@ -109,7 +109,7 @@ export default  function Login() {
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? 'Logging In...' : 'Login In'}
+                {isLoading ? 'Logging In...' : 'Login'}
               </Button>
             </form>
 

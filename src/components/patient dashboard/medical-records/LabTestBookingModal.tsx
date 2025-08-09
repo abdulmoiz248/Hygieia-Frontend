@@ -114,6 +114,7 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
       onSelect={setSelectedDate}
       className="rounded-md border w-[350px]" // or whatever width you want
       showOutsideDays={false}
+        disabled={(date:Date) => date < new Date()}
       required
     />
   </div>
