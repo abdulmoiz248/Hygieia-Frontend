@@ -26,46 +26,35 @@ export default function DashboardPage() {
       variants={containerVariants} 
       initial="hidden" 
       animate="visible" 
-      className="space-y-8 p-6 max-w-7xl mx-auto"
+      className="space-y-6 lg:space-y-8 w-full"
     >
       {/* Welcome and Overview Section */}
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         <WelcomeSection />
         <DashboardStats />
       </div>
 
       {/* Fitness and Progress Section */}
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         <FitnessProgressGauges />
         <FolderApp />
       </div>
 
       {/* Advanced Analytics Section */}
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-dark-slate-gray/90 mb-2">Advanced Health Analytics</h2>
-          <p className="text-dark-slate-gray/60">Comprehensive insights into your health journey</p>
-        </div>
+   
         <DashboardGraphs />
-      </div>
+  
 
       {/* Health Insights and Recommendations */}
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-dark-slate-gray/90 mb-2">AI-Powered Health Insights</h2>
-          <p className="text-dark-slate-gray/60">Personalized recommendations and predictive analytics</p>
+      <div className="space-y-4 lg:space-y-6">
+        <div className="text-center mb-6 lg:mb-8">
+          <h2 className="text-2xl lg:text-3xl font-bold text-dark-slate-gray/90 mb-2">AI-Powered Health Insights</h2>
+          <p className="text-sm lg:text-base text-dark-slate-gray/60">Personalized recommendations and predictive analytics</p>
         </div>
         <HealthInsights />
       </div>
 
-      {/* Real-time Monitoring Section */}
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-dark-slate-gray/90 mb-2">Live Health Monitoring</h2>
-          <p className="text-dark-slate-gray/60">Real-time data, alerts, and system status</p>
-        </div>
-        <RealTimeMonitoring />
-      </div>
+  
     </motion.div>
   )
 }

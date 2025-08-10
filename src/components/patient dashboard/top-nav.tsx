@@ -79,7 +79,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="border-2 rounded-5" asChild>
+            <DropdownMenuTrigger className=" rounded-5" asChild>
               <Button  variant="ghost" size="icon" className="relative">
                <BellRing className="w-5 h-5 "/>
                 {unreadCount > 0 && (

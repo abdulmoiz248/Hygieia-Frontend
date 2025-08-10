@@ -46,21 +46,20 @@ export default function DashboardStats() {
 
   const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
     return [
-    {
-  id: "appointment",
-  title: nextAppointment?.doctor?.name ?? "No Appointment 🎉",
-  value: nextAppointment
-    ? new Date(nextAppointment.date).toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      })
-    : "-",
-  subtitle: nextAppointment?.time ?? "-",
-  icon: null,
-  color: nextAppointment ? "soft-blue" : "mint-green",
-}
-,
+      {
+        id: "appointment",
+        title: nextAppointment?.doctor?.name ?? "No Appointment 🎉",
+        value: nextAppointment
+          ? new Date(nextAppointment.date).toLocaleDateString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })
+          : "-",
+        subtitle: nextAppointment?.time ?? "-",
+        icon: null,
+        color: nextAppointment ? "soft-blue" : "mint-green",
+      },
       {
         id: 'prescriptions',
         title: 'Active Prescriptions',
@@ -114,27 +113,26 @@ export default function DashboardStats() {
       {data.map((card) => {
         const Icon = iconMap[card.icon as keyof typeof iconMap]
         return (
-          <motion.div key={card.id} variants={itemVariants}>
-            <Card className={`bg-gradient-to-br from-${card.color}/10 to-${card.color}/5 border-${card.color}/20`}>
-              <CardContent className="p-6">
+          <motion.div key={card.id} variants={itemVariants} className="h-full">
+            <Card className={`h-full flex flex-col justify-between bg-gradient-to-br from-${card.color}/10 to-${card.color}/5 border-${card.color}/20`}>
+              <CardContent className="p-6 flex flex-col justify-between h-full">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-cool-gray">{card.title}</p>
-  <p className={`text-2xl font-bold ${card.colorText ? `text-${card.colorText}` : `text-${card.color}`}`}>
-  {typeof card.value === 'number' ? (
-    <CountUp
-      from={0}
-      to={card.value}
-      separator=","
-      direction="up"
-      duration={1}
-      className={card.colorText ? `text-${card.colorText}` : `text-${card.color}`}
-    />
-  ) : (
-    card.value
-  )}
-</p>
-
+                    <p className={`text-2xl font-bold ${card.colorText ? `text-${card.colorText}` : `text-${card.color}`}`}>
+                      {typeof card.value === 'number' ? (
+                        <CountUp
+                          from={0}
+                          to={card.value}
+                          separator=","
+                          direction="up"
+                          duration={1}
+                          className={card.colorText ? `text-${card.colorText}` : `text-${card.color}`}
+                        />
+                      ) : (
+                        card.value
+                      )}
+                    </p>
                     {card.subtitle && <p className="text-xs text-cool-gray">{card.subtitle}</p>}
                     {card.trend && (
                       <p className="text-xs text-green-600 flex items-center">
@@ -143,8 +141,8 @@ export default function DashboardStats() {
                       </p>
                     )}
                   </div>
-                  {Icon ? <Icon className={`w-8 h-8 text-${card.color}`} />:
-                   <Calendar1 className='text-cool-gray font-bold text-center'/>
+                  {Icon ? <Icon className={`w-8 h-8 text-${card.color}`} /> :
+                    <Calendar1 className='text-cool-gray font-bold text-center'/>
                   }
                 </div>
               </CardContent>
