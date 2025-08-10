@@ -3,24 +3,24 @@
 import {  Droplets } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ResponsiveContainer,  RadialBarChart, RadialBar, Legend, Tooltip } from "recharts"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
 
 
 export default function Nutrition() {
-    const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-}
 
+    const targets=useSelector((store:RootState)=>store.profile.limit)
+    const fitness=useSelector((store:RootState)=>store.fitness)
 const nutritionBreakdown = [
-  { nutrient: "Protein", current: 85, target: 100, unit: "g", color: "var(--color-soft-coral)" },
-  { nutrient: "Carbs", current: 220, target: 250, unit: "g", color: "var(--color-mint-green)" },
-  { nutrient: "Fats", current: 65, target: 70, unit: "g", color: "var(--color-soft-blue)" }
+  { nutrient: "Protein", current: fitness.proteinConsumed, target: targets.protein, unit: "g", color: "var(--color-soft-coral)" },
+  { nutrient: "Carbs", current: fitness.carbsConsumed, target: targets.carbs, unit: "g", color: "var(--color-mint-green)" },
+  { nutrient: "Fats", current: fitness.fatConsumed, target: targets.fats, unit: "g", color: "var(--color-soft-blue)" }
 ]
 
 // Prep data for RadialBarChart, add percentage and fill color
 const nutritionChartData = nutritionBreakdown.map(n => ({
   name: n.nutrient,
-  value: Math.min((n.current / n.target) * 100, 100),
+  value: Math.min((n.current /( n.target || 1)) * 100, 100),
   fill: n.color,
 }))
 

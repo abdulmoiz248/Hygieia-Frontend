@@ -34,6 +34,7 @@ export default function HealthDataModal({
 }) {
   const dispatch = useDispatch()
   const user =useSelector((state: RootState) => state.profile)
+  
 
   const [weight, setWeight] = useState<number>(user.weight || 0)
   const [height, setHeight] = useState<number>(user.height || 0)

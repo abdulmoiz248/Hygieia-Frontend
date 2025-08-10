@@ -1,4 +1,5 @@
 "use client"
+
 import { motion } from "framer-motion"
 import {
   Activity,
@@ -13,13 +14,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-
 import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/store/patient/store"
 import { updateGoalProgress } from "@/types/patient/fitnessSlice"
-
-
-
 
 export default function TodayGoal() {
   const itemVariants = {
@@ -27,14 +24,13 @@ export default function TodayGoal() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   }
 
-  const goals =useSelector((state: RootState) => state.fitness.goals)
+  const goals = useSelector((state: RootState) => state.fitness.goals)
+  const targets = useSelector((store: RootState) => store.profile.limit)
   const dispatch = useDispatch()
- //const [goals, setGoals] = useState(initialGoals.goals)
 
-const incrementGoal = (type: string, amount: number) => {
-  dispatch(updateGoalProgress({ type, amount }))
- 
-}
+  const incrementGoal = (type: string, amount: number) => {
+    dispatch(updateGoalProgress({ type, amount }))
+  }
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -65,7 +61,14 @@ const incrementGoal = (type: string, amount: number) => {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {goals.map((goal) => {
-              const progress = (goal.current / goal.target) * 100
+              // Get target from profile.limit or fall back to goal.target
+              const targetValue = Number(
+                (targets as Record<string, string | undefined>)[goal.type] ??
+                  goal.target
+              )
+
+              const progress =
+                targetValue > 0 ? (goal.current / targetValue) * 100 : 0
 
               return (
                 <motion.div
@@ -81,7 +84,11 @@ const incrementGoal = (type: string, amount: number) => {
                           {goal.type}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          {goal.current} /<span className=""> {goal.target} </span> <span className="text-dark-slate-gray">{goal.unit} </span>
+                          {goal.current} /{" "}
+                          <span>{targetValue}</span>{" "}
+                          <span className="text-dark-slate-gray">
+                            {goal.unit}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -97,17 +104,19 @@ const incrementGoal = (type: string, amount: number) => {
                     className="h-2 rounded-full bg-muted"
                   />
 
-                  {(goal.type === "water" || goal.type === "steps" || goal.type === "sleep") && (
+                  {(goal.type === "water" ||
+                    goal.type === "steps" ||
+                    goal.type === "sleep") && (
                     <div className="flex gap-2 pt-1">
                       {goal.type === "water" && (
                         <Button
                           variant="ghost"
-                            className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                        size="sm"
+                          className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+                          size="sm"
                           onClick={() => incrementGoal("water", 1)}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          1 glass
+                          1 Litre
                         </Button>
                       )}
                       {goal.type === "steps" && (
@@ -124,8 +133,8 @@ const incrementGoal = (type: string, amount: number) => {
                       {goal.type === "sleep" && (
                         <Button
                           variant="ghost"
-                            className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                        size="sm"
+                          className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+                          size="sm"
                           onClick={() => incrementGoal("sleep", 0.5)}
                         >
                           <Plus className="w-4 h-4 mr-1" />

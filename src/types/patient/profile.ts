@@ -28,4 +28,15 @@ dateOfBirth: string
   adherence :number| string
   missed_doses:number| string
   doses_taken:number| string
+  limit:Limit
+}
+
+
+export type Limit= {
+  sleep?: number
+  water?: number
+  steps?: number
+  protein?: number
+  carbs?: number
+  fats?: number
 }

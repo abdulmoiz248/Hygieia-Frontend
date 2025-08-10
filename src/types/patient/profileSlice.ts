@@ -32,6 +32,14 @@ const initialState: ProfileType = {
   adherence :70,
   missed_doses:17,
   doses_taken:3,
+  limit: {
+  sleep:10,
+  water: 8,
+  steps: 10000,
+  protein:100 ,
+  carbs: 45,
+  fats: 50,
+}
 }
 
 const profileSlice = createSlice({

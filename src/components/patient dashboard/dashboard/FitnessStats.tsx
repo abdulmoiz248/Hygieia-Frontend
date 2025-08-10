@@ -15,6 +15,8 @@ const itemVariants = {
 
 export default function FitnessProgressGauges() {
   const fitness = useSelector((store: RootState) => store.fitness)
+  const targets = useSelector((store: RootState) => store.profile.limit)
+
   const themeColors = [
     'var(--color-soft-blue)',
     'var(--color-soft-coral)',
@@ -30,7 +32,7 @@ export default function FitnessProgressGauges() {
 
   useEffect(() => {
     let animationFrameId: number
-    const duration = 1000 // animation duration in ms
+    const duration = 1000
     const startTime = performance.now()
 
     const animate = (time: number) => {
@@ -38,7 +40,8 @@ export default function FitnessProgressGauges() {
       const progress = Math.min(elapsed / duration, 1)
 
       const updatedPercents = fitness.goals.map((goal, index) => {
-        const targetPercent = (goal.current / goal.target) * 100
+        const targetValue = Number((targets as Record<string, string | undefined>)[goal.type] ?? goal.target)
+        const targetPercent = targetValue ? (goal.current / targetValue) * 100 : 0
         return targetPercent * progress
       })
 
@@ -50,9 +53,8 @@ export default function FitnessProgressGauges() {
     }
 
     animationFrameId = requestAnimationFrame(animate)
-
     return () => cancelAnimationFrame(animationFrameId)
-  }, [fitness.goals])
+  }, [fitness.goals, targets])
 
   return (
     <motion.div variants={itemVariants}>
@@ -68,6 +70,7 @@ export default function FitnessProgressGauges() {
             {fitness.goals.map((goal, index) => {
               const percent = animatedPercents[index] || 0
               const goalColor = themeColors[index % themeColors.length]
+              const targetValue = Number((targets as Record<string, string | undefined>)[goal.type] ?? goal.target)
 
               return (
                 <div
@@ -96,12 +99,11 @@ export default function FitnessProgressGauges() {
                           fontWeight: '400'
                         },
                         formatTextValue: () =>
-                          `${Math.round((percent / 100) * goal.target)} / ${goal.target} ${goal.unit}`
+                          `${Math.round((percent / 100) * targetValue)} / ${targetValue} ${goal.unit}`
                       },
                       tickLabels: { type: 'outer', ticks: [] }
                     }}
                   />
-
                   <span className="mt-2 text-xs sm:text-sm font-normal capitalize text-dark-slate-gray/70">
                     {goal.type}
                   </span>

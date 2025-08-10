@@ -16,6 +16,8 @@ import { ProfileType } from "@/types/patient/profile"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
 import { patientSuccess } from "@/toasts/PatientToast"
 
+import Limits from "@/components/patient dashboard/profile/Limits"
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -409,8 +411,14 @@ export default function ProfilePage() {
 </CardContent>
 
   </Card>
+
+
 </motion.div>
 
+
+ <motion.div variants={itemVariants}>
+<Limits profile={profile} setProfile={setProfile} isEditing={isEditing} />
+</motion.div>
     </motion.div>
   )
 }
