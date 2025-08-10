@@ -57,7 +57,7 @@ export default function Calories() {
 
   return (
     <motion.div variants={itemVariants}>
-      <Card>
+      <Card className="bg-white/40">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -154,7 +154,7 @@ export default function AIDiagnosisPage() {
           /* Type Selection */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card
-              className=" bg-cool-gray/10 cursor-pointer hover:shadow-lg transition-all border-2 hover:border-soft-blue/30 "
+              className=" bg-white/40 cursor-pointer hover:shadow-lg transition-all border-2 hover:border-soft-blue/30 "
               onClick={() => setSelectedType("dental")}
             >
               <CardContent className="p-8 text-center">
@@ -167,7 +167,7 @@ export default function AIDiagnosisPage() {
             </Card>
 
             <Card
-              className="bg-cool-gray/10 cursor-pointer hover:shadow-lg transition-all border-2 hover:border-mint-green/30 "
+              className="bg-white/40 cursor-pointer hover:shadow-lg transition-all border-2 hover:border-mint-green/30 "
               onClick={() => setSelectedType("acne")}
             >
               <CardContent className="p-8 text-center">

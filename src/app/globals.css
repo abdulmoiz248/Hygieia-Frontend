@@ -7,8 +7,116 @@
   --color-snow-white: oklch(0.98 0.02 100);
   --color-dark-slate-gray: oklch(0.15 0.05 210);
   --color-cool-gray: oklch(0.35 0.05 180);
+  
+  /* Chart Colors */
+  --color-chart-1: var(--color-soft-blue);
+  --color-chart-2: var(--color-soft-coral);
+  --color-chart-3: var(--color-mint-green);
+  --color-chart-4: var(--color-cool-gray);
+  --color-chart-5: var(--color-dark-slate-gray);
+  
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, var(--color-soft-blue), var(--color-mint-green));
+  --gradient-secondary: linear-gradient(135deg, var(--color-soft-coral), var(--color-soft-blue));
+  --gradient-accent: linear-gradient(135deg, var(--color-mint-green), var(--color-soft-coral));
+  
+  /* Status Colors */
+  --color-success: var(--color-mint-green);
+  --color-warning: var(--color-soft-coral);
+  --color-info: var(--color-soft-blue);
+  --color-error: oklch(0.65 0.25 0);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cool-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-soft-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mint-green);
+}
+
+/* Chart Tooltip Styles */
+.recharts-tooltip-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Progress Bar Customization */
+.progress-bar {
+  background: var(--color-soft-blue);
+  transition: width 0.5s ease-out;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

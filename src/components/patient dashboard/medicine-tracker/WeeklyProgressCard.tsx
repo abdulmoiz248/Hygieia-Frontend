@@ -14,7 +14,7 @@ const WeeklyProgressCard = () => {
   const prevDayIndex = (todayIndex + 6) % 7;
 
   return (
-    <Card className="bg-snow-white/20">
+    <Card className="bg-white/40">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-soft-coral" />

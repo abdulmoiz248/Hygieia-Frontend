@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/patient/store";
+import CountUp from '@/blocks/TextAnimations/CountUp/CountUp'
+import { Calendar1 } from '../CalendarIcon'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -18,7 +20,7 @@ type StatCardData = {
   title: string
   value: string | number
   subtitle?: string
-  icon: 'calendar' | 'pill' | 'flame' | 'score'
+  icon: 'calendar' | 'pill' | 'flame' | 'score' | null
   color: string
   colorText?: string
   trend?: string
@@ -55,7 +57,7 @@ export default function DashboardStats() {
       })
     : "-",
   subtitle: nextAppointment?.time ?? "-",
-  icon: "calendar",
+  icon: null,
   color: nextAppointment ? "soft-blue" : "mint-green",
 }
 ,
@@ -118,7 +120,21 @@ export default function DashboardStats() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-cool-gray">{card.title}</p>
-                    <p className={`text-2xl font-bold ${card.colorText ? `text-${card.colorText}` : `text-${card.color}`}`}>{card.value}</p>
+  <p className={`text-2xl font-bold ${card.colorText ? `text-${card.colorText}` : `text-${card.color}`}`}>
+  {typeof card.value === 'number' ? (
+    <CountUp
+      from={0}
+      to={card.value}
+      separator=","
+      direction="up"
+      duration={1}
+      className={card.colorText ? `text-${card.colorText}` : `text-${card.color}`}
+    />
+  ) : (
+    card.value
+  )}
+</p>
+
                     {card.subtitle && <p className="text-xs text-cool-gray">{card.subtitle}</p>}
                     {card.trend && (
                       <p className="text-xs text-green-600 flex items-center">
@@ -127,7 +143,9 @@ export default function DashboardStats() {
                       </p>
                     )}
                   </div>
-                  {Icon && <Icon className={`w-8 h-8 text-${card.color}`} />}
+                  {Icon ? <Icon className={`w-8 h-8 text-${card.color}`} />:
+                   <Calendar1 className='text-cool-gray font-bold text-center'/>
+                  }
                 </div>
               </CardContent>
             </Card>

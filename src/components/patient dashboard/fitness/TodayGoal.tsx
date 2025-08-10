@@ -55,7 +55,7 @@ const incrementGoal = (type: string, amount: number) => {
 
   return (
     <motion.div variants={itemVariants} initial="hidden" animate="visible">
-      <Card className="shadow-lg rounded-2xl">
+      <Card className="shadow-lg rounded-2xl bg-white/40">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl font-semibold text-dark-slate-gray">
             <Target className="w-5 h-5 text-soft-coral" />

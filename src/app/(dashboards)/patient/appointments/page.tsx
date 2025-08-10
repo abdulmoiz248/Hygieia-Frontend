@@ -118,7 +118,7 @@ export default function AppointmentsPage() {
 
 
     
-        <motion.div variants={itemVariants} className="bg-snow-white/20">
+        <motion.div variants={itemVariants} className="bg-white/40">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -203,7 +203,7 @@ export default function AppointmentsPage() {
 
       {/* Appointments List */}
     <motion.div variants={itemVariants}>
-  <Card className="bg-snow-white/20">
+  <Card className="bg-white/40">
     <CardHeader>
       <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
         <Clock className="w-5 h-5 text-mint-green" />
@@ -217,7 +217,7 @@ export default function AppointmentsPage() {
         <motion.div
           key={appointment.id}
           whileHover={{ scale: 1.02 }}
-          className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer  bg-white/40"
+          className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer  bg-cool-gray/10"
           onClick={() => setSelectedAppointment(appointment)}
         >
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

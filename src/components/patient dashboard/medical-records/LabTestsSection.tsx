@@ -55,7 +55,7 @@ export function LabTestsSection() {
       </div>
       
   <motion.div variants={itemVariants}>
-    <Card className="bg-white/10">
+    <Card className="bg-white/40">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-soft-coral" />
@@ -166,9 +166,9 @@ export function LabTestsSection() {
   key={test.id}
   className="group bg-white/40 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all"
 >
-  <CardContent className="p-4 space-y-3 b">
+  <CardContent className="px-4 space-y-2 py-2">
     <div className="flex justify-between items-center">
-      <h4 className="font-semibold text-soft-blue text-base line-clamp-2">{test.name}</h4>
+      <h4 className="font-semibold text-soft-blue text-base line-clamp-1">{test.name}</h4>
       <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md bg-soft-coral text-snow-white">
         {test.category}
       </Badge>
@@ -184,15 +184,15 @@ export function LabTestsSection() {
       <span className="font-semibold text-cool-gray">${test.price}</span>
     </div>
 
-    <div className="pt-3">
+  
       <Button
         onClick={() => handleBookTest(test)}
         size="sm"
-        className="w-full bg-transparent border-soft-blue  text-soft-blue border-1 hover:bg-soft-blue hover:text-snow-white"
+        className="w-full bg-transparent mb-1 border-soft-blue  text-soft-blue border-1 hover:bg-soft-blue hover:text-snow-white"
       >
         Book Test
       </Button>
-    </div>
+
   </CardContent>
 </Card>
 

@@ -14,7 +14,7 @@ export default function Week() {
  const activityLog = useSelector((state: RootState) => state.fitness.activityLog)
   return (
     <motion.div variants={itemVariants} initial="hidden" animate="visible" className="w-full">
-      <Card className="w-full">
+      <Card className="w-full bg-white/40">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
             <Calendar className="w-5 h-5 text-mint-green" />
@@ -30,7 +30,7 @@ export default function Week() {
       className={`rounded-xl p-4 text-center border-2 transition-all flex flex-col items-center justify-center ${
         dayInfo.completed
           ? "border-mint-green/30 bg-mint-green/5"
-          : "border-gray-200"
+          : "border-gray-200 bg-cool-gray/10"
       }`}
     >
       <div className="text-sm font-semibold text-dark-slate-gray">{new Date(dayInfo.date).toDateString().split(" ")[0]}</div>

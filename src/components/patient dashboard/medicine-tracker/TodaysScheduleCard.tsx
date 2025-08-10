@@ -25,7 +25,7 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
   todaysMeds,
   toggleMedicineTaken
 }) => (
-  <Card className="shadow-md rounded-2xl bg-snow-white/20">
+  <Card className="shadow-md rounded-2xl bg-white/40">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <Clock className="w-5 h-5 text-soft-blue" />
