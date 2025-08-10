@@ -1,14 +1,16 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info, Target, Award, Lightbulb } from "lucide-react"
+import {  AlertTriangle, CheckCircle, Info, Target, Award, Lightbulb } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+   const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 }
+
+
 
 const healthRecommendations = [
   {
@@ -82,9 +84,9 @@ export default function HealthInsights() {
       
       {/* Recommendations Card */}
       <Card className="bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-md overflow-hidden max-w-full">
-        <CardHeader className="bg-gradient-to-r from-soft-coral/30 via-transparent to-soft-blue/30 border-b border-white/25">
+        <CardHeader className="border-b border-white/25">
           <CardTitle className="flex items-center gap-3 text-dark-slate-gray font-semibold text-lg">
-            <div className="p-2 bg-soft-coral/30 rounded-lg">
+            <div className="p-2 rounded-lg">
               <Lightbulb className="w-6 h-6 text-soft-coral" />
             </div>
             <span>Personalized Recommendations</span>
@@ -107,13 +109,7 @@ export default function HealthInsights() {
                   <h4 className="text-md font-semibold text-dark-slate-gray">{rec.title}</h4>
                   <Badge 
                     variant="secondary" 
-                    className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                      rec.priority === "high"
-                        ? "bg-soft-coral/30 text-soft-coral border-soft-coral/40"
-                        : rec.priority === "medium"
-                        ? "bg-mint-green/30 text-mint-green border-mint-green/40"
-                        : "bg-soft-blue/30 text-soft-blue border-soft-blue/40"
-                    }`}
+                    className={`text-xs px-2 py-0.5 rounded-full capitalize ${rec.priority === "high" ? "bg-soft-coral/30 text-soft-coral border-soft-coral/40" : rec.priority === "medium" ? "bg-mint-green/30 text-mint-green border-mint-green/40" : "bg-soft-blue/30 text-soft-blue border-soft-blue/40"}`}
                   >
                     {rec.priority}
                   </Badge>
@@ -131,9 +127,9 @@ export default function HealthInsights() {
 
       {/* Predictive Insights Card */}
       <Card className="bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-md overflow-hidden max-w-full">
-        <CardHeader className="bg-gradient-to-r from-soft-blue/30 via-transparent to-mint-green/30 border-b border-white/25">
+        <CardHeader className="border-b border-white/25">
           <CardTitle className="flex items-center gap-3 text-dark-slate-gray font-semibold text-lg">
-            <div className="p-2 bg-soft-blue/30 rounded-lg">
+            <div className="p-2 rounded-lg">
               <Info className="w-6 h-6 text-soft-blue" />
             </div>
             <span>Predictive Insights</span>

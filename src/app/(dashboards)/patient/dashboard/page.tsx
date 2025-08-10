@@ -8,7 +8,6 @@ import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSect
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
 import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
-import RealTimeMonitoring from "@/components/patient dashboard/dashboard/RealTimeMonitoring"
 
 const containerVariants = {
   hidden: { opacity: 0 },
