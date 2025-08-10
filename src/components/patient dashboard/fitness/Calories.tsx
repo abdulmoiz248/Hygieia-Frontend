@@ -43,14 +43,28 @@ export default function Calories() {
     }
   }
 
-  const handleGenerateCalories = async () => {
-    if (!desc.trim()) return
-    setLoading(true)
-    // Expect AiCalorieEstimate to return JSON like { calories, carbs, protein, fat }
-    const nutrition: NutritionInfo = await AiCalorieEstimate(desc) || { calories: 0, carbs: 0, protein: 0, fat: 0 }
-    setLoading(false)
-    setGeneratedNutrition(nutrition)
+ const handleGenerateCalories = async () => {
+  if (!desc.trim()) return;
+  setLoading(true);
+
+  const nutrition: NutritionInfo = await AiCalorieEstimate(desc) || { 
+    calories: 0, carbs: 0, protein: 0, fat: 0 
+  };
+
+  setLoading(false);
+
+  if (type === "burned") {
+    setGeneratedNutrition({
+      calories: nutrition.calories,
+      carbs: 0,
+      protein: 0,
+      fat: 0
+    });
+  } else {
+    setGeneratedNutrition(nutrition);
   }
+};
+
 
   const handleAddCalories = () => {
     if (!type || !generatedNutrition || generatedNutrition.calories <= 0) return
@@ -139,14 +153,19 @@ export default function Calories() {
                     {loading ? "Thinking..." : "Ask AI"}
                   </Button>
 
-                  {generatedNutrition !== null && (
-                    <div className="text-center text-soft-coral text-sm font-semibold space-y-1">
-                      <div>Estimated Calories: {generatedNutrition.calories} kcal</div>
-                      <div>Carbs: {generatedNutrition.carbs} g</div>
-                      <div>Protein: {generatedNutrition.protein} g</div>
-                      <div>Fat: {generatedNutrition.fat} g</div>
-                    </div>
-                  )}
+               {generatedNutrition !== null && (
+  <div className="text-center text-soft-coral text-sm font-semibold space-y-1">
+    <div>Estimated Calories: {generatedNutrition.calories} kcal</div>
+    {type === "consumed" && (
+      <>
+        <div>Carbs: {generatedNutrition.carbs} g</div>
+        <div>Protein: {generatedNutrition.protein} g</div>
+        <div>Fat: {generatedNutrition.fat} g</div>
+      </>
+    )}
+  </div>
+)}
+
 
                   {generatedNutrition !== null && (
                     <Button
