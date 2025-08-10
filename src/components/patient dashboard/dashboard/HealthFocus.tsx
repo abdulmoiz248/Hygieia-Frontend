@@ -58,8 +58,8 @@ export default function HealthFocus() {
       
       {/* Health Focus (Donut) */}
       <Card className="bg-white/40 backdrop-blur-lg shadow-sm border border-white/20 rounded-2xl overflow-hidden ">
-        <h3 className="flex items-center gap-2 text-dark-slate-gray font-semibold mb-4">
-          <Target className="w-5 h-5 text-mint-green" /> Health Focus
+        <h3 className="pl-3 flex items-center gap-2 text-dark-slate-gray font-semibold mb-4">
+          <Target className=" w-5 h-5 text-mint-green" /> Health Focus
         </h3>
         <CardContent className="p-0">
           <div className="flex flex-col items-center">

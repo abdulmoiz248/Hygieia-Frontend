@@ -44,14 +44,10 @@ export default function DashboardPage() {
         <DashboardGraphs />
   
 
-      {/* Health Insights and Recommendations */}
-      <div className="space-y-4 lg:space-y-6">
-        <div className="text-center mb-6 lg:mb-8">
-          <h2 className="text-2xl lg:text-3xl font-bold text-dark-slate-gray/90 mb-2">AI-Powered Health Insights</h2>
-          <p className="text-sm lg:text-base text-dark-slate-gray/60">Personalized recommendations and predictive analytics</p>
-        </div>
+   
+       
         <HealthInsights />
-      </div>
+
 
   
     </motion.div>
