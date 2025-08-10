@@ -36,6 +36,7 @@ Answer:
 
   const rawOutput = chatCompletion.choices[0]?.message?.content || ""
 
+  console.log("[INFO] LLM RESPONSE: ",rawOutput)
   try {
     // Extract JSON from the AI response (even if there's extra fluff)
     const jsonStart = rawOutput.indexOf("{")

@@ -37,13 +37,15 @@ export default function Calories() {
   const [generatedNutrition, setGeneratedNutrition] = useState<NutritionInfo | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleTypeChange = (val: string) => {
-    if (val === "consumed" || val === "burned") {
-      setType(val)
-    }
-  }
 
- const handleGenerateCalories = async () => {
+
+
+  const handleTypeChange = (val: "consumed" | "burned") => {
+  setType(val);
+  setGeneratedNutrition(null); // clear old values when switching type
+};
+
+const handleGenerateCalories = async () => {
   if (!desc.trim()) return;
   setLoading(true);
 
@@ -153,7 +155,7 @@ export default function Calories() {
                     {loading ? "Thinking..." : "Ask AI"}
                   </Button>
 
-               {generatedNutrition !== null && (
+              {generatedNutrition && (
   <div className="text-center text-soft-coral text-sm font-semibold space-y-1">
     <div>Estimated Calories: {generatedNutrition.calories} kcal</div>
     {type === "consumed" && (
@@ -165,6 +167,7 @@ export default function Calories() {
     )}
   </div>
 )}
+
 
 
                   {generatedNutrition !== null && (
