@@ -39,7 +39,7 @@ export default function FitnessProgressGauges() {
       const elapsed = time - startTime
       const progress = Math.min(elapsed / duration, 1)
 
-      const updatedPercents = fitness.goals.map((goal, index) => {
+      const updatedPercents = fitness.goals.map((goal) => {
         const targetValue = Number((targets as Record<string, string | undefined>)[goal.type] ?? goal.target)
         const targetPercent = targetValue ? (goal.current / targetValue) * 100 : 0
         return targetPercent * progress

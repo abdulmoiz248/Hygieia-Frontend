@@ -1,10 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Activity } from "lucide-react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, RadialBarChart, RadialBar, Legend, Tooltip } from "recharts"
+
 import WeeklyActivity from "./WeeklyActivity"
 import HealthFocus from "./HealthFocus"
 import Nutrition from "./Nutrition"

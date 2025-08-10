@@ -38,7 +38,7 @@ const MacroGraphToday = () => {
       <CardHeader className="flex items-center space-x-3 ">
         <ChartBarIcon className="w-6 h-6 text-[#4ab68a]" />
         <CardTitle className="text-lg font-semibold text-[#2c3e50]">
-          Today's Macros
+          Today&apos;s Macros
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[380px]">
@@ -47,7 +47,7 @@ const MacroGraphToday = () => {
             <PolarGrid stroke="#748399" strokeDasharray="4 4" />
             <PolarAngleAxis
               dataKey="macro"
-              tick={({ payload, x, y, textAnchor, fill }) => {
+              tick={({ payload, x, y, textAnchor }) => {
                 const color = macroColors[payload.value] || "#2c3e50"
                 return (
                   <text

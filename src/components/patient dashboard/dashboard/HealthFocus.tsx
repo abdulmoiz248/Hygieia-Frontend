@@ -23,7 +23,7 @@ import {
   XAxis,
   YAxis,
   Bar,
-  Line
+ 
 } from "recharts"
 import { useSelector } from "react-redux"
 import { RootState } from "@/store/patient/store"
@@ -36,7 +36,7 @@ export default function HealthFocus() {
     { week: "Week 1", adherence: 95, missed: 1, sideEffects: 0, effectiveness: 9.2 },
     { week: "Week 2", adherence: 88, missed: 3, sideEffects: 1, effectiveness: 8.8 },
     { week: "Week 3", adherence: 92, missed: 2, sideEffects: 0, effectiveness: 9.0 },
-    { week: "Week 4", adherence: user.adherence as Number, missed: 1, sideEffects: 0, effectiveness: 9.5 },
+    { week: "Week 4", adherence: user.adherence , missed: 1, sideEffects: 0, effectiveness: 9.5 },
   ]
 
   const initialMetrics = [
