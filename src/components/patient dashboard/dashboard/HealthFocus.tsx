@@ -25,15 +25,18 @@ import {
   Bar,
   Line
 } from "recharts"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/patient/store"
 
 export default function HealthFocus() {
+  const user=useSelector((store:RootState)=>store.profile)
   const itemVariants = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }
-
+  
   const medicationAdherence = [
     { week: "Week 1", adherence: 95, missed: 1, sideEffects: 0, effectiveness: 9.2 },
     { week: "Week 2", adherence: 88, missed: 3, sideEffects: 1, effectiveness: 8.8 },
     { week: "Week 3", adherence: 92, missed: 2, sideEffects: 0, effectiveness: 9.0 },
-    { week: "Week 4", adherence: 97, missed: 1, sideEffects: 0, effectiveness: 9.5 },
+    { week: "Week 4", adherence: user.adherence as Number, missed: 1, sideEffects: 0, effectiveness: 9.5 },
   ]
 
   const initialMetrics = [
@@ -147,13 +150,7 @@ export default function HealthFocus() {
                     <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="adherence" fill="var(--color-mint-green)" radius={[4, 4, 0, 0]} />
-                    <Line
-                      type="monotone"
-                      dataKey="effectiveness"
-                      stroke="var(--color-soft-coral)"
-                      strokeWidth={3}
-                      dot={{ fill: "var(--color-soft-coral)", strokeWidth: 2, r: 4 }}
-                    />
+                    
                   </ComposedChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -166,8 +163,8 @@ export default function HealthFocus() {
                   <span className="text-xs font-medium text-dark-slate-gray/70">Overall Adherence</span>
                 </div>
                 <div className="text-2xl font-bold text-mint-green">
-                  {Math.round(medicationAdherence.reduce((acc, week) => acc + week.adherence, 0) / medicationAdherence.length)}%
-                </div>
+                       {user.adherence}%
+                 </div>
               </div>
 
              

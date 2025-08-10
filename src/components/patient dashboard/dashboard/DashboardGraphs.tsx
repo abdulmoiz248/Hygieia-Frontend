@@ -100,14 +100,14 @@ export default function DashboardGraphs() {
 
 <motion.div variants={itemVariants}>
   <Card className="w-full bg-white/50 backdrop-blur-lg shadow-md border border-white/25 rounded-2xl overflow-hidden">
-    <CardHeader className="border-b border-white/30 px-6 py-3">
-      <h3 className="flex items-center gap-2 text-dark-slate-gray font-semibold mb-0 text-lg">
-        <Activity className="w-5 h-5 text-soft-blue" />
-        Monthly Health Progress
-      </h3>
-    </CardHeader>
-    <CardContent className="p-5">
-      <div className="min-h-[220px]">
+   <CardHeader className="border-b border-white/30 px-4 sm:px-6 pt-2 pb-0 mb-0 sm:pt-3">
+  <h3 className="flex items-center gap-2 text-dark-slate-gray font-semibold mb-0 text-lg">
+    <Activity className="w-5 h-5 text-soft-blue" />
+    Monthly Health Progress
+  </h3>
+</CardHeader>
+<CardContent className="p-4 pt-0 sm:p-5">
+  <div className="min-h-[180px] sm:min-h-[220px]">
         <ChartContainer
           config={{
             weight: { label: "Weight (kg)", color: "#3b82f6" },
@@ -115,7 +115,7 @@ export default function DashboardGraphs() {
             bloodPressure: { label: "Blood Pressure", color: "#f87171" },
             heartRate: { label: "Heart Rate", color: "#6b7280" },
           }}
-          className="h-full"
+          className="h-full mt-0"
         >
           <ResponsiveContainer width="100%" height="100%" minHeight={220}>
             <RadarChart data={monthlyProgress}>
