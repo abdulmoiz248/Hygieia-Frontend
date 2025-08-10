@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import GaugeComponent from 'react-gauge-component'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/patient/store'
+import { useState, useEffect } from 'react'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -14,8 +15,6 @@ const itemVariants = {
 
 export default function FitnessProgressGauges() {
   const fitness = useSelector((store: RootState) => store.fitness)
-
-  // assign colors from theme dynamically so each goal type looks different
   const themeColors = [
     'var(--color-soft-blue)',
     'var(--color-soft-coral)',
@@ -23,6 +22,37 @@ export default function FitnessProgressGauges() {
     'var(--color-cool-gray)',
     'var(--color-dark-slate-gray)'
   ]
+
+  // State to hold animated values per goal
+  const [animatedPercents, setAnimatedPercents] = useState(
+    fitness.goals.map(() => 0)
+  )
+
+  useEffect(() => {
+    let animationFrameId: number
+    const duration = 1000 // animation duration in ms
+    const startTime = performance.now()
+
+    const animate = (time: number) => {
+      const elapsed = time - startTime
+      const progress = Math.min(elapsed / duration, 1)
+
+      const updatedPercents = fitness.goals.map((goal, index) => {
+        const targetPercent = (goal.current / goal.target) * 100
+        return targetPercent * progress
+      })
+
+      setAnimatedPercents(updatedPercents)
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(animate)
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [fitness.goals])
 
   return (
     <motion.div variants={itemVariants}>
@@ -36,7 +66,7 @@ export default function FitnessProgressGauges() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {fitness.goals.map((goal, index) => {
-              const percent = (goal.current / goal.target) * 100
+              const percent = animatedPercents[index] || 0
               const goalColor = themeColors[index % themeColors.length]
 
               return (
@@ -66,7 +96,7 @@ export default function FitnessProgressGauges() {
                           fontWeight: '400'
                         },
                         formatTextValue: () =>
-                          `${goal.current} / ${goal.target} ${goal.unit}`
+                          `${Math.round((percent / 100) * goal.target)} / ${goal.target} ${goal.unit}`
                       },
                       tickLabels: { type: 'outer', ticks: [] }
                     }}
