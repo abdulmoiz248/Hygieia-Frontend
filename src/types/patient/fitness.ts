@@ -12,9 +12,14 @@ export type DayStatus = {
   completed: boolean
 }
 
+
+
 export type FitnessState = {
   goals: Goal[]
   activityLog: DayStatus[]
   caloriesConsumed: number
   caloriesBurned: number
+  proteinConsumed: number
+  fatConsumed: number
+  carbsConsumed:number
 }

@@ -10,9 +10,17 @@ import { Input } from "@/components/ui/input"
 import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/store/patient/store"
 import { addCalories } from "@/types/patient/fitnessSlice"
-import {  Flame, Apple} from "lucide-react"
-import {AiCalorieEstimate} from './action'
+import { Flame, Apple } from "lucide-react"
+import { AiCalorieEstimate } from './action'
 import { patientSuccess } from "@/toasts/PatientToast"
+
+type NutritionInfo = {
+  calories: number
+  carbs: number
+  protein: number
+  fat: number
+}
+
 export default function Calories() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -26,7 +34,7 @@ export default function Calories() {
 
   const [type, setType] = useState<"consumed" | "burned" | "">("")
   const [desc, setDesc] = useState("")
-  const [generatedCalories, setGeneratedCalories] = useState<number | null>(null)
+  const [generatedNutrition, setGeneratedNutrition] = useState<NutritionInfo | null>(null)
   const [loading, setLoading] = useState(false)
 
   const handleTypeChange = (val: string) => {
@@ -35,23 +43,29 @@ export default function Calories() {
     }
   }
 
-
   const handleGenerateCalories = async () => {
     if (!desc.trim()) return
     setLoading(true)
-    const cal = await AiCalorieEstimate(desc) || 0
+    // Expect AiCalorieEstimate to return JSON like { calories, carbs, protein, fat }
+    const nutrition: NutritionInfo = await AiCalorieEstimate(desc) || { calories: 0, carbs: 0, protein: 0, fat: 0 }
     setLoading(false)
-    setGeneratedCalories(cal)
+    setGeneratedNutrition(nutrition)
   }
 
   const handleAddCalories = () => {
-    if (!type || !generatedCalories || generatedCalories <= 0) return
+    if (!type || !generatedNutrition || generatedNutrition.calories <= 0) return
 
-    dispatch(addCalories({ type, amount: generatedCalories }))
-    patientSuccess("Calories added to today's record successfully")
+    dispatch(addCalories({ 
+      type, 
+      amount: generatedNutrition.calories, 
+      carbs: generatedNutrition.carbs, 
+      protein: generatedNutrition.protein, 
+      fat: generatedNutrition.fat 
+    }))
+    patientSuccess("Calories and macros added successfully")
     setType("")
     setDesc("")
-    setGeneratedCalories(null)
+    setGeneratedNutrition(null)
     setShowCalorieTracker(false)
   }
 
@@ -68,7 +82,7 @@ export default function Calories() {
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="bg-mint-green text-snow-white hover:bg-mint-green/90">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Calories
+                  Add Meal
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-snow-white">
@@ -76,33 +90,33 @@ export default function Calories() {
                   <DialogTitle className="text-soft-coral">Add Calories</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleTypeChange("consumed")}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        type === "consumed"
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : 'border-gray-200 hover:border-green-300'
-                      }`}
-                    >
-                      <Apple className="w-5 h-5 mx-auto mb-1" />
-                      <div className="text-sm font-medium">Consumed</div>
-                    </button>
-                    <button
-                      onClick={() => handleTypeChange("burned")}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        type === "burned"
-                          ? 'border-orange-500 bg-orange-50 text-orange-700'
-                          : 'border-gray-200 hover:border-orange-300'
-                      }`}
-                    >
-                      <Flame className="w-5 h-5 mx-auto mb-1" />
-                      <div className="text-sm font-medium">Burned</div>
-                    </button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleTypeChange("consumed")}
+                        className={`p-3 rounded-lg border-2 transition-all ${
+                          type === "consumed"
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 hover:border-green-300'
+                        }`}
+                      >
+                        <Apple className="w-5 h-5 mx-auto mb-1" />
+                        <div className="text-sm font-medium">Consumed</div>
+                      </button>
+                      <button
+                        onClick={() => handleTypeChange("burned")}
+                        className={`p-3 rounded-lg border-2 transition-all ${
+                          type === "burned"
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 hover:border-orange-300'
+                        }`}
+                      >
+                        <Flame className="w-5 h-5 mx-auto mb-1" />
+                        <div className="text-sm font-medium">Burned</div>
+                      </button>
+                    </div>
                   </div>
-                </div>
 
                   <div>
                     <label className="text-sm font-medium text-soft-blue">What did you do / eat?</label>
@@ -111,7 +125,7 @@ export default function Calories() {
                       value={desc}
                       onChange={e => {
                         setDesc(e.target.value)
-                        setGeneratedCalories(null)
+                        setGeneratedNutrition(null)
                       }}
                     />
                   </div>
@@ -125,13 +139,16 @@ export default function Calories() {
                     {loading ? "Thinking..." : "Ask AI"}
                   </Button>
 
-                  {generatedCalories !== null && (
-                    <div className="text-center text-soft-coral text-sm font-semibold">
-                      Estimated: {generatedCalories} kcal
+                  {generatedNutrition !== null && (
+                    <div className="text-center text-soft-coral text-sm font-semibold space-y-1">
+                      <div>Estimated Calories: {generatedNutrition.calories} kcal</div>
+                      <div>Carbs: {generatedNutrition.carbs} g</div>
+                      <div>Protein: {generatedNutrition.protein} g</div>
+                      <div>Fat: {generatedNutrition.fat} g</div>
                     </div>
                   )}
 
-                  {generatedCalories !== null && (
+                  {generatedNutrition !== null && (
                     <Button
                       className="w-full bg-mint-green text-snow-white hover:bg-mint-green/90"
                       onClick={handleAddCalories}

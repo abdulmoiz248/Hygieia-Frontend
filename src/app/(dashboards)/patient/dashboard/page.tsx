@@ -39,6 +39,8 @@ export default function DashboardPage() {
         <FolderApp />
       </div>
 
+       <HealthInsights />
+
       {/* Advanced Analytics Section */}
    
         <DashboardGraphs />
@@ -46,7 +48,7 @@ export default function DashboardPage() {
 
    
        
-        <HealthInsights />
+       
 
 
   

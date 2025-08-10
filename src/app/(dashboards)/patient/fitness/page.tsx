@@ -10,6 +10,7 @@ import Week from "@/components/patient dashboard/fitness/week"
 import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
+import MacroGraphToday from "@/components/patient dashboard/fitness/MacroGraph"
 
 
 
@@ -56,6 +57,7 @@ export default function FitnessPage() {
 
       {/* Enhanced Calorie Tracking */}
     <Calories/>
+    <MacroGraphToday/>
 
       {/* Enhanced Active Diet Plan */}
      
