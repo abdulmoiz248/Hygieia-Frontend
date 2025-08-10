@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Target, Trophy, Star, TrendingUp, Calendar, Award, CheckCircle, Clock, Zap, Heart, Activity } from "lucide-react"
+import { Target, Trophy, Star, TrendingUp,  Award, CheckCircle, Clock, Zap, Heart, Activity } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -362,10 +362,10 @@ export default function GoalTracker() {
         <CardContent className="p-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-dark-slate-gray/90 mb-4">
-              "Every step you take towards better health is a victory worth celebrating!"
+              &quot;Every step you take towards better health is a victory worth celebrating!&quot;
             </div>
             <div className="text-dark-slate-gray/70 mb-6">
-              You're making incredible progress. Keep up the amazing work!
+              You&apos;re making incredible progress. Keep up the amazing work!
             </div>
             <div className="flex items-center justify-center gap-4">
               <div className="text-center">

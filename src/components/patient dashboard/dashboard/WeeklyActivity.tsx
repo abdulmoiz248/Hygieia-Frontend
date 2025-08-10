@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Activity, Flame, TrendingUp, Moon, Droplets } from "lucide-react"
+import { Activity, Droplets } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, BarChart, Bar, LineChart, Line } from "recharts"

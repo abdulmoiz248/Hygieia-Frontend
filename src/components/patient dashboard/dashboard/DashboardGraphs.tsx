@@ -1,10 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Activity, Pill, TrendingUp, Target, Heart, Droplets, Moon, Zap, Calendar, Clock, AlertCircle, Brain, Eye, Shield, Users, Globe, Smartphone, Wifi, Battery } from "lucide-react"
+import { Activity } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart } from "recharts"
+import { ResponsiveContainer,  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
 import WeeklyActivity from "./WeeklyActivity"
 import HealthFocus from "./HealthFocus"
 
