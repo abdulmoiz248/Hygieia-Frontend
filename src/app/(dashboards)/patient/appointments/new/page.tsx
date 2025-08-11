@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
 import { RootState } from "@/store/patient/store"
-import { AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
+import { AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 import { patientSuccess } from "@/toasts/PatientToast"
 
 
@@ -39,6 +39,8 @@ export default function NewAppointmentPage() {
   const appointments=useSelector((store:RootState)=>store.appointments)
 const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
 const [showConfirmation, setShowConfirmation] = useState(false)
+const [appointmentMode, setAppointmentMode] = useState("")
+
 
   const [selectedDoctor, setSelectedDoctor] = useState("")
   const [appointmentType, setAppointmentType] = useState("")
@@ -75,6 +77,7 @@ const [showConfirmation, setShowConfirmation] = useState(false)
           setSelectedTime(app.time)
           setSelectedDate(new Date(app.date))
           setreschedule(true)
+          setAppointmentMode(app.mode)
           setReason(app.notes || "")
            localStorage.removeItem("reschedule")
          }
@@ -183,6 +186,19 @@ const [showConfirmation, setShowConfirmation] = useState(false)
                   rows={4}
                 />
               </div>
+              <div className="space-y-2">
+  <label className="text-sm font-medium text-soft-blue">Appointment Mode</label>
+  <Select value={appointmentMode} onValueChange={setAppointmentMode}>
+    <SelectTrigger>
+      <SelectValue placeholder="Select mode" />
+    </SelectTrigger>
+    <SelectContent className="bg-snow-white">
+      <SelectItem className="hover:bg-mint-green hover:text-snow-white" value={AppointmentMode.Online}>Online</SelectItem>
+      <SelectItem className="hover:bg-mint-green hover:text-snow-white" value={AppointmentMode.Physical}>Physical</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
 
               {/* Time Selection */}
               <div className="space-y-2">
@@ -224,7 +240,7 @@ const [showConfirmation, setShowConfirmation] = useState(false)
       
 
           {/* Appointment Summary */}
-          <Card className={  (!selectedDoctor || !selectedDate || !selectedTime || !appointmentType)?'bg-cool-gray/10':'bg-white/40'}>
+          <Card className={  (!selectedDoctor ||!appointmentType || !selectedDate || !selectedTime || !appointmentType)?'bg-cool-gray/10':'bg-white/40'}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 ">
                 <FileText className="w-5 h-5 text-soft-coral" />
@@ -264,7 +280,8 @@ const [showConfirmation, setShowConfirmation] = useState(false)
               <div className="pt-4 border-t">
                 <Button
                   className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
-                  disabled={!selectedDoctor || !selectedDate || !selectedTime || !appointmentType}
+                disabled={!selectedDoctor || !selectedDate || !selectedTime || !appointmentType || !appointmentMode}
+
                 onClick={() => {
     dispatch(
       addAppointment({
@@ -275,6 +292,7 @@ const [showConfirmation, setShowConfirmation] = useState(false)
         status: AppointmentStatus.Upcoming,
         type: appointmentType as AppointmentTypes,
         notes: reason,
+      mode:appointmentMode as AppointmentMode,
       })
     )
        patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${mockDoctors.find((d) => d.id === selectedDoctor)?.name} Successfully`)

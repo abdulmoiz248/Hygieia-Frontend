@@ -10,6 +10,11 @@ export enum AppointmentTypes {
   Emergency = "emergency"
 }
 
+export enum AppointmentMode {
+ Physical='physical',
+ Online='online'
+}
+
 import { Doctor } from "../doctor/profile"
 
 
@@ -22,4 +27,5 @@ export interface Appointment {
   type: AppointmentTypes
   notes?: string
  report?: string
+ mode:AppointmentMode
 }

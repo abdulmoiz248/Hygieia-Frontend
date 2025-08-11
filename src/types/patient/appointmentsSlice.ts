@@ -1,5 +1,5 @@
 
-import {Appointment, AppointmentStatus, AppointmentTypes} from './appointment'
+import {Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes} from './appointment'
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { mockDoctors } from '@/mocks/data'
 interface AppointmentState {
@@ -14,7 +14,8 @@ export const mockAppointments: Appointment[] = [
     date: "2025-07-26",
     time: "10:00 AM",
     status: AppointmentStatus.Cancelled,
-    type: AppointmentTypes.Consultation
+    type: AppointmentTypes.Consultation,
+  mode:AppointmentMode.Online,
   },
   {
     id: "2",
@@ -23,11 +24,12 @@ export const mockAppointments: Appointment[] = [
     time: "2:30 PM",
     status: AppointmentStatus.Completed,
     type: AppointmentTypes.Emergency
-    ,report:'/temp/test.pdf'
+    ,report:'/temp/test.pdf',
+      mode:AppointmentMode.Online,
   },
    {
     id: "3",
-   
+     mode:AppointmentMode.Online,
     doctor: mockDoctors[0],
     date: "2025-08-26",
     time: "10:00 AM",

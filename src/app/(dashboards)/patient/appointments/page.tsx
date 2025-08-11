@@ -241,7 +241,7 @@ export default function AppointmentsPage() {
                 <div className="flex flex-wrap items-center gap-2 text-cool-gray mt-1">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4 text-mint-green" />
-                    {appointment.date}
+                  {new Date(appointment.date).toLocaleDateString("en-CA")}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4 text-mint-green" />
@@ -327,7 +327,7 @@ export default function AppointmentsPage() {
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-cool-gray" />
                     <span className="text-sm">
-                      <strong>Date:</strong> {selectedAppointment.date}
+                      <strong>Date:</strong>   {new Date(selectedAppointment.date).toLocaleDateString("en-CA")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
