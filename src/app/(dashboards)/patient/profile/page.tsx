@@ -1,5 +1,5 @@
 "use client"
-
+import Suggestions from '@/components/patient dashboard/profile/Suggestions'
 import { useEffect, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { User,  Save, Edit,  Heart, AlertTriangle } from "lucide-react"
@@ -179,7 +179,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Medical Information */}
-     <motion.div variants={itemVariants}>
+
+<motion.div variants={itemVariants}>
   <Card>
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-dark-slate-gray">
@@ -187,234 +188,363 @@ export default function ProfilePage() {
         Medical Information
       </CardTitle>
     </CardHeader>
- <CardContent>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-    {/* Column 1 */}
-    <div className="flex flex-col gap-4">
-      {/* Blood Type */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="bloodType" className="text-soft-coral">Blood Type</Label>
-        <Select
-          value={profile.bloodType}
-          onValueChange={(value) => setProfile((prev) => ({ ...prev, bloodType: value }))}
-          disabled={!isEditing}
-        >
-          <SelectTrigger className="text-soft-coral border-dark-slate-gray">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-snow-white">
-            {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((type) => (
-              <SelectItem key={type} value={type} className="hover:bg-mint-green hover:text-snow-white">
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Allergies */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="allergies" className="text-soft-coral">Allergies</Label>
-        <Textarea
-          id="allergies"
-          value={profile.allergies}
-          onChange={(e) => setProfile((prev) => ({ ...prev, allergies: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="Food, medicine, environment, etc."
-          rows={3}
-        />
-      </div>
-
-      {/* Vaccines */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="vaccines" className="text-soft-coral">Vaccinations</Label>
-        <Textarea
-          id="vaccines"
-          value={profile.vaccines}
-          onChange={(e) => setProfile((prev) => ({ ...prev, vaccines: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="e.g. COVID-19, Hepatitis, Tetanus, Flu"
-          rows={2}
-        />
-      </div>
-
-      {/* Ongoing Medications */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ongoingMedications" className="text-soft-coral">Current Medications</Label>
-        <Textarea
-          id="ongoingMedications"
-          value={profile.ongoingMedications}
-          onChange={(e) => setProfile((prev) => ({ ...prev, ongoingMedications: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="Daily meds, supplements, treatment courses"
-          rows={2}
-        />
-      </div>
-
-      {/* Lifestyle */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="lifestyle" className="text-soft-coral">Lifestyle Habits</Label>
-        <Textarea
-          id="lifestyle"
-          value={profile.lifestyle}
-          onChange={(e) => setProfile((prev) => ({ ...prev, lifestyle: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="Smoking, alcohol, diet, physical activity"
-          rows={2}
-        />
-      </div>
-
-      {/* Disabilities / Aids */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="disabilities" className="text-soft-coral">Disabilities / Mobility Aids</Label>
-        <Textarea
-          id="disabilities"
-          value={profile.disabilities}
-          onChange={(e) => setProfile((prev) => ({ ...prev, disabilities: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="e.g. wheelchair, hearing aid, visual impairment"
-          rows={2}
-        />
-      </div>
-    </div>
-
-    {/* Column 2 */}
-    <div className="flex flex-col gap-4">
-      {/* Conditions */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="conditions" className="text-soft-coral">Medical Conditions</Label>
-        <Textarea
-          id="conditions"
-          value={profile.conditions}
-          onChange={(e) => setProfile((prev) => ({ ...prev, conditions: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="Diabetes, asthma, heart disease, etc."
-          rows={3}
-        />
-      </div>
-
-      {/* Mental Health */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="mentalHealth" className="text-soft-coral">Mental Health</Label>
-        <Textarea
-          id="mentalHealth"
-          value={profile.mentalHealth}
-          onChange={(e) => setProfile((prev) => ({ ...prev, mentalHealth: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="e.g. Anxiety, depression, therapy, etc."
-          rows={2}
-        />
-      </div>
-
-      {/* Surgery History */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="surgeryHistory" className="text-soft-coral">Surgical History</Label>
-        <Textarea
-          id="surgeryHistory"
-          value={profile.surgeryHistory}
-          onChange={(e) => setProfile((prev) => ({ ...prev, surgeryHistory: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="List any major past surgeries"
-          rows={2}
-        />
-      </div>
-
-      {/* Implants / Devices */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="implants" className="text-soft-coral">Implants / Devices</Label>
-        <Textarea
-          id="implants"
-          value={profile.implants}
-          onChange={(e) => setProfile((prev) => ({ ...prev, implants: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="Pacemaker, stents, contraceptive implants, etc."
-          rows={2}
-        />
-      </div>
-
-      {/* Family History */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="familyHistory" className="text-soft-coral">Family Medical History</Label>
-        <Textarea
-          id="familyHistory"
-          value={profile.familyHistory}
-          onChange={(e) => setProfile((prev) => ({ ...prev, familyHistory: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="e.g. cancer, heart disease, mental illness"
-          rows={2}
-        />
-      </div>
-
-      {/* Organ Donor / DNR */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="organDonor" className="text-soft-coral">Organ Donor / DNR</Label>
-        <Textarea
-          id="organDonor"
-          value={profile.organDonor}
-          onChange={(e) => setProfile((prev) => ({ ...prev, organDonor: e.target.value }))}
-          disabled={!isEditing}
-          placeholder="e.g. Yes - donor, No - DNR preferences, etc."
-          rows={2}
-        />
-      </div>
-
-      {/* Female-specific fields */}
-      {profile.gender?.toLowerCase() === "female" && (
-        <>
+    <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        {/* Column 1 */}
+        <div className="flex flex-col gap-4">
+          {/* Blood Type */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="pregnancyStatus" className="text-soft-coral">Are you currently pregnant?</Label>
+            <Label htmlFor="bloodType" className="text-soft-coral">Blood Type</Label>
             <Select
-              value={profile.pregnancyStatus}
-              onValueChange={(value) => setProfile((prev) => ({ ...prev, pregnancyStatus: value }))}
+              value={profile.bloodType}
+              onValueChange={(value) => setProfile((prev) => ({ ...prev, bloodType: value }))}
               disabled={!isEditing}
             >
               <SelectTrigger className="text-soft-coral border-dark-slate-gray">
-                <SelectValue placeholder="Select" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-snow-white">
-                <SelectItem value="yes" className="hover:bg-mint-green hover:text-snow-white">Yes</SelectItem>
-                <SelectItem value="no" className="hover:bg-mint-green hover:text-snow-white">No</SelectItem>
-                <SelectItem value="preferNotToSay" className="hover:bg-mint-green hover:text-snow-white">Prefer not to say</SelectItem>
+                {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((type) => (
+                  <SelectItem key={type} value={type} className="hover:bg-mint-green hover:text-snow-white">
+                    {type}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Allergies */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="menstrualCycle" className="text-soft-coral">Menstrual / Reproductive Health</Label>
+            <Label htmlFor="allergies" className="text-soft-coral">Allergies</Label>
             <Textarea
-              id="menstrualCycle"
-              value={profile.menstrualCycle}
-              onChange={(e) => setProfile((prev) => ({ ...prev, menstrualCycle: e.target.value }))}
+              id="allergies"
+              value={profile.allergies}
+              onChange={(e) => setProfile((prev) => ({ ...prev, allergies: e.target.value }))}
               disabled={!isEditing}
-              placeholder="e.g. PCOS, irregular periods, contraceptives"
+              placeholder="Food, medicine, environment, etc."
+              rows={3}
+            />
+          
+            {isEditing && (
+              <Suggestions
+                items={["Peanuts", "Penicillin", "Pollen", "Dust", "Shellfish", "Gluten"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    allergies: prev.allergies ? `${prev.allergies}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Vaccines */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="vaccines" className="text-soft-coral">Vaccinations</Label>
+            <Textarea
+              id="vaccines"
+              value={profile.vaccines}
+              onChange={(e) => setProfile((prev) => ({ ...prev, vaccines: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="e.g. COVID-19, Hepatitis, Tetanus, Flu"
               rows={2}
             />
+            {isEditing && (
+              <Suggestions
+                items={["COVID-19", "Hepatitis B", "Tetanus", "Flu", "HPV"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    vaccines: prev.vaccines ? `${prev.vaccines}, ${item}` : item
+                  }))
+                }
+              />
+            )}
           </div>
-        </>
-      )}
-    </div>
-  </div>
 
-  {!isEditing && (
-    <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-      <div className="flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-1" />
-        <div>
-          <h4 className="font-medium text-yellow-800">Keep This Info Updated</h4>
-          <p className="text-sm text-yellow-700 mt-1">
-            Medical history, medications, mental health and allergies are vital in emergencies and for personalized treatment.
-          </p>
+          {/* Ongoing Medications */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="ongoingMedications" className="text-soft-coral">Current Medications</Label>
+            <Textarea
+              id="ongoingMedications"
+              value={profile.ongoingMedications}
+              onChange={(e) => setProfile((prev) => ({ ...prev, ongoingMedications: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="Daily meds, supplements, treatment courses"
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Metformin", "Atorvastatin", "Ibuprofen", "Vitamin D"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    ongoingMedications: prev.ongoingMedications ? `${prev.ongoingMedications}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Lifestyle */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="lifestyle" className="text-soft-coral">Lifestyle Habits</Label>
+            <Textarea
+              id="lifestyle"
+              value={profile.lifestyle}
+              onChange={(e) => setProfile((prev) => ({ ...prev, lifestyle: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="Smoking, alcohol, diet, physical activity"
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Non-smoker", "Smoker", "Vegetarian", "High activity"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    lifestyle: prev.lifestyle ? `${prev.lifestyle}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Disabilities */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="disabilities" className="text-soft-coral">Disabilities / Mobility Aids</Label>
+            <Textarea
+              id="disabilities"
+              value={profile.disabilities}
+              onChange={(e) => setProfile((prev) => ({ ...prev, disabilities: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="e.g. wheelchair, hearing aid, visual impairment"
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Wheelchair", "Hearing aid", "Prosthetic limb", "Visual impairment"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    disabilities: prev.disabilities ? `${prev.disabilities}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Column 2 */}
+        <div className="flex flex-col gap-4">
+          {/* Conditions */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="conditions" className="text-soft-coral">Medical Conditions</Label>
+            <Textarea
+              id="conditions"
+              value={profile.conditions}
+              onChange={(e) => setProfile((prev) => ({ ...prev, conditions: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="Diabetes, asthma, heart disease, etc."
+              rows={3}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Diabetes", "Asthma", "Hypertension", "Heart disease"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    conditions: prev.conditions ? `${prev.conditions}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Mental Health */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="mentalHealth" className="text-soft-coral">Mental Health</Label>
+            <Textarea
+              id="mentalHealth"
+              value={profile.mentalHealth}
+              onChange={(e) => setProfile((prev) => ({ ...prev, mentalHealth: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="e.g. Anxiety, depression, therapy, etc."
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Anxiety", "Depression", "Therapy", "PTSD"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    mentalHealth: prev.mentalHealth ? `${prev.mentalHealth}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Surgery History */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="surgeryHistory" className="text-soft-coral">Surgical History</Label>
+            <Textarea
+              id="surgeryHistory"
+              value={profile.surgeryHistory}
+              onChange={(e) => setProfile((prev) => ({ ...prev, surgeryHistory: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="List any major past surgeries"
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Appendectomy", "Gallbladder removal", "Knee replacement"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    surgeryHistory: prev.surgeryHistory ? `${prev.surgeryHistory}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Implants */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="implants" className="text-soft-coral">Implants / Devices</Label>
+            <Textarea
+              id="implants"
+              value={profile.implants}
+              onChange={(e) => setProfile((prev) => ({ ...prev, implants: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="Pacemaker, stents, contraceptive implants, etc."
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Pacemaker", "Dental implant", "Stent", "Hearing implant"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    implants: prev.implants ? `${prev.implants}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Family History */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="familyHistory" className="text-soft-coral">Family Medical History</Label>
+            <Textarea
+              id="familyHistory"
+              value={profile.familyHistory}
+              onChange={(e) => setProfile((prev) => ({ ...prev, familyHistory: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="e.g. cancer, heart disease, mental illness"
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Cancer", "Heart disease", "Mental illness", "Diabetes"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    familyHistory: prev.familyHistory ? `${prev.familyHistory}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Organ Donor */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="organDonor" className="text-soft-coral">Organ Donor / DNR</Label>
+            <Textarea
+              id="organDonor"
+              value={profile.organDonor}
+              onChange={(e) => setProfile((prev) => ({ ...prev, organDonor: e.target.value }))}
+              disabled={!isEditing}
+              placeholder="e.g. Yes - donor, No - DNR preferences, etc."
+              rows={2}
+            />
+            {isEditing && (
+              <Suggestions
+                items={["Yes - Donor", "No - DNR", "Yes - Partial Donor"]}
+                onSelect={(item) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    organDonor: prev.organDonor ? `${prev.organDonor}, ${item}` : item
+                  }))
+                }
+              />
+            )}
+          </div>
+
+          {/* Female-specific fields */}
+          {profile.gender?.toLowerCase() === "female" && (
+            <>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="pregnancyStatus" className="text-soft-coral">Are you currently pregnant?</Label>
+                <Select
+                  value={profile.pregnancyStatus}
+                  onValueChange={(value) => setProfile((prev) => ({ ...prev, pregnancyStatus: value }))}
+                  disabled={!isEditing}
+                >
+                  <SelectTrigger className="text-soft-coral border-dark-slate-gray">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-snow-white">
+                    <SelectItem value="yes" className="hover:bg-mint-green hover:text-snow-white">Yes</SelectItem>
+                    <SelectItem value="no" className="hover:bg-mint-green hover:text-snow-white">No</SelectItem>
+                    <SelectItem value="preferNotToSay" className="hover:bg-mint-green hover:text-snow-white">Prefer not to say</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="menstrualCycle" className="text-soft-coral">Menstrual / Reproductive Health</Label>
+                <Textarea
+                  id="menstrualCycle"
+                  value={profile.menstrualCycle}
+                  onChange={(e) => setProfile((prev) => ({ ...prev, menstrualCycle: e.target.value }))}
+                  disabled={!isEditing}
+                  placeholder="e.g. PCOS, irregular periods, contraceptives"
+                  rows={2}
+                />
+                {isEditing && (
+                  <Suggestions
+                    items={["PCOS", "Irregular periods", "Contraceptives"]}
+                    onSelect={(item) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        menstrualCycle: prev.menstrualCycle ? `${prev.menstrualCycle}, ${item}` : item
+                      }))
+                    }
+                  />
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
-    </div>
-  )}
-</CardContent>
 
+      {!isEditing && (
+        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="font-medium text-yellow-800">Keep This Info Updated</h4>
+              <p className="text-sm text-yellow-700 mt-1">
+                Medical history, medications, mental health and allergies are vital in emergencies and for personalized treatment.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </CardContent>
   </Card>
-
-
 </motion.div>
-
 
  <motion.div variants={itemVariants}>
 <Limits profile={profile} setProfile={setProfile} isEditing={isEditing} />
