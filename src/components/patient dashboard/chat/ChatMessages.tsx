@@ -1,12 +1,43 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
-import { AnimatePresence } from "framer-motion"
-import { ChatSidebar } from "./chat-sidebar"
-import { ChatArea } from "./ChatArea"
-import { EmptyChat } from "./EmptyState"
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
+import {
+  ArrowLeft,
+  Search,
+  Send,
+  Phone,
+  Video,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  Mic,
+  ImageIcon,
+  FileText,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+
+import {
+  selectContact,
+  clearSelection,
+  setSearchQuery,
+  sendMessage,
+  markAsRead,
+  receiveMessage,
+} from "@/types/patient/ChatSlice"
+
+import { useDispatch, useSelector, type TypedUseSelectorHook } from "react-redux"
+import { AppDispatch, RootState } from "@/store/patient/store"
 
 
+export const useAppDispatch = () => useDispatch<AppDispatch>()
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
+// Export interfaces as named exports
 export interface ChatContact {
   id: string
   name: string
@@ -37,264 +68,574 @@ export interface ChatMessage {
   }
 }
 
-const initialContacts: ChatContact[] = [
-  {
-    id: "1",
-    name: "Dr. Sarah Johnson",
-    avatar: "/placeholder.svg?height=48&width=48&text=SJ",
-    lastMessage: "Your blood pressure readings look much better this week",
-    timestamp: "2m ago",
-    unread: 0,
-    online: true,
-    specialty: "Cardiologist",
-    role: "doctor",
-    department: "Cardiology",
-    lastActivity: new Date(Date.now() - 2 * 60 * 1000),
-  },
-  {
-    id: "2",
-    name: "Dr. Emily Rodriguez",
-    avatar: "/placeholder.svg?height=48&width=48&text=ER",
-    lastMessage: "Please remember to take your medication with food",
-    timestamp: "1h ago",
-    unread: 2,
-    online: true,
-    specialty: "Internal Medicine",
-    role: "doctor",
-    department: "Internal Medicine",
-    lastActivity: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-  {
-    id: "3",
-    name: "Nurse Jennifer Kim",
-    avatar: "/placeholder.svg?height=48&width=48&text=JK",
-    lastMessage: "Your appointment is confirmed for tomorrow at 2 PM",
-    timestamp: "3h ago",
-    unread: 0,
-    online: false,
-    specialty: "Registered Nurse",
-    role: "nurse",
-    department: "General Care",
-    lastActivity: new Date(Date.now() - 3 * 60 * 60 * 1000),
-  },
-  {
-    id: "4",
-    name: "Dr. Michael Chen",
-    avatar: "/placeholder.svg?height=48&width=48&text=MC",
-    lastMessage: "Your test results are ready for review",
-    timestamp: "1d ago",
-    unread: 1,
-    online: false,
-    specialty: "Dermatologist",
-    role: "doctor",
-    department: "Dermatology",
-    lastActivity: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-]
-
-const initialMessages: { [key: string]: ChatMessage[] } = {
-  "1": [
-    {
-      id: "1",
-      content: "Hello! I've reviewed your latest blood pressure readings from this week.",
-      sender: "contact",
-      timestamp: "2:30 PM",
-      status: "read",
-      messageTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      type: "text",
-    },
-    {
-      id: "2",
-      content: "Your numbers are looking much better! Keep up the great work with your medication routine.",
-      sender: "contact",
-      timestamp: "2:31 PM",
-      status: "read",
-      messageTime: new Date(Date.now() - 2 * 60 * 60 * 1000 + 1 * 60 * 1000),
-      type: "text",
-    },
-    {
-      id: "3",
-      content: "Thank you Dr. Johnson! I've been following the diet plan you recommended.",
-      sender: "user",
-      timestamp: "2:35 PM",
-      status: "read",
-      messageTime: new Date(Date.now() - 2 * 60 * 60 * 1000 + 5 * 60 * 1000),
-      type: "text",
-    },
-    {
-      id: "4",
-      content: "That's wonderful to hear. Let's schedule a follow-up in 2 weeks to monitor your progress.",
-      sender: "contact",
-      timestamp: "2:36 PM",
-      status: "delivered",
-      messageTime: new Date(Date.now() - 2 * 60 * 1000),
-      type: "text",
-    },
-  ],
-  "2": [
-    {
-      id: "5",
-      content: "Good morning! Just a friendly reminder about your medication schedule.",
-      sender: "contact",
-      timestamp: "9:00 AM",
-      status: "delivered",
-      messageTime: new Date(Date.now() - 1 * 60 * 60 * 1000),
-      type: "text",
-    },
-    {
-      id: "6",
-      content: "Please remember to take your medication with food to avoid stomach irritation.",
-      sender: "contact",
-      timestamp: "9:01 AM",
-      status: "delivered",
-      messageTime: new Date(Date.now() - 1 * 60 * 60 * 1000 + 1 * 60 * 1000),
-      type: "text",
-    },
-  ],
-}
-
 export default function ModernPatientChat() {
-  const [contacts, setContacts] = useState<ChatContact[]>(() =>
-    initialContacts.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime()),
-  )
-  const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null)
-  const [allMessages, setAllMessages] = useState<{ [key: string]: ChatMessage[] }>(initialMessages)
+  const dispatch = useAppDispatch()
+  const { contacts, messages, selectedContactId, searchQuery } = useAppSelector((state) => state.chat)
   const [inputValue, setInputValue] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isMobileView, setIsMobileView] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [showAttachments, setShowAttachments] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Check if mobile view
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobileView(window.innerWidth < 768)
+  const selectedContact = contacts.find((c) => c.id === selectedContactId) || null
+  const currentMessages = selectedContact ? messages[selectedContact.id] || [] : []
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case "doctor":
+        return "bg-[var(--color-soft-blue)] text-white"
+      case "nurse":
+        return "bg-[var(--color-mint-green)] text-[var(--color-dark-slate-gray)]"
+      case "therapist":
+        return "bg-[var(--color-soft-coral)] text-white"
+      default:
+        return "bg-[var(--color-cool-gray)] text-white"
     }
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  }
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [allMessages, selectedContact?.id, scrollToBottom])
-
-  const moveContactToTop = useCallback((contactId: string, newMessage?: string) => {
-    setContacts((prev) => {
-      const updatedContacts = prev.map((contact) => {
-        if (contact.id === contactId) {
-          return {
-            ...contact,
-            lastActivity: new Date(),
-            lastMessage: newMessage || contact.lastMessage,
-            timestamp: "now",
-          }
-        }
-        return contact
-      })
-      return updatedContacts.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime())
-    })
-  }, [])
-
-  const markMessagesAsRead = useCallback((contactId: string) => {
-    setAllMessages((prev) => ({
-      ...prev,
-      [contactId]: prev[contactId]?.map((msg) => (msg.sender === "contact" ? { ...msg, status: "read" } : msg)) || [],
-    }))
-    setContacts((prev) => prev.map((contact) => (contact.id === contactId ? { ...contact, unread: 0 } : contact)))
-  }, [])
-
-  const handleContactSelect = useCallback(
-    (contact: ChatContact) => {
-      setSelectedContact(contact)
-      markMessagesAsRead(contact.id)
-    },
-    [markMessagesAsRead],
-  )
-
-  const sendMessage = useCallback(() => {
+  const handleSendMessage = () => {
     if (!inputValue.trim() || !selectedContact) return
 
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: "user",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      status: "sent",
-      messageTime: new Date(),
-      type: "text",
+    dispatch(sendMessage({ contactId: selectedContact.id, content: inputValue.trim() }))
+    setInputValue("")
+    setIsTyping(false)
+
+    // Auto-resize textarea back to single line
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto"
     }
 
-    setAllMessages((prev) => ({
-      ...prev,
-      [selectedContact.id]: [...(prev[selectedContact.id] || []), newMessage],
-    }))
+    // Simulate doctor response after 2-3 seconds
+    if (selectedContact.role === "doctor") {
+      setTimeout(
+        () => {
+          const responses = [
+            "Thank you for the update. I'll review this information.",
+            "That sounds good. Keep monitoring and let me know if anything changes.",
+            "I've noted this in your file. Continue with your current treatment plan.",
+            "Great progress! Let's schedule a follow-up appointment.",
+          ]
+          const randomResponse = responses[Math.floor(Math.random() * responses.length)]
+          dispatch(receiveMessage({ contactId: selectedContact.id, content: randomResponse }))
+        },
+        2000 + Math.random() * 1000,
+      )
+    }
+  }
 
-    moveContactToTop(selectedContact.id, inputValue)
-    setInputValue("")
+  const handleSelectContact = (contactId: string) => {
+    dispatch(selectContact(contactId))
+    dispatch(markAsRead(contactId))
+  }
 
-    // Simulate message delivery and read status
-    setTimeout(() => {
-      setAllMessages((prev) => ({
-        ...prev,
-        [selectedContact.id]:
-          prev[selectedContact.id]?.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg)) ||
-          [],
-      }))
-    }, 1000)
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value)
+    setIsTyping(e.target.value.length > 0)
 
-    setTimeout(() => {
-      setAllMessages((prev) => ({
-        ...prev,
-        [selectedContact.id]:
-          prev[selectedContact.id]?.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "read" } : msg)) || [],
-      }))
-    }, 3000)
-  }, [inputValue, selectedContact, moveContactToTop])
+    // Auto-resize textarea
+    const textarea = e.target
+    textarea.style.height = "auto"
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px"
+  }
 
-  const currentMessages = selectedContact ? allMessages[selectedContact.id] || [] : []
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
 
-  // Mobile: Show chat list when no contact selected, show chat when contact selected
-  // Desktop: Always show both
-  const showSidebar = !isMobileView || !selectedContact
-  const showChat = !isMobileView || selectedContact
+  const emojis = [
+    "😀",
+    "😃",
+    "😄",
+    "😁",
+    "😆",
+    "😅",
+    "😂",
+    "🤣",
+    "😊",
+    "😇",
+    "🙂",
+    "🙃",
+    "😉",
+    "😌",
+    "😍",
+    "🥰",
+    "😘",
+    "😗",
+    "😙",
+    "😚",
+    "😋",
+    "😛",
+    "😝",
+    "😜",
+    "🤪",
+    "🤨",
+    "🧐",
+    "🤓",
+    "😎",
+    "🤩",
+    "🥳",
+    "😏",
+    "😒",
+    "😞",
+    "😔",
+    "😟",
+    "😕",
+    "🙁",
+    "☹️",
+    "😣",
+    "😖",
+    "😫",
+    "😩",
+    "🥺",
+    "😢",
+    "😭",
+    "😤",
+    "😠",
+    "😡",
+    "🤬",
+    "🤯",
+    "😳",
+    "🥵",
+    "🥶",
+    "😱",
+    "😨",
+    "😰",
+    "😥",
+    "😓",
+    "🤗",
+    "🤔",
+    "🤭",
+    "🤫",
+    "🤥",
+    "😶",
+    "😐",
+    "😑",
+    "😬",
+    "🙄",
+    "😯",
+    "😦",
+    "😧",
+    "😮",
+    "😲",
+    "🥱",
+    "😴",
+    "🤤",
+    "😪",
+    "😵",
+    "🤐",
+    "🥴",
+    "🤢",
+    "🤮",
+    "🤧",
+    "😷",
+    "🤒",
+    "🤕",
+    "🤑",
+    "🤠",
+    "😈",
+    "👍",
+    "👎",
+    "👌",
+    "✌️",
+    "🤞",
+    "🤟",
+    "🤘",
+    "🤙",
+    "👈",
+    "👉",
+    "👆",
+    "🖕",
+    "👇",
+    "☝️",
+    "👋",
+    "🤚",
+    "🖐️",
+    "✋",
+    "🖖",
+    "👏",
+    "🙌",
+    "🤲",
+    "🤝",
+    "🙏",
+    "✍️",
+    "💪",
+    "🦾",
+    "🦿",
+    "🦵",
+    "🦶",
+    "❤️",
+    "🧡",
+    "💛",
+    "💚",
+    "💙",
+    "💜",
+    "🖤",
+    "🤍",
+    "🤎",
+    "💔",
+    "❣️",
+    "💕",
+    "💞",
+    "💓",
+    "💗",
+    "💖",
+    "💘",
+    "💝",
+    "💟",
+    "☮️",
+  ]
+
+  const handleEmojiSelect = (emoji: string) => {
+    if (inputRef.current) {
+      const textarea = inputRef.current
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const newValue = inputValue.slice(0, start) + emoji + inputValue.slice(end)
+
+      setInputValue(newValue)
+      setIsTyping(newValue.length > 0)
+
+      // Focus back to textarea and set cursor position after emoji
+      setTimeout(() => {
+        textarea.focus()
+        textarea.setSelectionRange(start + emoji.length, start + emoji.length)
+      }, 0)
+    }
+    setShowEmojiPicker(false)
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (showEmojiPicker && !target.closest(".emoji-picker") && !target.closest(".emoji-button")) {
+        setShowEmojiPicker(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [showEmojiPicker])
+
+  const filteredContacts = contacts.filter(
+    (contact) =>
+      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.specialty.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  // Enhanced scrolling with smooth animation and proper timing
+  useEffect(() => {
+    if (messagesEndRef.current && messagesContainerRef.current) {
+      const container = messagesContainerRef.current
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100
+
+      // Only auto-scroll if user is near the bottom or it's a new message
+      if (isNearBottom || currentMessages.length > 0) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
+          })
+        }, 50)
+      }
+    }
+  }, [currentMessages])
+
+  // Scroll to bottom when selecting a new contact
+  useEffect(() => {
+    if (selectedContact && messagesEndRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "auto",
+          block: "end",
+        })
+      }, 100)
+    }
+  }, [selectedContact])
+
+  if (!selectedContact) {
+    return (
+      <div className="chat-container m-0 p-0 bg-[var(--color-snow-white)] rounded-lg border border-gray-200">
+        <div className="chat-header bg-white border-b border-gray-200 p-4">
+          <h2 className="text-lg font-semibold text-[var(--color-dark-slate-gray)] mb-3">Messages</h2>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--color-cool-gray)]" />
+            <Input
+              placeholder="Search conversations..."
+              className="pl-10 bg-gray-50 border-0"
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <div className="chat-messages hide-scrollbar">
+          {filteredContacts.map((contact) => (
+            <button
+              key={contact.id}
+              onClick={() => handleSelectContact(contact.id)}
+              className="contact-item w-full flex items-center space-x-3 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 text-left"
+            >
+              <div className="relative">
+                <Avatar className="w-12 h-12">
+                  <AvatarImage src={contact.avatar || "/placeholder.svg"} alt={contact.name} />
+                  <AvatarFallback className="bg-[var(--color-soft-blue)] text-white">
+                    {contact.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                {contact.online && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--color-mint-green)] rounded-full border-2 border-white"></div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-semibold text-[var(--color-dark-slate-gray)] truncate">{contact.name}</h3>
+                  <span className="text-xs text-[var(--color-cool-gray)] flex-shrink-0">{contact.timestamp}</span>
+                </div>
+
+                <div className="flex items-center space-x-2 mb-2">
+                  <Badge className={`text-xs px-2 py-0.5 ${getRoleBadgeColor(contact.role)}`}>{contact.role}</Badge>
+                  <span className="text-xs text-[var(--color-cool-gray)] truncate">{contact.specialty}</span>
+                </div>
+
+                <p className="text-sm text-[var(--color-cool-gray)] truncate">{contact.lastMessage}</p>
+              </div>
+
+              {contact.unread > 0 && (
+                <Badge className="bg-[var(--color-soft-coral)] text-white text-xs flex-shrink-0">
+                  {contact.unread}
+                </Badge>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex h-full w-full mt-0 bg-[var(--color-snow-white)] rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-      {/* Sidebar */}
-      <AnimatePresence>
-        {showSidebar && (
-          <ChatSidebar
-            contacts={contacts}
-            selectedContactId={selectedContact?.id || null}
-            onSelect={handleContactSelect}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            isMobileView={isMobileView}
-          />
-        )}
-      </AnimatePresence>
+    <div className="chat-container bg-[var(--color-snow-white)] rounded-lg border border-gray-200">
+      <div className="chat-header bg-white border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => dispatch(clearSelection())}
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)] p-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
 
-      {/* Chat Area */}
-      <AnimatePresence>
-        {showChat && selectedContact ? (
-          <ChatArea
-            contact={selectedContact}
-            messages={currentMessages}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSendMessage={sendMessage}
-            onBack={() => setSelectedContact(null)}
-            isMobileView={isMobileView}
-            messagesEndRef={messagesEndRef}
-          />
-        ) : (
-          !isMobileView && <EmptyChat />
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={selectedContact.avatar || "/placeholder.svg"} alt={selectedContact.name} />
+              <AvatarFallback className="bg-[var(--color-soft-blue)] text-white">
+                {selectedContact.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="text-left">
+              <h3 className="font-semibold text-[var(--color-dark-slate-gray)]">{selectedContact.name}</h3>
+              <div className="flex items-center space-x-2">
+                <Badge className={`text-xs px-2 py-0.5 ${getRoleBadgeColor(selectedContact.role)}`}>
+                  {selectedContact.role}
+                </Badge>
+                <span className="text-sm text-[var(--color-cool-gray)]">{selectedContact.specialty}</span>
+                {selectedContact.online && <div className="w-2 h-2 bg-[var(--color-mint-green)] rounded-full"></div>}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)]"
+              title="Voice Call"
+            >
+              <Phone className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)]"
+              title="Video Call"
+            >
+              <Video className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)]"
+              title="More Options"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div ref={messagesContainerRef} className="chat-messages hide-scrollbar p-4 space-y-4">
+        {currentMessages.map((message) => (
+          <div
+            key={message.id}
+            className={`message-bubble flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                message.sender === "user"
+                  ? "bg-[var(--color-soft-blue)] text-white"
+                  : "bg-gray-100 text-[var(--color-dark-slate-gray)]"
+              }`}
+            >
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <div className="flex items-center justify-between mt-1">
+                <p
+                  className={`text-xs ${message.sender === "user" ? "text-blue-100" : "text-[var(--color-cool-gray)]"}`}
+                >
+                  {message.timestamp}
+                </p>
+                {message.sender === "user" && (
+                  <div className={`text-xs ${message.status === "read" ? "text-blue-200" : "text-blue-100"}`}>
+                    {message.status === "sent" && "✓"}
+                    {message.status === "delivered" && "✓✓"}
+                    {message.status === "read" && "✓✓"}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+        {isTyping && selectedContact.online && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-[var(--color-dark-slate-gray)] px-4 py-2 rounded-2xl">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-[var(--color-cool-gray)] rounded-full animate-bounce"></div>
+                <div
+                  className="w-2 h-2 bg-[var(--color-cool-gray)] rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-[var(--color-cool-gray)] rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+              </div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+        <div ref={messagesEndRef} className="h-1" />
+      </div>
+
+      <div className="chat-input border-t border-gray-200 p-4">
+        {showAttachments && (
+          <div className="mb-3 flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)] flex items-center space-x-1"
+              title="Send Image"
+            >
+              <ImageIcon className="w-4 h-4" />
+              <span className="text-xs">Image</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)] flex items-center space-x-1"
+              title="Send File"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="text-xs">File</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)] flex items-center space-x-1"
+              title="Voice Message"
+            >
+              <Mic className="w-4 h-4" />
+              <span className="text-xs">Voice</span>
+            </Button>
+          </div>
+        )}
+
+        {showEmojiPicker && (
+          <div className="emoji-picker absolute bottom-20 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-80 max-h-60 overflow-y-auto z-50">
+            <div className="grid grid-cols-10 gap-1">
+              {emojis.map((emoji, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleEmojiSelect(emoji)}
+                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-lg transition-colors"
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-end space-x-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAttachments(!showAttachments)}
+            className="text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)] p-2 flex-shrink-0"
+            title="Attachments"
+          >
+            <Paperclip className="w-4 h-4" />
+          </Button>
+
+          <div className="flex-1 relative">
+            <Textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message..."
+              className="min-h-[40px] max-h-[120px] resize-none pr-20 bg-gray-50 border-0 focus:bg-white"
+              rows={1}
+            />
+            <div className="absolute right-2 bottom-2 flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={`emoji-button p-1 ${
+                  showEmojiPicker
+                    ? "text-[var(--color-soft-blue)] bg-blue-50"
+                    : "text-[var(--color-cool-gray)] hover:text-[var(--color-soft-blue)]"
+                }`}
+                title="Add Emoji"
+              >
+                <Smile className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim()}
+                size="sm"
+                className="bg-[var(--color-soft-blue)] hover:bg-[var(--color-soft-blue)]/90 text-white p-1"
+                title="Send Message"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

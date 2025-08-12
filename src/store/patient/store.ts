@@ -6,6 +6,7 @@ import medicineReducer from '@/types/patient/medicineSlice'
 import appointmentsReducer from '@/types/patient/appointmentsSlice'
 import labTestsReducer from '@/types/patient/labTestsSlice'
 import medicalRecordsReducer from '@/types/patient/medicalRecordsSlice'
+import chatSliceReducer from '@/types/patient/ChatSlice'
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     appointments: appointmentsReducer,
     labTests:labTestsReducer,
     medicalRecords:medicalRecordsReducer,
+     chat: chatSliceReducer,
   },
 })
 
