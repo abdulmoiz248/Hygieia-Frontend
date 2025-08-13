@@ -54,17 +54,17 @@ export function ChatList({ contacts, selectedContactId, onSelect, searchQuery, o
       animate={isMobileView ? { x: 0 } : {}}
       exit={isMobileView ? { x: -300 } : {}}
       className={cn(
-        "bg-snow-white border-r border-gray-200 flex flex-col",
+        "bg-snow-white border-r border-gray-200 flex flex-col overflow-hidden",
         isMobileView ? "absolute inset-0 z-10" : "w-80",
       )}
     >
       {/* Chat List Header */}
-      <div className="p-4 border-b border-gray-200 bg-snow-white">
+      <div className="p-4 border-b border-gray-200 bg-snow-white fixed z-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-soft-coral">Messages</h2>
          
         </div>
-        <div className="relative">
+        <div className="relative z-10">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-slate-gray w-4 h-4" />
           <Input
             placeholder="Search conversations..."
@@ -75,7 +75,7 @@ export function ChatList({ contacts, selectedContactId, onSelect, searchQuery, o
         </div>
       </div>
       {/* Contacts List */}
-      <div className="flex-1 overflow-y-auto ">
+      <div className="flex-1 overflow-y-auto mt-[100px] z-1">
         <AnimatePresence>
           {filteredContacts.map((contact) => (
             <motion.div
@@ -95,9 +95,9 @@ export function ChatList({ contacts, selectedContactId, onSelect, searchQuery, o
             >
               <div className="flex items-center gap-3">
                 <div className="relative flex-shrink-0">
-                  <Avatar className="w-12 h-12">
+                  <Avatar className="w-12 h-12 z-1">
                     <AvatarImage src={contact.avatar || "/placeholder.svg"} />
-                    <AvatarFallback className="bg-soft-blue border-2 border-cool-gray  text-snow-white font-semibold text-sm">
+                    <AvatarFallback className="bg-soft-blue border-2 border-cool-gray  text-snow-white font-semibold text-sm z-1">
                       {contact.name
                         .split(" ")
                         .map((n) => n[0])
