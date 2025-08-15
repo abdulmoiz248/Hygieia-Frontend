@@ -9,6 +9,7 @@ interface SidebarProps {
   setCollapsed: (collapsed: boolean) => void
   activeTab: string
   onTabChange: (tab: string) => void
+    onMobileClose?: () => void
 }
 
 const sidebarItems = [
@@ -22,6 +23,7 @@ export default function LabSidebar({
   setCollapsed,
   activeTab,
   onTabChange,
+  onMobileClose,
 }: SidebarProps) {
   return (
     <motion.aside
@@ -54,7 +56,14 @@ export default function LabSidebar({
 
           {/* Collapse button */}
           <button
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={() => {
+              setCollapsed(!collapsed)
+             if (window.innerWidth < 768 && onMobileClose) {
+      onMobileClose()
+    }
+            }
+
+            }
             className="p-2 rounded-lg transition-colors bg-blue-50 hover:bg-blue-100 flex-shrink-0"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
