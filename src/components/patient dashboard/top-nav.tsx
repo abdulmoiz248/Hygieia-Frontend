@@ -43,7 +43,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
     .toUpperCase()
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex-shrink-0">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 w-full">
           <Button variant="ghost" size="icon" onClick={onMobileMenuToggle} className="md:hidden">
