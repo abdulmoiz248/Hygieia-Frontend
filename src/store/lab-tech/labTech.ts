@@ -114,7 +114,8 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-15"),
             scheduledTime: "09:00",
             status: "pending",
-            priority: "high",
+           
+             type: "lab-result" 
           },
           {
             id: "2",
@@ -124,7 +125,7 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-14"),
             scheduledTime: "10:30",
             status: "pending",
-            priority: "medium",
+             type: "scan" 
           },
           {
             id: "3",
@@ -134,7 +135,7 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-13"),
             scheduledTime: "11:00",
             status: "pending",
-            priority: "low",
+ type: "lab-result" 
           },
           {
             id: "4",
@@ -144,7 +145,7 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-16"),
             scheduledTime: "14:00",
             status: "pending",
-            priority: "high",
+           type: "lab-result" 
           },
           {
             id: "5",
@@ -154,7 +155,7 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-12"),
             scheduledTime: "15:30",
             status: "pending",
-            priority: "medium",
+          type: "lab-result" 
           },
         ]
 
@@ -167,7 +168,8 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-10"),
             scheduledTime: "09:00",
             status: "completed",
-            priority: "medium",
+           
+             type: "lab-result" ,
             uploadedAt: new Date("2024-01-11"),
           },
           {
@@ -178,7 +180,7 @@ export const useLabStore = create<LabStore>()(
             scheduledDate: new Date("2024-01-09"),
             scheduledTime: "10:00",
             status: "completed",
-            priority: "low",
+             type: "report", 
             uploadedAt: new Date("2024-01-10"),
           },
         ]

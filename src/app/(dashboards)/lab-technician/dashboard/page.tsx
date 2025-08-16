@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
 import { DashboardAnalytics } from "@/components/lab-tech/dashboard/dashboard-analytics"
-import { PendingReports } from "@/components/lab-tech/dashboard/pending-reports"
+import { PendingReports } from "@/components/lab-tech/pending-reports/pending-reports"
 import { CompletedReports } from "@/components/lab-tech/dashboard/completed-reports"
 import { useLabStore } from "@/store/lab-tech/labTech"
 
