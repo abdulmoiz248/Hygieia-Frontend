@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import {  FileCheck, Clock, TrendingUp,  DollarSign, Activity, Users, Settings } from "lucide-react"
+import {Activity, Users } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import {
   BarChart,

@@ -93,7 +93,7 @@ export default function KeyMetrics() {
           <CardContent className="p-6 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-cool-gray">Today's Tests</p>
+                <p className="text-sm text-cool-gray">Today&apos;s Tests</p>
                 <p className="text-2xl font-bold text-cool-gray">
                   <CountUp from={0} to={analytics.todayTests} separator="," direction="up" duration={1} className="text-cool-gray" />
                 </p>

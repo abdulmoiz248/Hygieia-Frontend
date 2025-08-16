@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, X, LayoutDashboard, Clock, CheckCircle } from "lucide-react"
+import { ChevronLeft, LayoutDashboard, Clock, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SidebarProps {

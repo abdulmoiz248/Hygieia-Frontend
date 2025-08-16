@@ -8,20 +8,18 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, FileText, Clock, AlertTriangle, Search, CheckCircle, Edit3 } from "lucide-react"
+import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3 } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import type { PendingReport } from "@/types/lab-tech/lab-reports"
 import PendingHeader from "./PendingHeader"
 import { PendingReportFilter } from "./PendingReportsFilter"
 
 export function PendingReports() {
-  const { pendingReports, uploadReport, initializeMockData, getPendingCount } = useLabStore()
+  const { pendingReports, uploadReport, initializeMockData } = useLabStore()
   const [selectedReport, setSelectedReport] = useState<PendingReport | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [priorityFilter, setPriorityFilter] = useState<string>("all")
+
   const [reportValues, setReportValues] = useState({
     results: "",
     findings: "",
@@ -80,9 +78,9 @@ export function PendingReports() {
     const matchesSearch =
       report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.testName.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || report.status === statusFilter
+  
 
-    return matchesSearch && matchesStatus
+    return matchesSearch 
   })
 
   const getStatusIcon = (status: string) => {
@@ -98,7 +96,6 @@ export function PendingReports() {
     }
   }
 
-  const currentPendingCount = getPendingCount()
 
   return (
     <div className="space-y-6 p-6 bg-snow-white min-h-screen">
