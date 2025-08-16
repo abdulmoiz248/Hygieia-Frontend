@@ -10,6 +10,7 @@ interface LabTechnicianProfile {
   certifications: string[]
   shift: string
   available: boolean
+  img:string
 }
 
 interface LabTechnicianStore {
@@ -28,7 +29,8 @@ const initialProfile: LabTechnicianProfile = {
   experienceYears: 0,
   certifications: [],
   shift: 'morning',
-  available: false
+  available: false,
+  img:'/doctor.png'
 }
 
 const useLabTechnicianStore = create<LabTechnicianStore>((set) => ({

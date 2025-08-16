@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Menu, User, Settings, LogOut, ChevronDown } from "lucide-react"
+import {  Menu, User, Settings, LogOut, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,10 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Link from "next/link"
+import useLabTechnicianStore from "@/store/lab-tech/userStore"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
+  const user=useLabTechnicianStore()
   const unreadCount = 3
-  const userName = "Dr. Sarah Wilson"
+  const userName = user.profile.name
   const userInitials = userName
     .split(" ")
     .map((n) => n[0])
@@ -48,14 +50,7 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
         {/* Right side: search (mobile) + notifications + profile */}
         <div className="flex items-center gap-3">
           {/* Mobile search icon */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="#">
-                <Search className="w-5 h-5" />
-              </Link>
-            </Button>
-          </div>
-
+        
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <svg
@@ -84,7 +79,7 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src="" />
+                  <AvatarImage src={user.profile.img} />
                   <AvatarFallback className="border p-2 bg-soft-blue text-white">
                     {userInitials}
                   </AvatarFallback>
@@ -94,14 +89,14 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white">
-              <DropdownMenuItem asChild className="hover:bg-soft-blue hover:text-snow-white">
-                <Link href="#">
+              <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
+                <Link href="/lab-technician/profile">
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="hover:bg-soft-blue hover:text-snow-white">
-                <Link href="#">
+              <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
+                <Link href="/lab-technician/settings">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Link>
