@@ -54,7 +54,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
         )}
         <main
           className={cn(
-            "flex-1 transition-all duration-300",
+            "flex-1 transition-all duration-300 bg-snow-white",
             collapsed ? "md:ml-[80px]" : "md:ml-[280px]"
           )}
         >
