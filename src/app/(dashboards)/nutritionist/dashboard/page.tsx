@@ -12,6 +12,7 @@ import { NutritionGoalsChart } from "@/components/nutritionist/dashboard/nutriti
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import WelcomeSection from "@/components/nutritionist/dashboard/WelcomeSection"
 
 export default function DashboardPage() {
   const { stats, isLoading, refreshStats } = useDashboardStore()
@@ -31,32 +32,9 @@ export default function DashboardPage() {
 
   return (
    
-      <div className="space-y-4 md:space-y-6 fade-in p-4 md:p-6">
+      <div className="space-y-4 md:space-y-6 fade-in">
         {/* Header */}
-        <div className="flex flex-col space-y-3 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div>
-            <h1
-              className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight font-serif"
-              style={{ color: "var(--color-dark-slate-gray)" }}
-            >
-              Welcome, Dr. Johnson
-            </h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-1">
-              Here's what's happening with your patients today.
-            </p>
-          </div>
-          <Button
-            onClick={refreshStats}
-            disabled={isLoading}
-            variant="outline"
-            size="sm"
-            className="self-start md:self-auto bg-transparent w-fit"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        </div>
-
+         <WelcomeSection/>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="slide-up">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

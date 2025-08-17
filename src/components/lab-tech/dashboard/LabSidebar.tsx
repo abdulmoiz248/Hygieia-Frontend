@@ -15,7 +15,7 @@ interface SidebarProps {
 }
 
 const sidebarItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "dashboard", label: "Overview", icon: LayoutDashboard },
   { id: "pending", label: "Pending Reports", icon: Clock },
   { id: "completed", label: "Completed Reports", icon: CheckCircle },
 ]
@@ -65,7 +65,7 @@ const handleTabChange = (tab: string) => {
               </div>
                  <div>
                 <span className="font-bold text-xl text-soft-blue">Hygieia Lab</span>
-                <p className="text-xs text-cool-gray">Technician Portal</p>
+                <p className="text-xs text-cool-gray">Healthcare Platform</p>
               </div>
               </motion.div>
             )}

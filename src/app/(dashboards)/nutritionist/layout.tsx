@@ -5,9 +5,10 @@ import type { Metadata } from "next";
 
 
 export const metadata: Metadata = {
-  title: "Patient | Hygieia",
-  description: "Comprehensive patient dashboard for managing health records, appointments, and more.",
+  title: "Nutritionist | Hygieia",
+  description: "Comprehensive nutritionist dashboard for managing diet plans, client progress, and consultations.",
 }
+
 
 export default function RootLayout({
   children,
