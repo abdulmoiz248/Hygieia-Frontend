@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import {  Lock, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
+import { useLabStore } from "@/store/lab-tech/labTech"
 
 
 const containerVariants = {
@@ -33,8 +34,12 @@ export default function SettingsPage() {
   const [otpVerified, setOtpVerified] = useState(false)
   const [error, setError] = useState("")
   const user=useLabTechnicianStore().profile
+   const setactiveTab = useLabStore((state) => state.setActiveTab)
 
 
+   useEffect(()=>{
+setactiveTab('')
+   },[])
   const handleVerifyEmail = async () => {
     setError("")
  

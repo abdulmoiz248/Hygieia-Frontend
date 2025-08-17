@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
 import LabTechnicianCard from "@/components/lab-tech/profile/profile"
+import { useLabStore } from "@/store/lab-tech/labTech"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,11 +29,13 @@ export default function ProfilePage() {
 
   const reduxProfile=useLabTechnicianStore().profile
   const saveProfile=useLabTechnicianStore().setProfile
+   const setactiveTab = useLabStore((state) => state.setActiveTab)
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<LabTechnicianProfile>(reduxProfile)
 
   useEffect(() => {
   setProfile(reduxProfile)
+  setactiveTab('')
 }, [reduxProfile])
 
   const handleSave = () => {

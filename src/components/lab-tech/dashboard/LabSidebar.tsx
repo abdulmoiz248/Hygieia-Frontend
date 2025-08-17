@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, LayoutDashboard, Clock, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePathname, useRouter } from "next/navigation"
+import { useLabStore } from "@/store/lab-tech/labTech"
 
 interface SidebarProps {
   collapsed: boolean
@@ -25,6 +27,21 @@ export default function LabSidebar({
   onTabChange,
   onMobileClose,
 }: SidebarProps) {
+
+  const setactiveTab = useLabStore((state) => state.setActiveTab)
+    const pathname = usePathname()
+const router = useRouter()
+
+const handleTabChange = (tab: string) => {
+  if(pathname.includes('dashboard')){
+     onTabChange(tab)
+  }else{
+  router.push(`/lab-technician/dashboard`)
+  setactiveTab(tab)
+  }
+
+  if (onMobileClose) onMobileClose?.()
+}
   return (
     <motion.aside
       initial={false}
@@ -90,7 +107,7 @@ export default function LabSidebar({
                 )}
                 whileHover={{ x: collapsed ? 0 : 2 }}
                 title={collapsed ? item.label : undefined}
-                onClick={() => onTabChange(item.id)}
+                onClick={() => handleTabChange(item.id)}
               >
                 <motion.div whileHover={{ rotate: 10 }} transition={{ duration: 0.2 }}>
                   <Icon
