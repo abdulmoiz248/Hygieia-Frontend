@@ -2,15 +2,14 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, Bot,  Loader2 } from "lucide-react"
+import { Send, Bot, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-import {  useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
-
 
 interface Message {
   id: string
@@ -24,7 +23,6 @@ export default function ChatbotPage() {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
 
   const user = useSelector((state: RootState) => state.profile)
   const userName = user.name
@@ -88,7 +86,7 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] w-full flex flex-col relative">
+    <div className="h-[calc(100vh-8rem)] w-full flex flex-col relative px-6 pt-6 ">
       {isInitial ? (
         <div className="flex flex-1 items-center justify-center flex-col text-center px-4">
           <motion.div
@@ -130,18 +128,17 @@ export default function ChatbotPage() {
               </h1>
               <p className="text-cool-gray text-sm">Ask anything. I got you.</p>
             </div>
-          <Button
-  onClick={handleNewChat}
-  className="bg-gradient-to-r from-soft-blue to-mint-green text-white hover:opacity-90 transition-all duration-300 shadow-md px-4 py-2 rounded-xl text-sm font-semibold"
->
-  🧹 New Chat
-</Button>
-
+            <Button
+              onClick={handleNewChat}
+              className="bg-gradient-to-r from-soft-blue to-mint-green text-white hover:opacity-90 transition-all duration-300 shadow-md px-4 py-2 rounded-xl text-sm font-semibold"
+            >
+              🧹 New Chat
+            </Button>
           </div>
 
-          <Card className="flex-1 flex flex-col">
-            <CardContent className="flex-1 flex flex-col p-0">
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-none">
+          <Card className="flex-1 flex flex-col  bg-white/60">
+            <CardContent className="flex flex-col p-0 h-full">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-none ">
                 <AnimatePresence>
                   {messages.map((message) => (
                     <motion.div
@@ -153,8 +150,8 @@ export default function ChatbotPage() {
                     >
                       {message.sender === "bot" && (
                         <Avatar className="w-8 h-8 bg-soft-blue">
-                          <AvatarFallback>
-                            <Bot className="w-4 h-4 text-snow-white" />
+                          <AvatarFallback className="bg-soft-blue">
+                            <Bot className="w-4 h-4 text-snow-white bg-soft-blue" />
                           </AvatarFallback>
                         </Avatar>
                       )}
@@ -221,24 +218,26 @@ export default function ChatbotPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="border-t p-4 ">
-                <div className="flex gap-2">
-                  <Input
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type your health question..."
-                    onKeyPress={(e) => e.key === "Enter" && sendMessage(inputValue)}
-                    className="flex-1"
-                    disabled={isTyping}
-                  />
-                  <Button
-                    onClick={() => sendMessage(inputValue)}
-                    disabled={!inputValue.trim() || isTyping}
-                    className="bg-soft-blue hover:bg-soft-blue/90"
-                  >
-                    {isTyping ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Send className="w-4 h-4 text-white" />}
-                  </Button>
-                </div>
+              <div className="border-t p-4 flex gap-2 bg-cool-gray/10">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Type your health question..."
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage(inputValue)}
+                  className="flex-1"
+                  disabled={isTyping}
+                />
+                <Button
+                  onClick={() => sendMessage(inputValue)}
+                  disabled={!inputValue.trim() || isTyping}
+                  className="bg-soft-blue hover:bg-soft-blue/90"
+                >
+                  {isTyping ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    <Send className="w-4 h-4 text-white" />
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>

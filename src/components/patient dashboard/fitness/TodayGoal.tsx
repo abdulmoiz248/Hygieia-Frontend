@@ -110,19 +110,19 @@ export default function TodayGoal() {
                     <div className="flex gap-2 pt-1">
                       {goal.type === "water" && (
                         <Button
-                          variant="ghost"
-                          className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+                          
+                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
                           onClick={() => incrementGoal("water", 1)}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          1 Litre
+                          1 Glass
                         </Button>
                       )}
                       {goal.type === "steps" && (
                         <Button
-                          variant="ghost"
-                          className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+                         
+                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
                           onClick={() => incrementGoal("steps", 100)}
                         >
@@ -132,8 +132,8 @@ export default function TodayGoal() {
                       )}
                       {goal.type === "sleep" && (
                         <Button
-                          variant="ghost"
-                          className="text-dark-slate-gray border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+                        
+                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
                           onClick={() => incrementGoal("sleep", 0.5)}
                         >

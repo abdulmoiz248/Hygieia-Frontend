@@ -98,7 +98,7 @@ export function LabTestsSection() {
                   {test.status}
                 </Badge>
                 <Button
-                  variant="destructive"
+                
                   size="sm"
                   onClick={() => setSelectedTestModal(test)}
                   className="text-snow-white rounded-2 bg-soft-coral hover:bg-soft-coral/90"

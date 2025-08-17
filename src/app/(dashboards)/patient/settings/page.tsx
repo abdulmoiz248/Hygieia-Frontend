@@ -115,7 +115,7 @@ export default function SettingsPage() {
               Security & Privacy
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 bg-snow-white">
+          <CardContent className="space-y-4 ">
             <div className="flex items-center justify-between">
               <div>
                 <Label>Password</Label>
@@ -131,7 +131,7 @@ export default function SettingsPage() {
                 }
               }}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button className="bg-soft-blue text-snow-white hover:bg-soft-blue/90" size="sm">
                     <Lock className="w-4 h-4 mr-2" />
                     Change Password
                   </Button>

@@ -265,11 +265,11 @@ export default function AppointmentsPage() {
             {appointment.status === "upcoming" && (
               <div className="flex gap-2 sm:justify-end justify-start flex-wrap mt-2 sm:mt-0">
                 <Button
-                className="bg-soft-blue text-snow-white" variant="outline" size="sm">
+                className="bg-soft-blue text-snow-white hover:bg-soft-blue/90"  size="sm">
                   Reschedule
                 </Button>
                 <Button
-                  variant="outline"
+                
                   size="sm"
                   className="text-white bg-soft-coral hover:bg-soft-coral/90 hover:text-black border-0"
                 >
@@ -359,7 +359,7 @@ export default function AppointmentsPage() {
                       }}
                       className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">Reschedule</Button>
                       <Button
-                      className="bg-soft-coral text-snow-white border-0"
+                      className="bg-soft-coral hover:bg-soft-coral/90 text-snow-white border-0"
                       onClick={()=>{
                         dispatch(cancelAppointment(selectedAppointment.id))
                         
@@ -367,8 +367,7 @@ export default function AppointmentsPage() {
                         patientDestructive(`Appointment with ${selectedAppointment.doctor.name} Cancelled Successfully`) 
                       }
                       
-}
-                       variant="outline">Cancel</Button>
+}>Cancel</Button>
                     </>
                   )}
                   {selectedAppointment.status === "completed" && selectedAppointment.report && (
@@ -378,8 +377,8 @@ export default function AppointmentsPage() {
                         <FileText className="w-4 h-4 mr-2" />
                         Download Report
                       </Button>
-                      <Button variant="outline"
-                      className="hover:bg-mint-green hover:text-snow-white"
+                      <Button 
+                      className="hover:bg-mint-green hover:text-snow-white bg-transparent text-dark-slate-gray border border-dark-slate-gray hover:border-mint-green"
                        onClick={()=>{
                         localStorage.setItem('appointment',selectedAppointment.id)
                         router.push('/patient/appointments/new')

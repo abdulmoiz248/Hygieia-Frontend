@@ -96,7 +96,7 @@ const handleGenerateCalories = async () => {
             </div>
             <Dialog open={showCalorieTracker} onOpenChange={setShowCalorieTracker}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-mint-green text-snow-white hover:bg-mint-green/90">
+                <Button size="sm" className="bg-mint-green text-snow-white hover:bg-mint-green/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Meal
                 </Button>

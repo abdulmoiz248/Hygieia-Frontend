@@ -105,7 +105,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="text-white bg-soft-blue hover:bg-soft-blue/90 " asChild>
+        <Button  size="icon" className="text-white bg-soft-blue hover:bg-soft-blue/90 " asChild>
           <Link href="/patient/appointments">
             <ArrowLeft className="w-4 h-4  " />
           </Link>
@@ -207,10 +207,10 @@ const [appointmentMode, setAppointmentMode] = useState("")
                   {timeSlots.map((time) => (
                     <Button
                       key={time}
-                      variant={selectedTime === time ? "default" : "outline"}
+                    
                       size="sm"
                       onClick={() => setSelectedTime(time)}
-                      className={selectedTime === time ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white" : "text-cool-gray hover:bg-soft-blue/70 hover:text-snow-white"}
+                      className={selectedTime === time ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white" : "text-cool-gray bg-transparent border-soft-blue border hover:bg-soft-blue/70 hover:text-snow-white"}
                     >
                       {time}
                     </Button>

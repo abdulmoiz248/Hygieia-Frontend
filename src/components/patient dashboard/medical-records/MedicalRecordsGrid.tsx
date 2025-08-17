@@ -51,9 +51,9 @@ export function MedicalRecordsGrid({
 
               <div className="flex gap-2 pt-3">
                 <Button
-                  variant="ghost"
+                 
                   size="sm"
-                  className="flex-1 border border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white"
+                  className="flex-1 border border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white bg-transparent"
                   onClick={() => setViewingRecord(record)}
                 >
                   <Eye className="w-4 h-4 mr-1" />

@@ -112,7 +112,7 @@ export default function PrescriptionsPage() {
                         </CardContent>
                       </div>
                       <div className="p-4 pt-2 mt-auto">
-                        <Button variant="outline" size="sm" className="w-full bg-soft-blue text-snow-white">
+                        <Button size="sm" className="w-full bg-soft-blue  hover:bg-soft-blue/90 text-snow-white">
                           View Details
                         </Button>
                       </div>
@@ -162,7 +162,7 @@ export default function PrescriptionsPage() {
                         </CardContent>
                       </div>
                       <div className="p-4 pt-2 mt-auto">
-                        <Button variant="outline" size="sm" className="w-full bg-soft-blue text-snow-white">
+                        <Button  size="sm" className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
                           View Details
                         </Button>
                       </div>
@@ -294,7 +294,7 @@ export default function PrescriptionsPage() {
             <div className="pt-4 border-t">
               <Button
                 onClick={handleDownload}
-                className="w-full sm:w-auto min-w-[200px] bg-soft-blue hover:bg-soft-blue/90 text-snow-white text-sm sm:text-base py-2 sm:py-2.5"
+                className="max-w-full sm:w-auto min-w-[200px] bg-soft-blue hover:bg-soft-blue/90 text-snow-white text-sm sm:text-base py-2 sm:py-2.5"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Download PDF

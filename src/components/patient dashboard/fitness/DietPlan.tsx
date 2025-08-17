@@ -192,9 +192,9 @@ export default function DietPlan() {
   </div>
   <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
     <Button
-      variant="outline"
+      
       size="sm"
-      className="bg-mint-green text-snow-white w-full sm:w-auto"
+      className="bg-mint-green text-snow-white w-full sm:w-auto hover:bg-mint-green/90"
       asChild
     >
       <Link href="/nutritionists">
@@ -203,9 +203,9 @@ export default function DietPlan() {
       </Link>
     </Button>
     <Button
-      variant="outline"
+    
       size="sm"
-      className="text-mint-green w-full sm:w-auto"
+      className="text-mint-green bg-transparent border-1 border-mint-green hover:bg-mint-green hover:text-snow-white w-full sm:w-auto"
       onClick={handleGenerateAIPlan}
     >
       Generate AI Plan
@@ -399,9 +399,9 @@ export default function DietPlan() {
            Start This Plan
          </Button>
          <Button 
-           variant="outline" 
+         
            onClick={resetModal} 
-           className="hover:bg-soft-coral hover:text-white hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
+           className="hover:bg-soft-coral/90 hover:text-white bg-soft-coral hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
          >
            Cancel
          </Button>
@@ -542,10 +542,10 @@ export default function DietPlan() {
          </Button>
          <Button 
            type="button" 
-           variant="outline" 
+         
            onClick={resetModal} 
-           className="hover:bg-soft-coral hover:text-white hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
-         >
+            className="hover:bg-soft-coral/90 hover:text-white bg-soft-coral hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
+        >
            Cancel
          </Button>
        </div>
@@ -569,7 +569,8 @@ export default function DietPlan() {
               <Button onClick={handleConfirmReplace} className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
                 Yes, Replace Plan
               </Button>
-              <Button variant="outline" onClick={() => setShowConfirmReplace(false)} className="hover:bg-soft-coral">
+              <Button  onClick={() => setShowConfirmReplace(false)}       className="hover:bg-soft-coral/90 hover:text-white bg-soft-coral hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
+     >
                 Cancel
               </Button>
             </div>

@@ -153,7 +153,7 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
           </div>
 
           <div className="flex gap-3 mt-8">
-            <Button variant="outline" onClick={handleClose} className="flex-1 bg-soft-coral text-snow-white">
+            <Button onClick={handleClose} className="flex-1 bg-soft-coral hover:bg-soft-coral/90 text-snow-white">
               Cancel
             </Button>
             <Button
