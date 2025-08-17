@@ -16,6 +16,7 @@ export const mockAppointments: Appointment[] = [
     status: AppointmentStatus.Cancelled,
     type: AppointmentTypes.Consultation,
   mode:AppointmentMode.Online,
+  
   },
   {
     id: "2",

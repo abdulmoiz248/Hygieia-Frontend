@@ -9,6 +9,7 @@ import TextType from "@/blocks/TextAnimations/TextType/TextType"
 
 import useNutritionistStore from "@/store/nutritionist/userStore"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
+import { AppointmentStatus } from "@/types/patient/appointment"
 
 export default function WelcomeSection() {
 
@@ -19,8 +20,8 @@ export default function WelcomeSection() {
 
 
    const user=useNutritionistStore().profile
-   const getPendingCount=useAppointmentStore().appointments.filter((apt) => apt.status === "scheduled").length
-   
+     const { appointments } = useAppointmentStore()
+  const upcomingToday = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming).length
     
       const [showDes,setShowDes]=useState(false)
       const handleAnimationComplete = () => {
@@ -54,7 +55,7 @@ export default function WelcomeSection() {
      <TextType
        text={ [
 
-  `🥗 You have ${getPendingCount} meal plans pending for review.`,
+  `🥗 You have ${upcomingToday} meal plans pending for review.`,
   "📋 Check and update today's client nutrition reports before sharing.",
   "⚠️ Verify dietary restrictions and allergies to avoid mistakes.",
   "💧 Promote healthy habits — remind clients to stay hydrated."

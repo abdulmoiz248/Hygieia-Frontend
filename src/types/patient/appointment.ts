@@ -1,3 +1,6 @@
+import { Doctor } from "../doctor/profile"
+import { ProfileType } from "./profile"
+
 export enum AppointmentStatus {
   Upcoming = "upcoming",
   Completed = "completed",
@@ -15,11 +18,11 @@ export enum AppointmentMode {
  Online='online'
 }
 
-import { Doctor } from "../doctor/profile"
 
 
 export interface Appointment {
   id: string
+  patient?:ProfileType
   doctor: Doctor
   date: string
   time: string

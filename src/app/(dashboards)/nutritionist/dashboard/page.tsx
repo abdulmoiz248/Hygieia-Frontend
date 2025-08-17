@@ -13,6 +13,8 @@ import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import WelcomeSection from "@/components/nutritionist/dashboard/WelcomeSection"
+import NutritionistStats from "@/components/nutritionist/dashboard/StatsCards"
+import { AppointmentStatus } from "@/types/patient/appointment"
 
 export default function DashboardPage() {
   const { stats, isLoading, refreshStats } = useDashboardStore()
@@ -23,73 +25,14 @@ export default function DashboardPage() {
     refreshStats()
   }, [refreshStats])
 
-  const todayAppointments = appointments.filter((apt) => apt.status === "scheduled" || apt.status === "completed")
-  const completedToday = appointments.filter((apt) => apt.status === "completed").length
-  const upcomingToday = appointments.filter((apt) => apt.status === "scheduled").length
-  const activePlans = dietPlans.filter((plan) => plan.status === "active").length
-  const totalPatients = new Set(appointments.map((apt) => apt.patientInfo?.id)).size
-  const successRate = Math.round((completedToday / Math.max(todayAppointments.length, 1)) * 100)
-
+  const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
+ 
   return (
    
       <div className="space-y-4 md:space-y-6 fade-in">
         {/* Header */}
          <WelcomeSection/>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="slide-up">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: "var(--color-soft-blue)" }}>
-                {isLoading ? "..." : totalPatients}
-              </div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card className="slide-up">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Appointments</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: "var(--color-mint-green)" }}>
-                {todayAppointments.length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {completedToday} completed, {upcomingToday} upcoming
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="slide-up">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Diet Plans</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: "var(--color-soft-coral)" }}>
-                {activePlans}
-              </div>
-              <p className="text-xs text-muted-foreground">+8 new this week</p>
-            </CardContent>
-          </Card>
-
-          <Card className="slide-up">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: "var(--color-mint-green)" }}>
-                {isLoading ? "..." : `${successRate}%`}
-              </div>
-              <p className="text-xs text-muted-foreground">Patient goal achievement</p>
-            </CardContent>
-          </Card>
-        </div>
+          <NutritionistStats/>
 
         <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2">
           <PatientMetricsChart />
@@ -126,7 +69,7 @@ export default function DashboardPage() {
                       }}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{appointment.patientName}</p>
+                      <p className="font-medium truncate">{appointment.patient?.name}</p>
                       <p className="text-sm text-muted-foreground truncate">{appointment.type}</p>
                     </div>
                   </div>

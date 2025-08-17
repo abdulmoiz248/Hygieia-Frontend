@@ -137,7 +137,7 @@ export function LabTestsSection() {
           No, Go Back
         </Button>
         <Button
-          variant="destructive"
+          
           className="bg-soft-coral text-snow-white hover:bg-soft-coral/90"
           onClick={() => {
             const testName=selectTestModal?.testName
