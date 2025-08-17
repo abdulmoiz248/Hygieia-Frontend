@@ -1,6 +1,6 @@
 "use client"
 
-import {  Menu, User, Settings, LogOut, ChevronDown } from "lucide-react"
+import { Menu, User, Settings, LogOut, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,12 +14,13 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Link from "next/link"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
+import { BellRing } from "@/components/ui/BellRing"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
-  const user=useLabTechnicianStore()
-  const unreadCount = 3
-  const userName = user.profile.name
-  const userInitials = userName
+  const { profile, notifications, markAllAsRead } = useLabTechnicianStore()
+  const unreadCount = notifications.filter((n) => n.unread).length
+
+  const userInitials = profile.name
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -28,7 +29,6 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0 sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-full">
       <div className="flex items-center justify-between">
-        {/* Left side: hamburger + logo (mobile) */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -43,48 +43,66 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
             <Image src="/logo/logo.png" alt="Hygieia Logo" width={32} height={32} />
             <span className="font-semibold text-lg">Hygieia</span>
           </div>
-
-        
         </div>
 
-        {/* Right side: search (mobile) + notifications + profile */}
         <div className="flex items-center gap-3">
-          {/* Mobile search icon */}
-        
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            {unreadCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-soft-coral text-white text-xs">
-                {unreadCount}
-              </Badge>
-            )}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <BellRing className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-soft-coral text-white text-xs">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 bg-white">
+              <div className="p-3 border-b">
+                <h3 className="font-semibold text-soft-blue">Notifications</h3>
+                <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer">
+                    <div className="flex gap-3 w-full">
+                      <div
+                        className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                          notification.unread ? "bg-soft-coral" : "bg-transparent"
+                        }`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm">{notification.title}</h4>
+                        <p className="text-sm text-cool-gray line-clamp-2">{notification.message}</p>
+                        <p className="text-xs text-cool-gray mt-1">{notification.time}</p>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+              <div className="p-2 border-t">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full bg-soft-blue text-snow-white"
+                  onClick={markAllAsRead}
+                >
+                  Mark All As Read
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* Profile dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user.profile.img} />
+                  <AvatarImage src={profile.img} />
                   <AvatarFallback className="border p-2 bg-soft-blue text-white">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden sm:block">{userName}</span>
+                <span className="hidden sm:block">{profile.name}</span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>

@@ -19,7 +19,7 @@ import {
 //  markAsRead,
   markAllAsRead,
 } from "@/types/patient/notificationSlice"
-import { BellRing } from "./BellRing"
+import { BellRing } from "../ui/BellRing"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
