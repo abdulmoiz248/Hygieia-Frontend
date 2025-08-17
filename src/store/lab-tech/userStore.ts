@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-interface LabTechnicianProfile {
+export interface LabTechnicianProfile {
   id: string | null
   name: string
   email: string
@@ -11,6 +11,8 @@ interface LabTechnicianProfile {
   shift: string
   available: boolean
   img: string
+  gender:string
+  dateOfBirth:string
 }
 
 interface Notification {
@@ -21,7 +23,7 @@ interface Notification {
   unread: boolean
 }
 
-interface LabTechnicianStore {
+export interface LabTechnicianStore {
   profile: LabTechnicianProfile
   notifications: Notification[]
   setProfile: (profileData: LabTechnicianProfile) => void
@@ -48,6 +50,9 @@ const initialProfile: LabTechnicianProfile = {
   shift: "morning",
   available: false,
   img: "/doctor.png",
+  gender:'male'
+  ,dateOfBirth:'2025-8-31',
+  
 }
 
 const useLabTechnicianStore = create<LabTechnicianStore>((set) => ({
