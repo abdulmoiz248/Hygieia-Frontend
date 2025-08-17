@@ -31,7 +31,7 @@ export default function WelcomeSection() {
  
  <SplitText
    text={   <span>
-       <span className="text-soft-coral">Welcome back, </span>
+       <span className="text-soft-coral">Welcome, </span>
        <span className="text-dark-slate-gray">{user.name}! 👋</span>
      </span>
      }

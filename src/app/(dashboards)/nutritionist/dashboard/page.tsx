@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const completedToday = appointments.filter((apt) => apt.status === "completed").length
   const upcomingToday = appointments.filter((apt) => apt.status === "scheduled").length
   const activePlans = dietPlans.filter((plan) => plan.status === "active").length
-  const totalPatients = new Set(appointments.map((apt) => apt.patientId)).size
+  const totalPatients = new Set(appointments.map((apt) => apt.patientInfo?.id)).size
   const successRate = Math.round((completedToday / Math.max(todayAppointments.length, 1)) * 100)
 
   return (
@@ -39,7 +39,7 @@ export default function DashboardPage() {
               className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight font-serif"
               style={{ color: "var(--color-dark-slate-gray)" }}
             >
-              Welcome back, Dr. Johnson
+              Welcome, Dr. Johnson
             </h1>
             <p className="text-sm md:text-base text-muted-foreground mt-1">
               Here's what's happening with your patients today.

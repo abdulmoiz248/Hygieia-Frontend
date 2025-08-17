@@ -14,6 +14,7 @@ export interface Appointment {
   notes?: string
   lastVisit?: string
   patientInfo?: {
+    id:string
     age: number
     weight: string
     height: string
