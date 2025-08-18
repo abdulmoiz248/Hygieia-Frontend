@@ -44,9 +44,9 @@ export default function DashboardPage() {
           <NutritionGoalsChart />
         </div>
 
-        <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2 bg-white/60">
           {/* Today's Schedule */}
-          <Card className="scale-in">
+          <Card className="scale-in bg-white/60">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-lg">
                 <Clock className="h-5 w-5" style={{ color: "var(--color-soft-blue)" }} />
@@ -58,7 +58,7 @@ export default function DashboardPage() {
               {todayAppointments.slice(0, 3).map((appointment) => (
                 <div
                   key={appointment.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-cool-gray/10 hover:bg-muted/70 transition-colors"
                 >
                   <div className="flex items-center space-x-3 min-w-0 flex-1">
                     <div
@@ -69,15 +69,15 @@ export default function DashboardPage() {
                       }}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{appointment.patient?.name}</p>
+                      <p className="font-medium truncate text-soft-coral">{appointment.patient?.name}</p>
                       <p className="text-sm text-muted-foreground truncate">{appointment.type}</p>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-3">
                     <p className="text-sm font-medium">{appointment.time}</p>
                     <Badge
-                      variant={appointment.status === "completed" ? "outline" : "secondary"}
-                      className="text-xs mt-1"
+                    
+                      className="text-xs mt-1 text-snow-white bg-soft-blue"
                     >
                       {appointment.status === "completed" ? (
                         <>

@@ -16,31 +16,25 @@ const nutritionData = [
 
 export function NutritionGoalsChart() {
   return (
-    <Card className="scale-in">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Heart className="h-5 w-5" style={{ color: "var(--color-soft-coral)" }} />
+    <Card className="w-full max-w-full sm:max-w-3xl mx-auto scale-in overflow-hidden bg-white/60">
+      <CardHeader className="space-y-1">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl ">
+          <Heart className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: "var(--color-soft-blue)" }} />
           <span>Nutrition Goals Progress</span>
         </CardTitle>
-        <CardDescription>Weekly progress tracking by goal type</CardDescription>
+        <CardDescription className="text-sm sm:text-base">
+          Weekly progress tracking by goal type
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="overflow-hidden">
         <ChartContainer
           config={{
-            weightLoss: {
-              label: "Weight Loss",
-              color: "var(--color-soft-coral)",
-            },
-            muscleGain: {
-              label: "Muscle Gain",
-              color: "var(--color-soft-blue)",
-            },
-            maintenance: {
-              label: "Maintenance",
-              color: "var(--color-mint-green)",
-            },
+            weightLoss: { label: "Weight Loss", color: "var(--color-soft-coral)" },
+            muscleGain: { label: "Muscle Gain", color: "var(--color-soft-blue)" },
+            maintenance: { label: "Maintenance", color: "var(--color-mint-green)" },
           }}
-          className="h-[300px]"
+          className="h-[250px] sm:h-[300px] md:h-[350px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={nutritionData}>

@@ -13,7 +13,7 @@ const successData = [
 
 export function SuccessRateChart() {
   return (
-    <Card className="scale-in">
+    <Card className="scale-in bg-white/60">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Target className="h-5 w-5" style={{ color: "var(--color-mint-green)" }} />
