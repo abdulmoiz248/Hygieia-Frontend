@@ -39,7 +39,7 @@ interface ChatStore {
 
 export const useChatStore = create<ChatStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       patients: [
         {
           id: "1",

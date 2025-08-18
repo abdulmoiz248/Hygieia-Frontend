@@ -56,7 +56,7 @@ interface DietPlanStore {
 
 export const useDietPlanStore = create<DietPlanStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       dietPlans: [
         {
           id: "1",

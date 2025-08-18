@@ -22,7 +22,7 @@ interface DashboardStore {
 
 export const useDashboardStore = create<DashboardStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       stats: {
         totalPatients: 247,
         todayAppointments: 8,

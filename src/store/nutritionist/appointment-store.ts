@@ -23,7 +23,7 @@ interface AppointmentStore {
 
 export const useAppointmentStore = create<AppointmentStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
     appointments: [
   {
     id: "1",
