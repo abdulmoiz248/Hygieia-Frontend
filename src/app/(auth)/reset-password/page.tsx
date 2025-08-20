@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Mail, AlertCircle, Loader2, CheckCircle, ArrowLeft, Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import api from '@/lib/axios'
 
 type Step = 'email' | 'otp' | 'newPassword' | 'success'
 
@@ -34,139 +35,105 @@ export default function ResetPassword() {
     }
   }, [countdown])
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) {
-      setError('Email is required.')
-      return
-    }
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email.')
-      return
-    }
+const handleEmailSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!email) {
+    setError('Email is required.')
+    return
+  }
+  if (!validateEmail(email)) {
+    setError('Please enter a valid email.')
+    return
+  }
 
-    setError('')
-    setIsLoading(true)
+  setError('')
+  setIsLoading(true)
 
-    try {
-      // TODO: API call to send OTP
-      // const res = await axios.post('/auth/send-reset-otp', { email })
-      // if (res.data.success) {
-      //   setCurrentStep('otp')
-      //   setCountdown(60)
-      // } else {
-      //   setError(res.data.message)
-      // }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+  try {
+    const res = await api.post('/auth/request-password-reset', { email })
+    if (res.data.success) {
       setCurrentStep('otp')
       setCountdown(60)
-    } catch (err) {
-      console.log(err)
-      setError('Something went wrong. Try again.')
-    } finally {
-      setIsLoading(false)
+      localStorage.setItem('resetEmail', email)
+    } else {
+      setError(res.data.message || 'Failed to send reset OTP')
     }
+  } catch (err) {
+    console.log(err)
+    setError('Something went wrong. Try again.')
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+
+ const handleOtpSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!otp || otp.length !== 6) {
+    setError('Please enter a valid 6-digit OTP.')
+    return
   }
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP.')
-      return
-    }
+  setError('')
+  setIsLoading(true)
 
-    setError('')
-    setIsLoading(true)
-
-    try {
-      // TODO: API call to verify OTP
-      // const res = await axios.post('/auth/verify-reset-otp', { email, otp })
-      // if (res.data.success) {
-      //   setCurrentStep('newPassword')
-      // } else {
-      //   setError(res.data.message || 'Invalid OTP. Please try again.')
-      // }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      if (otp === '123456') { // Mock validation
-        setCurrentStep('newPassword')
-      } else {
-        setError('Invalid OTP. Please try again.')
-      }
-    } catch (err) {
-      console.log(err)
-      setError('Something went wrong. Try again.')
-    } finally {
-      setIsLoading(false)
+  try {
+    const email = localStorage.getItem('resetEmail')
+    const res = await api.post('/auth/verify-reset-otp', { email, otp })
+    if (res.data.success) {
+      setCurrentStep('newPassword')
+    } else {
+      setError(res.data.message || 'Invalid OTP. Please try again.')
     }
+  } catch (err) {
+    console.log(err)
+    setError('Something went wrong. Try again.')
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+
+const handlePasswordSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!newPassword || !confirmPassword) {
+    setError('Both password fields are required.')
+    return
+  }
+  if (!validatePassword(newPassword)) {
+    setError('Password must be at least 6 characters long.')
+    return
+  }
+  if (newPassword !== confirmPassword) {
+    setError('Passwords do not match.')
+    return
   }
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newPassword || !confirmPassword) {
-      setError('Both password fields are required.')
-      return
-    }
-    if (!validatePassword(newPassword)) {
-      setError('Password must be at least 6 characters long.')
-      return
-    }
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.')
-      return
-    }
+  setError('')
+  setIsLoading(true)
 
-    setError('')
-    setIsLoading(true)
-
-    try {
-      // TODO: API call to update password
-      // const res = await axios.post('/auth/update-password', { email, otp, newPassword })
-      // if (res.data.success) {
-      //   setCurrentStep('success')
-      // } else {
-      //   setError(res.data.message)
-      // }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+  try {
+    const email = localStorage.getItem('resetEmail')
+    const res = await api.post('/auth/reset-password', { 
+      email, 
+      otp, 
+      newPassword 
+    })
+    if (res.data.success) {
       setCurrentStep('success')
-    } catch (err) {
-      console.log(err)
-      setError('Something went wrong. Try again.')
-    } finally {
-      setIsLoading(false)
+      localStorage.removeItem('resetEmail')
+    } else {
+      setError(res.data.message)
     }
+  } catch (err) {
+    console.log(err)
+    setError('Something went wrong. Try again.')
+  } finally {
+    setIsLoading(false)
   }
+}
 
-  const handleResendOtp = async () => {
-    if (countdown > 0) return
-
-    setError('')
-    setIsLoading(true)
-
-    try {
-      // TODO: API call to resend OTP
-      // const res = await axios.post('/auth/send-reset-otp', { email })
-      // if (res.data.success) {
-      //   setCountdown(60)
-      // } else {
-      //   setError(res.data.message)
-      // }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setCountdown(60)
-    } catch (err) {
-      console.log(err)
-      setError('Failed to resend OTP. Try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+ 
 
   // Email Step
   if (currentStep === 'email') {
@@ -273,22 +240,7 @@ export default function ResetPassword() {
               </Button>
             </form>
 
-            <div className="mt-4 text-center text-sm text-snow-white animate-slide-in-right delay-400">
-              Didn&apos;t receive the code?{' '}
-              {countdown > 0 ? (
-                <span className="text-soft-coral">
-                  Resend in {countdown}s
-                </span>
-              ) : (
-                <button
-                  onClick={handleResendOtp}
-                  disabled={isLoading}
-                  className="text-soft-blue hover:text-blue-300 transition-colors duration-300 underline-offset-4 hover:underline"
-                >
-                  Resend OTP
-                </button>
-              )}
-            </div>
+           
 
             <div className="mt-2 text-center text-sm text-snow-white animate-slide-in-right delay-500">
               <button

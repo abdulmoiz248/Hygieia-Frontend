@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock,  AlertCircle } from 'lucide-react'
 import {  useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
@@ -14,7 +14,7 @@ const Signup = () => {
  
   
   const [showPassword, setShowPassword] = useState(false)
-  const [name, setName] = useState('')
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -26,7 +26,7 @@ const Signup = () => {
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || !email || !password) {
+    if ( !email || !password) {
       setError('All fields are required.')
       return
     }
@@ -35,24 +35,21 @@ const Signup = () => {
       return
     }
     setLoading(true)
-    try {
-        const res=await api.post(`/signup`,{name,email,password,role:'PATIENT'})
-      if(res.data.success)
-         {  
-            localStorage.setItem('email',email)
-            router.push(`/otp`)
-         
-          }
-      else
-           setError(res.data.message) 
-     
-    } catch (err) {
-      console.log(err)
-      setError('Something went wrong.')
-     
-    }finally{
-      setLoading(false)
-    }
+   try {
+  const res = await api.post(`auth/register`, { email, password })
+  if (res.data.message) {  
+    localStorage.setItem('email', email)
+    router.push(`/otp`)
+  } else {
+    setError(res.data.message || 'Registration failed')
+  }
+} catch (err) {
+  console.log(err)
+  setError('Something went wrong.')
+} finally {
+  setLoading(false)
+}
+
   }
 
   return (
@@ -68,16 +65,6 @@ const Signup = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative animate-slide-in-right delay-200">
-                <User className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
-                <Input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="pl-10 bg-white/5 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-snow-white"
-                />
-              </div>
               <div className="relative animate-slide-in-right delay-300">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
                 <Input

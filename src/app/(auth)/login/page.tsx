@@ -8,6 +8,7 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import { useRouter } from 'next/navigation'
+import api from '@/lib/axios'
 
 export default  function Login() {
   
@@ -23,36 +24,54 @@ export default  function Login() {
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || !password) {
-      setError('Email and password are required.')
-      return
-    }
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email.')
-      return
-    }
-
-    setError('')
-    setIsLoading(true)
-
-    try {
-      // TODO: role from api
-      // const res = await axios.post(`/${role}/auth/login`, { email, password })
-      // if (res.data.success) {
-      //   router.push(`/${role}/dashboard`)
-      // } else {
-      //   setError(res.data.message)
-      // }
-      router.push(`/patient/dashboard`)
-    } catch (err) {
-      console.log(err);
-      setError('Something went wrong. Try again.')
-    } finally {
-      setIsLoading(false)
-    }
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!email || !password) {
+    setError('Email and password are required.')
+    return
   }
+  if (!validateEmail(email)) {
+    setError('Please enter a valid email.')
+    return
+  }
+
+  setError('')
+  setIsLoading(true)
+
+  try {
+    const res =await api.post('/auth/login',{email,password})
+
+    if (!res.data.success) {
+      const data = await res.data
+
+   
+    localStorage.setItem('token', data.accessToken)
+    localStorage.setItem('id',data.id)
+
+
+    const role = data.role?.toLowerCase() || 'patient'
+
+   
+      router.push(`/${role}/dashboard`)
+   
+    }else{
+  console.log(res)
+
+      const data = await res.data
+      throw new Error(data.message || 'Login failed')
+    }
+
+    
+  
+    
+  } catch (err: any) {
+    console.error(err)
+    setError(err.message || 'Something went wrong. Try again.')
+  } finally {
+    setIsLoading(false)
+  }
+}
+
  
   return (
    

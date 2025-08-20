@@ -95,20 +95,20 @@ export default function OTPVerificationPage() {
   const verifyOtp = async() => {
     const otpString = otp.join("")
 
-    if (otpString.length !== 6) {
-      setErrorMessage("Please enter all 6 digits")
-      setVerificationStatus("error")
-      setTimeout(() => {
-        setErrorMessage("")
-        setVerificationStatus("idle")
-      }, 3000)
-      return
-    }
+    // if (otpString.length !== 6) {
+    //   setErrorMessage("Please enter all 6 digits")
+    //   setVerificationStatus("error")
+    //   setTimeout(() => {
+    //     setErrorMessage("")
+    //     setVerificationStatus("idle")
+    //   }, 3000)
+    //   return
+    // }
 
-    setIsVerifying(true)
-    setVerificationStatus("idle")
+    // setIsVerifying(true)
+    // setVerificationStatus("idle")
     try{
-      const res=await api.post(`/verify-otp`,{email,otp:otpString})
+      const res=await api.post(`/auth/verify-otp`,{email,otp:otpString})
       if(res.data.success){
         setShowModal(true)
         localStorage.removeItem('email')
@@ -124,6 +124,7 @@ export default function OTPVerificationPage() {
     }
     catch(err){
       console.log(err)
+      setErrorMessage("Invalid or Otp Expired")
     }finally{
       
     }
@@ -232,7 +233,7 @@ export default function OTPVerificationPage() {
           <button
             onClick={verifyOtp}
             disabled={isVerifyButtonDisabled}
-            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium hover:bg-mint-green
               ${isVerifying ? "bg-cool-gray cursor-not-allowed" : "bg-mint-green hover:bg-opacity-90"} 
               text-dark-slate-gray transition-all duration-200`}
           >
