@@ -8,7 +8,7 @@ interface GoogleLoginButtonProps {
 }
 
 const GoogleLoginButton = ({
-  redirectUrl = "http://localhost:4000/auth/google",
+  redirectUrl = "http://localhost:4001/auth/google",
   className = "",
 }: GoogleLoginButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)

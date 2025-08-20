@@ -12,6 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 import { useSelector } from "react-redux"
 import { RootState } from "@/store/patient/store"
+import api from "@/lib/axios"
+
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -22,7 +25,6 @@ const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
-
 
 export default function SettingsPage() {
   const [notifications, setNotifications] = useState({
@@ -35,26 +37,102 @@ export default function SettingsPage() {
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [emailValid, setEmailValid] = useState(false)
-  const [otpSent, setOtpSent] = useState(false)
-  const [otpVerified, setOtpVerified] = useState(false)
   const [error, setError] = useState("")
-  const user=useSelector((store:RootState)=>store.profile)
+  const [otp, setOtp] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [currentStep, setCurrentStep] = useState("verifyEmail")
+
+  const user = useSelector((store: RootState) => store.profile)
+
+ const handleVerifyEmail = async () => {
+  setError("")
+  if (user.email != email) {
+    setEmailValid(false)
+    setError("Incorrect Email Address")
+    return
+  }
+
+  setEmailValid(true)
+  setError("")
+  setIsLoading(true)
+  try {
+    const res = await api.post('/auth/request-password-reset', { email })
+    if (res.data.success) {
+      localStorage.setItem("resetEmail", email)
+      setCurrentStep("otp")
+    } else {
+      setError(res.data.message || "Something went wrong")
+    }
+  } catch (err) {
+    console.log(err)
+    setError("Something went wrong. Try again.")
+  } finally {
+    setIsLoading(false)
+  }
+}
 
 
-  const handleVerifyEmail = async () => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!otp || otp.length !== 6) {
+      setError("Please enter a valid 6-digit OTP.")
+      return
+    }
     setError("")
- 
-       if(user.email!=email){
-        setEmailValid(false)
-         setError("Incorrect Email Address")
-       }else{
-           setEmailValid(true)
-            setError("")
-       }
-     
-  
-      
-   
+    setIsLoading(true)
+    try {
+      const email = localStorage.getItem("resetEmail")
+      const res = await api.post("/auth/verify-reset-otp", { email, otp })
+      if (res.data.success) {
+        setCurrentStep("newPassword")
+      } else {
+        setError(res.data.message || "Invalid OTP. Please try again.")
+      }
+    } catch (err) {
+      console.log(err)
+      setError("Something went wrong. Try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newPassword || !confirmPassword) {
+      setError("Both password fields are required.")
+      return
+    }
+    if (!validatePassword(newPassword)) {
+      setError("Password must be at least 6 characters long.")
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.")
+      return
+    }
+    setError("")
+    setIsLoading(true)
+    try {
+      const email = localStorage.getItem("resetEmail")
+      const res = await api.post("/auth/reset-password", { email, otp, newPassword })
+      if (res.data.success) {
+        setCurrentStep("success")
+        localStorage.removeItem("resetEmail")
+      } else {
+        setError(res.data.message)
+      }
+    } catch (err) {
+      console.log(err)
+      setError("Something went wrong. Try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -91,16 +169,14 @@ export default function SettingsPage() {
                       : "Weekly health and wellness tips"}
                   </p>
                 </div>
-<Switch
-  id={key}
-  checked={notifications[key as keyof typeof notifications]}
-  onCheckedChange={(checked) =>
-    setNotifications((prev) => ({ ...prev, [key]: checked }))
-  }
-  className="data-[state=checked]:bg-soft-blue data-[state=unchecked]:bg-soft-coral relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out"
-/>
-
-
+                <Switch
+                  id={key}
+                  checked={notifications[key as keyof typeof notifications]}
+                  onCheckedChange={(checked) =>
+                    setNotifications((prev) => ({ ...prev, [key]: checked }))
+                  }
+                  className="data-[state=checked]:bg-soft-blue data-[state=unchecked]:bg-soft-coral relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out"
+                />
               </div>
             ))}
           </CardContent>
@@ -115,21 +191,26 @@ export default function SettingsPage() {
               Security & Privacy
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 ">
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <Label>Password</Label>
-             </div>
-              <Dialog open={showResetPassword} onOpenChange={(open) => {
-                setShowResetPassword(open)
-                if (!open) {
-                  setEmail("")
-                  setEmailValid(false)
-                  setOtpSent(false)
-                  setOtpVerified(false)
-                  setError("")
-                }
-              }}>
+              </div>
+              <Dialog
+                open={showResetPassword}
+                onOpenChange={(open) => {
+                  setShowResetPassword(open)
+                  if (!open) {
+                    setEmail("")
+                    setEmailValid(false)
+                    setOtp("")
+                    setNewPassword("")
+                    setConfirmPassword("")
+                    setCurrentStep("verifyEmail")
+                    setError("")
+                  }
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button className="bg-soft-blue text-snow-white hover:bg-soft-blue/90" size="sm">
                     <Lock className="w-4 h-4 mr-2" />
@@ -141,7 +222,7 @@ export default function SettingsPage() {
                     <DialogTitle>Change Password</DialogTitle>
                   </DialogHeader>
 
-                  {!emailValid && (
+                  {currentStep === "verifyEmail" && (
                     <div className="space-y-4">
                       <Label htmlFor="email">Enter your email</Label>
                       <Input
@@ -155,52 +236,71 @@ export default function SettingsPage() {
                       <Button
                         className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
                         onClick={handleVerifyEmail}
-                        disabled={!email}
+                        disabled={!email || isLoading}
                       >
-                        Verify Email
+                        {isLoading ? "Verifying..." : "Verify Email"}
                       </Button>
                     </div>
                   )}
 
-                  {emailValid && !otpSent && (
-                    <div className="space-y-4">
-                      <Label htmlFor="otp">OTP sent to your email</Label>
-                      <Input id="otp" placeholder="123456" />
+                  {currentStep === "otp" && (
+                    <form onSubmit={handleOtpSubmit} className="space-y-4">
+                      <Label htmlFor="otp">Enter OTP</Label>
+                      <Input
+                        id="otp"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="123456"
+                      />
+                      {error && <p className="text-red-500 text-sm">{error}</p>}
                       <Button
+                        type="submit"
                         className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
-                        onClick={() => setOtpSent(true)}
+                        disabled={isLoading}
                       >
-                        Verify OTP
+                        {isLoading ? "Verifying..." : "Verify OTP"}
                       </Button>
-                    </div>
+                    </form>
                   )}
 
-                  {otpSent && !otpVerified && (
-                    <div className="space-y-4">
-                      <Label htmlFor="otp">Re-enter OTP</Label>
-                      <Input id="otp" placeholder="123456" />
-                      <Button
-                        className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
-                        onClick={() => setOtpVerified(true)}
-                      >
-                        Confirm OTP
-                      </Button>
-                    </div>
-                  )}
-
-                  {otpVerified && (
-                    <div className="space-y-4">
+                  {currentStep === "newPassword" && (
+                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
                       <div>
-                        <Label htmlFor="new" className="text-soft-blue pb-2">New Password</Label>
-                        <Input id="new" type="password" />
+                        <Label htmlFor="new" className="text-soft-blue pb-2">
+                          New Password
+                        </Label>
+                        <Input
+                          id="new"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
                       </div>
                       <div>
-                        <Label htmlFor="confirm" className="text-soft-blue pb-2">Confirm New Password</Label>
-                        <Input id="confirm" type="password" />
+                        <Label htmlFor="confirm" className="text-soft-blue pb-2">
+                          Confirm New Password
+                        </Label>
+                        <Input
+                          id="confirm"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
                       </div>
-                      <Button className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
-                        Update Password
+                      {error && <p className="text-red-500 text-sm">{error}</p>}
+                      <Button
+                        type="submit"
+                        className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Updating..." : "Update Password"}
                       </Button>
+                    </form>
+                  )}
+
+                  {currentStep === "success" && (
+                    <div className="space-y-4 text-center">
+                      <p className="text-green-600 font-semibold">Password updated successfully!</p>
                     </div>
                   )}
                 </DialogContent>
