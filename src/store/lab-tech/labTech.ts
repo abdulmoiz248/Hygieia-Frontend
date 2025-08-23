@@ -51,15 +51,13 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
     if (type === "scan") {
       const formData = new FormData()
       formData.append("file", file)
-      // optional doctor name if needed
-      // formData.append("doctor_name", "Dr. Example")
-
+    
       await api.post(`/${id}/upload-scan`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
     } else {
       // for other report types, send JSON body
-      const body = reportValues ? { ...reportValues, title: `${file?.name || "Report"}` } : {}
+      const body = reportValues ? { resultData:reportValues.results, title: `${file?.name || "Report"}` } : {}
       await api.post(`/${id}/upload-result`, body)
     }
 
@@ -103,36 +101,43 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
   getCompletedCount: () => get().completedReports.length,
   getTotalTests: () => get().pendingReports.length + get().completedReports.length,
 
-  initialize: async () => {
-    const techId = useLabTechnicianStore.getState().profile.id
-    if (!techId) return
-    set({ isLoading: true })
+ initialize: async () => {
+  const userStore = useLabTechnicianStore.getState()
+  await userStore.fetchProfile()
+    
+  
 
-    try {
-      const res = await api.get<PendingReport[]>(`/technician/${techId}`)
-      const allReports = res.data
+  const techId = useLabTechnicianStore.getState().profile?.id
+  if (!techId) return
 
-      const pendingReports = allReports.filter(r => r.status === "pending")
-      const completedReports = allReports.filter(r => r.status === "completed")
+  set({ isLoading: true })
 
-      const analytics: LabAnalytics = {
-        totalTests: allReports.length,
-        completedTests: completedReports.length,
-        pendingReports: pendingReports.length,
-        todayTests: allReports.filter(
-          r => new Date(r.scheduledDate).toDateString() === new Date().toDateString()
-        ).length,
-        weeklyGrowth: 12.5, // calculate if needed
-        monthlyRevenue: 45600, // calculate if needed
-      }
+  try {
+    const res = await api.get<PendingReport[]>(`/technician/${techId}`)
+    const allReports = res.data
 
-      set({ pendingReports, completedReports, analytics, isInitialized: true })
-    } catch (err) {
-      console.error("Failed to fetch lab data:", err)
-    } finally {
-      set({ isLoading: false })
+    const pendingReports = allReports.filter(r => r.status === "pending")
+    const completedReports = allReports.filter(r => r.status === "completed")
+
+    const analytics: LabAnalytics = {
+      totalTests: allReports.length,
+      completedTests: completedReports.length,
+      pendingReports: pendingReports.length,
+      todayTests: allReports.filter(
+        r => new Date(r.scheduledDate).toDateString() === new Date().toDateString()
+      ).length,
+      weeklyGrowth: 12.5,
+      monthlyRevenue: 45600,
     }
-  },
+
+    set({ pendingReports, completedReports, analytics, isInitialized: true })
+  } catch (err) {
+    console.error("Failed to fetch lab data:", err)
+  } finally {
+    set({ isLoading: false })
+  }
+}
+
 }))
 
 // Auto-fetch when store is first imported

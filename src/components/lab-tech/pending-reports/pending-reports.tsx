@@ -19,6 +19,7 @@ export function PendingReports() {
   const [selectedReport, setSelectedReport] = useState<PendingReport | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
 
   const [reportValues, setReportValues] = useState({
     results: "",
@@ -42,12 +43,14 @@ export function PendingReports() {
 
   const handleValueSubmit = () => {
     if (selectedReport && (reportValues.results || reportValues.findings)) {
+       setIsUploading(true)
       const reportData = JSON.stringify(reportValues)
       const blob = new Blob([reportData], { type: "application/json" })
       const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
 
    uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
       setSelectedReport(null)
+        setIsUploading(false)
       setReportValues({
         results: "",
         findings: "",
@@ -60,9 +63,11 @@ export function PendingReports() {
 
   const handleUploadSubmit = () => {
     if (selectedReport && uploadFile) {
+       setIsUploading(true)
       uploadReport(selectedReport.id, uploadFile, undefined, selectedReport.type)
       setSelectedReport(null)
       setUploadFile(null)
+       setIsUploading(false)
       const fileInput = document.getElementById("report-file") as HTMLInputElement
       if (fileInput) fileInput.value = ""
     }
@@ -106,174 +111,203 @@ export function PendingReports() {
 
      <PendingReportFilter searchQuery={searchTerm} setSearchQuery={setSearchTerm}/>
 
-          <div className="space-y-3">
-            {filteredReports.map((report) => (
-              <Card
-                key={report.id}
-                className={`cursor-pointer transition-all hover:shadow-lg border-0 shadow-md bg-cool-gray/10 ${
-                  selectedReport?.id === report.id ? "ring-2 ring-soft-blue shadow-lg" : ""
-                }`}
-                onClick={() => {
+         <div className="space-y-3">
+  {filteredReports.length > 0 ? (
+    filteredReports.map((report) => (
+      <Card
+        key={report.id}
+        className={`cursor-pointer transition-all hover:shadow-lg border-0 shadow-md bg-cool-gray/10 ${
+          selectedReport?.id === report.id ? "ring-2 ring-soft-blue shadow-lg" : ""
+        }`}
+        onClick={() => {
+          setSelectedReport(report)
+          if (uploadSectionRef.current) {
+            uploadSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        }}
+      >
+        <CardContent className="p-4 py-1">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-3 text-soft-coral">
+                {getStatusIcon(report.status)}
+                <div>
+                  <h3 className="font-bold text-soft-coral text-lg">{report.patientName}</h3>
+                  <p className="text-gray-600 font-medium">{report.testName}</p>
+                  <Badge variant="outline" className="text-xs mt-1 capitalize bg-soft-blue text-snow-white">
+                    {report.type && report.type.replace("-", " ")}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500 font-medium">
+                  {new Date(report.scheduledDate).toLocaleDateString()} at {report.scheduledTime}
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-xs capitalize font-medium bg-soft-coral text-snow-white"
+                >
+                  {report.status.replace("-", " ")}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="text-xs capitalize font-medium bg-mint-green text-black"
+                >
+                  {report.location}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
                   setSelectedReport(report)
                   if (uploadSectionRef.current) {
                     uploadSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
                   }
                 }}
+                className="hover:bg-blue-50"
               >
-                <CardContent className="p-4 py-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3 text-soft-coral">
-                        {getStatusIcon(report.status)}
-                        <div>
-                          <h3 className="font-bold text-soft-coral text-lg">{report.patientName}</h3>
-                          <p className="text-gray-600 font-medium">{report.testName}</p>
-                        
-                          <Badge variant="outline" className="text-xs mt-1 capitalize bg-soft-blue text-snow-white">
-                            {report.type && report.type.replace("-", " ")}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm text-gray-500 font-medium">
-                          {new Date(report.scheduledDate).toLocaleDateString()} at {report.scheduledTime}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className="text-xs capitalize font-medium bg-soft-coral text-snow-white"
-                        >
-                          {report.status.replace("-", " ")}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedReport(report)
-                          if (uploadSectionRef.current) {
-                            uploadSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
-                          }
-                        }}
-                        className="hover:bg-blue-50"
-                      >
-                        <FileText className="w-4 h-4 text-soft-blue" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                <FileText className="w-4 h-4 text-soft-blue" />
+              </Button>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+    ))
+  ) : (
+   <div className="flex flex-col items-center justify-center py-16 space-y-4 text-gray-400">
+  <svg
+    className="w-16 h-16 text-soft-blue animate-bounce"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V7a2 2 0 012-2h7l5 5v9a2 2 0 01-2 2z"
+    />
+  </svg>
+  <h3 className="text-lg font-semibold text-soft-blue">Great Job!</h3>
+  <p className="text-gray-500 text-center max-w-xs">
+    You’re all caught up! No pending reports at the moment. Keep up the good work.
+  </p>
+</div>
+
+  )}
+</div>
+
         </div>
 
         {/* Sticky Upload Section */}
-        <div ref={uploadSectionRef} className="space-y-4 lg:sticky lg:top-6 ">
-          <Card className="border-0 shadow-lg bg-white/60">
-            <CardHeader className="pb-1">
-              <CardTitle className="flex items-center space-x-2 text-xl">
-                {selectedReport && isFileUploadOnly(selectedReport.type) ? (
-                  <Upload className="w-6 h-6 text-dark-slate-gray" />
-                ) : (
-                  <Edit3 className="w-6 h-6 text-dark-slate-gray" />
+     {/* Sticky Upload Section */}
+<div ref={uploadSectionRef} className="space-y-4 lg:sticky lg:top-6">
+  <Card className={`border-0 shadow-lg bg-white/60 ${isUploading ? "opacity-50 pointer-events-none" : ""}`}>
+    <CardHeader className="pb-1">
+      <CardTitle className="flex items-center space-x-2 text-xl">
+        {selectedReport && isFileUploadOnly(selectedReport.type) ? (
+          <Upload className="w-6 h-6 text-dark-slate-gray" />
+        ) : (
+          <Edit3 className="w-6 h-6 text-dark-slate-gray" />
+        )}
+        <span className="text-soft-coral">
+          {selectedReport && isFileUploadOnly(selectedReport.type) ? "Upload Report" : "Enter Report Data"}
+        </span>
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-6 relative">
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10">
+          <span className="text-soft-blue font-semibold">Uploading...</span>
+        </div>
+      )}
+
+      {selectedReport ? (
+        <>
+          <div className="p-4 bg-cool-gray/10 rounded-xl border border-blue-200 space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="font-semibold text-dark-slate-gray w-32">Patient Name:</span>
+              <span className="text-soft-blue font-medium">{selectedReport.patientName}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="font-semibold text-dark-slate-gray w-32">Test Name:</span>
+              <span className="text-soft-blue font-medium">{selectedReport.testName}</span>
+            </div>
+          </div>
+
+          {isFileUploadOnly(selectedReport.type) ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="report-file" className="text-sm font-medium text-soft-blue">
+                  Upload Scan File
+                </Label>
+                <Input
+                  id="report-file"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.png,.dicom"
+                  onChange={handleFileUpload}
+                  className="border-gray-200 focus:border-blue-500"
+                />
+                {uploadFile && (
+                  <p className="text-sm text-dark-slate-gray font-medium">
+                    Selected: <span className="font-medium text-soft-coral">{uploadFile.name}</span>
+                  </p>
                 )}
-                <span className="text-soft-coral">
-                  {selectedReport && isFileUploadOnly(selectedReport.type) ? "Upload Report" : "Enter Report Data"}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {selectedReport ? (
-                <>
-                 <div className="p-4 bg-cool-gray/10 rounded-xl border border-blue-200 space-y-2">
-  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-    <span className="font-semibold text-dark-slate-gray w-32">Patient Name:</span>
-    <span className="text-soft-blue font-medium">{selectedReport.patientName}</span>
-  </div>
-  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-    <span className="font-semibold text-dark-slate-gray w-32">Test Name:</span>
-    <span className="text-soft-blue font-medium">{selectedReport.testName}</span>
-  </div>
+              </div>
+
+              <Button
+                onClick={handleUploadSubmit}
+                disabled={!uploadFile || isUploading}
+                className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {isUploading ? "Uploading..." : "Upload Scan"}
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="results" className="text-sm font-medium text-soft-blue">
+                    Test Results *
+                  </Label>
+                  <Textarea
+                    id="results"
+                    placeholder="Enter the test results..."
+                    value={reportValues.results}
+                    onChange={(e) => setReportValues((prev) => ({ ...prev, results: e.target.value }))}
+                    rows={3}
+                    className="border-gray-200 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleValueSubmit}
+                disabled={!reportValues.results && !reportValues.findings || isUploading}
+                className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
+              >
+                <Edit3 className="w-4 h-4 mr-2" />
+                {isUploading ? "Uploading..." : "Submit Report Data"}
+              </Button>
+            </>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <FileText className="w-16 h-16 text-soft-blue mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-dark-slate-gray mb-2">Select a report to process</h3>
+          <p className="text-cool-gray">Choose a pending report from the list to get started</p>
+        </div>
+      )}
+    </CardContent>
+  </Card>
 </div>
 
-
-                  {isFileUploadOnly(selectedReport.type) ? (
-                    // File upload interface for scans
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="report-file" className="text-sm font-medium text-soft-blue">
-                          Upload Scan File
-                        </Label>
-                        <Input
-                          id="report-file"
-                          type="file"
-                          accept=".pdf,.doc,.docx,.jpg,.png,.dicom"
-                          onChange={handleFileUpload}
-                          className="border-gray-200 focus:border-blue-500"
-                        />
-                        {uploadFile && (
-                          <p className="text-sm text-dark-slate-gray font-medium"> Selected: <span className="font-medium text-soft-coral"> {uploadFile.name} </span></p>
-                        )}
-                      </div>
-
-                 
-
-                      <Button
-                        onClick={handleUploadSubmit}
-                        disabled={!uploadFile}
-                        className="w-full bg-soft-blue hover:bg-soft-blue/90  text-snow-white font-medium py-3"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Scan
-                      </Button>
-                    </>
-                  ) : (
-                    // Direct value entry interface for other report types
-                    <>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="results" className="text-sm font-medium text-soft-blue">
-                            Test Results *
-                          </Label>
-                          <Textarea
-                            id="results"
-                            placeholder="Enter the test results..."
-                            value={reportValues.results}
-                            onChange={(e) => setReportValues((prev) => ({ ...prev, results: e.target.value }))}
-                            rows={3}
-                            className="border-gray-200 focus:border-blue-500"
-                          />
-                        </div>
-
-                    
-
-                      
-                      </div>
-
-                      <Button
-                        onClick={handleValueSubmit}
-                        disabled={!reportValues.results && !reportValues.findings}
-                        className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
-                      >
-                        <Edit3 className="w-4 h-4 mr-2" />
-                        Submit Report Data
-                      </Button>
-                    </>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-soft-blue mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-dark-slate-gray mb-2">Select a report to process</h3>
-                  <p className="text-cool-gray">Choose a pending report from the list to get started</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-        </div>
       </div>
     </div>
   )

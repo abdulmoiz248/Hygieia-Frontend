@@ -22,10 +22,14 @@ export function CompletedReports() {
 
 
 
-  const handleDownload = (reportId: string, patientName: string) => {
-    // Simulate download functionality
-    console.log(`Downloading report ${reportId} for ${patientName}`)
+ const handleDownload = (fileUrl: string, patientName: string) => {
+  if (!fileUrl) {
+    console.warn(`No file available for ${patientName}`);
+    return;
   }
+  window.open(fileUrl, '_blank');
+}
+
 
   return (
     <div className="space-y-6 fade-in p-6 bg-snow-white">
@@ -69,7 +73,7 @@ export function CompletedReports() {
       <div className="flex mt-2 sm:mt-0 w-full sm:w-auto">
         <Button
           size="sm"
-          onClick={() => handleDownload(report.id, report.patientName)}
+          onClick={() => handleDownload(report.reportFile!, report.patientName)}
           className="w-full sm:w-auto bg-soft-blue hover:bg-soft-blue/90 text-snow-white flex items-center justify-center space-x-2"
         >
           <DownloadIcon id="t-1" className="m-0" />

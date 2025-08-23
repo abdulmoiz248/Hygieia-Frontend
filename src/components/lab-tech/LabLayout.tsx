@@ -5,20 +5,31 @@ import LabSidebar from "@/components/lab-tech/dashboard/LabSidebar"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
 import { cn } from "@/lib/utils"
 import { useLabStore } from "@/store/lab-tech/labTech"
+import useLabTechnicianStore from "@/store/lab-tech/userStore"
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const { loading } = useLabTechnicianStore()
+  
   const activeTab = useLabStore((state) => state.activeTab)
   const setActiveTab = useLabStore((state) => state.setActiveTab)
 
+
+  const [mounted, setMounted] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const isAppLoading = loading
+
   useEffect(() => {
+    setMounted(true)
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMobileOpen(false)
     }
     window.addEventListener("keydown", handleEsc)
     return () => window.removeEventListener("keydown", handleEsc)
   }, [])
+
+  if (!mounted || isAppLoading) return null
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -32,6 +43,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
             onTabChange={setActiveTab}
           />
         </div>
+
         {mobileOpen && (
           <div className="fixed inset-0 z-50 flex">
             <div className="relative z-50 w-64 bg-white shadow-lg">
@@ -52,6 +64,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
             />
           </div>
         )}
+
         <main
           className={cn(
             "flex-1 transition-all duration-300 bg-snow-white",

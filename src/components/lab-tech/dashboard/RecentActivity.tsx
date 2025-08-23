@@ -32,11 +32,11 @@ export default function RecentActivity() {
               </p>
              <p className="text-xs text-gray-500">
   {report.uploadedAt
-    ? `${new Date(report.uploadedAt).toLocaleDateString(undefined, {
+    ? `${new Date(report.scheduledDate).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
-      })} • ${new Date(report.uploadedAt).toLocaleTimeString(undefined, {
+      })} • ${new Date(report.scheduledDate).toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
       })}`

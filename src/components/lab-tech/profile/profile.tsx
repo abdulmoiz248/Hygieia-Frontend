@@ -39,7 +39,7 @@ const LabTechnicianCard = ({
   }
 
   const renderGenderIcon = (gender: string) => {
-    switch (gender.toLowerCase()) {
+    switch (gender) {
       case "male":
         return <Mars className="w-5 h-5 text-soft-blue" />
       case "female":
@@ -113,8 +113,8 @@ const LabTechnicianCard = ({
               <Calendar className="w-4 h-4 text-soft-blue" />
               <span>
                 Born{" "}
-                {profile.dateOfBirth
-                  ? new Date(profile.dateOfBirth).toLocaleDateString()
+                {profile.dateofbirth
+                  ? new Date(profile.dateofbirth).toLocaleDateString()
                   : "N/A"}
               </span>
             </div>

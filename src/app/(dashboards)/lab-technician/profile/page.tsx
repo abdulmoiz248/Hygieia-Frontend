@@ -12,6 +12,7 @@ import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
 import LabTechnicianCard from "@/components/lab-tech/profile/profile"
 import { useLabStore } from "@/store/lab-tech/labTech"
+import api from "@/lib/axios"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,12 +30,13 @@ export default function ProfilePage() {
 
   const reduxProfile=useLabTechnicianStore().profile
   const saveProfile=useLabTechnicianStore().setProfile
+  const updateField=useLabTechnicianStore().updateProfileField
    const setactiveTab = useLabStore((state) => state.setActiveTab)
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<LabTechnicianProfile>(reduxProfile)
+  const [profile, setProfile] = useState<LabTechnicianProfile>(reduxProfile!)
 
   useEffect(() => {
-  setProfile(reduxProfile)
+  setProfile(reduxProfile!)
   setactiveTab('')
 }, [reduxProfile])
 
@@ -43,6 +45,34 @@ export default function ProfilePage() {
     saveProfile(profile)
     
   }
+
+
+async function uploadUserAvatar(file: File, role: string, userId: string) {
+  const formData = new FormData();
+  formData.append('file', file); // key must match FileInterceptor('file')
+
+  try {
+    const res = await api.post(
+      `/auth/profile-pic?role=${role}&userId=${userId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data', // ✅ important
+        },
+      }
+    );
+
+    if (res.data.success) {
+      const img = res.data.img;
+      updateField('img', img);
+    }
+  } catch (err: any) {
+    console.error('Error uploading avatar:', err);
+    throw err;
+  }
+}
+
+
 
   
   return (
@@ -74,11 +104,13 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Picture & Basic Info */}
-  <LabTechnicianCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants}  
-  onAvatarChange={(file) => {
-    console.log("Selected avatar file:", file)
-    // upload to server or update profile
-  }} />
+<LabTechnicianCard
+  profile={profile}
+  isEditing={isEditing}
+  itemVariants={itemVariants}
+  onAvatarChange={(file) => uploadUserAvatar(file, 'lab-technician', profile.id)}
+/>
+
 
 
         {/* Personal Information */}
@@ -113,7 +145,7 @@ export default function ProfilePage() {
     </div>
      <div>
               <label className="text-sm font-medium text-soft-blue">Gender</label>
-           <Select value={profile.gender.toLowerCase()}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
+           <Select value={profile.gender}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
   <SelectTrigger>
     <SelectValue placeholder="Select gender" />
   </SelectTrigger>
@@ -139,7 +171,8 @@ export default function ProfilePage() {
       <Input
         id="dob"
         type="date" 
-      value={profile.dateOfBirth }
+   value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split('T')[0] : ''}
+
 
         onChange={(e) => setProfile((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
         disabled={!isEditing}

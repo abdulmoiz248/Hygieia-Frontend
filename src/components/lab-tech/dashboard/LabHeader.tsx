@@ -20,11 +20,14 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
   const { profile, notifications, markAllAsRead } = useLabTechnicianStore()
   const unreadCount = notifications.filter((n) => n.unread).length
 
-  const userInitials = profile.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
+const safeProfile = profile ?? { name: "user" }
+
+const userInitials = (safeProfile.name || "user")
+  .split(" ")
+  .map((n) => n[0])
+  .join("")
+  .toUpperCase()
+
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0 sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-full">
@@ -97,12 +100,12 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={profile.img} />
+                  <AvatarImage src={profile?.img || "/default-avatar.png"} />
                   <AvatarFallback className="border p-2 bg-soft-blue text-white">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden sm:block">{profile.name}</span>
+                <span className="hidden sm:block">{profile?.name || 'user'}</span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>

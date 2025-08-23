@@ -47,11 +47,8 @@ export default  function Login() {
    
     localStorage.setItem('token', data.accessToken)
     localStorage.setItem('id',data.id)
-
-
-    const role = data.role?.toLowerCase() || 'patient'
-
-   
+    const role=res.data.role.includes('lab')?'lab-technician':res.data.role.toLowerCase()
+    localStorage.setItem('role',role)
       router.push(`/${role}/dashboard`)
    
     }else{
