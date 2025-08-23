@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 export interface LabTechnicianProfile {
-  id: string | null
+  id: string 
   name: string
   email: string
   phone: string
@@ -40,7 +40,7 @@ export interface LabTechnicianStore {
 }
 
 const initialProfile: LabTechnicianProfile = {
-  id: null,
+  id: '7b82f843-1628-4740-a41a-e67393d0e8d4',
   name: "Haris Imran",
   email: "fa22-bcs-084@cuilahore.edu.pk",
   phone: "",

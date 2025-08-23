@@ -15,11 +15,9 @@ const itemVariants = {
 }
 
 export default function KeyMetrics() {
-  const { analytics, initializeMockData, getPendingCount, getCompletedCount } = useLabStore()
+  const { analytics,  getPendingCount, getCompletedCount } = useLabStore()
 
-  useEffect(() => {
-    initializeMockData()
-  }, [initializeMockData])
+
 
   const currentPendingCount = getPendingCount()
   const currentCompletedCount = getCompletedCount()

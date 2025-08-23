@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import {Activity, Users } from "lucide-react"
-import { useLabStore } from "@/store/lab-tech/labTech"
 import {
   BarChart,
   Bar,
@@ -47,12 +46,7 @@ const testCategoryData = [
 const COLORS = ["var(--color-mint-green)", "var(--color-soft-blue)", "var(--color-cool-gray)", "var(--color-soft-coral)", "var(--color-dark-slate-gray)"]
 
 export function DashboardAnalytics() {
-  const {   initializeMockData } =
-    useLabStore()
-  
-  useEffect(() => {
-    initializeMockData()
-  }, [initializeMockData])
+
 
 
  

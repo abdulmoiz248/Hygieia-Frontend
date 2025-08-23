@@ -1,6 +1,6 @@
 import type {  BookedLabTest,LabTest } from '@/types/patient/lab'
 
-export interface PendingReport extends Omit<BookedLabTest, "bookedAt" | "location" | "instructions"> {
+export interface PendingReport extends Omit<BookedLabTest, "bookedAt"  | "instructions"> {
   patientName: string
   type: "lab-result" | "prescription" | "scan" | "report"
   uploadedAt?: Date

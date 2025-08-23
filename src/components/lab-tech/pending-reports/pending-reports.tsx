@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback,  useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +15,7 @@ import PendingHeader from "./PendingHeader"
 import { PendingReportFilter } from "./PendingReportsFilter"
 
 export function PendingReports() {
-  const { pendingReports, uploadReport, initializeMockData } = useLabStore()
+  const { pendingReports, uploadReport } = useLabStore()
   const [selectedReport, setSelectedReport] = useState<PendingReport | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -30,9 +30,8 @@ export function PendingReports() {
 
   const uploadSectionRef = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    initializeMockData()
-  }, [initializeMockData])
+  
+
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -47,7 +46,7 @@ export function PendingReports() {
       const blob = new Blob([reportData], { type: "application/json" })
       const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
 
-      uploadReport(selectedReport.id, file)
+   uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
       setSelectedReport(null)
       setReportValues({
         results: "",
@@ -61,7 +60,7 @@ export function PendingReports() {
 
   const handleUploadSubmit = () => {
     if (selectedReport && uploadFile) {
-      uploadReport(selectedReport.id, uploadFile)
+      uploadReport(selectedReport.id, uploadFile, undefined, selectedReport.type)
       setSelectedReport(null)
       setUploadFile(null)
       const fileInput = document.getElementById("report-file") as HTMLInputElement

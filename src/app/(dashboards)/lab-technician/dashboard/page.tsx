@@ -8,12 +8,7 @@ import { useLabStore } from "@/store/lab-tech/labTech"
 
 export default function LabPortal() {
   const activeTab = useLabStore((state) => state.activeTab)
-  const initializeMockData = useLabStore((state) => state.initializeMockData)
-
-  useEffect(() => {
-    initializeMockData()
-  }, [initializeMockData])
-
+ 
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
