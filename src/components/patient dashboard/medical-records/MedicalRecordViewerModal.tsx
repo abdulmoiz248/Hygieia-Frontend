@@ -19,16 +19,25 @@ export function MedicalRecordViewerModal({
   onDeleteRecord
 }: MedicalRecordViewerModalProps) {
   
-  const handleDownload = () => {
-    if (!viewingRecord?.fileUrl) return
+const handleDownload = async () => {
+  if (!viewingRecord?.fileUrl) return
+  try {
+    const response = await fetch(viewingRecord.fileUrl)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
-    link.href = viewingRecord.fileUrl
+    link.href = url
     link.download = viewingRecord.title || "medical-record.pdf"
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    URL.revokeObjectURL(url)
     patientSuccess(`${viewingRecord.title} Report Downloaded Successfully`)
+  } catch (error) {
+    console.error("Download failed", error)
   }
+}
+
 
   const handlePreview = () => {
     if (!viewingRecord?.fileUrl) return

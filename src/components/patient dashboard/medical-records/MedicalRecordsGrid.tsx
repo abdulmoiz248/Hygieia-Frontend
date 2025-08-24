@@ -20,6 +20,26 @@ export function MedicalRecordsGrid({
   getTypeColor,
   onShowUpload
 }: MedicalRecordsGridProps) {
+
+  const handleDownload = async (fileUrl:string,title:string) => {
+  if (!fileUrl) return
+  try {
+    const response = await fetch(fileUrl)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = title || "medical-record.pdf"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    patientSuccess(`${title} Report Downloaded Successfully`)
+  } catch (error) {
+    console.error("Download failed", error)
+  }
+}
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -60,16 +80,16 @@ export function MedicalRecordsGrid({
                   <Eye className="w-4 h-4 mr-1" />
                   View
                 </Button>
-                <a href={record.fileUrl} download>
+              
                   <Button
-                  onClick={()=> patientSuccess(`${record.title} Report Downloaded Successfully`)}
+                  onClick={()=>handleDownload(record.fileUrl,record.title)}
                     variant="default"
                     size="sm"
                     className="bg-soft-coral hover:bg-soft-coral/90 text-white px-3"
                   >
                     <Download className="w-4 h-4" />
                   </Button>
-                </a>
+               
               </div>
             </CardContent>
           </Card>
