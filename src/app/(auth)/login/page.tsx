@@ -50,9 +50,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       const role = data.role.includes('lab') ? 'lab-technician' : data.role.toLowerCase()
       
       // Store in cookies
-      Cookies.set('token', data.accessToken, { expires: 7, secure: true, sameSite: 'strict' })
-      Cookies.set('role', role, { expires: 7, secure: true, sameSite: 'strict' })
-      Cookies.set('id', data.id, { expires: 7, secure: true, sameSite: 'strict' })
+      Cookies.set('token', data.accessToken, { expires: 7, sameSite: 'strict' })
+      Cookies.set('role', role, { expires: 7, sameSite: 'strict' })
+      Cookies.set('id', data.id, { expires: 7, sameSite: 'strict' })
       localStorage.setItem('token', data.accessToken)
       localStorage.setItem('id',data.id)
       localStorage.setItem('role',role)

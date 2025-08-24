@@ -102,6 +102,7 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
   getTotalTests: () => get().pendingReports.length + get().completedReports.length,
 
  initialize: async () => {
+   set({ isLoading: true })
   const userStore = useLabTechnicianStore.getState()
   await userStore.fetchProfile()
     
@@ -110,7 +111,7 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
   const techId = useLabTechnicianStore.getState().profile?.id
   if (!techId) return
 
-  set({ isLoading: true })
+ 
 
   try {
     const res = await api.get<PendingReport[]>(`/technician/${techId}`)

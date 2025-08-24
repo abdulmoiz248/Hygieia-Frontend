@@ -5,10 +5,9 @@ import LabSidebar from "@/components/lab-tech/dashboard/LabSidebar"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
 import { cn } from "@/lib/utils"
 import { useLabStore } from "@/store/lab-tech/labTech"
-import useLabTechnicianStore from "@/store/lab-tech/userStore"
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
-  const { loading } = useLabTechnicianStore()
+  const  loading  = useLabStore().isLoading
   
   const activeTab = useLabStore((state) => state.activeTab)
   const setActiveTab = useLabStore((state) => state.setActiveTab)
