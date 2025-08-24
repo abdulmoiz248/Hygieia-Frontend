@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { TopNav } from "./top-nav"
+
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -15,6 +16,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/patient/chat")
+
+
+
+  
 
   return (
     <div className="flex h-screen bg-snow-white">

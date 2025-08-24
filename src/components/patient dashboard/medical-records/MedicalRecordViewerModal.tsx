@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import {  Download, Eye, Trash2 } from "lucide-react"
 import type { MedicalRecord } from "@/types"
 import { patientDestructive,  patientSuccess } from "@/toasts/PatientToast"
+import { formatDateOnly } from "@/helpers/date"
 
 interface MedicalRecordViewerModalProps {
   viewingRecord: MedicalRecord | null
@@ -52,7 +53,7 @@ export function MedicalRecordViewerModal({
                 <div>
                   <h2 className="text-xl font-semibold text-soft-coral">{viewingRecord.title}</h2>
                   <p className="text-cool-gray font-normal">
-                    {viewingRecord.doctorName} • {viewingRecord.date}
+                    {viewingRecord.doctorName} • {formatDateOnly( viewingRecord.date)}
                   </p>
                 </div>
               </DialogTitle>
@@ -78,7 +79,7 @@ export function MedicalRecordViewerModal({
                     <span className="font-medium">Type:</span> {viewingRecord.type.replace("-", " ")}
                   </div>
                   <div>
-                    <span className="font-medium">Date:</span> {viewingRecord.date}
+                    <span className="font-medium">Date:</span> {formatDateOnly( viewingRecord.date)}
                   </div>
                   {viewingRecord.doctorName && (
                     <div>

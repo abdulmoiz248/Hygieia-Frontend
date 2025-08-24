@@ -23,10 +23,9 @@ export const fetchLabTests = createAsyncThunk("labTests/fetchLabTests", async ()
 export const fetchBookedTests = createAsyncThunk("labTests/fetchBookedTests", async () => {
   const patientId = localStorage.getItem("id")
   if (!patientId) throw new Error("Patient ID not found in localStorage")
-    console.log(patientId)
-  
+
   const response = await api.get<BookedLabTest[]>(`/booked-lab-tests/patient/${patientId}`)
-   console.log(response.data)
+  
   return response.data
 })
 

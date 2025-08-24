@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { FileText, Eye, Download, Upload, Calendar, User } from "lucide-react"
 import type { MedicalRecord } from "@/types"
 import { patientSuccess } from "@/toasts/PatientToast"
+import { formatDateOnly } from "@/helpers/date"
 
 interface MedicalRecordsGridProps {
   filteredRecords: MedicalRecord[]
@@ -39,7 +40,7 @@ export function MedicalRecordsGrid({
               <div className="space-y-1 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-soft-blue" />
-                  <span>{record.date}</span>
+                  <span>{formatDateOnly( record.date)}</span>
                 </div>
                 {record.doctorName && (
                   <div className="flex items-center gap-2">

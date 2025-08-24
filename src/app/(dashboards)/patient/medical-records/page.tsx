@@ -9,6 +9,8 @@ import {
   setSearchQuery,
   setViewingRecord,
   setShowUpload,
+  fetchMedicalRecords,
+  
 } from "@/types/patient/medicalRecordsSlice"
 import { MedicalRecordsHeader } from "@/components/patient dashboard/medical-records/MedicalRecordsHeader"
 import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-records/MedicalRecordsFilters"
@@ -16,6 +18,7 @@ import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-recor
 import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical-records/MedicalRecordViewerModal"
 import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
 import type { MedicalRecord } from "@/types"
+import { useEffect } from "react"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,6 +35,12 @@ export default function MedicalRecordsPage() {
   const { records, typeFilter, searchQuery, viewingRecord, showUpload } = useAppSelector(
     (state) => state.medicalRecords,
   )
+
+
+ 
+  useEffect(() => {
+    dispatch(fetchMedicalRecords())
+  }, [dispatch])
 
   const onUploadRecord = (record: MedicalRecord) => {
     dispatch(addRecord(record))

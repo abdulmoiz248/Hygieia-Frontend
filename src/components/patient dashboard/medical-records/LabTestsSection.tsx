@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 import { patientDestructive } from "@/toasts/PatientToast"
 
 import { fetchLabTests, fetchBookedTests } from '@/types/patient/labTestsSlice'
+import { formatDateOnly } from "@/helpers/date"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -29,10 +30,16 @@ export function LabTestsSection() {
  
 
 
-    useEffect(() => {
+  useEffect(() => {
+  if (!availableTests || availableTests.length === 0) {
     dispatch(fetchLabTests())
+  }
+  if (!bookedTests || bookedTests.length === 0) {
     dispatch(fetchBookedTests())
-  }, [dispatch])
+  }
+}, [dispatch, availableTests, bookedTests])
+
+
   const handleBookTest = (test: LabTest) => {
     dispatch(setSelectedTest(test))
     dispatch(setShowBookingModal(true))
@@ -83,7 +90,7 @@ export function LabTestsSection() {
                 <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
                   <span className="flex items-center gap-1 text-dark-slate-gray">
                     <Calendar className="h-4 w-4 text-soft-coral" />
-                    {new Date(test.scheduledDate).toLocaleDateString()}
+                    {formatDateOnly(test.scheduledDate)}
                   </span>
                   <span className="flex items-center gap-1 text-dark-slate-gray">
                     <Clock className="h-4 w-4 text-soft-coral" />
@@ -133,7 +140,7 @@ export function LabTestsSection() {
         </DialogTitle>
         <DialogDescription className="text-gray-700 mt-1">
           Are you sure you want to cancel this test scheduled on{" "}
-          <strong>{new Date(selectTestModal.scheduledTime).toLocaleDateString()}</strong> at{" "}
+          <strong>{new Date(selectTestModal.scheduledDate).toLocaleDateString()}</strong> at{" "}
           <strong>{selectTestModal.scheduledTime}</strong>?
         </DialogDescription>
       </DialogHeader>
