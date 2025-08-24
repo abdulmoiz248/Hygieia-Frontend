@@ -9,6 +9,7 @@ import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
+import Cookies from 'js-cookie'
 
 export default  function Login() {
   
@@ -24,7 +25,8 @@ export default  function Login() {
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
- const handleSubmit = async (e: React.FormEvent) => {
+ 
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   if (!email || !password) {
     setError('Email and password are required.')
@@ -39,28 +41,25 @@ export default  function Login() {
   setIsLoading(true)
 
   try {
-    const res =await api.post('/auth/login',{email,password})
+    const res = await api.post('/auth/login', { email, password })
+    const data = res.data
 
-    if (!res.data.success) {
-      const data = await res.data
-
-   
-    localStorage.setItem('token', data.accessToken)
-    localStorage.setItem('id',data.id)
-    const role=res.data.role.includes('lab')?'lab-technician':res.data.role.toLowerCase()
-    localStorage.setItem('role',role)
-      router.push(`/${role}/dashboard`)
-   
-    }else{
-  console.log(res)
-
-      const data = await res.data
+    if (data.success) {
       throw new Error(data.message || 'Login failed')
+    } else {
+      const role = data.role.includes('lab') ? 'lab-technician' : data.role.toLowerCase()
+      
+      // Store in cookies
+      Cookies.set('token', data.accessToken, { expires: 7, secure: true, sameSite: 'strict' })
+      Cookies.set('role', role, { expires: 7, secure: true, sameSite: 'strict' })
+      Cookies.set('id', data.id, { expires: 7, secure: true, sameSite: 'strict' })
+      localStorage.setItem('token', data.accessToken)
+      localStorage.setItem('id',data.id)
+      localStorage.setItem('role',role)
+
+      router.push(`/${role}/dashboard`)
     }
 
-    
-  
-    
   } catch (err: any) {
     console.error(err)
     setError(err.message || 'Something went wrong. Try again.')
@@ -68,6 +67,7 @@ export default  function Login() {
     setIsLoading(false)
   }
 }
+
 
  
   return (
