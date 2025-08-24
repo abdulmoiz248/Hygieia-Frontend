@@ -20,6 +20,10 @@ import { LabTestsSection } from "@/components/patient dashboard/medical-records/
 import type { MedicalRecord } from "@/types"
 import { useEffect } from "react"
 
+
+
+interface Upload{ file: File; title: string; type: string }
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -42,7 +46,7 @@ export default function MedicalRecordsPage() {
     dispatch(fetchMedicalRecords())
   }, [dispatch])
 
-  const onUploadRecord = (record: MedicalRecord) => {
+  const onUploadRecord = (record: any) => {
     dispatch(addRecord(record))
   }
 

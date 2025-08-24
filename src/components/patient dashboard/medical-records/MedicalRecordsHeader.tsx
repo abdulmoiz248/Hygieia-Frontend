@@ -1,11 +1,26 @@
 import { useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Upload } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { MedicalRecord } from "@/types"
 import { patientSuccess } from "@/toasts/PatientToast"
+import { useAppDispatch } from "@/hooks/redux"
+import { addRecord } from "@/types/patient/medicalRecordsSlice"
 
 interface MedicalRecordsHeaderProps {
   showUpload: boolean
@@ -13,12 +28,19 @@ interface MedicalRecordsHeaderProps {
   onUploadRecord: (record: MedicalRecord) => void
 }
 
-export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord }: MedicalRecordsHeaderProps) {
+export function MedicalRecordsHeader({
+  showUpload,
+  setShowUpload,
+  onUploadRecord,
+}: MedicalRecordsHeaderProps) {
+  const dispatch = useAppDispatch()
+
   const [title, setTitle] = useState("")
   const [type, setType] = useState<MedicalRecord["type"] | "">("")
   const [doctorName, setDoctorName] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,27 +54,42 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
     setFile(selected)
   }
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!title || !type || !file) {
       setError("Please fill all fields and select a PDF file.")
       return
     }
-    const newRecord: MedicalRecord = {
-      id: Date.now().toString(),
-      title,
-      type: type as MedicalRecord["type"],
-      date: new Date().toISOString().split("T")[0],
-      doctorName,
-      fileUrl: URL.createObjectURL(file),
-    }
-    onUploadRecord(newRecord)
-    patientSuccess(`${title} Report Uploaded Succesfully`)
-    setTitle("")
-    setType("")
-    setDoctorName("")
-    setFile(null)
+
+    setLoading(true)
     setError("")
-    setShowUpload(false)
+
+    try {
+      const action = await dispatch(
+        addRecord({
+          file,
+          title,
+          type,
+        })
+      )
+
+      if (addRecord.fulfilled.match(action)) {
+        onUploadRecord(action.payload)
+        patientSuccess(`${title} Report Uploaded Successfully`)
+
+        // reset state
+        setTitle("")
+        setType("")
+        setDoctorName("")
+        setFile(null)
+        setShowUpload(false)
+      } else {
+        setError(action.payload as string || "Upload failed")
+      }
+    } catch (err: any) {
+      setError(err.message || "Upload failed")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -75,7 +112,11 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Record Title</label>
-              <Input placeholder="e.g., Blood Test Results" value={title} onChange={e => setTitle(e.target.value)} />
+              <Input
+                placeholder="e.g., Blood Test Results"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Record Type</label>
@@ -93,9 +134,16 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
             </div>
             <div>
               <label className="text-sm font-medium">Doctor Name</label>
-              <Input placeholder="e.g., Dr. Smith" value={doctorName} onChange={e => setDoctorName(e.target.value)} />
+              <Input
+                placeholder="e.g., Dr. Smith"
+                value={doctorName}
+                onChange={e => setDoctorName(e.target.value)}
+              />
             </div>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
               <Upload className="w-12 h-12 text-cool-gray mx-auto mb-4" />
               <p className="text-cool-gray">Drag and drop your file here, or click to browse</p>
               <p className="text-xs text-cool-gray mt-2">Supports PDF only (Max 10MB)</p>
@@ -109,10 +157,16 @@ export function MedicalRecordsHeader({ showUpload, setShowUpload, onUploadRecord
               {file && <p className="mt-2 text-green-600 text-sm">Selected: {file.name}</p>}
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}
-            <Button className="w-full bg-mint-green hover:bg-mint-green/90" onClick={handleUpload}>Upload Record</Button>
+            <Button
+              className="w-full bg-mint-green hover:bg-mint-green/90"
+              onClick={handleUpload}
+              disabled={loading}
+            >
+              {loading ? "Uploading..." : "Upload Record"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
   )
-} 
+}
