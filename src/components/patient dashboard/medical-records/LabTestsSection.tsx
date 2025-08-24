@@ -197,7 +197,7 @@ export function LabTestsSection() {
         <Clock className="h-4 w-4 text-soft-coral" />
         <span>{test.duration}</span>
       </div>
-      <span className="font-semibold text-cool-gray">${test.price}</span>
+      <span className="font-semibold text-cool-gray">Rs.{test.price}</span>
     </div>
 
   
