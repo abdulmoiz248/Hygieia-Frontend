@@ -3,6 +3,7 @@ import { ProfileType } from "./profile"
 import patientApi from "@/api/patient/patientApi"
 
 const initialState: ProfileType = {
+  id:'fb6b58a2-3509-4e27-9a00-5491d2927189',
   name: "Abdul Muqeet Naeem",
   email: "fa22-bcs-0168@cuilahore.edu.pk",
   phone: "+92 324 7006001",

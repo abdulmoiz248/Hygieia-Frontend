@@ -5,7 +5,7 @@ export interface LabTest {
   price: number
   duration: string
   category: string
-  preparationInstructions?: string[]
+  preparation_instructions?: string[]
 }
 
 export interface BookedLabTest {

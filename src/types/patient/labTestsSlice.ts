@@ -1,87 +1,42 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import {LabTest,BookedLabTest} from './lab'
+
+import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
+import { LabTest, BookedLabTest } from "./lab"
+import api from "@/lib/axios"
 
 interface LabTestsState {
   availableTests: LabTest[]
   bookedTests: BookedLabTest[]
   showBookingModal: boolean
   selectedTest: LabTest | null
+  loading: boolean
+  error: string | null
 }
-const mockLabTests: LabTest[] = [
-  {
-    id: "1",
-    name: "Complete Blood Count (CBC)",
-    description: "Comprehensive blood analysis including RBC, WBC, platelets",
-    price: 45,
-    duration: "15 minutes",
-    category: "Blood Tests",
-    preparationInstructions: ["Fast for 8-12 hours", "Stay hydrated"],
-  },
-  {
-    id: "2",
-    name: "Lipid Profile",
-    description: "Cholesterol and triglyceride levels assessment",
-    price: 35,
-    duration: "10 minutes",
-    category: "Blood Tests",
-    preparationInstructions: ["Fast for 12 hours", "No alcohol 24 hours prior"],
-  },
-  {
-    id: "3",
-    name: "Thyroid Function Test",
-    description: "TSH, T3, T4 hormone levels",
-    price: 55,
-    duration: "15 minutes",
-    category: "Hormone Tests",
-  },
-  {
-    id: "4",
-    name: "Diabetes Panel",
-    description: "Blood glucose and HbA1c testing",
-    price: 40,
-    duration: "10 minutes",
-    category: "Blood Tests",
-    preparationInstructions: ["Fast for 8 hours"],
-  },
-  {
-    id: "5",
-    name: "Liver Function Test",
-    description: "ALT, AST, bilirubin levels",
-    price: 50,
-    duration: "15 minutes",
-    category: "Blood Tests",
-  },
-]
 
-const mockBookedTests: BookedLabTest[] = [
-  {
-    id: "1",
-    testId: "1",
-    testName: "Complete Blood Count (CBC)",
-    scheduledDate: new Date("2024-01-15"),
-    scheduledTime: "09:00",
-    status: "pending",
-    bookedAt: "2024-01-10T10:30:00Z",
-    location: "Main Lab - Floor 2",
-    instructions: ["Fast for 8-12 hours", "Stay hydrated"],
-  },
-  {
-    id: "2",
-    testId: "3",
-    testName: "Thyroid Function Test",
-    scheduledDate: new Date("2024-01-18"),
-    scheduledTime: "11:30",
-    status: "pending",
-    bookedAt: "2024-01-12T14:15:00Z",
-    location: "Main Lab - Floor 2",
-  },
-]
+// fetch all lab tests
+export const fetchLabTests = createAsyncThunk("labTests/fetchLabTests", async () => {
+  const response = await api.get<LabTest[]>("/lab-tests")
+ 
+  return response.data
+})
+
+// fetch booked tests for current patient
+export const fetchBookedTests = createAsyncThunk("labTests/fetchBookedTests", async () => {
+  const patientId = localStorage.getItem("id")
+  if (!patientId) throw new Error("Patient ID not found in localStorage")
+    console.log(patientId)
+  
+  const response = await api.get<BookedLabTest[]>(`/booked-lab-tests/patient/${patientId}`)
+   console.log(response.data)
+  return response.data
+})
 
 const initialState: LabTestsState = {
-  availableTests: mockLabTests,
-  bookedTests: mockBookedTests,
+  availableTests: [],
+  bookedTests: [],
   showBookingModal: false,
   selectedTest: null,
+  loading: false,
+  error: null,
 }
 
 const labTestsSlice = createSlice({
@@ -98,9 +53,7 @@ const labTestsSlice = createSlice({
     },
     cancelLabTest: (state, action: PayloadAction<string>) => {
       const test = state.bookedTests.find((test) => test.id === action.payload)
-      if (test) {
-        test.status = "cancelled"
-      }
+      if (test) test.status = "cancelled"
     },
     setShowBookingModal: (state, action: PayloadAction<boolean>) => {
       state.showBookingModal = action.payload
@@ -108,6 +61,33 @@ const labTestsSlice = createSlice({
     setSelectedTest: (state, action: PayloadAction<LabTest | null>) => {
       state.selectedTest = action.payload
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchLabTests.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchLabTests.fulfilled, (state, action) => {
+        state.loading = false
+        state.availableTests = action.payload
+      })
+      .addCase(fetchLabTests.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || "Failed to fetch lab tests"
+      })
+      .addCase(fetchBookedTests.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchBookedTests.fulfilled, (state, action) => {
+        state.loading = false
+        state.bookedTests = action.payload
+      })
+      .addCase(fetchBookedTests.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || "Failed to fetch booked tests"
+      })
   },
 })
 

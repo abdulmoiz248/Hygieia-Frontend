@@ -38,7 +38,7 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
         scheduledTime: selectedTime,
         status: "pending",
         location,
-        instructions: test.preparationInstructions,
+        instructions: test.preparation_instructions,
       }),
     )
 
@@ -88,14 +88,14 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
             </div>
 
             {/* Preparation Instructions */}
-            {test.preparationInstructions && (
+            {test.preparation_instructions && (
               <div className="bg-soft-blue text-snow-white rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="h-5 w-5 text-black  " />
                   <h4 className="font-semibold text-black ">Preparation Instructions</h4>
                 </div>
                 <ul className="list-disc list-inside space-y-1">
-                  {test.preparationInstructions.map((instruction, index) => (
+                  {test.preparation_instructions.map((instruction, index) => (
                     <li key={index}>{instruction}</li>
                   ))}
                 </ul>

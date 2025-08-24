@@ -9,8 +9,10 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux"
 import { setShowBookingModal, setSelectedTest, cancelLabTest } from "@/types/patient/labTestsSlice"
 import { LabTestBookingModal } from "./LabTestBookingModal"
 import type { LabTest,BookedLabTest } from "@/types/patient/lab"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { patientDestructive } from "@/toasts/PatientToast"
+
+import { fetchLabTests, fetchBookedTests } from '@/types/patient/labTestsSlice'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -19,11 +21,18 @@ const itemVariants = {
 
 export function LabTestsSection() {
   const dispatch = useAppDispatch()
+  
   const { availableTests, bookedTests, selectedTest } = useAppSelector((state) => state.labTests)
 
   const [selectTestModal,setSelectedTestModal]=useState<BookedLabTest | null>()
   const pendingTests = bookedTests.filter((test) => test.status === "pending")
+ 
 
+
+    useEffect(() => {
+    dispatch(fetchLabTests())
+    dispatch(fetchBookedTests())
+  }, [dispatch])
   const handleBookTest = (test: LabTest) => {
     dispatch(setSelectedTest(test))
     dispatch(setShowBookingModal(true))

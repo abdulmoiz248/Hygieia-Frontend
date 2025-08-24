@@ -51,6 +51,8 @@ export const useLabStore = create<LabStore>((set, get) => ({
   uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
 
   try {
+   
+    let file_url:string
     if (type === "scan") {
       const formData = new FormData()
       formData.append("file", file)
@@ -61,7 +63,10 @@ export const useLabStore = create<LabStore>((set, get) => ({
     } else {
       // for other report types, send JSON body
       const body = reportValues ? { resultData:reportValues.results, title: `${file?.name || "Report"}` } : {}
-      await api.post(`/${id}/upload-result`, body)
+      const res= await api.post(`/${id}/upload-result`, body)
+      if(res.data){
+file_url=res.data.file_url
+      }
     }
 
     // Update store after successful upload
@@ -71,7 +76,7 @@ export const useLabStore = create<LabStore>((set, get) => ({
 
       const completedReport: PendingReport = {
         ...reportToComplete,
-        reportFile: file,
+        reportFile: type=='scan'?file:file_url,
         status: "completed",
         uploadedAt: new Date(),
       }
