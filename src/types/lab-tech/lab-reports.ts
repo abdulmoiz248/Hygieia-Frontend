@@ -12,10 +12,20 @@ export interface LabAnalytics {
   completedTests: number
   pendingReports: number
   todayTests: number
-  weeklyGrowth: number
-  monthlyRevenue: number
+
 }
 
 
+
+export type WeeklyDataItem = {
+  day: string; // "Mon", "Tue", etc.
+  completed: number;
+};
+
+export type TestCategoryDataItem = {
+  category: string;
+  count: number;
+  color: string;
+};
 
 export type { BookedLabTest,LabTest }

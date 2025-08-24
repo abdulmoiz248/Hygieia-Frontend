@@ -41,14 +41,14 @@ export function PendingReports() {
     }
   }, [])
 
-  const handleValueSubmit = () => {
+  const handleValueSubmit = async() => {
     if (selectedReport && (reportValues.results || reportValues.findings)) {
        setIsUploading(true)
       const reportData = JSON.stringify(reportValues)
       const blob = new Blob([reportData], { type: "application/json" })
       const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
 
-   uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
+   await uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
       setSelectedReport(null)
         setIsUploading(false)
       setReportValues({
@@ -61,10 +61,10 @@ export function PendingReports() {
     }
   }
 
-  const handleUploadSubmit = () => {
+  const handleUploadSubmit = async() => {
     if (selectedReport && uploadFile) {
        setIsUploading(true)
-      uploadReport(selectedReport.id, uploadFile, undefined, selectedReport.type)
+      await uploadReport(selectedReport.id, uploadFile, undefined, selectedReport.type)
       setSelectedReport(null)
       setUploadFile(null)
        setIsUploading(false)
@@ -220,11 +220,13 @@ export function PendingReports() {
       </CardTitle>
     </CardHeader>
     <CardContent className="space-y-6 relative">
-      {isUploading && (
-        <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10">
-          <span className="text-soft-blue font-semibold">Uploading...</span>
-        </div>
-      )}
+     {isUploading && (
+  <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm bg-white/30 z-20">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-soft-blue border-solid mb-4"></div>
+    <span className="text-soft-blue font-semibold">Uploading...</span>
+  </div>
+)}
+
 
       {selectedReport ? (
         <>

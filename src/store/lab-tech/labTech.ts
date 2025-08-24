@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 import useLabTechnicianStore from "./userStore"
-import type { PendingReport, LabAnalytics, LabTest, BookedLabTest } from "@/types/lab-tech/lab-reports"
+import type { PendingReport, LabAnalytics, LabTest, BookedLabTest,WeeklyDataItem } from "@/types/lab-tech/lab-reports"
 import { LabTechapi as api } from "@/axios-api/lab-tech"
 
 
@@ -15,7 +15,8 @@ interface LabStore {
   labTests: LabTest[]
   isLoading: boolean
   isInitialized: boolean
-
+weeklyData:WeeklyDataItem[]
+testCategoryData:WeeklyDataItem[]
   setActiveTab: (tab: string) => void
   setLoading: (loading: boolean) => void
 uploadReport:  (id:any, file:any, reportValues: any, type: string) => void
@@ -29,14 +30,16 @@ export const useLabStore = create<LabStore>((set, get) => ({
   activeTab: "dashboard",
   pendingReports: [],
   completedReports: [],
+  weeklyData:[],
   analytics: {
     totalTests: 0,
     completedTests: 0,
     pendingReports: 0,
     todayTests: 0,
-    weeklyGrowth: 0,
-    monthlyRevenue: 0,
+    
   },
+  testCategoryData:[],
+
   bookedTests: [],
   labTests: [],
   isLoading: false,
@@ -45,8 +48,8 @@ export const useLabStore = create<LabStore>((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
   setLoading: (loading) => set({ isLoading: loading }),
 
-uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
-  set({ isLoading: true })
+  uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
+
   try {
     if (type === "scan") {
       const formData = new FormData()
@@ -91,8 +94,6 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
     })
   } catch (err) {
     console.error("Upload failed:", err)
-  } finally {
-    set({ isLoading: false })
   }
 },
 
@@ -101,6 +102,7 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
   getCompletedCount: () => get().completedReports.length,
   getTotalTests: () => get().pendingReports.length + get().completedReports.length,
 
+  
  initialize: async () => {
    set({ isLoading: true })
   const userStore = useLabTechnicianStore.getState()
@@ -114,24 +116,24 @@ uploadReport: async (id:any, file:any, reportValues: any, type: string) => {
  
 
   try {
-    const res = await api.get<PendingReport[]>(`/technician/${techId}`)
-    const allReports = res.data
+    const res = await api.get(`/technician/${techId}`)
+    const allReports = res.data.bookings
 
-    const pendingReports = allReports.filter(r => r.status === "pending")
-    const completedReports = allReports.filter(r => r.status === "completed")
+    const pendingReports = allReports.filter((r:PendingReport) => r.status === "pending")
+    const completedReports = allReports.filter((r:PendingReport) => r.status === "completed")
 
     const analytics: LabAnalytics = {
       totalTests: allReports.length,
       completedTests: completedReports.length,
       pendingReports: pendingReports.length,
       todayTests: allReports.filter(
-        r => new Date(r.scheduledDate).toDateString() === new Date().toDateString()
+        (r:PendingReport) => new Date(r.scheduledDate).toDateString() === new Date().toDateString()
       ).length,
-      weeklyGrowth: 12.5,
-      monthlyRevenue: 45600,
+      
+      
     }
 
-    set({ pendingReports, completedReports, analytics, isInitialized: true })
+    set({ pendingReports, completedReports, analytics, isInitialized: true,weeklyData:res.data.weeklyData,testCategoryData:res.data.testCategoryData })
   } catch (err) {
     console.error("Failed to fetch lab data:", err)
   } finally {

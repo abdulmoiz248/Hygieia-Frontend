@@ -4,7 +4,7 @@
 
 import { motion } from "framer-motion"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import { useLabStore } from "@/store/lab-tech/labTech"
@@ -25,6 +25,12 @@ export default function WelcomeSection() {
       const handleAnimationComplete = () => {
       setShowDes(true)
     };
+
+    useEffect(() => {
+  const timer = setTimeout(() => setShowDes(true), 1000); // fallback
+  return () => clearTimeout(timer);
+}, []);
+
   return (
    
        <motion.div variants={itemVariants}>
@@ -52,8 +58,10 @@ export default function WelcomeSection() {
    <div className="block mt-2 ">
      <TextType
        text={ [
-  `🧪 You have ${getPendingCount()} samples pending for processing.`,
-  "📋 Review and validate today's test reports before submission.",
+  getPendingCount() === 0 
+  ? "🎉 Great job! No pending reports." 
+  : `🧪 You have ${getPendingCount()} sample${getPendingCount() > 1 ? 's' : ''} pending for processing.`
+,"📋 Review and validate today's test reports before submission.",
   "⚠️ Double-check patient details to avoid labeling errors.",
   "🧼 Maintain lab hygiene — disinfect equipment regularly."
 ]}

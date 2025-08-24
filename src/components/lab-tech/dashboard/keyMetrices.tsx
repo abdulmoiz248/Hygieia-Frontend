@@ -76,9 +76,13 @@ export default function KeyMetrics() {
                 <p className="text-2xl font-bold text-soft-coral">
                   <CountUp from={0} to={currentPendingCount} separator="," direction="up" duration={1} className="text-soft-coral" />
                 </p>
-                <Badge variant="outline" className="mt-1 text-xs border-soft-coral/30 text-soft-coral">
+              {
+                currentPendingCount!=0
+                 &&
+                   <Badge variant="outline" className="mt-1 text-xs border-soft-coral/30 text-soft-coral">
                   Requires attention
                 </Badge>
+              }
               </div>
               <Clock className="w-8 h-8 text-soft-coral" />
             </div>
@@ -95,10 +99,7 @@ export default function KeyMetrics() {
                 <p className="text-2xl font-bold text-cool-gray">
                   <CountUp from={0} to={analytics.todayTests} separator="," direction="up" duration={1} className="text-cool-gray" />
                 </p>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  +{analytics.weeklyGrowth}% this week
-                </p>
+              
               </div>
               <Calendar className="w-8 h-8 text-cool-gray" />
             </div>
