@@ -22,4 +22,6 @@ export type FitnessState = {
   proteinConsumed: number
   fatConsumed: number
   carbsConsumed:number
+  loading:boolean
+  error: string | null
 }

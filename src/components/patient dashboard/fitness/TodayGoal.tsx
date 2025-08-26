@@ -15,8 +15,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { AppDispatch, RootState } from "@/store/patient/store"
 import { updateGoalProgress } from "@/types/patient/fitnessSlice"
+import { useRef, useCallback } from "react"
 
 export default function TodayGoal() {
   const itemVariants = {
@@ -26,11 +27,28 @@ export default function TodayGoal() {
 
   const goals = useSelector((state: RootState) => state.fitness.goals)
   const targets = useSelector((store: RootState) => store.profile.limit)
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
-  const incrementGoal = (type: string, amount: number) => {
-    dispatch(updateGoalProgress({ type, amount }))
-  }
+  // store pending increments until debounce triggers
+  const incrementsRef = useRef<Record<string, number>>({})
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+
+  const incrementGoal = useCallback((type: string, amount: number) => {
+    // accumulate increments in ref
+    incrementsRef.current[type] = (incrementsRef.current[type] || 0) + amount
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    // debounce: only send after 500ms of no new clicks
+    debounceTimer.current = setTimeout(() => {
+      Object.entries(incrementsRef.current).forEach(([goalType, totalAmount]) => {
+        dispatch(updateGoalProgress({ type: goalType, amount: totalAmount }))
+      })
+      incrementsRef.current = {}
+    }, 500)
+  }, [dispatch])
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -61,7 +79,6 @@ export default function TodayGoal() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {goals.map((goal) => {
-              // Get target from profile.limit or fall back to goal.target
               const targetValue = Number(
                 (targets as Record<string, string | undefined>)[goal.type] ??
                   goal.target
@@ -110,7 +127,6 @@ export default function TodayGoal() {
                     <div className="flex gap-2 pt-1">
                       {goal.type === "water" && (
                         <Button
-                          
                           className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
                           onClick={() => incrementGoal("water", 1)}
@@ -121,24 +137,22 @@ export default function TodayGoal() {
                       )}
                       {goal.type === "steps" && (
                         <Button
-                         
                           className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
-                          onClick={() => incrementGoal("steps", 100)}
+                          onClick={() => incrementGoal("steps", 1000)}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          100 steps
+                          1000 steps
                         </Button>
                       )}
                       {goal.type === "sleep" && (
                         <Button
-                        
                           className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
                           size="sm"
-                          onClick={() => incrementGoal("sleep", 0.5)}
+                          onClick={() => incrementGoal("sleep", 1)}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          0.5 hr
+                          1 hr
                         </Button>
                       )}
                     </div>

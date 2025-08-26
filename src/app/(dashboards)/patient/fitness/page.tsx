@@ -1,6 +1,6 @@
 "use client"
 
-import {  useState } from "react"
+import {  useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
 //import LogActivity from "@/components/patient dashboard/fitness/LogActivity"
@@ -11,6 +11,9 @@ import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
 import MacroGraphToday from "@/components/patient dashboard/fitness/MacroGraph"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState,AppDispatch } from "@/store/patient/store"
+import { fetchFitness } from "@/types/patient/fitnessSlice"
 
 
 
@@ -27,7 +30,12 @@ const itemVariants = {
 export default function FitnessPage() {
   // const [showLogActivity, setShowLogActivity] = useState(false)
   const [showBMICalculator, setShowBMICalculator] = useState(false)
+   const profile=useSelector((state:RootState)=>state.profile)
+  const dispatch=useDispatch<AppDispatch>()
 
+  useEffect(()=>{
+      dispatch(fetchFitness(profile.id))   
+  },[])
 
 
   return (

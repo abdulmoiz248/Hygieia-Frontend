@@ -34,7 +34,7 @@ const MacroGraphToday = () => {
   }
 
   return (
-    <Card className="w-full max-w-screen-lg mx-auto bg-white/40 pb-0">
+    <Card className="w-full  mx-auto bg-white/40 pb-0">
       <CardHeader className="flex items-center space-x-3 ">
         <ChartBarIcon className="w-6 h-6 text-[#4ab68a]" />
         <CardTitle className="text-lg font-semibold text-[#2c3e50]">

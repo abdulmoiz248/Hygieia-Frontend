@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { AppDispatch, RootState } from "@/store/patient/store"
 import { addCalories } from "@/types/patient/fitnessSlice"
 import { Flame, Apple } from "lucide-react"
 import { AiCalorieEstimate } from './action'
@@ -29,7 +29,7 @@ export default function Calories() {
 
   const caloriesConsumed = useSelector((state: RootState) => state.fitness.caloriesConsumed)
   const caloriesBurned = useSelector((state: RootState) => state.fitness.caloriesBurned)
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [showCalorieTracker, setShowCalorieTracker] = useState(false)
 
   const [type, setType] = useState<"consumed" | "burned" | "">("")
