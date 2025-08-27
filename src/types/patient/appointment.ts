@@ -22,7 +22,7 @@ export enum AppointmentMode {
 
 export interface Appointment {
   id: string
-  patient?:ProfileType
+  patient:ProfileType
   doctor: Doctor
   date: string
   time: string
@@ -31,4 +31,5 @@ export interface Appointment {
   notes?: string
  report?: string
  mode:AppointmentMode
+ dataShared:boolean
 }

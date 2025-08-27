@@ -72,8 +72,10 @@ export const useAppointmentStore = create<AppointmentStore>()(
     notes: "Follow-up on 30-day meal plan progress",
     report: "Patient responded well, continue current diet.",
     mode: AppointmentMode.Physical,
+    dataShared:true,
   },
   {
+     dataShared:true,
     id: "2",
     patient: {
       id: "p2",
@@ -121,6 +123,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
     mode: AppointmentMode.Physical,
   },
   {
+     dataShared:false,
     id: "3",
     patient: {
       id: "p3",

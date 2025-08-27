@@ -7,14 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Clock, MoreVertical, CheckCircle, XCircle, Calendar } from "lucide-react"
 import { AppointmentDetailsModal } from "./appointment-details-modal"
-import { MarkDoneModal } from "./mark-done-modal"
+
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
+import { useRouter } from "next/navigation"
 
 
 export function AppointmentsList() {
-  const { appointments,  setSelectedAppointment,  updateAppointmentStatus } =
+  const { appointments,    updateAppointmentStatus } =
     useAppointmentStore()
+
+    const router=useRouter()
 
     const filteredAppointments=appointments.filter((apt)=>apt.status==AppointmentStatus.Upcoming)
 
@@ -33,10 +36,7 @@ export function AppointmentsList() {
     }
   }
 
-  const handleMarkDone = (appointment: any) => {
-    setSelectedAppointment(appointment)
-  }
-
+ 
 
 
   const handleCancelAppointment = (appointmentId: string) => {
@@ -134,7 +134,7 @@ export function AppointmentsList() {
       <div className="flex items-center justify-end gap-2">
         {appointment.status === "upcoming" && (
           <Button
-            onClick={() => handleMarkDone(appointment)}
+            onClick={() => router.push(`/nutritionist/appointments/${appointment.id}`)}
             size="sm"
             className="bg-[var(--color-soft-blue)] text-snow-white hover:bg-[var(--color-soft-blue)]/90 rounded-full shadow-sm"
           >
@@ -175,9 +175,8 @@ export function AppointmentsList() {
         )}
       </div>
 
-      {/* Modals */}
-      <AppointmentDetailsModal />
-      <MarkDoneModal />
+ 
+      
     </>
   )
 }
