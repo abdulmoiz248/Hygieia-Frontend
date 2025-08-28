@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,37 +9,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 import {
-  Phone,
-  Mail,
+ 
   Calendar,
-  MapPin,
+
   Heart,
   FileText,
   ExternalLink,
   Bot,
-  Shield,
+
   ShieldOff,
   Activity,
   Weight,
   Ruler,
   Clock,
-  User,
+
   Stethoscope,
-  TrendingUp,
+
   BarChart3,
-  Download,
-  Share2,
   Star,
   Target,
+  CheckCircle,
+  ClipboardList,
 } from "lucide-react"
 import type { Appointment } from "@/types/patient/appointment"
 import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
 import { MedicalRecord } from "@/types"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { DietPlanDialog } from "@/components/nutritionist/appointments/id/diet-plan-dialog"
-import { TestReferralDialog } from "@/components/nutritionist/appointments/id/test-referral-dialog"
 import { formatDateOnly } from "@/helpers/date"
-
+import LabTests from "@/components/nutritionist/appointments/id/LabTest"
+import {motion} from 'framer-motion'
 
 // Mock fitness data for the last 30 days
 const generateMockFitnessData = (patientId: string): FitnessData[] => {
@@ -93,6 +92,9 @@ export default function AppointmentPage() {
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
+  const [assignedDietPlan, setAssignedDietPlan] = useState<any | null>(null)
+const [referredTests, setReferredTests] = useState<any[]>([])
+
 
   useEffect(() => {
     const foundAppointment = appointments.find((apt) => apt.id === appointmentId)
@@ -109,15 +111,33 @@ export default function AppointmentPage() {
     alert("AI Report generation started. You will receive the report shortly.")
   }
 
-  const handleAssignDietPlan = (dietPlan: any) => {
-    console.log("[v0] Diet plan assigned:", dietPlan)
-    alert(`Diet plan successfully assigned to ${appointment?.patient.name}`)
+  const labTestsRef = useRef<HTMLDivElement | null>(null)
+
+const handleScrollToLabTests = () => {
+  labTestsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+const handleAssignDietPlan = (dietPlan: any) => {
+  setAssignedDietPlan(dietPlan)
+}
+
+const handleTestReferral = (referral: any) => {
+  setReferredTests((prev) => [...prev, referral])
+}
+
+
+ const [appointmentDone, setAppointmentDone] = useState(false)
+
+  const handleMarkAppointmentDone = () => {
+    setAppointmentDone(true)
+    // 🔒 here you can also dispatch Redux action or call API to update backend
   }
 
-  const handleTestReferral = (referral: any) => {
-    console.log("[v0] Test referral created:", referral)
-    alert(`Test referral sent for ${appointment?.patient.name}`)
+  const handleRemoveTest = (id:string) => {
+    setReferredTests((prev) => prev.filter((t) => t.id !== id))
+    // 🗑️ also update backend if required
   }
+
 
   if (!appointment) {
     return (
@@ -142,6 +162,7 @@ export default function AppointmentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent">
       <div className="container mx-auto  space-y-8">
+
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
@@ -284,8 +305,13 @@ export default function AppointmentPage() {
 
                 <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />
 
-                <TestReferralDialog patientName={patient.name} onRefer={handleTestReferral} />
-
+                     <Button
+                       onClick={handleScrollToLabTests}
+                        className="border-soft-coral w-full bg-soft-coral hover:bg-soft-coral/90 hover:text-white text-white"
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        Refer Test
+                      </Button>
                
               </CardContent>
             </Card>
@@ -337,6 +363,90 @@ export default function AppointmentPage() {
           </div>
 
           <div className="xl:col-span-3 space-y-8">
+             
+<>
+
+
+{(assignedDietPlan || referredTests.length > 0) && (
+  <Card
+    className={`hover-lift bg-white border-accent/30 shadow-md rounded-2xl overflow-hidden transition-all ${
+      appointmentDone ? "opacity-60 pointer-events-none" : ""
+    }`}
+  >
+  <CardHeader className=" border-b ">
+                                        <CardTitle className="text-soft-coral flex items-center gap-2 text-xl ">
+                        <ClipboardList className="w-6 h-6" />
+                       Summary
+                      </CardTitle>
+
+                </CardHeader>
+    <CardContent className="space-y-6">
+      {/* Assigned Diet Plan */}
+      {assignedDietPlan && (
+        <div className="p-4 rounded-xl bg-cool-gray/10 border border-mint-green/30">
+          <h4 className="font-semibold text-soft-blue flex items-center gap-2">🥗 Assigned Diet Plan</h4>
+          <p className="text-sm text-soft-blue mt-1">
+            Calories: {assignedDietPlan.dailyCalories} | Protein: {assignedDietPlan.protein}g | Carbs:{" "}
+            {assignedDietPlan.carbs}g | Fat: {assignedDietPlan.fat}g
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {assignedDietPlan.startDate && assignedDietPlan.endDate
+              ? `${new Date(assignedDietPlan.startDate).toLocaleDateString()} → ${new Date(
+                  assignedDietPlan.endDate
+                ).toLocaleDateString()}`
+              : "No date range specified"}
+          </p>
+          {assignedDietPlan.notes && (
+            <p className="text-sm italic text-cool-gray mt-2">“{assignedDietPlan.notes}”</p>
+          )}
+        </div>
+      )}
+
+      {/* Referred Tests */}
+      {referredTests.length > 0 && (
+        <div className="p-4 rounded-xl bg-cool-gray/10 border border-soft-blue/30">
+          <h4 className="font-semibold text-soft-blue flex items-center gap-2">🧪 Referred Lab Tests</h4>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {[...new Map(referredTests.map((t) => [t.id, t])).values()].map((test) => (
+              <div
+                key={test.id}
+                className="flex items-center gap-2 bg-soft-blue/20 text-soft-blue border border-soft-blue/30 px-3 py-1 rounded-lg text-sm"
+              >
+                {test.name}
+                <button
+                  onClick={() => handleRemoveTest(test.id)}
+                  className="text-xs text-red-500 hover:text-red-700"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </CardContent>
+
+    {/* Mark Appointment Done */}
+    {!appointmentDone && (
+      <div className="p-4 border-t border-accent/20 flex justify-end">
+        <Button
+          className="bg-soft-coral text-white hover:bg-soft-coral/80"
+          onClick={handleMarkAppointmentDone}
+        >
+          Mark Appointment Done
+        </Button>
+      </div>
+    )}
+  </Card>
+)}
+
+
+
+
+</>
+
+
+
             {/* Fitness Analytics Section */}
             {dataShared ? (
               <Card className="hover-lift overflow-hidden">
@@ -438,6 +548,11 @@ export default function AppointmentPage() {
               </CardContent>
             </Card>
             }
+
+            <div ref={labTestsRef}>
+  <LabTests onReferTest={handleTestReferral} />
+</div>
+
           </div>
         </div>
       </div>

@@ -100,6 +100,45 @@ export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
         avgCaloriesBurned={avgCaloriesBurned}
       />
 
+
+<Card className="border-soft-blue/20 w-full bg-cool-gray/10">
+  <CardHeader>
+    <CardTitle className="text-soft-blue">Macronutrients</CardTitle>
+    <CardDescription>Daily protein, carbs, and fat intake (grams)</CardDescription>
+  </CardHeader>
+  <CardContent className="w-full">
+    <ChartContainer
+      config={{
+        protein: {
+          label: "Protein (g)",
+          color: "var(--color-soft-coral)",
+        },
+        carbs: {
+          label: "Carbs (g)",
+          color: "var(--color-mint-green)",
+        },
+        fat: {
+          label: "Fat (g)",
+          color: "var(--color-soft-blue)",
+        },
+      }}
+      className="w-full h-[300px]"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Line type="monotone" dataKey="protein" stroke="var(--color-soft-coral)" strokeWidth={2} />
+          <Line type="monotone" dataKey="carbs" stroke="var(--color-mint-green)" strokeWidth={2} />
+          <Line type="monotone" dataKey="fat" stroke="var(--color-soft-blue)" strokeWidth={2} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartContainer>
+  </CardContent>
+</Card>
+
      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Steps Chart */}
       <Card className="border-soft-blue/20 bg-cool-gray/10">
@@ -223,43 +262,7 @@ export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
       </Card>
 
       {/* Macronutrients Chart */}
-      <Card className="border-soft-blue/20 md:col-span-2 bg-cool-gray/10">
-        <CardHeader>
-          <CardTitle className="text-soft-blue">Macronutrients</CardTitle>
-          <CardDescription>Daily protein, carbs, and fat intake (grams)</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              protein: {
-                label: "Protein (g)",
-                color: "var(--color-soft-coral)",
-              },
-              carbs: {
-                label: "Carbs (g)",
-                color: "var(--color-mint-green)",
-              },
-              fat: {
-                label: "Fat (g)",
-                color: "var(--color-soft-blue)",
-              },
-            }}
-            className="h-[300px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="protein" stroke="var(--color-soft-coral)" strokeWidth={2} />
-                <Line type="monotone" dataKey="carbs" stroke="var(--color-mint-green)" strokeWidth={2} />
-                <Line type="monotone" dataKey="fat" stroke="var(--color-soft-blue)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+    
     </div>
 
    

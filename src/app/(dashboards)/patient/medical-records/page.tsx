@@ -17,7 +17,7 @@ import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-re
 import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-records/MedicalRecordsGrid"
 import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical-records/MedicalRecordViewerModal"
 import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
-import type { MedicalRecord } from "@/types"
+
 import { useEffect } from "react"
 
 
