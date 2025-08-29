@@ -126,6 +126,7 @@ const handleTestReferral = (referral: any) => {
 }
 
 
+const [doctorReport, setDoctorReport] = useState("")
  const [appointmentDone, setAppointmentDone] = useState(false)
 
   const handleMarkAppointmentDone = () => {
@@ -367,19 +368,20 @@ const handleTestReferral = (referral: any) => {
 <>
 
 
-{(assignedDietPlan || referredTests.length > 0) && (
+
+{(assignedDietPlan || referredTests.length > 0 || doctorReport) && (
   <Card
     className={`hover-lift bg-white border-accent/30 shadow-md rounded-2xl overflow-hidden transition-all ${
       appointmentDone ? "opacity-60 pointer-events-none" : ""
     }`}
   >
-  <CardHeader className=" border-b ">
-                                        <CardTitle className="text-soft-coral flex items-center gap-2 text-xl ">
-                        <ClipboardList className="w-6 h-6" />
-                       Summary
-                      </CardTitle>
+    <CardHeader className=" border-b ">
+      <CardTitle className="text-soft-coral flex items-center gap-2 text-xl ">
+        <ClipboardList className="w-6 h-6" />
+        Summary
+      </CardTitle>
+    </CardHeader>
 
-                </CardHeader>
     <CardContent className="space-y-6">
       {/* Assigned Diet Plan */}
       {assignedDietPlan && (
@@ -424,11 +426,23 @@ const handleTestReferral = (referral: any) => {
           </div>
         </div>
       )}
+
+      {/* Doctor Report */}
+      <div className="p-4 rounded-xl bg-cool-gray/10 border border-soft-coral/30">
+        <h4 className="font-semibold text-soft-blue flex items-center gap-2">📝Report</h4>
+        <textarea
+          value={doctorReport}
+          onChange={(e) => setDoctorReport(e.target.value)}
+          placeholder="Write your report here..."
+          className="w-full mt-2 p-3 border border-soft-blue/30 rounded-lg text-sm focus:ring-2 focus:ring-soft-coral outline-none"
+          rows={4}
+        />
+      </div>
     </CardContent>
 
     {/* Mark Appointment Done */}
     {!appointmentDone && (
-      <div className="p-4 border-t border-accent/20 flex justify-end">
+      <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
         <Button
           className="bg-soft-coral text-white hover:bg-soft-coral/80"
           onClick={handleMarkAppointmentDone}
@@ -439,6 +453,7 @@ const handleTestReferral = (referral: any) => {
     )}
   </Card>
 )}
+
 
 
 
