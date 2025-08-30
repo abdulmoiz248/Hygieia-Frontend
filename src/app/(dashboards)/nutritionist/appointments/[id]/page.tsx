@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -41,10 +41,38 @@ export const fetchPatientAnalytics = async (patientId: string) => {
   return res.data
 }
 
+
+export async function completeNutritionistAppointment(
+  appointmentId: string,
+  nutritionistId: string,
+  payload: {
+    referredTestIds?: string[]
+    report?: string
+    dietPlan?: {
+      dailyCalories: string
+      protein: string
+      carbs: string
+      fat: string
+      deficiency: string
+      notes?: string
+      caloriesBurned: string
+      exercise: string
+      startDate?: string
+      endDate?: string
+    }
+  }
+) {
+  const { data } = await api.post(`/appointments/${appointmentId}/complete`, {
+    dto: payload,
+    nutritionistId,
+  })
+  return data
+}
+
 export default function AppointmentPage() {
   const params = useParams()
   const appointmentId = params?.id as string
-  const { appointments, fetchAppointments, isLoading } = useAppointmentStore()
+  const { appointments, fetchAppointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
@@ -52,6 +80,7 @@ export default function AppointmentPage() {
   const [referredTests, setReferredTests] = useState<any[]>([])
   const [doctorReport, setDoctorReport] = useState("")
   const [appointmentDone, setAppointmentDone] = useState(false)
+  const router=useRouter()
 
   useEffect(() => {
     if (appointments.length === 0) {
@@ -79,6 +108,8 @@ export default function AppointmentPage() {
     alert("AI Report generation started. You will receive the report shortly.")
   }
 
+  
+
   const labTestsRef = useRef<HTMLDivElement | null>(null)
   const handleScrollToLabTests = () => {
     labTestsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -92,8 +123,22 @@ export default function AppointmentPage() {
     setReferredTests((prev) => [...prev, referral])
   }
 
-  const handleMarkAppointmentDone = () => {
+  const handleMarkAppointmentDone = async() => {
     setAppointmentDone(true)
+  await completeNutritionistAppointment(
+  appointmentId,
+  localStorage.getItem('id')!,
+  {
+    referredTestIds: referredTests.map(l => l.id), // ✅ use plural
+    report: doctorReport,
+    dietPlan: assignedDietPlan
+  })
+
+
+
+    updateAppointmentStatus(appointmentId, AppointmentStatus.Completed)
+    router.push('/nutritionist/appointments')
+
   }
 
   const handleRemoveTest = (id: string) => {
@@ -422,8 +467,8 @@ export default function AppointmentPage() {
         <div className="p-4 rounded-xl bg-cool-gray/10 border border-mint-green/30">
           <h4 className="font-semibold text-soft-blue flex items-center gap-2">🥗 Assigned Diet Plan</h4>
           <p className="text-sm text-soft-blue mt-1">
-            Calories: {assignedDietPlan.dailyCalories} | Protein: {assignedDietPlan.protein}g | Carbs:{" "}
-            {assignedDietPlan.carbs}g | Fat: {assignedDietPlan.fat}g
+          <span className="text-soft-coral">  Calories:</span> {assignedDietPlan.dailyCalories} | <span className="text-soft-coral"> Protein:</span> {assignedDietPlan.protein}g | <span className="text-soft-coral">Carbs:{" "}</span>
+            {assignedDietPlan.carbs}g | <span className="text-soft-coral"> Fat:</span> {assignedDietPlan.fat}g
           </p>
           <p className="text-xs text-muted-foreground">
             {assignedDietPlan.startDate && assignedDietPlan.endDate
@@ -446,7 +491,7 @@ export default function AppointmentPage() {
             {[...new Map(referredTests.map((t) => [t.id, t])).values()].map((test) => (
               <div
                 key={test.id}
-                className="flex items-center gap-2 bg-soft-blue/20 text-soft-blue border border-soft-blue/30 px-3 py-1 rounded-lg text-sm"
+                className="flex items-center gap-2 bg-soft-blue/20 text-dark-slate-gray border border-soft-blue/30 px-3 py-1 rounded-lg text-sm"
               >
                 {test.name}
                 <button
@@ -480,6 +525,7 @@ export default function AppointmentPage() {
         <Button
           className="bg-soft-coral text-white hover:bg-soft-coral/80"
           onClick={handleMarkAppointmentDone}
+          disabled={doctorReport.length<10}
         >
           Mark Appointment Done
         </Button>

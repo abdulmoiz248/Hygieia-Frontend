@@ -162,131 +162,148 @@ export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
   </CardContent>
 </Card>
 
-     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Steps Chart */}
-      <Card className="border-soft-blue/20 bg-cool-gray/10">
-        <CardHeader>
-          <CardTitle className="text-soft-blue">Daily Steps</CardTitle>
-          <CardDescription>Steps taken over the last 30 days</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              steps: {
-                label: "Steps",
-                color: "var(--color-soft-blue)",
-              },
-            }}
-            className="h-[200px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="steps" stroke="var(--color-soft-blue)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Steps Chart */}
+  <Card className="border-soft-blue/20 bg-cool-gray/10">
+    <CardHeader>
+      <CardTitle className="text-soft-blue">Daily Steps</CardTitle>
+      <CardDescription>Steps taken over the last 30 days</CardDescription>
+    </CardHeader>
+    <CardContent className="h-[250px]">
+      <ChartContainer
+        config={{
+          steps: {
+            label: "Steps",
+            color: "var(--color-soft-blue)",
+          },
+        }}
+        className="w-full h-full flex-1"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line
+              type="monotone"
+              dataKey="steps"
+              stroke="var(--color-soft-blue)"
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </CardContent>
+  </Card>
 
-      {/* Water Intake Chart */}
-      <Card className="border-mint-green/20 bg-cool-gray/10">
-        <CardHeader>
-          <CardTitle className="text-mint-green">Water Intake</CardTitle>
-          <CardDescription>Daily water consumption (liters)</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              water: {
-                label: "Water (L)",
-                color: "var(--color-mint-green)",
-              },
-            }}
-            className="h-[200px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="water" fill="var(--color-mint-green)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+  {/* Water Intake Chart */}
+  <Card className="border-mint-green/20 bg-cool-gray/10">
+    <CardHeader>
+      <CardTitle className="text-mint-green">Water Intake</CardTitle>
+      <CardDescription>Daily water consumption (liters)</CardDescription>
+    </CardHeader>
+    <CardContent className="h-[250px]">
+      <ChartContainer
+        config={{
+          water: {
+            label: "Water (L)",
+            color: "var(--color-mint-green)",
+          },
+        }}
+        className="w-full h-full flex-1"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="water" fill="var(--color-mint-green)" />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </CardContent>
+  </Card>
 
-      {/* Sleep Chart */}
-      <Card className="border-soft-coral/20 bg-cool-gray/10">
-        <CardHeader>
-          <CardTitle className="text-soft-coral">Sleep Duration</CardTitle>
-          <CardDescription>Hours of sleep per night</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              sleep: {
-                label: "Sleep (hrs)",
-                color: "var(--color-soft-coral)",
-              },
-            }}
-            className="h-[200px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="sleep" stroke="var(--color-soft-coral)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+  {/* Sleep Chart */}
+  <Card className="border-soft-coral/20 bg-cool-gray/10">
+    <CardHeader>
+      <CardTitle className="text-soft-coral">Sleep Duration</CardTitle>
+      <CardDescription>Hours of sleep per night</CardDescription>
+    </CardHeader>
+    <CardContent className="h-[250px]">
+      <ChartContainer
+        config={{
+          sleep: {
+            label: "Sleep (hrs)",
+            color: "var(--color-soft-coral)",
+          },
+        }}
+        className="w-full h-full flex-1"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line
+              type="monotone"
+              dataKey="sleep"
+              stroke="var(--color-soft-coral)"
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </CardContent>
+  </Card>
 
-      {/* Calories Chart */}
-      <Card className="border-cool-gray/20 bg-cool-gray/10">
-        <CardHeader>
-          <CardTitle className="text-cool-gray">Calories</CardTitle>
-          <CardDescription>Burned vs Intake</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              calories_burned: {
-                label: "Burned",
-                color: "var(--color-soft-coral)",
-              },
-              calories_intake: {
-                label: "Intake",
-                color: "var(--color-mint-green)",
-              },
-            }}
-            className="h-[200px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="calories_burned" stroke="var(--color-soft-coral)" strokeWidth={2} />
-                <Line type="monotone" dataKey="calories_intake" stroke="var(--color-mint-green)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      {/* Macronutrients Chart */}
-    
-    </div>
+  {/* Calories Chart */}
+  <Card className="border-cool-gray/20 bg-cool-gray/10">
+    <CardHeader>
+      <CardTitle className="text-cool-gray">Calories</CardTitle>
+      <CardDescription>Burned vs Intake</CardDescription>
+    </CardHeader>
+    <CardContent className="h-[250px]">
+      <ChartContainer
+        config={{
+          calories_burned: {
+            label: "Burned",
+            color: "var(--color-soft-coral)",
+          },
+          calories_intake: {
+            label: "Intake",
+            color: "var(--color-mint-green)",
+          },
+        }}
+        className="w-full h-full flex-1"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line
+              type="monotone"
+              dataKey="calories_burned"
+              stroke="var(--color-soft-coral)"
+              strokeWidth={2}
+            />
+            <Line
+              type="monotone"
+              dataKey="calories_intake"
+              stroke="var(--color-mint-green)"
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </CardContent>
+  </Card>
+</div>
 
    
     </div>
