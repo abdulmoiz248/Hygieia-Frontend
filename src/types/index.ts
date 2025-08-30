@@ -27,11 +27,14 @@ export interface Doctor {
 export interface MedicalRecord {
   id: string
   title: string
-  type: "lab-result" | "prescription" | "scan" | "report"
+  record_type?: "lab-result" | "prescription" | "scan" | "report"
+  type?: "lab-result" | "prescription" | "scan" | "report"
   date: string
-  fileUrl: string
+  fileUrl?: string
+   file_url?: string
   doctorName?: string
 }
+
 
 export interface Prescription {
   id: string

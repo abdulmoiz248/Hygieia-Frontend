@@ -9,136 +9,98 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 import {
- 
   Calendar,
-
   Heart,
   FileText,
   ExternalLink,
   Bot,
-
   ShieldOff,
   Activity,
   Weight,
   Ruler,
   Clock,
-
   Stethoscope,
-
   BarChart3,
   Star,
   Target,
-  CheckCircle,
   ClipboardList,
 } from "lucide-react"
-import type { Appointment } from "@/types/patient/appointment"
+import { AppointmentStatus, type Appointment } from "@/types/patient/appointment"
 import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
 import { MedicalRecord } from "@/types"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { DietPlanDialog } from "@/components/nutritionist/appointments/id/diet-plan-dialog"
 import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
+import api from "@/lib/axios"
 
-
-// Mock fitness data for the last 30 days
-const generateMockFitnessData = (patientId: string): FitnessData[] => {
-  const data: FitnessData[] = []
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    data.push({
-      id: `fitness-${patientId}-${i}`,
-      created_at: date.toISOString(),
-      patient_id: patientId,
-      steps: Math.floor(Math.random() * 5000) + 5000,
-      water: Math.random() * 2 + 1.5,
-      sleep: Math.random() * 2 + 6.5,
-      calories_burned: Math.floor(Math.random() * 800) + 1200,
-      calories_intake: Math.floor(Math.random() * 600) + 1800,
-      fat: Math.random() * 30 + 50,
-      protein: Math.random() * 50 + 100,
-      carbs: Math.random() * 100 + 150,
-    })
-  }
-  return data
+export const fetchPatientAnalytics = async (patientId: string) => {
+  const res = await api.get(`/analytics/${patientId}`)
+  console.log(res)
+  if (!res.data) throw new Error("Failed to fetch analytics")
+  return res.data
 }
-
-// Mock medical records
-const generateMockMedicalRecords = (patientId: string): MedicalRecord[] => [
-  {
-    id: "med-1",
-   // patientid: patientId,
-    title: "Blood Test Results",
-    type: "lab-result",
-    date: "2025-08-15T10:00:00Z",
-    fileUrl: "https://res.cloudinary.com/demo/image/upload/sample.pdf",
-    doctorName: "Dr. Smith",
-  },
-  {
-    id: "med-2",
-   // patient_id: patientId,
-    title: "Nutrition Prescription",
-    type: "prescription",
-    date: "2025-08-10T14:30:00Z",
-    fileUrl: "https://res.cloudinary.com/demo/image/upload/prescription.pdf",
-    doctorName: "Dr. Carter",
-  }
-]
 
 export default function AppointmentPage() {
   const params = useParams()
-  const appointmentId = params.id as string
-  const { appointments } = useAppointmentStore()
+  const appointmentId = params?.id as string
+  const { appointments, fetchAppointments, isLoading } = useAppointmentStore()
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
   const [assignedDietPlan, setAssignedDietPlan] = useState<any | null>(null)
-const [referredTests, setReferredTests] = useState<any[]>([])
+  const [referredTests, setReferredTests] = useState<any[]>([])
+  const [doctorReport, setDoctorReport] = useState("")
+  const [appointmentDone, setAppointmentDone] = useState(false)
 
+  useEffect(() => {
+    if (appointments.length === 0) {
+      fetchAppointments(AppointmentStatus.Upcoming)
+    }
+  }, [appointments.length, fetchAppointments])
 
   useEffect(() => {
     const foundAppointment = appointments.find((apt) => apt.id === appointmentId)
-    if (foundAppointment) {
-      setAppointment(foundAppointment)
-      setFitnessData(generateMockFitnessData(foundAppointment.patient.id))
-      setMedicalRecords(generateMockMedicalRecords(foundAppointment.patient.id))
+    if (foundAppointment) setAppointment(foundAppointment)
+  }, [appointments, appointmentId])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (!appointment?.patient?.id) return
+      const data = await fetchPatientAnalytics(appointment.patient.id)
+      setFitnessData(data.fitness)
+      setMedicalRecords(data.medicalRecords)
     }
-  }, [appointmentId, appointments])
+    if (appointment?.dataShared) getData()
+  }, [appointment])
 
   const handleGenerateAIReport = () => {
     console.log("[v0] Generating AI report for patient:", appointment?.patient.name)
-    // This would typically call an AI service to generate a comprehensive report
     alert("AI Report generation started. You will receive the report shortly.")
   }
 
   const labTestsRef = useRef<HTMLDivElement | null>(null)
+  const handleScrollToLabTests = () => {
+    labTestsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
-const handleScrollToLabTests = () => {
-  labTestsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-}
+  const handleAssignDietPlan = (dietPlan: any) => {
+    setAssignedDietPlan(dietPlan)
+  }
 
-const handleAssignDietPlan = (dietPlan: any) => {
-  setAssignedDietPlan(dietPlan)
-}
-
-const handleTestReferral = (referral: any) => {
-  setReferredTests((prev) => [...prev, referral])
-}
-
-
-const [doctorReport, setDoctorReport] = useState("")
- const [appointmentDone, setAppointmentDone] = useState(false)
+  const handleTestReferral = (referral: any) => {
+    setReferredTests((prev) => [...prev, referral])
+  }
 
   const handleMarkAppointmentDone = () => {
     setAppointmentDone(true)
-    // 🔒 here you can also dispatch Redux action or call API to update backend
   }
 
-  const handleRemoveTest = (id:string) => {
+  const handleRemoveTest = (id: string) => {
     setReferredTests((prev) => prev.filter((t) => t.id !== id))
-    // 🗑️ also update backend if required
   }
 
+  if (isLoading) return <p>Loading...</p>
 
   if (!appointment) {
     return (
@@ -158,7 +120,7 @@ const [doctorReport, setDoctorReport] = useState("")
     )
   }
 
-  const { patient, doctor, date, time, status, type, notes, dataShared } = appointment
+  const { patient, date, time, type, notes, dataShared } = appointment
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent">
@@ -327,13 +289,7 @@ const [doctorReport, setDoctorReport] = useState("")
               </CardHeader>
               <CardContent className="p-6 pt-0 space-y-4">
                 <div className="space-y-3 text-soft-blue">
-                  <div className="flex items-start gap-3">
-                    <Stethoscope className="w-4 h-4  mt-1 text-cool-gray" />
-                    <div>
-                      <p className="text-sm font-medium ">{doctor.name}</p>
-                
-                    </div>
-                  </div>
+                 
 
                   <div className="flex items-center gap-3">
                     <Clock className="w-4 h-4 text-cool-gray" />
@@ -359,6 +315,84 @@ const [doctorReport, setDoctorReport] = useState("")
                 </div>
               </CardContent>
             </Card>
+
+<Card className="hover-lift">
+  <CardHeader className="bg-white">
+    <CardTitle className="text-soft-coral flex items-center gap-2">
+      <FileText className="w-5 h-5" />
+      Additional Info
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="p-6 pt-0 space-y-4">
+    <div className="space-y-3">
+      <h4 className="font-semibold text-soft-coral flex items-center gap-2">
+        <Activity className="w-4 h-4" />
+        Other Health Details
+      </h4>
+
+      <div className="space-y-2">
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Medications</p>
+          <p className="text-sm text-cool-gray">{patient.medications || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Ongoing Medications</p>
+          <p className="text-sm text-cool-gray">{patient.ongoingMedications || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Surgery History</p>
+          <p className="text-sm text-cool-gray">{patient.surgeryHistory || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Implants</p>
+          <p className="text-sm text-cool-gray">{patient.implants || "N/A"}</p>
+        </div>
+
+        {patient.gender === "Female" && (
+          <>
+            <div className="p-2 rounded-lg bg-cool-gray/10">
+              <p className="text-sm text-soft-blue mb-1">Pregnancy Status</p>
+              <p className="text-sm text-cool-gray">{patient.pregnancyStatus || "N/A"}</p>
+            </div>
+
+            <div className="p-2 rounded-lg bg-cool-gray/10">
+              <p className="text-sm text-soft-blue mb-1">Menstrual Cycle</p>
+              <p className="text-sm text-cool-gray">{patient.menstrualCycle || "N/A"}</p>
+            </div>
+          </>
+        )}
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Mental Health</p>
+          <p className="text-sm text-cool-gray">{patient.mentalHealth || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Family History</p>
+          <p className="text-sm text-cool-gray">{patient.familyHistory || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Organ Donor</p>
+          <p className="text-sm text-cool-gray">{patient.organDonor || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Disabilities</p>
+          <p className="text-sm text-cool-gray">{patient.disabilities || "N/A"}</p>
+        </div>
+
+        <div className="p-2 rounded-lg bg-cool-gray/10">
+          <p className="text-sm text-soft-blue mb-1">Lifestyle</p>
+          <p className="text-sm text-cool-gray">{patient.lifestyle || "N/A"}</p>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
 
            
           </div>
@@ -509,58 +543,68 @@ const [doctorReport, setDoctorReport] = useState("")
                       Patient's medical history, test results, and prescriptions
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className="border-secondary text-secondary">
+                  <Badge variant="outline" className="border-secondary text-mint-green">
                     {medicalRecords.length} Records
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
-                <div className="grid gap-4">
-                  {medicalRecords.map((record) => (
-                    <div
-                      key={record.id}
-                      className="group flex  items-center justify-between p-4 border border-secondary/20 rounded-xl  bg-cool-gray/10 transition-all duration-200"
-                    >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                          <FileText className="w-6 h-6 text-soft-blue" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-soft-coral group-hover:text-soft-coral/90 transition-colors">
-                            {record.title}
-                          </h4>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1">
-                              <Badge variant="outline" className="text-xs bg-mint-green text-white">
-                                {record.type}
-                              </Badge>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDateOnly( new Date(record.date))}
-                            </span>
-                            {record.doctorName && (
-                              <span className="flex items-center gap-1">
-                                <Stethoscope className="w-3 h-3" />
-                                {record.doctorName}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                       
-                        size="sm"
-                        className=" gap-2 ml-4 bg-soft-blue text-snow-white hover:bg-soft-blue/90 "
-                        onClick={() => window.open(record.fileUrl, "_blank")}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        View
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
+           <CardContent className="p-6 pt-0">
+  {medicalRecords.length === 0 ? (
+    <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+      <FileText className="w-10 h-10 mb-3 text-soft-blue/70" />
+      <p className="text-sm">No medical records available yet.</p>
+    </div>
+  ) : (
+    <div className="grid gap-4">
+      {medicalRecords.map((record) => (
+        <div
+          key={record.id}
+          className="group flex items-center justify-between p-4 border border-secondary/20 rounded-xl bg-cool-gray/10 transition-all duration-200"
+        >
+          <div className="flex items-center gap-4 flex-1">
+            <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+              <FileText className="w-6 h-6 text-soft-blue" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-soft-coral group-hover:text-soft-coral/90 transition-colors">
+                {record.title}
+              </h4>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
+                <span className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-mint-green text-white"
+                  >
+                    {record.record_type}
+                  </Badge>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {formatDateOnly(new Date(record.date))}
+                </span>
+                {record.doctorName && (
+                  <span className="flex items-center gap-1">
+                    <Stethoscope className="w-3 h-3" />
+                    {record.doctorName}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            className="gap-2 ml-4 bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+            onClick={() => window.open(record.file_url, "_blank")}
+          >
+            <ExternalLink className="w-4 h-4" />
+            View
+          </Button>
+        </div>
+      ))}
+    </div>
+  )}
+</CardContent>
+
             </Card>
             }
 

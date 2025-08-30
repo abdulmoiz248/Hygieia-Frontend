@@ -13,7 +13,7 @@ import { useEffect } from "react"
 
 
 export function AppointmentsList() {
-  const { appointments,    updateAppointmentStatus,fetchAppointments,isLoading } =
+  const { appointments,    updateAppointmentStatus } =
     useAppointmentStore()
 
     const router=useRouter()
@@ -43,13 +43,6 @@ export function AppointmentsList() {
   }
 
 
-    useEffect(() => {
-    // fetch all appointments for this doctor on mount
-    fetchAppointments(AppointmentStatus.Upcoming)  
-    // if you want "all", just do fetchAppointments()
-  }, [fetchAppointments])
-
-  if (isLoading) return <p>Loading...</p>
 
 
   return (

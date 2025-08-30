@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 
 import {  CalendarComponent } from "@/components/ui/calendar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 
 
@@ -44,10 +44,19 @@ const itemVariants:Variants = {
   visible: { opacity: 1, y: 0 },
 }
 
-  const { appointments } = useAppointmentStore()
+  const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
  const appointmentDates = appointments.map((apt) => new Date(apt.date))
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
     
+
+      useEffect(() => {
+     if(appointments.length==0)
+        fetchAppointments(AppointmentStatus.Upcoming)  
+      
+    }, [fetchAppointments])
+  
+    if (isLoading) return <p>Loading...</p>
+  
     
   return (
 
@@ -112,9 +121,9 @@ const itemVariants:Variants = {
       >
         <div className="flex items-start sm:items-center sm:flex-row flex-col gap-4 ">
           <Avatar className="w-12 h-12 shrink-0">
-            <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
+            <AvatarImage src={appointment.patient.avatar || "/placeholder.svg"} />
             <AvatarFallback>
-              {appointment.doctor.name
+              {appointment.patient.name
                 .split(" ")
                 .map((n) => n[0])
                 .join("")}
@@ -124,7 +133,7 @@ const itemVariants:Variants = {
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h4 className="font-semibold text-base text-dark-slate-gray break-words">
-                {appointment.doctor.name}
+                {appointment.patient.name}
               </h4>
               <Badge className={`${getStatusColor(appointment.status)} text-xs px-2 py-0.5`}>
                 {appointment.status}

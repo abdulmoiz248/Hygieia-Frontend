@@ -12,11 +12,7 @@ import {
 } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-
-import { Progress } from "@/components/ui/progress"
-import { Activity, Droplets, Moon, Flame, Apple, TrendingUp, TrendingDown, Target } from "lucide-react"
 import HealthMetrics from "./HealthMetrics"
-
 
 export interface FitnessData {
   id: string
@@ -37,34 +33,58 @@ interface EnhancedFitnessChartsProps {
 }
 
 export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+        <p>No fitness data available</p>
+      </div>
+    )
+  }
+
   const chartData = data.map((item, index) => ({
     date: new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     fullDate: new Date(item.created_at).toLocaleDateString(),
-    steps: item.steps,
-    water: item.water,
-    sleep: item.sleep,
-    calories_burned: item.calories_burned,
-    calories_intake: item.calories_intake,
-    fat: item.fat,
-    protein: item.protein,
-    carbs: item.carbs,
+    steps: item.steps || 0,
+    water: item.water || 0,
+    sleep: item.sleep || 0,
+    calories_burned: item.calories_burned || 0,
+    calories_intake: item.calories_intake || 0,
+    fat: item.fat || 0,
+    protein: item.protein || 0,
+    carbs: item.carbs || 0,
     day: index + 1,
   }))
 
-  // Calculate averages and trends
-  const avgSteps = Math.round(data.reduce((sum, item) => sum + (item.steps || 0), 0) / data.length)
-  const avgWater = (data.reduce((sum, item) => sum + (item.water || 0), 0) / data.length).toFixed(1)
-  const avgSleep = (data.reduce((sum, item) => sum + (item.sleep || 0), 0) / data.length).toFixed(1)
-  const avgCaloriesBurned = Math.round(data.reduce((sum, item) => sum + (item.calories_burned || 0), 0) / data.length)
-  const avgCaloriesIntake = Math.round(data.reduce((sum, item) => sum + (item.calories_intake || 0), 0) / data.length)
+  const safeDivide = (num: number, denom: number) => (denom > 0 ? num / denom : 0)
+
+  // Calculate averages
+  const avgSteps = Math.round(safeDivide(data.reduce((s, i) => s + (i.steps || 0), 0), data.length))
+  const avgWater = safeDivide(data.reduce((s, i) => s + (i.water || 0), 0), data.length).toFixed(1)
+  const avgSleep = safeDivide(data.reduce((s, i) => s + (i.sleep || 0), 0), data.length).toFixed(1)
+  const avgCaloriesBurned = Math.round(
+    safeDivide(data.reduce((s, i) => s + (i.calories_burned || 0), 0), data.length)
+  )
+  const avgCaloriesIntake = Math.round(
+    safeDivide(data.reduce((s, i) => s + (i.calories_intake || 0), 0), data.length)
+  )
 
   // Latest week vs previous week comparison
   const latestWeek = data.slice(-7)
   const previousWeek = data.slice(-14, -7)
 
-  const latestWeekAvgSteps = latestWeek.reduce((sum, item) => sum + (item.steps || 0), 0) / 7
-  const previousWeekAvgSteps = previousWeek.reduce((sum, item) => sum + (item.steps || 0), 0) / 7
-  const stepsChange = (((latestWeekAvgSteps - previousWeekAvgSteps) / previousWeekAvgSteps) * 100).toFixed(1)
+  const latestWeekAvgSteps = safeDivide(
+    latestWeek.reduce((s, i) => s + (i.steps || 0), 0),
+    latestWeek.length
+  )
+  const previousWeekAvgSteps = safeDivide(
+    previousWeek.reduce((s, i) => s + (i.steps || 0), 0),
+    previousWeek.length
+  )
+
+  const stepsChange =
+    previousWeekAvgSteps > 0
+      ? (((latestWeekAvgSteps - previousWeekAvgSteps) / previousWeekAvgSteps) * 100).toFixed(1)
+      : "0.0"
 
   // Macronutrient distribution for latest day
   const latestDay = data[data.length - 1]
@@ -78,14 +98,17 @@ export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
   const weeklyData = []
   for (let i = 0; i < data.length; i += 7) {
     const week = data.slice(i, i + 7)
-    const weekAvg = {
-      week: `Week ${Math.floor(i / 7) + 1}`,
-      steps: Math.round(week.reduce((sum, item) => sum + (item.steps || 0), 0) / week.length),
-      water: (week.reduce((sum, item) => sum + (item.water || 0), 0) / week.length).toFixed(1),
-      sleep: (week.reduce((sum, item) => sum + (item.sleep || 0), 0) / week.length).toFixed(1),
-      calories_burned: Math.round(week.reduce((sum, item) => sum + (item.calories_burned || 0), 0) / week.length),
+    if (week.length > 0) {
+      weeklyData.push({
+        week: `Week ${Math.floor(i / 7) + 1}`,
+        steps: Math.round(safeDivide(week.reduce((s, i) => s + (i.steps || 0), 0), week.length)),
+        water: safeDivide(week.reduce((s, i) => s + (i.water || 0), 0), week.length).toFixed(1),
+        sleep: safeDivide(week.reduce((s, i) => s + (i.sleep || 0), 0), week.length).toFixed(1),
+        calories_burned: Math.round(
+          safeDivide(week.reduce((s, i) => s + (i.calories_burned || 0), 0), week.length)
+        ),
+      })
     }
-    weeklyData.push(weekAvg)
   }
 
   return (
