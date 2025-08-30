@@ -6,15 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Clock, MoreVertical, CheckCircle, XCircle, Calendar } from "lucide-react"
-import { AppointmentDetailsModal } from "./appointment-details-modal"
-
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 
 export function AppointmentsList() {
-  const { appointments,    updateAppointmentStatus } =
+  const { appointments,    updateAppointmentStatus,fetchAppointments,isLoading } =
     useAppointmentStore()
 
     const router=useRouter()
@@ -44,10 +43,23 @@ export function AppointmentsList() {
   }
 
 
+    useEffect(() => {
+    // fetch all appointments for this doctor on mount
+    fetchAppointments(AppointmentStatus.Upcoming)  
+    // if you want "all", just do fetchAppointments()
+  }, [fetchAppointments])
+
+  if (isLoading) return <p>Loading...</p>
 
 
   return (
     <>
+     <div>
+          <h1 className="text-3xl font-bold text-soft-coral">Upcoming Appointments</h1>
+          <p className="text-cool-gray">Stay on top of your schedule</p>
+        </div>
+
+
       <div className="space-y-3 sm:space-y-4">
         {filteredAppointments.length === 0 ? (
           <Card className="scale-in">
@@ -61,103 +73,94 @@ export function AppointmentsList() {
           </Card>
         ) : (
           filteredAppointments.map((appointment) => (
-          <Card
+       <Card
   key={appointment.id}
-  className="rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 bg-cool-gray/10 backdrop-blur-md"
+  className={`rounded-2xl border-l-4 shadow-md hover:shadow-xl transition-all duration-300 
+    backdrop-blur-lg bg-gradient-to-br from-snow-white via-cool-gray/10 to-soft-blue/5 
+    border-${appointment.status === "upcoming" ? "soft-blue" : appointment.status === "completed" ? "mint-green" : "soft-coral"}`}
 >
-  <CardContent className="p-5 sm:p-6">
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      {/* Left Side: Avatar + Details */}
-      <div className="flex items-start sm:items-center gap-4 flex-1">
-        <Avatar className="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
-          <AvatarImage src={appointment.patient?.avatar || "/placeholder.svg"} />
-          <AvatarFallback
-            style={{ backgroundColor: "var(--color-soft-blue)", color: "white" }}
-            className="text-sm sm:text-base"
-          >
-            {appointment.patient?.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </AvatarFallback>
-        </Avatar>
+  <CardContent className="p-6">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      
+      {/* Left Side */}
+      <div className="flex items-start gap-5 flex-1">
+        <div className="relative">
+          <Avatar className="h-14 w-14 ring-4 ring-white shadow-md">
+            <AvatarImage src={appointment.patient?.avatar || "/placeholder.svg"} />
+            <AvatarFallback
+              className="text-base font-semibold bg-gradient-to-r from-soft-blue to-soft-coral text-white"
+            >
+              {appointment.patient?.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
         <div className="flex-1 min-w-0">
           {/* Name + Status */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-            <h3 className="font-semibold text-lg truncate text-soft-coral">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <h3 className="font-bold text-lg text-dark-slate-gray truncate">
               {appointment.patient?.name}
             </h3>
             <Badge
-              variant="outline"
-              className="flex items-center gap-1 bg-mint-green/80 text-dark-slate-gray rounded-full px-3 py-1"
+              variant="secondary"
+              className="flex items-center gap-1 bg-mint-green/20 text-dark-slate-gray rounded-full px-3 py-1 shadow-sm"
             >
               {getStatusIcon(appointment.status)}
-              <span className="capitalize text-xs">{appointment.status}</span>
+              <span className="capitalize">{appointment.status}</span>
             </Badge>
           </div>
 
           {/* Type + Mode */}
           <div className="flex flex-wrap gap-2 mb-3">
-            <Badge
-              variant="secondary"
-              className="bg-soft-blue/10 text-soft-blue capitalize px-2.5 py-0.5 rounded-lg"
-            >
-              {appointment.type}
+            <Badge className="flex items-center gap-1 bg-soft-blue/10 text-soft-blue rounded-md px-3 py-1">
+              <span>📋</span>{appointment.type}
             </Badge>
-            <Badge
-              variant="secondary"
-              className="bg-soft-coral/10 text-soft-coral capitalize px-2.5 py-0.5 rounded-lg"
-            >
-              {appointment.mode}
+            <Badge className="flex items-center gap-1 bg-soft-coral/10 text-soft-coral rounded-md px-3 py-1">
+              <span>🎥</span>{appointment.mode}
             </Badge>
           </div>
 
           {/* Time */}
-          <div className="flex items-center gap-4 text-xs sm:text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4 text-soft-coral" />
-              <span>{appointment.time}</span>
-            </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+            <Clock className="h-4 w-4 text-soft-coral" />
+            <span className="text-dark-slate-gray font-semibold">{appointment.time}</span>
           </div>
 
           {/* Notes */}
           {appointment.notes && (
-            <p className="text-xs sm:text-sm text-muted-foreground mt-3 italic border-l-2 border-soft-coral pl-3 line-clamp-2">
+            <p className="mt-3 text-sm italic border-l-2 text-dark-slate-gray rounded">
               "{appointment.notes}"
             </p>
           )}
         </div>
       </div>
 
-      {/* Right Side: Actions */}
+      {/* Actions */}
       <div className="flex items-center justify-end gap-2">
         {appointment.status === "upcoming" && (
           <Button
             onClick={() => router.push(`/nutritionist/appointments/${appointment.id}`)}
             size="sm"
-            className="bg-[var(--color-soft-blue)] text-snow-white hover:bg-[var(--color-soft-blue)]/90 rounded-full shadow-sm"
+            className="bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90 rounded-full shadow-md"
           >
             <CheckCircle className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">Mark Done</span>
-            <span className="sm:hidden">Done</span>
           </Button>
         )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full hover:bg-gray-100"
-            >
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-gray-100">
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="shadow-md rounded-xl">
             {appointment.status === "upcoming" && (
               <DropdownMenuItem
-                className="text-red-600"
+                className="text-red-600 hover:bg-red-50"
                 onClick={() => handleCancelAppointment(appointment.id)}
               >
                 <XCircle className="h-4 w-4 mr-2" />
@@ -170,6 +173,7 @@ export function AppointmentsList() {
     </div>
   </CardContent>
 </Card>
+
 
           ))
         )}

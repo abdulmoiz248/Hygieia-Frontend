@@ -38,7 +38,7 @@ import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { DietPlanDialog } from "@/components/nutritionist/appointments/id/diet-plan-dialog"
 import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
-import {motion} from 'framer-motion'
+
 
 // Mock fitness data for the last 30 days
 const generateMockFitnessData = (patientId: string): FitnessData[] => {

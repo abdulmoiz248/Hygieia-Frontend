@@ -63,7 +63,7 @@ export default function AppointmentsPage() {
   // Add appointment dates for calendar
   const appointmentDates = appointments.map((apt) => new Date(apt.date))
 
-  const getStatusColor = (status: string) => {
+   const getStatusColor = (status: string) => {
     switch (status) {
       case "upcoming":
         return "bg-soft-blue text-white"
