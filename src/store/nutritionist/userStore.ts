@@ -40,7 +40,7 @@ export interface NutritionistStore {
 }
 
 const initialProfile: NutritionistProfile = {
-  id: null,
+  id: '7191ac63-6ac5-47c3-a865-b1fe152f8f47',
   name: "Wahb Usman",
   email: "fa22-bcs-072cuilahore.edu.pk",
   phone: "oooooooo",

@@ -1,38 +1,23 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
+import axios from "axios"
+import api from "@/lib/axios"
 
 export interface DietPlan {
-  id: string
-  patientId: string
-  patientName: string
-  patientAvatar?: string
-  planName: string
-  startDate: string
-  endDate: string
-  status: "active" | "completed" | "paused" | "expired"
-  compliance: number
-  lastUpdate: string
-  goals: string[]
-  restrictions: string[]
-  calories: number
-  macros: {
-    protein: number
-    carbs: number
-    fat: number
-  }
-  meals: {
-    breakfast: string[]
-    lunch: string[]
-    dinner: string[]
-    snacks: string[]
-  }
-  progress: {
-    week: number
-    weight: string
-    notes: string
-    compliance: number
-  }[]
-  sessionNotes: string
+  id?: string
+  dailyCalories: string
+  protein: string
+  carbs: string
+  fat: string
+  deficiency: string
+  notes: string
+  caloriesBurned: string
+  exercise: string
+  startDate: string | Date
+  endDate: string | Date
+  patientId?: string
+  patientName?: string
+  nutritionistId?:string
 }
 
 interface DietPlanStore {
@@ -46,6 +31,8 @@ interface DietPlanStore {
   isLoading: boolean
 
   // Actions
+  fetchDietPlans: (nutritionistId: string) => Promise<void>
+  updateDietPlanBackend: (dietPlanId: string, updates: Partial<DietPlan>, nutritionistId: string) => Promise<void>
   setDietPlans: (plans: DietPlan[]) => void
   setSelectedDietPlan: (plan: DietPlan | null) => void
   addDietPlan: (plan: DietPlan) => void
@@ -56,90 +43,103 @@ interface DietPlanStore {
 
 export const useDietPlanStore = create<DietPlanStore>()(
   devtools(
-    (set) => ({
-      dietPlans: [
-        {
-          id: "1",
-          patientId: "1",
-          patientName: "Emma Wilson",
-          planName: "Weight Management Plan",
-          startDate: "2024-01-15",
-          endDate: "2024-04-15",
-          status: "active",
-          compliance: 92,
-          lastUpdate: "2 days ago",
-          goals: ["Lose 10 kg", "Improve energy levels", "Better sleep"],
-          restrictions: ["Vegetarian", "Low sodium", "No nuts"],
-          calories: 1800,
-          macros: { protein: 25, carbs: 45, fat: 30 },
-          meals: {
-            breakfast: ["Oatmeal with berries", "Greek yogurt", "Green tea"],
-            lunch: ["Quinoa salad", "Grilled vegetables", "Hummus"],
-            dinner: ["Lentil curry", "Brown rice", "Steamed broccoli"],
-            snacks: ["Apple slices", "Almonds", "Herbal tea"],
-          },
-          progress: [
-            { week: 1, weight: "68 kg", notes: "Good start, feeling motivated", compliance: 95 },
-            { week: 2, weight: "67.5 kg", notes: "Slight weight loss, energy improving", compliance: 90 },
-          ],
-          sessionNotes: "Patient is responding well to the plan. Recommend continuing current approach.",
-        },
-        {
-          id: "2",
-          patientId: "2",
-          patientName: "Michael Chen",
-          planName: "Diabetes Management Plan",
-          startDate: "2024-02-01",
-          endDate: "2024-08-01",
-          status: "active",
-          compliance: 78,
-          lastUpdate: "1 day ago",
-          goals: ["Control blood sugar", "Lose 5 kg", "Reduce medication dependency"],
-          restrictions: ["Low carb", "Low sodium", "No sugar"],
-          calories: 2000,
-          macros: { protein: 30, carbs: 35, fat: 35 },
-          meals: {
-            breakfast: ["Scrambled eggs", "Avocado", "Whole grain toast"],
-            lunch: ["Grilled chicken salad", "Olive oil dressing"],
-            dinner: ["Baked salmon", "Roasted vegetables", "Cauliflower rice"],
-            snacks: ["Nuts", "Cheese", "Cucumber slices"],
-          },
-          progress: [
-            { week: 1, weight: "82 kg", notes: "Adjusting to new diet", compliance: 80 },
-            { week: 2, weight: "81.5 kg", notes: "Blood sugar levels improving", compliance: 75 },
-          ],
-          sessionNotes: "Need to work on compliance. Patient struggling with carb restrictions.",
-        },
-      ],
+    (set, get) => ({
+      dietPlans: [],
       selectedDietPlan: null,
-      filters: {
-        status: "all",
-        compliance: "all",
-        search: "",
-      },
+      filters: { status: "all", compliance: "all", search: "" },
       isLoading: false,
 
       setDietPlans: (plans) => set({ dietPlans: plans }),
-
       setSelectedDietPlan: (plan) => set({ selectedDietPlan: plan }),
-
-      addDietPlan: (plan) =>
-        set((state) => ({
-          dietPlans: [...state.dietPlans, plan],
-        })),
-
+      addDietPlan: (plan) => set((state) => ({ dietPlans: [...state.dietPlans, plan] })),
       updateDietPlan: (id, updates) =>
-        set((state) => ({
-          dietPlans: state.dietPlans.map((plan) => (plan.id === id ? { ...plan, ...updates } : plan)),
-        })),
-
-      setFilters: (newFilters) =>
-        set((state) => ({
-          filters: { ...state.filters, ...newFilters },
-        })),
-
+        set((state) => ({ dietPlans: state.dietPlans.map((plan) => (plan.id === id ? { ...plan, ...updates } : plan)) })),
+      setFilters: (newFilters) => set((state) => ({ filters: { ...state.filters, ...newFilters } })),
       setLoading: (loading) => set({ isLoading: loading }),
+
+      // fetch diet plans assigned to the nutritionist from backend
+    fetchDietPlans: async (nutritionistId) => {
+  set({ isLoading: true })
+  try {
+    const { data } = await api.get(`/diet-plans/assigned?nutritionistId=${nutritionistId}`)
+ 
+   const camelData:DietPlan[] = data.map((plan: any) => ({
+  id: plan.id,
+  dailyCalories: plan.daily_calories,
+  protein: plan.protein,
+  carbs: plan.carbs,
+  fat: plan.fat,
+  deficiency: plan.deficiency,
+  notes: plan.notes,
+  caloriesBurned: plan.calories_burned,
+  exercise: plan.exercise,
+  startDate: new Date(plan.start_date),
+  endDate: new Date(plan.end_date),
+  patientId: plan.patient_id,
+  patientName: plan.patient_name,
+  nutritionistId: plan.nutritionist_id,
+}))
+
+   
+    set({ dietPlans: camelData })
+  } catch (err: any) {
+    console.error("Failed to fetch diet plans:", err.message || err)
+  } finally {
+    set({ isLoading: false })
+  }
+}
+,
+
+      // update diet plan both in store and backend
+    updateDietPlanBackend: async (dietPlanId, updates, nutritionistId) => {
+  set({ isLoading: true })
+  try {
+    const payload = toSnakeCase({ ...updates, nutritionistId }) // map camelCase -> snake_case
+    const { data } = await api.patch(`/diet-plans/${dietPlanId}`, payload)
+    
+    // convert backend response to camelCase before updating store
+    const updatedPlan: DietPlan = {
+      id: data.id,
+      dailyCalories: data.daily_calories,
+      protein: data.protein,
+      carbs: data.carbs,
+      fat: data.fat,
+      deficiency: data.deficiency,
+      notes: data.notes,
+      caloriesBurned: data.calories_burned,
+      exercise: data.exercise,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      patientId: data.patient_id,
+      patientName: data.patient_name,
+      nutritionistId: data.nutritionist_id,
+    }
+
+    get().updateDietPlan(dietPlanId, updatedPlan)
+  } catch (err: any) {
+    console.error("Failed to update diet plan:", err.message || err)
+  } finally {
+    set({ isLoading: false })
+  }
+}
+
     }),
-    { name: "diet-plan-store" },
-  ),
+    { name: "diet-plan-store" }
+  )
 )
+
+const toSnakeCase = (plan: Partial<DietPlan>) => ({
+  daily_calories: plan.dailyCalories,
+  protein: plan.protein,
+  carbs: plan.carbs,
+  fat: plan.fat,
+  deficiency: plan.deficiency,
+  notes: plan.notes,
+  calories_burned: plan.caloriesBurned,
+  exercise: plan.exercise,
+  start_date: plan.startDate,
+  end_date: plan.endDate,
+  patient_id: plan.patientId,
+  nutritionist_id: plan.nutritionistId,
+})
+

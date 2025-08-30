@@ -20,20 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Utensils } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { DietPlan } from "@/store/nutritionist/diet-plan-store"
 
-interface DietPlan {
-  dailyCalories: string
-  protein: string
-  carbs: string
-  fat: string
-  deficiency: string
-  notes: string
-  caloriesBurned: string
-  exercise: string
-  startDate?: Date
-  endDate?: Date
-  patientName: string
-}
 
 interface DietPlanDialogProps {
   patientName: string
@@ -51,8 +39,8 @@ export function DietPlanDialog({ patientName, onAssign }: DietPlanDialogProps) {
     notes: "",
     caloriesBurned: "",
     exercise: "",
-    startDate: undefined,
-    endDate: undefined,
+    startDate: new Date(),
+    endDate: new Date(),
     patientName: patientName,
   })
 
@@ -72,8 +60,8 @@ export function DietPlanDialog({ patientName, onAssign }: DietPlanDialogProps) {
       notes: "",
       caloriesBurned: "",
       exercise: "",
-      startDate: undefined,
-      endDate: undefined,
+      startDate: new Date(),
+      endDate: new Date(),
       patientName,
     })
   }
@@ -232,8 +220,8 @@ min={1}
       <PopoverContent className="w-auto p-0 rounded-lg shadow-lg">
         <Calendar
           mode="single"
-          selected={formData.startDate}
-          onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date, endDate: date }))} 
+          selected={formData.startDate as Date}
+          onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date as Date, endDate: date as Date }))} 
           disabled={(date) => date < new Date()} // disable past dates
           initialFocus
         />
@@ -259,8 +247,8 @@ min={1}
       <PopoverContent className="w-auto p-0 rounded-lg shadow-lg">
         <Calendar
           mode="single"
-          selected={formData.endDate}
-          onSelect={(date) => setFormData((prev) => ({ ...prev, endDate: date }))} 
+          selected={formData.endDate as Date}
+          onSelect={(date) => setFormData((prev) => ({ ...prev, endDate: date as Date}))} 
           disabled={(date) => !formData.startDate || date < formData.startDate} // disable before start
           initialFocus
         />

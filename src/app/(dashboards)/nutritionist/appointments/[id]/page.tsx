@@ -33,6 +33,10 @@ import { DietPlanDialog } from "@/components/nutritionist/appointments/id/diet-p
 import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
 import api from "@/lib/axios"
+import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+
+
+
 
 export const fetchPatientAnalytics = async (patientId: string) => {
   const res = await api.get(`/analytics/${patientId}`)
@@ -70,6 +74,11 @@ export async function completeNutritionistAppointment(
 }
 
 export default function AppointmentPage() {
+
+
+
+const { addDietPlan } = useDietPlanStore.getState()
+
   const params = useParams()
   const appointmentId = params?.id as string
   const { appointments, fetchAppointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
@@ -137,6 +146,14 @@ export default function AppointmentPage() {
 
 
     updateAppointmentStatus(appointmentId, AppointmentStatus.Completed)
+    // update store reactively
+if (assignedDietPlan) {
+  addDietPlan({
+    ...assignedDietPlan,
+    patientId: appointment?.patient.id,
+    patientName: appointment?.patient.name
+  })
+}
     router.push('/nutritionist/appointments')
 
   }
