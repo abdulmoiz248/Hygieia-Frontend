@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const { appointments } = useAppointmentStore()
   const { dietPlans } = useDietPlanStore()
 
+
+
   useEffect(() => {
     refreshStats()
   }, [refreshStats])

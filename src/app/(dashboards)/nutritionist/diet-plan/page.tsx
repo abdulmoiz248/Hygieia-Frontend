@@ -9,7 +9,7 @@ import PatientStats from "@/components/nutritionist/diet-plan/DietPlanStatsCard"
 import { PatientPlansFilters } from "@/components/nutritionist/diet-plan/DietPlanFilters"
 
 export default function DietPlanManager() {
-  const nutritionistId = useNutritionistStore().profile.id!
+  const nutritionistId = useNutritionistStore().profile?.id!
 
   const {
     dietPlans,
@@ -26,9 +26,6 @@ export default function DietPlanManager() {
   visible: { opacity: 1, y: 0 },
 }
 
-  useEffect(() => {
-    if(dietPlans.length==0) fetchDietPlans(nutritionistId)
-  }, [nutritionistId, fetchDietPlans])
 
   const handleUpdateDietPlan = (updatedPlan: DietPlan) => {
    
@@ -103,9 +100,7 @@ const filteredPlans = dietPlans.filter((plan) => {
 
         {/* Diet Plans Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {isLoading ? (
-            <p>Loading diet plans...</p>
-          ) : filteredPlans.length > 0 ? (
+          { filteredPlans.length > 0 ? (
             filteredPlans.map((dietPlan) => (
               <DietPlanCard key={dietPlan.id} dietPlan={dietPlan} onUpdate={handleUpdateDietPlan} />
             ))

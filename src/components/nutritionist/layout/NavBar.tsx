@@ -26,10 +26,11 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const notifications = useNutritionistStore().notifications
   const unreadCount = notifications.filter(n => n.unread).length
   const user = useNutritionistStore().profile
+  
 
   const read=useNutritionistStore().markAllAsRead
 
-  const userInitials = user.name
+  const userInitials = (user?.name ?? "jphn")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -106,14 +107,14 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             <DropdownMenuTrigger  asChild>
               <Button variant="ghost" className="flex items-center gap-2 ">
                 <Avatar className="w-8 h-8">
-                  {user.img?.trim() ? (
-                    <AvatarImage src={user.img} />
+                  {user?.img?.trim() ? (
+                    <AvatarImage src={user?.img} />
                   ) : (
                     <AvatarFallback className=" border p-2 bg-soft-blue text-white">{userInitials}</AvatarFallback>
 
                   )}
                 </Avatar>
-                <span className="hidden sm:block">{user.name}</span>
+                <span className="hidden sm:block">{user?.name}</span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>

@@ -1,10 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "./SideBar"
 import { TopNav } from "./NavBar"
+import useNutritionistStore from "@/store/nutritionist/userStore"
+import { AppointmentStatus } from "@/types/patient/appointment"
+import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
+import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -15,6 +19,46 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/patient/chat")
+
+  const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
+   
+  
+  useEffect(() => {
+       if(appointments.length==0)
+          fetchAppointments(AppointmentStatus.Upcoming)  
+        
+      }, [fetchAppointments])
+    
+    
+  const {
+    profile,
+    fetchProfile,
+  loading
+  } = useNutritionistStore()
+
+    useEffect(() => {
+      if(!profile)
+    fetchProfile()
+  }, [fetchProfile])
+
+
+const {
+    dietPlans,
+    fetchDietPlans,
+  
+    isLoading:isLoadingDietPlan,
+  } = useDietPlanStore()
+
+
+  
+    useEffect(() => {
+      if(dietPlans.length==0 && profile?.id) fetchDietPlans(profile?.id)
+    }, [profile, fetchDietPlans])
+
+
+
+  if (loading || isLoading || isLoadingDietPlan) return <p>Loading...</p>
+
 
   return (
     <div className="flex h-screen bg-snow-white">

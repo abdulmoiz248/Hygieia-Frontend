@@ -68,10 +68,8 @@ const useLabTechnicianStore = create<LabTechnicianStore>((set) => {
     loading: false,
    setProfile: async(profileData) => {
     const role=localStorage.getItem('role')
-    const id=localStorage.getItem('id')
-
-    
-    const res = await api.post(`/auth/user?role=${role}`, {profileData})
+   
+        await api.post(`/auth/user?role=${role}`, {profileData})
     set({ profile: profileData })
 
    },

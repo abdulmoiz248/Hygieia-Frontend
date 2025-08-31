@@ -27,21 +27,27 @@ const itemVariants:Variants = {
 }
 
 export default function ProfilePage() {
-  const reduxProfile=useNutritionistStore().profile
+  const {profile:reduxProfile, updateProfileField}=useNutritionistStore()
+  const saveProfile=useNutritionistStore().setProfile
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<NutritionistProfile>(reduxProfile)
+  const [profile, setProfile] = useState<NutritionistProfile>(reduxProfile!)
   const [isSaving, setIsSaving] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
-    setProfile(reduxProfile)
+    setProfile(reduxProfile!)
   }, [reduxProfile])
+
+
+
+
+
 
   const handleSave = async () => {
     setIsSaving(true)
     try {
       setIsEditing(false)
-      // add backend update call if needed
+      saveProfile(profile)
     } finally {
       setIsSaving(false)
     }
@@ -91,7 +97,15 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Picture & Basic Info */}
-        <LabTechnicianCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants} />
+        <LabTechnicianCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants}
+        onAvatarChange={(file) =>
+    uploadUserAvatar<NutritionistProfile>(
+      file,
+      "nutritionist",
+      profile.id,
+      updateProfileField
+    )
+  }      />
         <motion.div variants={itemVariants} className="lg:col-span-2">
           <Card className="py-15">
             <CardHeader>
@@ -106,7 +120,7 @@ export default function ProfilePage() {
                   <Label className="pb-1 text-soft-blue" htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
-                    value={profile.name}
+                    value={profile?.name ?? ""}
                     onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
                     disabled={!isEditing}
                   />
@@ -116,14 +130,14 @@ export default function ProfilePage() {
                   <Input
                     id="email"
                     type="email"
-                    value={profile.email}
+                    value={profile?.email}
                     onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))}
                     disabled={!isEditing}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-soft-blue">Gender</label>
-                  <Select value={profile.gender} disabled={!isEditing} onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
+                  <Select value={profile?.gender} disabled={!isEditing} onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -138,7 +152,7 @@ export default function ProfilePage() {
                   <Label className="pb-1 text-soft-blue" htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
-                    value={profile.phone}
+                    value={profile?.phone}
                     onChange={(e) => setProfile((prev) => ({ ...prev, phone: e.target.value }))}
                     disabled={!isEditing}
                   />
@@ -148,7 +162,7 @@ export default function ProfilePage() {
                   <Input
                     id="dob"
                     type="date" 
-                    value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split('T')[0] : ''}
+                    value={profile?.dateofbirth ? new Date(profile?.dateofbirth).toISOString().split('T')[0] : ''}
                     onChange={(e) => setProfile((prev) => ({ ...prev, dateofbirth: e.target.value }))}
                     disabled={!isEditing}
                   />
@@ -162,7 +176,7 @@ export default function ProfilePage() {
       {/* Nutritionist Information */}
       <motion.div variants={itemVariants}>
         <WorkingHours
-          value={profile.workingHours}
+          value={profile?.workingHours}
           onChange={(newHours) => setProfile((prev) => ({ ...prev, workingHours: newHours }))}
           disabled={!isEditing}
         />
@@ -185,7 +199,7 @@ export default function ProfilePage() {
                   <Label htmlFor="bio" className="text-soft-coral">Bio</Label>
                   <Textarea
                     id="bio"
-                    value={profile.bio}
+                    value={profile?.bio}
                     onChange={(e) => setProfile((prev) => ({ ...prev, bio: e.target.value }))}
                     disabled={!isEditing}
                     placeholder="Write a short professional bio..."
@@ -208,7 +222,7 @@ export default function ProfilePage() {
                   <Label htmlFor="specialization" className="text-soft-coral">Specialization</Label>
                   <Input
                     id="specialization"
-                    value={profile.specialization}
+                    value={profile?.specialization}
                     onChange={(e) => setProfile((prev) => ({ ...prev, specialization: e.target.value }))}
                     disabled={!isEditing}
                     placeholder="e.g. Sports Nutrition, Weight Management"
@@ -220,7 +234,7 @@ export default function ProfilePage() {
                   <Input
                     id="experienceYears"
                     type="number"
-                    value={profile.experienceYears}
+                    value={profile?.experienceYears}
                     onChange={(e) => setProfile((prev) => ({ ...prev, experienceYears: Number(e.target.value) }))}
                     disabled={!isEditing}
                     placeholder="e.g. 5"
@@ -231,7 +245,7 @@ export default function ProfilePage() {
                   <Label htmlFor="certifications" className="text-soft-coral">Certifications</Label>
                   <Textarea
                     id="certifications"
-                    value={profile.certifications.join(", ")}
+                    value={profile?.certifications?.join(", ")}
                     onChange={(e) =>
                       setProfile((prev) => ({ ...prev, certifications: e.target.value.split(",").map((s) => s.trim()) }))
                     }
@@ -262,7 +276,7 @@ export default function ProfilePage() {
                   <Label htmlFor="languages" className="text-soft-coral">Languages</Label>
                   <Textarea
                     id="languages"
-                    value={profile.languages.join(", ")}
+                    value={profile?.languages?.join(", ")}
                     onChange={(e) =>
                       setProfile((prev) => ({ ...prev, languages: e.target.value.split(",").map((s) => s.trim()) }))
                     }
@@ -289,7 +303,7 @@ export default function ProfilePage() {
                   <Label htmlFor="education" className="text-soft-coral">Education</Label>
                   <Textarea
                     id="education"
-                    value={profile.education.join(", ")}
+                    value={profile?.education?.join(", ")}
                     onChange={(e) =>
                       setProfile((prev) => ({ ...prev, education: e.target.value.split(",").map((s) => s.trim()) }))
                     }
@@ -317,7 +331,7 @@ export default function ProfilePage() {
                   <Input
                     id="consultationFee"
                     type="number"
-                    value={profile.consultationFee}
+                    value={profile?.consultationFee}
                     onChange={(e) => setProfile((prev) => ({ ...prev, consultationFee: Number(e.target.value) }))}
                     disabled={!isEditing}
                     placeholder="Enter fee in PKR"

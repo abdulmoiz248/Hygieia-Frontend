@@ -1,7 +1,8 @@
+import api from "@/lib/axios"
 import { create } from "zustand"
 
 export interface NutritionistProfile {
-  id: string | null
+  id: string
   name: string
   email: string
   phone: string
@@ -28,9 +29,11 @@ interface Notification {
 }
 
 export interface NutritionistStore {
-  profile: NutritionistProfile
+  profile: NutritionistProfile | null
   notifications: Notification[]
+  loading: boolean
   setProfile: (profileData: NutritionistProfile) => void
+  fetchProfile: () => Promise<void>
   updateProfileField: <K extends keyof NutritionistProfile>(
     field: K,
     value: NutritionistProfile[K]
@@ -42,77 +45,58 @@ export interface NutritionistStore {
   clearNotifications: () => void
 }
 
-const initialProfile: NutritionistProfile = {
-  id: '7191ac63-6ac5-47c3-a865-b1fe152f8f47',
-  name: "Wahb Usman",
-  email: "fa22-bcs-072cuilahore.edu.pk",
-  phone: "oooooooo",
-  gender: "female",
-  dateofbirth: "2004-05-11",
-  img: "/wahb.png",
-  specialization: "Diet & Wellness",
-  experienceYears: 0,
-  certifications: [],
-  education: [],
-  languages: [],
-  bio: "",
-  consultationFee: 0,
-  workingHours: [],
-  rating: 0,
-}
+const useNutritionistStore = create<NutritionistStore>((set) => {
+  const fetchProfile = async () => {
+    try {
+      set({ loading: true })
+      const id = localStorage.getItem("id")
+      const role = 'nutritionist'
 
-const useNutritionistStore = create<NutritionistStore>((set) => ({
-  profile: initialProfile,
-  notifications: [
-    {
-      id: "1",
-      title: "New Appointment",
-      message: "You have a new consultation scheduled with a client.",
-      time: "5 min ago",
-      unread: true,
+      if (!id || !role) throw new Error("Missing id or role in localStorage")
+
+      const res = await api.get(`/auth/user?id=${id}&role=${role}`)
+
+      if (!res.data.success) throw new Error("Failed to fetch profile")
+      const data = res.data
+
+      set({ profile: data, loading: false })
+    } catch (err) {
+      console.error("Error fetching profile:", err)
+      set({ profile: null, loading: false })
+    }
+  }
+
+  return {
+    profile: null,
+    notifications: [],
+    loading: true,
+    setProfile: async (profileData) => {
+      const role = 'nutritionist'
+      await api.post(`/auth/user?role=${role}`, { profileData })
+      set({ profile: profileData })
     },
-    {
-      id: "2",
-      title: "Diet Plan Update",
-      message: "A client has requested changes to their diet plan.",
-      time: "1 hour ago",
-      unread: true,
-    },
-  ],
-
-  setProfile: (profileData) => set({ profile: profileData }),
-
-  updateProfileField: (field, value) =>
-    set((state) => ({
-      profile: { ...state.profile, [field]: value },
-    })),
-
-  resetProfile: () => set({ profile: initialProfile }),
-
-  addNotification: (notification) =>
-    set((state) => ({
-      notifications: [
-        { ...notification, unread: true },
-        ...state.notifications,
-      ],
-    })),
-
-  markAsRead: (id) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, unread: false } : n
-      ),
-    })),
-
-  markAllAsRead: () =>
-    set((state) => ({
-      notifications: state.notifications.map((n) => ({
-        ...n,
-        unread: false,
+    fetchProfile,
+    updateProfileField: (field, value) =>
+      set((state) => ({
+        profile: state.profile ? { ...state.profile, [field]: value } : null,
       })),
-    })),
-
-  clearNotifications: () => set({ notifications: [] }),
-}))
+    resetProfile: () => set({ profile: null }),
+    addNotification: (notification) =>
+      set((state) => ({
+        notifications: [{ ...notification, unread: true }, ...state.notifications],
+      })),
+    markAsRead: (id) =>
+      set((state) => ({
+        notifications: state.notifications.map((n) =>
+          n.id === id ? { ...n, unread: false } : n
+        ),
+      })),
+    markAllAsRead: () =>
+      set((state) => ({
+        notifications: state.notifications.map((n) => ({ ...n, unread: false })),
+      })),
+    clearNotifications: () => set({ notifications: [] }),
+  }
+})
 
 export default useNutritionistStore

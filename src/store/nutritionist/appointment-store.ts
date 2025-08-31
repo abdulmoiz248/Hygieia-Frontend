@@ -31,7 +31,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
         date: "today",
         search: "",
       },
-      isLoading: false,
+      isLoading: true,
 
      fetchAppointments: async (status = "all") => {
   const doctorId = localStorage.getItem("id")
@@ -79,9 +79,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
           ),
         }))
 
-        if (dietPlan) {
-          console.log("[v0] Diet plan assigned:", dietPlan)
-        }
+       
       },
     }),
     { name: "appointment-store" },

@@ -2,7 +2,6 @@
 
 import { AppointmentsList } from "@/components/nutritionist/appointments/appointments-list"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
-import { AppointmentStatus } from "@/types/patient/appointment"
 
 import { motion, Variants } from "framer-motion"
 
@@ -17,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 
 import {  CalendarComponent } from "@/components/ui/calendar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useEffect, useState } from "react"
+import {  useState } from "react"
 
 
 
@@ -44,18 +43,12 @@ const itemVariants:Variants = {
   visible: { opacity: 1, y: 0 },
 }
 
-  const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
+  const { appointments} = useAppointmentStore()
  const appointmentDates = appointments.map((apt) => new Date(apt.date))
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
     
 
-      useEffect(() => {
-     if(appointments.length==0)
-        fetchAppointments(AppointmentStatus.Upcoming)  
-      
-    }, [fetchAppointments])
-  
-    if (isLoading) return <p>Loading...</p>
+    
   
     
   return (

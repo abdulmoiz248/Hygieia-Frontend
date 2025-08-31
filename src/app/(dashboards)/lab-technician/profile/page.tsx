@@ -86,8 +86,16 @@ export default function ProfilePage() {
   profile={profile}
   isEditing={isEditing}
   itemVariants={itemVariants}
-  onAvatarChange={(file) => uploadUserAvatar(file, 'lab-technician', profile.id,updateField)}
+  onAvatarChange={(file) =>
+    uploadUserAvatar<LabTechnicianProfile>(
+      file,
+      "lab-technician",
+      profile.id,
+      updateField
+    )
+  }
 />
+
 
 
 

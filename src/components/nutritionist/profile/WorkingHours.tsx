@@ -57,10 +57,10 @@ export default function WorkingHoursCard({ value, onChange, disabled }: WorkingH
         {/* Current Schedule */}
         <div className="space-y-3">
         
-          {value.length === 0 && (
+          {value?.length === 0 && (
             <p className="text-sm text-soft-coral">No working hours set</p>
           )}
-          {value.map((h) => (
+          {value?.map((h) => (
             <div
               key={h.day}
               className="flex items-center gap-3 border border-gray-200 bg-gray-50 p-4 rounded-xl hover:shadow transition"
@@ -121,7 +121,7 @@ export default function WorkingHoursCard({ value, onChange, disabled }: WorkingH
             <h3 className="text-sm font-bold text-soft-blue">Add Days</h3>
             <div className="flex flex-wrap gap-2">
               {daysOfWeek.map((day) => {
-                const alreadyAdded = value.some((h) => h.day === day)
+                const alreadyAdded = value?.some((h) => h.day === day)
                 return (
                   <Button
                     key={day}

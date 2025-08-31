@@ -23,7 +23,7 @@ const LabTechnicianCard = ({
   itemVariants,
   onAvatarChange,
 }: Props) => {
-  const [avatarSrc, setAvatarSrc] = useState(profile.img)
+  const [avatarSrc, setAvatarSrc] = useState(profile?.img)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleAvatarClick = () => {
@@ -64,7 +64,7 @@ const LabTechnicianCard = ({
               <Avatar className="w-full h-full">
                 <AvatarImage src={avatarSrc} sizes="144px" />
                 <AvatarFallback className="text-3xl font-medium text-dark-slate-gray/70">
-                  {profile.name?.split(" ").map(n => n[0]).join("")}
+                  {profile?.name?.split(" ").map(n => n[0]).join("")}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -91,31 +91,31 @@ const LabTechnicianCard = ({
           </div>
 
           <h2 className="text-2xl font-bold text-dark-slate-gray mb-1 break-words">
-            {profile.name}
+            {profile?.name}
           </h2>
 
           <div className="flex items-center justify-center gap-2 text-base text-cool-gray mb-5">
-            {renderGenderIcon(profile.gender)}
-            <span className="capitalize">{profile.gender}</span>
+            {renderGenderIcon(profile?.gender)}
+            <span className="capitalize">{profile?.gender}</span>
           </div>
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Mail className="w-4 h-4 text-soft-blue" />
-              <span>{profile.email}</span>
+              <span>{profile?.email}</span>
             </div>
 
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Phone className="w-4 h-4 text-soft-blue" />
-              <span>{profile.phone}</span>
+              <span>{profile?.phone}</span>
             </div>
 
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Calendar className="w-4 h-4 text-soft-blue" />
               <span>
                 Born{" "}
-                {profile.dateofbirth
-                  ? new Date(profile.dateofbirth).toLocaleDateString()
+                {profile?.dateofbirth
+                  ? new Date(profile?.dateofbirth).toLocaleDateString()
                   : "N/A"}
               </span>
             </div>

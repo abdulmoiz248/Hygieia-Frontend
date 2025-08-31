@@ -47,7 +47,7 @@ export const useDietPlanStore = create<DietPlanStore>()(
       dietPlans: [],
       selectedDietPlan: null,
       filters: { status: "all", compliance: "all", search: "" },
-      isLoading: false,
+      isLoading: true,
 
       setDietPlans: (plans) => set({ dietPlans: plans }),
       setSelectedDietPlan: (plan) => set({ selectedDietPlan: plan }),
