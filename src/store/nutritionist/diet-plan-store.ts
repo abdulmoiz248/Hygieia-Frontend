@@ -76,7 +76,7 @@ export const useDietPlanStore = create<DietPlanStore>()(
   startDate: new Date(plan.start_date),
   endDate: new Date(plan.end_date),
   patientId: plan.patient_id,
-  patientName: plan.patient_name,
+  patientName: plan.patientName,
   nutritionistId: plan.nutritionist_id,
 }))
 
@@ -97,6 +97,7 @@ export const useDietPlanStore = create<DietPlanStore>()(
     const payload = toSnakeCase({ ...updates, nutritionistId }) // map camelCase -> snake_case
     const { data } = await api.patch(`/diet-plans/${dietPlanId}`, payload)
     
+   
     // convert backend response to camelCase before updating store
     const updatedPlan: DietPlan = {
       id: data.id,
@@ -111,7 +112,7 @@ export const useDietPlanStore = create<DietPlanStore>()(
       startDate: data.start_date,
       endDate: data.end_date,
       patientId: data.patient_id,
-      patientName: data.patient_name,
+      patientName: data.patientName,
       nutritionistId: data.nutritionist_id,
     }
 
