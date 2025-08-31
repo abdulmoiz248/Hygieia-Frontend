@@ -49,7 +49,7 @@ export function EditDietPlanDialog({ dietPlan, open, onOpenChange, onSave }: Edi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="scrollbar-hidden sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl [&::-webkit-scrollbar]:hidden">
         <DialogHeader>
-          <DialogTitle className="text-soft-blue text-xl">Edit Diet & Exercise Plan</DialogTitle>
+          <DialogTitle className="text-soft-blue text-xl">Edit Diet Plan</DialogTitle>
           <DialogDescription className="text-dark-slate-gray/70">
             Update the plan for <span className="font-semibold text-soft-coral">{dietPlan.patientName}</span>
           </DialogDescription>

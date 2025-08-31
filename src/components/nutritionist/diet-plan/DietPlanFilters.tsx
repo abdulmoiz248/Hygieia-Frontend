@@ -46,7 +46,7 @@ export function PatientPlansFilters({
           <Filter className="w-4 h-4 mr-2 text-[--color-dark-slate-gray]" />
           <SelectValue placeholder="Filter plans" />
         </SelectTrigger>
-        <SelectContent className="rounded-xl bg-[--color-snow-white] shadow-lg border border-[--color-cool-gray]">
+        <SelectContent className="rounded-xl bg-snow-white shadow-lg border border-[--color-cool-gray]">
           <SelectItem value="all" className="hover:text-white hover:bg-[--color-mint-green]">
             All Plans
           </SelectItem>

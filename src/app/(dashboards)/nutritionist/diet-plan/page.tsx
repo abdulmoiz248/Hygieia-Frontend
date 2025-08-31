@@ -110,9 +110,29 @@ const filteredPlans = dietPlans.filter((plan) => {
               <DietPlanCard key={dietPlan.id} dietPlan={dietPlan} onUpdate={handleUpdateDietPlan} />
             ))
           ) : (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">No diet plans found matching your criteria.</p>
-            </div>
+           <div className="col-span-full flex flex-col items-center justify-center py-20 px-6 bg-muted/40 rounded-2xl shadow-sm border border-dashed border-muted-foreground/30">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-16 w-16 text-soft-coral mb-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 6v6l4 2m6-4a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+  <p className="text-xl font-medium text-soft-coral mb-2">
+    No diet plans found
+  </p>
+  <p className="text-sm text-muted-foreground/70 mb-6 text-center max-w-sm">
+    We couldn’t match any diet plans with your current criteria. Try adjusting your filters or exploring recommendations.
+  </p>
+</div>
+
           )}
         </div>
       </div>
