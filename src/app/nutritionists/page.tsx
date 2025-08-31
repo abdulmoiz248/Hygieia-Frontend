@@ -180,10 +180,10 @@ export default function NutritionistsPage() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+           
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="border-primary/20 hover:bg-primary/10"
+            className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -237,7 +237,7 @@ export default function NutritionistsPage() {
             {filteredNutritionists.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">No nutritionists found</h3>
+                <h3 className="text-xl font-semibold text-soft-coral mb-2">No nutritionists found</h3>
                 <p className="text-muted-foreground">Try adjusting your search criteria or filters</p>
               </div>
             ) : (
