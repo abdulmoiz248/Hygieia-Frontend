@@ -1,294 +1,257 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Search, MapPin, Star, Filter, Users, Award, Calendar, CheckCircle } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useState, useMemo } from "react"
+import { NutritionistCard } from "@/components/nutritionist-main/nutritionist-card"
+import { SearchBar } from "@/components/nutritionist-main/search-bar"
+import { NutritionistFilters } from "@/components/nutritionist-main/nutritionist-filters"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Filter, Grid, List } from "lucide-react"
+import { NutritionistProfile } from "@/store/nutritionist/userStore"
 
-const mockNutritionists = [
+
+export const mockNutritionists: NutritionistProfile[] = [
   {
     id: "1",
-    name: "Dr. Lisa Chen",
-    specialty: "Sports Nutrition",
+    name: "Dr. Sarah Chen",
+    email: "sarah.chen@nutrition.com",
+    phone: "+1 (555) 123-4567",
+    gender: "Female",
+    dateofbirth: "1985-03-15",
+    img: "/placeholder.svg?height=300&width=300",
+    specialization: "Sports Nutrition",
+    experienceYears: 8,
+    certifications: ["Certified Sports Nutritionist", "Registered Dietitian"],
+    education: ["MS in Nutrition Science - Stanford University", "BS in Dietetics - UC Berkeley"],
+    languages: ["English", "Mandarin", "Spanish"],
+    bio: "Specialized in optimizing athletic performance through personalized nutrition strategies. Worked with Olympic athletes and professional sports teams.",
+    consultationFee: 150,
+    workingHours: [
+      { day: "Monday", start: "09:00", end: "17:00" },
+      { day: "Tuesday", start: "09:00", end: "17:00" },
+      { day: "Wednesday", start: "09:00", end: "17:00" },
+      { day: "Thursday", start: "09:00", end: "17:00" },
+      { day: "Friday", start: "09:00", end: "15:00" },
+    ],
     rating: 4.9,
-    location: "New York, NY",
-    experience: 8,
-    consultationFee: 120,
-    avatar: "/doctor.png",
-    specializations: ["Weight Management", "Athletic Performance", "Meal Planning"],
-    languages: ["English", "Mandarin"],
   },
   {
     id: "2",
-    name: "Dr. Maria Rodriguez",
-    specialty: "Clinical Nutrition",
+    name: "Dr. Michael Rodriguez",
+    email: "michael.rodriguez@wellness.com",
+    phone: "+1 (555) 234-5678",
+    gender: "Male",
+    dateofbirth: "1982-07-22",
+    img: "/placeholder.svg?height=300&width=300",
+    specialization: "Clinical Nutrition",
+    experienceYears: 12,
+    certifications: ["Registered Dietitian Nutritionist", "Certified Diabetes Educator"],
+    education: ["PhD in Clinical Nutrition - Harvard University", "MS in Nutrition - NYU"],
+    languages: ["English", "Spanish", "Portuguese"],
+    bio: "Expert in managing chronic diseases through evidence-based nutrition interventions. Specializes in diabetes, heart disease, and metabolic disorders.",
+    consultationFee: 180,
+    workingHours: [
+      { day: "Monday", start: "08:00", end: "16:00" },
+      { day: "Tuesday", start: "08:00", end: "16:00" },
+      { day: "Wednesday", start: "10:00", end: "18:00" },
+      { day: "Thursday", start: "08:00", end: "16:00" },
+      { day: "Friday", start: "08:00", end: "14:00" },
+    ],
     rating: 4.8,
-    location: "Los Angeles, CA",
-    experience: 12,
-    consultationFee: 150,
-    avatar: "/doctor.png",
-    specializations: ["Diabetes Management", "Heart Health", "Mediterranean Diet"],
-    languages: ["English", "Spanish"],
   },
   {
     id: "3",
-    name: "Dr. James Wilson",
-    specialty: "Pediatric Nutrition",
+    name: "Dr. Emily Johnson",
+    email: "emily.johnson@plantbased.com",
+    phone: "+1 (555) 345-6789",
+    gender: "Female",
+    dateofbirth: "1990-11-08",
+    img: "/placeholder.svg?height=300&width=300",
+    specialization: "Plant-Based Nutrition",
+    experienceYears: 6,
+    certifications: ["Plant-Based Nutrition Certificate", "Registered Dietitian"],
+    education: ["MS in Nutrition - Cornell University", "BS in Food Science - UC Davis"],
+    languages: ["English", "French"],
+    bio: "Passionate about sustainable nutrition and plant-based lifestyles. Helps clients transition to healthier, environmentally conscious eating patterns.",
+    consultationFee: 120,
+    workingHours: [
+      { day: "Monday", start: "10:00", end: "18:00" },
+      { day: "Tuesday", start: "10:00", end: "18:00" },
+      { day: "Wednesday", start: "09:00", end: "17:00" },
+      { day: "Thursday", start: "10:00", end: "18:00" },
+      { day: "Saturday", start: "09:00", end: "13:00" },
+    ],
     rating: 4.7,
-    location: "Chicago, IL",
-    experience: 10,
-    consultationFee: 100,
-    avatar: "/doctor.png",
-    specializations: ["Child Nutrition", "Family Meal Planning", "Picky Eaters"],
-    languages: ["English"],
   },
 ]
 
+export function getNutritionistById(id: string): NutritionistProfile | undefined {
+  return mockNutritionists.find((nutritionist) => nutritionist.id === id)
+}
+
+
+interface FilterState {
+  specializations: string[]
+  experienceRange: [number, number]
+  priceRange: [number, number]
+  rating: number
+}
+
 export default function NutritionistsPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [specialtyFilter, setSpecialtyFilter] = useState("all")
-  const [selectedNutritionist, setSelectedNutritionist] = useState<(typeof mockNutritionists)[0] | null>(null)
-  const [shareDetails, setShareDetails] = useState(false)
-
-  const filteredNutritionists = mockNutritionists.filter((nutritionist) => {
-    const matchesSearch =
-      nutritionist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      nutritionist.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesSpecialty = specialtyFilter === "all" || nutritionist.specialty === specialtyFilter
-    return matchesSearch && matchesSpecialty
+  const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [filters, setFilters] = useState<FilterState>({
+    specializations: [],
+    experienceRange: [0, 20],
+    priceRange: [0, 300],
+    rating: 0,
   })
 
-  const specialties = [...new Set(mockNutritionists.map((n) => n.specialty))]
+
+  
+  const availableSpecializations = useMemo(() => {
+    return Array.from(new Set(mockNutritionists.map((n) => n.specialization)))
+  }, [])
+
+  const filteredNutritionists = useMemo(() => {
+    return mockNutritionists.filter((nutritionist) => {
+      // Search query filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesSearch =
+          nutritionist.name.toLowerCase().includes(query) ||
+          nutritionist.specialization.toLowerCase().includes(query) ||
+          nutritionist.bio.toLowerCase().includes(query)
+
+        if (!matchesSearch) return false
+      }
+
+      // Specialization filter
+      if (filters.specializations.length > 0) {
+        if (!filters.specializations.includes(nutritionist.specialization)) {
+          return false
+        }
+      }
+
+      // Experience filter
+      if (
+        nutritionist.experienceYears < filters.experienceRange[0] ||
+        nutritionist.experienceYears > filters.experienceRange[1]
+      ) {
+        return false
+      }
+
+      // Price filter
+      if (
+        nutritionist.consultationFee < filters.priceRange[0] ||
+        nutritionist.consultationFee > filters.priceRange[1]
+      ) {
+        return false
+      }
+
+      // Rating filter
+      if (nutritionist.rating < filters.rating) {
+        return false
+      }
+
+      return true
+    })
+  }, [searchQuery, filters])
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-dark-slate-gray">Find Nutritionists</h1>
-        <p className="text-cool-gray">Connect with certified nutrition experts for personalized diet plans</p>
+     <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm pt-13">
+  <div className="container mx-auto px-4 py-6">
+    <div className="text-left mb-6">
+      <h1 className="text-4xl font-bold text-soft-coral mb-2 text-balance">
+        Find Your Perfect Nutritionist
+      </h1>
+      <p className="text-lg text-cool-gray text-pretty">
+        Connect with certified nutrition experts for personalized health guidance
+      </p>
+    </div>
+
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex-1">
+        <SearchBar onSearch={setSearchQuery} />
       </div>
 
-      {/* Search & Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cool-gray w-4 h-4" />
-              <Input
-                placeholder="Search nutritionists, specialties..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className="border-primary/20 hover:bg-primary/10"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          
+        </div>
 
-            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-              <SelectTrigger className="w-full lg:w-48">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Specialty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Specialties</SelectItem>
-                {specialties.map((specialty) => (
-                  <SelectItem key={specialty} value={specialty}>
-                    {specialty}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Results */}
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-cool-gray">{filteredNutritionists.length} nutritionists found</p>
+        <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="h-8 w-8 p-0"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="h-8 w-8 p-0"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredNutritionists.map((nutritionist) => (
-          <motion.div key={nutritionist.id} whileHover={{ scale: 1.02 }}>
-            <Card className="h-full hover:shadow-lg transition-all cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={nutritionist.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>
-                      {nutritionist.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
 
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-dark-slate-gray mb-1">{nutritionist.name}</h3>
-                    <Badge variant="outline" className="mb-2">
-                      {nutritionist.specialty}
-                    </Badge>
-
-                    <div className="flex items-center gap-1 mb-2">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{nutritionist.rating}</span>
-                      <span className="text-sm text-cool-gray">({nutritionist.experience} years exp.)</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-sm text-cool-gray">
-                      <MapPin className="w-4 h-4" />
-                      {nutritionist.location}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium mb-1">Specializations</p>
-                    <div className="flex flex-wrap gap-1">
-                      {nutritionist.specializations.slice(0, 2).map((spec) => (
-                        <Badge key={spec} variant="outline" className="text-xs">
-                          {spec}
-                        </Badge>
-                      ))}
-                      {nutritionist.specializations.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{nutritionist.specializations.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-cool-gray">Consultation Fee</span>
-                    <span className="font-semibold text-dark-slate-gray">${nutritionist.consultationFee}</span>
-                  </div>
-
-                  <Button
-                    size="sm"
-                    className="w-full bg-mint-green hover:bg-mint-green/90"
-                    onClick={() => setSelectedNutritionist(nutritionist)}
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Select Nutritionist
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Nutritionist Selection Modal */}
-      <Dialog open={!!selectedNutritionist} onOpenChange={() => setSelectedNutritionist(null)}>
-        <DialogContent className="max-w-2xl">
-          {selectedNutritionist && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={selectedNutritionist.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>
-                      {selectedNutritionist.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-xl font-semibold">{selectedNutritionist.name}</h2>
-                    <p className="text-cool-gray">{selectedNutritionist.specialty}</p>
-                  </div>
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-6">
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-mint-green/10 rounded-lg">
-                    <div className="text-2xl font-bold text-mint-green">{selectedNutritionist.rating}</div>
-                    <p className="text-sm text-cool-gray">Rating</p>
-                  </div>
-                  <div className="text-center p-3 bg-soft-blue/10 rounded-lg">
-                    <div className="text-2xl font-bold text-soft-blue">{selectedNutritionist.experience}</div>
-                    <p className="text-sm text-cool-gray">Years Exp.</p>
-                  </div>
-                  <div className="text-center p-3 bg-soft-coral/10 rounded-lg">
-                    <div className="text-2xl font-bold text-soft-coral">${selectedNutritionist.consultationFee}</div>
-                    <p className="text-sm text-cool-gray">Consultation</p>
-                  </div>
-                </div>
-
-                {/* Specializations */}
-                <div>
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    Specializations
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedNutritionist.specializations.map((spec) => (
-                      <Badge key={spec} variant="outline">
-                        {spec}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Languages */}
-                <div>
-                  <h3 className="font-semibold mb-2">Languages</h3>
-                  <div className="flex gap-2">
-                    {selectedNutritionist.languages.map((lang) => (
-                      <Badge key={lang} className="bg-gray-100 text-gray-800">
-                        {lang}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Share Details Option */}
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                  
-                  <Checkbox
-  id="share-details"
-  checked={shareDetails}
-  onCheckedChange={(val) => setShareDetails(val === true)}
-/>
-
-                     <div>
-                      <label htmlFor="share-details" className="font-medium text-sm cursor-pointer">
-                        Share my profile details with nutritionist
-                      </label>
-                      <p className="text-xs text-cool-gray mt-1">
-                        This will automatically share your health profile, dietary preferences, and fitness goals to
-                        help create a personalized plan.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <Button className="flex-1 bg-mint-green hover:bg-mint-green/90">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Book Consultation
-                  </Button>
-                  <Button variant="outline">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Get Diet Plan
-                  </Button>
-                </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* Filters Sidebar */}
+          {showFilters && (
+            <div className="w-80 shrink-0">
+              <div className="sticky top-32">
+                <NutritionistFilters
+               
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  availableSpecializations={availableSpecializations}
+                />
               </div>
-            </>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
+
+          {/* Results */}
+          <div className="flex-1">
+            {filteredNutritionists.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">No nutritionists found</h3>
+                <p className="text-muted-foreground">Try adjusting your search criteria or filters</p>
+              </div>
+            ) : (
+              <div
+                className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}
+              >
+                {filteredNutritionists.map((nutritionist) => (
+                  <NutritionistCard key={nutritionist.id} nutritionist={nutritionist} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
