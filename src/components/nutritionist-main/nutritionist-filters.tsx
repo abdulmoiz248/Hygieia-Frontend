@@ -46,16 +46,16 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
     filters.rating > 0
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-      <CardHeader className="pb-4">
+    <Card className="bg-gradient-to-br from-soft-blue/10 via-mint-green/10 to-cool-gray/20 backdrop-blur-lg border border-border/30 shadow-2xl hover:shadow-2xl transition-all duration-300 rounded-2xl w-80 ">
+      <CardHeader className="">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Filters</CardTitle>
+          <CardTitle className="text-lg font-semibold text-soft-blue">Filters</CardTitle>
           {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-soft-blue transition-colors"
             >
               <X className="h-4 w-4 mr-1" />
               Clear
@@ -65,16 +65,16 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h4 className="font-medium mb-3 text-foreground">Specializations</h4>
+          <h4 className="font-medium mb-3 text-soft-blue">Specializations</h4>
           <div className="flex flex-wrap gap-2">
             {availableSpecializations.map((spec) => (
               <Badge
                 key={spec}
                 variant={filters.specializations.includes(spec) ? "default" : "outline"}
-                className={`cursor-pointer transition-colors ${
+                className={`cursor-pointer transition-colors rounded-lg px-3 py-1 ${
                   filters.specializations.includes(spec)
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "hover:bg-primary/10 hover:border-primary/50"
+                    ? "bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+                    : "border border-soft-blue/30 text-dark-slate-gray hover:bg-soft-blue/10"
                 }`}
                 onClick={() => toggleSpecialization(spec)}
               >
@@ -85,7 +85,7 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
         </div>
 
         <div>
-          <h4 className="font-medium mb-3 text-foreground">Experience (Years)</h4>
+          <h4 className="font-medium mb-3 text-soft-blue">Experience (Years)</h4>
           <div className="px-2">
             <Slider
               value={filters.experienceRange}
@@ -93,17 +93,17 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
               max={20}
               min={0}
               step={1}
-              className="w-full"
+              className="w-full accent-soft-blue"
             />
             <div className="flex justify-between text-sm text-muted-foreground mt-2">
-              <span>{filters.experienceRange[0]} years</span>
-              <span>{filters.experienceRange[1]} years</span>
+              <span>{filters.experienceRange[0]} yrs</span>
+              <span>{filters.experienceRange[1]} yrs</span>
             </div>
           </div>
         </div>
 
         <div>
-          <h4 className="font-medium mb-3 text-foreground">Price Range ($)</h4>
+          <h4 className="font-medium mb-3 text-soft-blue">Price Range (Rs)</h4>
           <div className="px-2">
             <Slider
               value={filters.priceRange}
@@ -111,7 +111,7 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
               max={300}
               min={0}
               step={10}
-              className="w-full"
+              className="w-full accent-soft-blue"
             />
             <div className="flex justify-between text-sm text-muted-foreground mt-2">
               <span>${filters.priceRange[0]}</span>
@@ -121,7 +121,7 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
         </div>
 
         <div>
-          <h4 className="font-medium mb-3 text-foreground">Minimum Rating</h4>
+          <h4 className="font-medium mb-3 text-soft-blue">Minimum Rating</h4>
           <div className="px-2">
             <Slider
               value={[filters.rating]}
@@ -129,7 +129,7 @@ export function NutritionistFilters({ filters, onFiltersChange, availableSpecial
               max={5}
               min={0}
               step={0.1}
-              className="w-full"
+              className="w-full accent-soft-blue"
             />
             <div className="flex justify-between text-sm text-muted-foreground mt-2">
               <span>Any rating</span>
