@@ -44,7 +44,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const res = await api.post('/auth/login', { email, password })
     const data = res.data
 
-    if (data.success) {
+    if (!data.success) {
       throw new Error(data.message || 'Login failed')
     } else {
       const role = data.role.includes('lab') ? 'lab-technician' : data.role.toLowerCase()
