@@ -5,14 +5,18 @@ export interface NutritionistProfile {
   name: string
   email: string
   phone: string
+  gender: string
+  dateofbirth: string
+  img: string
   specialization: string
   experienceYears: number
   certifications: string[]
-  clinic: string
-  available: boolean
-  img: string
-  gender: string
-  dateOfBirth: string
+  education: string[]
+  languages: string[]
+  bio: string
+  consultationFee: number
+  workingHours: { day: string; start: string; end: string }[]
+  rating: number
 }
 
 interface Notification {
@@ -32,7 +36,6 @@ export interface NutritionistStore {
     value: NutritionistProfile[K]
   ) => void
   resetProfile: () => void
-
   addNotification: (notification: Notification) => void
   markAsRead: (id: string) => void
   markAllAsRead: () => void
@@ -44,14 +47,18 @@ const initialProfile: NutritionistProfile = {
   name: "Wahb Usman",
   email: "fa22-bcs-072cuilahore.edu.pk",
   phone: "oooooooo",
+  gender: "female",
+  dateofbirth: "2004-05-11",
+  img: "/wahb.png",
   specialization: "Diet & Wellness",
   experienceYears: 0,
   certifications: [],
-  clinic: "City Health Center",
-  available: true,
-  img: "/wahb.png",
-  gender: "female",
-  dateOfBirth: "2004-05-11",
+  education: [],
+  languages: [],
+  bio: "",
+  consultationFee: 0,
+  workingHours: [],
+  rating: 0,
 }
 
 const useNutritionistStore = create<NutritionistStore>((set) => ({

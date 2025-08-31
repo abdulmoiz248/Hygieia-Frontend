@@ -13,6 +13,7 @@ import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
 import LabTechnicianCard from "@/components/lab-tech/profile/profile"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import api from "@/lib/axios"
+import { uploadUserAvatar } from "@/helpers/UploadProfilePic"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,30 +48,7 @@ export default function ProfilePage() {
   }
 
 
-async function uploadUserAvatar(file: File, role: string, userId: string) {
-  const formData = new FormData();
-  formData.append('file', file); // key must match FileInterceptor('file')
 
-  try {
-    const res = await api.post(
-      `/auth/profile-pic?role=${role}&userId=${userId}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data', // ✅ important
-        },
-      }
-    );
-
-    if (res.data.success) {
-      const img = res.data.img;
-      updateField('img', img);
-    }
-  } catch (err: any) {
-    console.error('Error uploading avatar:', err);
-    throw err;
-  }
-}
 
 
 
@@ -108,7 +86,7 @@ async function uploadUserAvatar(file: File, role: string, userId: string) {
   profile={profile}
   isEditing={isEditing}
   itemVariants={itemVariants}
-  onAvatarChange={(file) => uploadUserAvatar(file, 'lab-technician', profile.id)}
+  onAvatarChange={(file) => uploadUserAvatar(file, 'lab-technician', profile.id,updateField)}
 />
 
 

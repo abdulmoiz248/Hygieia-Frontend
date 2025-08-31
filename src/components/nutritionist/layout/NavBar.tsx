@@ -119,13 +119,13 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white ">
               <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
-                <Link href="/patient/profile">
+                <Link href="/nutritionist/profile">
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
-                <Link href="/patient/settings">
+                <Link href="/nutritionist/settings">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Link>

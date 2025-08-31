@@ -8,9 +8,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Camera, Mail, Phone, Calendar } from "lucide-react"
 import { Venus, Mars, Transgender } from "lucide-react"
 import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
+import { NutritionistProfile } from "@/store/nutritionist/userStore"
 
 type Props = {
-  profile: LabTechnicianProfile
+  profile: LabTechnicianProfile | NutritionistProfile
   isEditing: boolean
   itemVariants?: Variants
   onAvatarChange?: (file: File) => void
