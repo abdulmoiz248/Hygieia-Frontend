@@ -146,15 +146,14 @@ export default function ProfilePage() {
     </div>
     <div className="flex flex-col">
       <Label className="pb-1 text-soft-blue" htmlFor="dob">Date of Birth</Label>
-      <Input
-        id="dob"
-        type="date" 
-   value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split('T')[0] : ''}
+    <Input
+  id="dob"
+  type="date"
+  value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split('T')[0] : ''}
+  onChange={(e) => setProfile((prev) => ({ ...prev, dateofbirth: new Date(e.target.value) }))}
+  disabled={!isEditing}
+/>
 
-
-        onChange={(e) => setProfile((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
-        disabled={!isEditing}
-      />
     </div>
   </div>
 
