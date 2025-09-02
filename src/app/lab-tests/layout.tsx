@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 import Navbar from "@/components/layouts/landing-page/navbar"
-import Footer from "@/components/layouts/landing-page/Footer";
-
+import Footer from "@/components/layouts/landing-page/Footer"
+import LabTestProviders from "@/components/lab-tests/labTestProvider"
 
 
 export const metadata: Metadata = {
@@ -11,14 +11,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-   <>
-     <Navbar/>
-     {children}
-     <Footer />
-   </>
-  );
+    <html lang="en">
+      <body>
+        <LabTestProviders>
+          <Navbar />
+          {children}
+          <Footer />
+        </LabTestProviders>
+      </body>
+    </html>
+  )
 }

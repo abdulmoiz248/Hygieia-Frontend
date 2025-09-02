@@ -15,6 +15,12 @@ interface LabTestCardProps {
 
 export function LabTestCard({ test }: LabTestCardProps) {
   const router=useRouter()
+   const handleViewDetails = () => {
+    // save the clicked test in localStorage
+    localStorage.setItem("selectedLabTest", JSON.stringify(test))
+    // navigate to details page
+    router.push(`/lab-tests/${test.id}`)
+  }
   return (
  
                  <Card
@@ -41,7 +47,7 @@ export function LabTestCard({ test }: LabTestCardProps) {
    
      
          <Button
-           onClick={() => router.push(`/lab-tests/${test.id}`)}
+           onClick={handleViewDetails}
            size="sm"
            className="w-full bg-transparent mb-1 border-soft-blue  text-soft-blue border-1 hover:bg-soft-blue hover:text-snow-white"
          >
