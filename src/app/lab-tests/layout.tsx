@@ -3,11 +3,12 @@ import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
 import LabTestProviders from "@/components/lab-tests/labTestProvider"
 
-
 export const metadata: Metadata = {
   title: "Lab Tests | Hygieia",
-  description: "Comprehensive patient dashboard for managing health records, appointments, and more.",
+  description: "Browse, book, and manage diagnostic lab tests with clear instructions, pricing, and secure results.",
 }
+
+
 
 export default function RootLayout({
   children,

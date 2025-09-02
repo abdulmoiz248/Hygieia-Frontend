@@ -14,15 +14,17 @@ import {
   DollarSign, Clock, Microscope, CheckCircle, AlertCircle,
   Calendar, FileText, Shield
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function LabTestDetailClient({ id }: { id: string }) {
+    const router=useRouter()
   const [test, setSelectedTest] = useState<LabTest | null>(null)
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedLabTest")
     if (stored) {
       const parsed: LabTest = JSON.parse(stored)
-      if (parsed.id === id) {
+      if (parsed.id == id) {
         setSelectedTest(parsed)
         return
       }
@@ -192,11 +194,16 @@ export default function LabTestDetailClient({ id }: { id: string }) {
                 </div>
 
                 <Button
+                onClick={()=>{
+                  localStorage.setItem('booktest',JSON.stringify(test))
+                  router.push('/patient/medical-records') 
+
+                }}
                   size="lg"
                   className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90 font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Test
+                  Book Test
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">

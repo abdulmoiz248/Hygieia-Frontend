@@ -40,6 +40,14 @@ export function LabTestsSection() {
 }, [dispatch, availableTests, bookedTests])
 
 
+useEffect(()=>{
+ const test=localStorage.getItem('booktest')
+ if(test){
+  const labtest=JSON.parse(test)
+   handleBookTest(labtest)
+ }
+},[])
+
   const handleBookTest = (test: LabTest) => {
     dispatch(setSelectedTest(test))
     dispatch(setShowBookingModal(true))

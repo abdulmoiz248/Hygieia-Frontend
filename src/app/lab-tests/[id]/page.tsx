@@ -5,6 +5,7 @@ interface LabTestDetailPageProps {
   params: { id: string }
 }
 
-export default function LabTestDetailPage({ params }: LabTestDetailPageProps) {
-  return <LabTestDetailClient id={params.id} />
+export default async function LabTestDetailPage({ params }: LabTestDetailPageProps) {
+   const { id } = await params
+  return <LabTestDetailClient id={id} />
 }
