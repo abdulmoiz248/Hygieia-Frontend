@@ -236,26 +236,25 @@ export default function NutritionistsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
       {/* Header */}
-     <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm pt-13">
-  <div className="container mx-auto px-4 py-6">
-    <div className="text-left mb-6">
-      <h1 className="text-4xl font-bold text-soft-coral mb-2 text-balance">
+<div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 border-b border-border/50">
+  <div className="absolute inset-0 opacity-5" />
+  <div className="relative container mx-auto px-4 pt-16 pb-5">
+    <div className="text-center space-y-6">
+      <h1 className="text-5xl font-bold text-soft-coral mb-4 text-balance pt-7">
         Find Your Perfect Nutritionist
+      <span className="block text-soft-blue">Personalized Health Guidance</span>
       </h1>
-      <p className="text-lg text-cool-gray text-pretty">
-        Connect with certified nutrition experts for personalized health guidance
+      <p className="text-xl text-cool-gray max-w-2xl mx-auto leading-relaxed">
+        Connect with certified nutrition experts for personalized health and wellness support.
       </p>
-    </div>
 
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div className="flex-1">
-        <SearchBar onSearch={setSearchQuery} />
-      </div>
+      <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+        <div className="w-full max-w-md">
+          <SearchBar onSearch={setSearchQuery} />
+        </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <Button
-           
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
@@ -263,31 +262,31 @@ export default function NutritionistsPage() {
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </Button>
-          
-        </div>
 
-        <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setViewMode("grid")}
-            className="h-8 w-8 p-0"
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setViewMode("list")}
-            className="h-8 w-8 p-0"
-          >
-            <List className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="h-8 w-8 p-0"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="h-8 w-8 p-0"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
 
       {/* Main Content */}
