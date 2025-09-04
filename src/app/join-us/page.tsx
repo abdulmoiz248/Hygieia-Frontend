@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle } from "lucide-react"
+import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle, Loader2 } from "lucide-react"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
+import api from "@/lib/axios"
 
-type Role = "doctor" | "lab-technician" | "nutritionist" | ""
+type Role = "doctor" | "lab_technician" | "nutritionist" | ""
 type DoctorField = "cardiology" | "neurology" | "pediatrics" | "orthopedics" | "dermatology" | ""
 
 export default function LandingPage() {
@@ -29,6 +30,7 @@ export default function LandingPage() {
     cv: null as File | null,
   })
   const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role)
@@ -49,8 +51,31 @@ export default function LandingPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+const [errorMessage, setErrorMessage] = useState("")
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+  setErrorMessage("")
+
+  try {
+    const payload = new FormData()
+    payload.append("role", selectedRole)
+    payload.append("email", formData.email)
+    payload.append("fullName", formData.fullName)
+    payload.append("phone", formData.phone)
+    payload.append("experience", formData.experience)
+    if (selectedRole === "doctor") {
+      payload.append("doctorField", formData.doctorField)
+    }
+    if (formData.cv) {
+      payload.append("file", formData.cv)
+    }
+
+    await api.post("/cv", payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+
     setShowModal(true)
     setSelectedRole("")
     setFormData({
@@ -61,7 +86,13 @@ export default function LandingPage() {
       doctorField: "",
       cv: null,
     })
+  } catch (error: any) {
+    setErrorMessage("Email already exists. Please use a different one.")
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const isFormValid = () => {
     const baseValid = selectedRole && formData.email && formData.fullName && formData.phone && formData.cv
@@ -70,24 +101,27 @@ export default function LandingPage() {
     }
     return baseValid
   }
-
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
         <section className="py-20 px-4">
-          <div className="max-w-4xl mx-auto text-center pt-3">
-            <h1 className="text-4xl md:text-6xl font-bold text-dark-slate-gray mb-6">Join Our Medical Network</h1>
-            <p className="text-xl text-cool-gray mb-12 max-w-2xl mx-auto">
-              Connect with healthcare professionals and advance your career in medicine. Choose your role and get started
-              today.
-            </p>
-          </div>
+        <div className="max-w-4xl mx-auto text-center pt-3">
+  <h1 className="text-5xl font-bold text-dark-slate-gray mb-4 text-balance pt-7">
+    Join Our Medical Network
+    <span className="block text-soft-blue">Advance Your Career</span>
+  </h1>
+  <p className="text-xl text-cool-gray max-w-2xl mx-auto leading-relaxed">
+    Connect with healthcare professionals and take the next step in your medical journey. 
+    Choose your role and get started today.
+  </p>
+</div>
+
         </section>
 
-        <section className="py-16 px-4">
+        <section className="pb-16 pt-0 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-dark-slate-gray mb-12">Select Your Role</h2>
+            <h2 className="text-3xl font-bold text-center text-soft-coral mb-12">Select Your Role</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <Card
                 className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
@@ -106,9 +140,9 @@ export default function LandingPage() {
 
               <Card
                 className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                  selectedRole === "lab-technician" ? "ring-2 ring-mint-green bg-mint-green/5" : ""
+                  selectedRole === "lab_technician" ? "ring-2 ring-mint-green bg-mint-green/5" : ""
                 }`}
-                onClick={() => handleRoleSelect("lab-technician")}
+                onClick={() => handleRoleSelect("lab_technician")}
               >
                 <CardHeader className="text-center">
                   <div className="mx-auto w-16 h-16 bg-mint-green/10 rounded-full flex items-center justify-center mb-4">
@@ -240,11 +274,22 @@ export default function LandingPage() {
                     <Button
                       type="submit"
                       className="w-full bg-soft-blue hover:bg-soft-blue/90 border-2 border-soft-blue text-snow-white"
-                      disabled={!isFormValid()}
+                      disabled={!isFormValid() || loading}
                     >
-                      Complete Registration
+                       {loading ? (
+                        <>
+                          <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Complete Registration"
+                      )}
                     </Button>
                   </form>
+                  {errorMessage && (
+  <p className="text-red-500 text-center">{errorMessage}</p>
+)}
+
                 </CardContent>
               </Card>
             </div>
