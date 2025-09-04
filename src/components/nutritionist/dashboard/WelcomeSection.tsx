@@ -19,14 +19,23 @@ export default function WelcomeSection() {
 }
 
 
-   const user=useNutritionistStore().profile
-     const { appointments } = useAppointmentStore()
+     const {
+    profile:user,
+   
+  loading
+  } = useNutritionistStore()
+     const { appointments,isLoading } = useAppointmentStore()
   const upcomingToday = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming).length
     
       const [showDes,setShowDes]=useState(false)
       const handleAnimationComplete = () => {
       setShowDes(true)
     };
+
+
+    if(loading || isLoading){
+      return <>loading...</>
+    }
   return (
    
        <motion.div variants={itemVariants}>
@@ -34,7 +43,7 @@ export default function WelcomeSection() {
  <SplitText
    text={   <span>
        <span className="text-soft-coral">Welcome, </span>
-       <span className="text-dark-slate-gray">{user.name}! 👋</span>
+       <span className="text-dark-slate-gray">{user?.name}! 👋</span>
      </span>
      }
    className="text-3xl font-bold mb-2"

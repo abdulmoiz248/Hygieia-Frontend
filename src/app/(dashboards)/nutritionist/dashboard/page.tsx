@@ -18,7 +18,7 @@ import { AppointmentStatus } from "@/types/patient/appointment"
 
 export default function DashboardPage() {
   const { stats, isLoading, refreshStats } = useDashboardStore()
-  const { appointments } = useAppointmentStore()
+  const { appointments,isLoading:isLoading2 } = useAppointmentStore()
   const { dietPlans } = useDietPlanStore()
 
 
@@ -28,7 +28,10 @@ export default function DashboardPage() {
   }, [refreshStats])
 
   const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
- 
+  if(isLoading || isLoading2){
+    return <>loading....</>
+  }
+
   return (
    
       <div className="space-y-4 md:space-y-6 fade-in">
