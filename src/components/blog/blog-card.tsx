@@ -115,8 +115,8 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
                     <User className="w-4 h-4 text-soft-blue" />
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-dark-slate-gray">{post.author.name}</span>
-                    <p className="text-xs text-muted-foreground">{post.author.role}</p>
+                    <span className="text-sm font-medium text-dark-slate-gray">{post.author ?? "Anonymous"}</span>
+                    {/* <p className="text-xs text-muted-foreground">{post.author.role}</p> */}
                   </div>
                 </div>
               </div>
@@ -126,8 +126,8 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
                   <Clock className="w-4 h-4" />
                   <span>{post.readTime}m</span>
                 </div>
-                <time dateTime={post.publishedAt} className="text-xs">
-                  {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                <time dateTime={post.publishedat} className="text-xs">
+                  {new Date(post.publishedat).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                   })}

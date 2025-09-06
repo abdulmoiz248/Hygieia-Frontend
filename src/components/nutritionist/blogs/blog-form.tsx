@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus } from "lucide-react"
-import { RichTextEditor } from "./rich-text-editor"
+import { NotionEditor } from "./notion-editor"
 
 import { useBlogStore, type Blog } from "@/store/nutritionist/blogs-store"
 
@@ -33,6 +33,7 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
   const [tags, setTags] = useState<string[]>(blog?.tags || [])
   const [newTag, setNewTag] = useState("")
   const [image, setImage] = useState<File | null>(null)
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(blog?.image || null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +46,7 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
     data.append("readTime", formData.readTime.toString())
     data.append("featured", formData.featured.toString())
     data.append("tags", JSON.stringify(tags))
+    
 
     if (image) {
       data.append("image", image)
@@ -71,6 +73,16 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
 
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImage(file)
+      // Create preview URL for new image
+      const previewUrl = URL.createObjectURL(file)
+      setExistingImageUrl(previewUrl)
+    }
   }
 
   return (
@@ -114,10 +126,10 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
 
           <div>
             <Label>Content</Label>
-            <RichTextEditor
+            <NotionEditor
               content={formData.content}
               onChange={(content) => setFormData({ ...formData, content })}
-              placeholder="Start writing your blog post content..."
+              placeholder="Type '/' to add headings, lists, and more..."
             />
           </div>
 
@@ -134,7 +146,30 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
             </div>
             <div>
               <Label htmlFor="image">Featured Image</Label>
-              <Input id="image" type="file" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)} />
+              <div className="space-y-2">
+                <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />
+                {existingImageUrl && (
+                  <div className="relative">
+                    <img
+                      src={existingImageUrl || "/placeholder.svg"}
+                      alt="Featured image preview"
+                      className="w-full h-32 object-cover rounded-md border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        setImage(null)
+                        setExistingImageUrl(null)
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -174,7 +209,7 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
           </div>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading} className="bg-soft-blue hover:bg-soft-blue/90">
+            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
               {loading ? "Saving..." : blog ? "Update Post" : "Create Post"}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>

@@ -1,22 +1,45 @@
 "use client"
 
 import { useState } from "react"
+import { useBlogs } from "@/hooks/useBlogs" // your fixed hook
 import { BlogCard } from "@/components/blog/blog-card"
 import { CategoryFilter } from "@/components/blog/category-filter"
 import { BlogHero } from "@/components/blog/blog-hero"
-import { blogPosts, blogCategories } from "@/lib/blog-data"
 import { TrendingUp, Star, Clock } from "lucide-react"
 
 export default function BlogPage() {
+  const { data, isLoading, isError } = useBlogs()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const filteredPosts = selectedCategory ? blogPosts.filter((post) => post.category === selectedCategory) : blogPosts
+  
+  const posts = data?.posts || []
+  const categories = data?.categories || []
+
+  const filteredPosts = selectedCategory
+    ? posts.filter((post) => post.category === selectedCategory)
+    : posts
 
   const featuredPosts = filteredPosts.filter((post) => post.featured)
   const regularPosts = filteredPosts.filter((post) => !post.featured)
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-dark-slate-gray">Loading blogs...</p>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-red-500">Failed to load blogs. Please try again later.</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green ">
+    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
       <BlogHero />
 
       <section className="py-20 px-4 relative">
@@ -25,8 +48,9 @@ export default function BlogPage() {
         <div className="absolute bottom-20 left-10 w-40 h-40 bg-mint-green/5 rounded-full blur-2xl"></div>
 
         <div className="max-w-7xl mx-auto relative">
+          {/* Categories */}
           <CategoryFilter
-            categories={blogCategories}
+            categories={categories}
             selectedCategory={selectedCategory}
             onCategorySelect={setSelectedCategory}
           />
@@ -46,7 +70,11 @@ export default function BlogPage() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {featuredPosts.map((post, index) => (
-                  <div key={post.id} className="animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
+                  <div
+                    key={post.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 150}ms` }}
+                  >
                     <BlogCard post={post} featured />
                   </div>
                 ))}
@@ -81,6 +109,7 @@ export default function BlogPage() {
             </div>
           )}
 
+          {/* Empty state */}
           {filteredPosts.length === 0 && (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gradient-to-r from-soft-blue/10 to-mint-green/10 rounded-full flex items-center justify-center mx-auto mb-6">

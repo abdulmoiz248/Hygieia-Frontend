@@ -1,6 +1,7 @@
 // stores/useBlogStore.ts
 import { create } from 'zustand'
 import api from '@/lib/axios'
+import useNutritionistStore from './userStore'
 
 export interface Blog {
   id: string
@@ -52,7 +53,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       set({ loading: true, error: null })
       const doctorId = localStorage.getItem('id')
       if (doctorId) {
+        const name=useNutritionistStore.getState().profile?.name
         formData.append('doctorId', doctorId)
+        formData.append('author',name || "")
       }
       await api.post('/blogPost', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },

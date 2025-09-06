@@ -1,25 +1,45 @@
-'use client'
+"use client"
+
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { BlogContent } from "@/components/blog/blog-content"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Home, Share2 } from "lucide-react"
-import { blogPosts } from "@/lib/blog-data"
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from "react"
 import { ShareModal } from "@/components/blog/share-modal"
-import { useParams } from 'next/navigation'
+import { useParams } from "next/navigation"
+import { useBlogs } from "@/hooks/useBlogs"
 
 export default function BlogPostPage() {
   const { id } = useParams()
+  const { data, isLoading, isError } = useBlogs()
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
-  const post = useMemo(() => blogPosts.find((p) => p.id === id), [id])
+  const posts = data?.posts || []
+
+  const post = useMemo(() => posts.find((p) => p.id === id), [posts, id])
 
   useEffect(() => {
-    if (!post) {
+    if (!isLoading && !post) {
       notFound()
     }
-  }, [post])
+  }, [isLoading, post])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-dark-slate-gray">Loading blog...</p>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-red-500">Failed to load blog. Please try again later.</p>
+      </div>
+    )
+  }
 
   if (!post) return null
 
@@ -53,7 +73,7 @@ export default function BlogPostPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ">
+            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 className="text-soft-blue hover:text-soft-blue/80 hover:bg-soft-blue/10 transition-all duration-300"

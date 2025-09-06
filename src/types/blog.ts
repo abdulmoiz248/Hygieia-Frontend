@@ -3,12 +3,8 @@ export interface BlogPost {
   title: string
   excerpt: string
   content: string
-  author: {
-    name: string
-    role: string
-    avatar: string
-  }
-  publishedAt: string
+  author: string
+  publishedat: string
   readTime: number
   category: string
   tags: string[]

@@ -28,23 +28,17 @@ export function BlogContent({ post }: BlogContentProps) {
         {/* Meta Information */}
         <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground mb-8">
           <div className="flex items-center gap-2">
-            <Image
-              src={post.author.avatar || "/placeholder.svg"}
-              alt={post.author.name}
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
+           
             <div>
-              <p className="font-medium text-dark-slate-gray">{post.author.name}</p>
-              <p className="text-xs">{post.author.role}</p>
+              <p className="font-medium text-dark-slate-gray">{post.author}</p>
+          
             </div>
           </div>
 
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            <time dateTime={post.publishedAt}>
-              {new Date(post.publishedAt).toLocaleDateString("en-US", {
+            <time dateTime={post.publishedat}>
+              {new Date(post.publishedat).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
@@ -71,22 +65,53 @@ export function BlogContent({ post }: BlogContentProps) {
       </header>
 
       {/* Content */}
-      <div className="prose prose-lg max-w-none">
-        <div
-          className="text-cool-gray leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html: post.content
-              .replace(/^# /gm, '<h1 class="text-3xl font-bold text-dark-slate-gray mb-6 mt-8">')
-              .replace(/^## /gm, '<h2 class="text-2xl font-bold text-dark-slate-gray mb-4 mt-8">')
-              .replace(/^### /gm, '<h3 class="text-xl font-semibold text-dark-slate-gray mb-3 mt-6">')
-              .replace(/^- /gm, '<li class="mb-2">')
-              .replace(/^\* /gm, '<li class="mb-2">')
-              .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-dark-slate-gray">$1</strong>')
-              .replace(/\n\n/g, '</p><p class="mb-4">')
-              .replace(/^(?!<[h|l])/gm, '<p class="mb-4">'),
-          }}
-        />
-      </div>
+<div className="max-w-3xl mx-auto">
+  <div
+    className="text-cool-gray"
+    dangerouslySetInnerHTML={{
+      __html: (() => {
+        let content = post.content
+
+        // Bold first
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-dark-slate-gray">$1</strong>')
+
+        // Headings
+        content = content
+          .replace(/^# (.*)$/gm, '<h1 class="text-3xl font-bold text-dark-slate-gray mb-4 mt-6">$1</h1>')
+          .replace(/^## (.*)$/gm, '<h2 class="text-2xl font-semibold text-dark-slate-gray mb-3 mt-5">$1</h2>')
+          .replace(/^### (.*)$/gm, '<h3 class="text-xl font-medium text-dark-slate-gray mb-2 mt-4">$1</h3>')
+
+        // Bullet list
+        const lines = content.split('\n')
+        let inList = false
+        const resultLines: string[] = []
+
+        lines.forEach((line) => {
+          if (/^- /.test(line)) {
+            if (!inList) {
+              inList = true
+              resultLines.push('<ul class="ml-6 list-disc mb-4">')
+            }
+            resultLines.push(`<li>${line.replace(/^- /, '')}</li>`)
+          } else {
+            if (inList) {
+              inList = false
+              resultLines.push('</ul>')
+            }
+            if (line.trim() !== '') {
+              resultLines.push(`<p class="mb-4">${line}</p>`)
+            }
+          }
+        })
+
+        if (inList) resultLines.push('</ul>') // close last list if open
+
+        return resultLines.join('\n')
+      })(),
+    }}
+  />
+</div>
+
 
       {/* Tags */}
       <footer className="mt-12 pt-8 border-t border-border">
