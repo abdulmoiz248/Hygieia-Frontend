@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import type { BlogCategory } from "@/types/blog"
-import { Sparkles, Filter } from "lucide-react"
+import {  Filter } from "lucide-react"
 
 interface CategoryFilterProps {
   categories: BlogCategory[]
@@ -48,7 +48,7 @@ export function CategoryFilter({ categories, selectedCategory, onCategorySelect 
           <Filter className="w-5 h-5 text-soft-blue" />
           <h3 className="text-lg font-semibold text-dark-slate-gray">Filter by Category</h3>
         </div>
-        <Sparkles className="w-4 h-4 text-soft-coral animate-pulse" />
+     
       </div>
 
       {/* Filter Buttons */}

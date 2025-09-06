@@ -65,7 +65,7 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
             {/* Floating Action Button */}
-            <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+            <div className="absolute top-4 right-4 w-10 h-10 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
               <ArrowUpRight className="w-5 h-5 text-dark-slate-gray" />
             </div>
 
