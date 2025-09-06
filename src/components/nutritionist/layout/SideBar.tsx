@@ -14,6 +14,7 @@ import {
   Activity,
   ChevronLeft,
   X,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +29,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Calendar, label: "Appointments", href: "/appointments" },
   { icon: FileText, label: "Diet Plan", href: "/diet-plan" },
+  { icon: BookOpen, label: "Blogs", href: "/blogs" },
 
   { icon: MessageCircle, label: "Messages", href: "/chat" },
 

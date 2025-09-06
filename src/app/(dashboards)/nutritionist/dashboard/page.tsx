@@ -1,14 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, Calendar, FileText, TrendingUp, Clock, CheckCircle, AlertCircle, RefreshCw } from "lucide-react"
+import { Clock, CheckCircle, AlertCircle } from "lucide-react"
 import { PatientMetricsChart } from "@/components/nutritionist/dashboard/patient-metrics-chart"
 import { AppointmentTrendsChart } from "@/components/nutritionist/dashboard/appointment-trends-chart"
-import { SuccessRateChart } from "@/components/nutritionist/dashboard/success-rate-chart"
-import { NutritionGoalsChart } from "@/components/nutritionist/dashboard/nutrition-goals-chart"
 
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 
@@ -37,17 +35,16 @@ export default function DashboardPage() {
         {/* Header */}
          <WelcomeSection/>
           <NutritionistStats/>
+        
+        
+
 
         <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2">
           <PatientMetricsChart />
           <AppointmentTrendsChart />
         </div>
 
-        <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2">
-          <SuccessRateChart />
-          <NutritionGoalsChart />
-        </div>
-
+      
         <div className="grid gap-4 md:gap-6 grid-cols-1 xl:grid-cols-2 bg-white/60">
           {/* Today's Schedule */}
           <Card className="scale-in bg-white/60">
