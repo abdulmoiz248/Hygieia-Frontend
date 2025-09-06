@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import { Calendar } from "lucide-react"
+import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 
 const appointmentData = [
   { day: "Mon", scheduled: 12, completed: 10, cancelled: 2 },
@@ -28,8 +29,10 @@ function useWindowSize() {
 }
 
 export function AppointmentTrendsChart() {
+    const { appointmentData, isLoading } = useDashboardStore()
   const [width] = useWindowSize()
 
+  if(isLoading) return <>Loading...</>
   return (
     <Card className="w-full max-w-full sm:max-w-3xl mx-auto scale-in overflow-hidden bg-white/60">
       <CardHeader className="space-y-1">

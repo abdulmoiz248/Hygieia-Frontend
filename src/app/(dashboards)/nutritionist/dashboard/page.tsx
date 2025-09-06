@@ -17,18 +17,16 @@ import NutritionistStats from "@/components/nutritionist/dashboard/StatsCards"
 import { AppointmentStatus } from "@/types/patient/appointment"
 
 export default function DashboardPage() {
-  const { stats, isLoading, refreshStats } = useDashboardStore()
+
   const { appointments,isLoading:isLoading2 } = useAppointmentStore()
   const { dietPlans } = useDietPlanStore()
 
 
 
-  useEffect(() => {
-    refreshStats()
-  }, [refreshStats])
+ 
 
   const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
-  if(isLoading || isLoading2){
+  if( isLoading2){
     return <>loading....</>
   }
 

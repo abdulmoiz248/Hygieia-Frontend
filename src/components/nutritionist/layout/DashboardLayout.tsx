@@ -9,6 +9,7 @@ import useNutritionistStore from "@/store/nutritionist/userStore"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -27,7 +28,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
        if(appointments.length==0)
           fetchAppointments(AppointmentStatus.Upcoming)  
         
-      }, [fetchAppointments])
+  }, [fetchAppointments])
     
     
   const {
@@ -51,13 +52,18 @@ const {
 
 
   
-    useEffect(() => {
+  useEffect(() => {
       if(dietPlans.length==0 && profile?.id) fetchDietPlans(profile?.id)
     }, [profile, fetchDietPlans])
 
 
+     const {isLoading:isload, fetchAnalytics } = useDashboardStore() 
 
-  if (loading || isLoading || isLoadingDietPlan) return <p>Loading...</p>
+       useEffect(() => {
+    fetchAnalytics()
+  }, [fetchAnalytics])
+
+  if (loading || isLoading || isLoadingDietPlan || isload) return <p>Loading...</p>
 
 
   return (

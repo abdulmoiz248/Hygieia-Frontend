@@ -1,59 +1,61 @@
+// store/dashboardStore.ts
+import api from "@/lib/axios"
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 
-interface DashboardStats {
+type PatientMonth = {
+  month: string
+  newPatients: number
   totalPatients: number
-  todayAppointments: number
-  activeDietPlans: number
-  successRate: number
-  completedAppointments: number
-  upcomingAppointments: number
+}
+
+type AppointmentDay = {
+  day: string
+  scheduled: number
+  completed: number
+  cancelled: number
 }
 
 interface DashboardStore {
-  stats: DashboardStats
+  patientData: PatientMonth[]
+  appointmentData: AppointmentDay[]
   isLoading: boolean
-
-  // Actions
-  setStats: (stats: DashboardStats) => void
-  setLoading: (loading: boolean) => void
-  refreshStats: () => Promise<void>
+  fetchAnalytics: () => Promise<void>
 }
 
 export const useDashboardStore = create<DashboardStore>()(
   devtools(
     (set) => ({
-      stats: {
-        totalPatients: 247,
-        todayAppointments: 8,
-        activeDietPlans: 156,
-        successRate: 94,
-        completedAppointments: 3,
-        upcomingAppointments: 5,
-      },
+      patientData: [],
+      appointmentData: [],
       isLoading: false,
 
-      setStats: (stats) => set({ stats }),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      refreshStats: async () => {
+      fetchAnalytics: async () => {
         set({ isLoading: true })
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        try {
+          const doctorId = localStorage.getItem("id")
+          if (!doctorId) throw new Error("Doctor ID not found in localStorage")
 
-        // In a real app, this would fetch from an API
-        const newStats = {
-          totalPatients: 247 + Math.floor(Math.random() * 5),
-          todayAppointments: 8,
-          activeDietPlans: 156 + Math.floor(Math.random() * 3),
-          successRate: 94 + Math.floor(Math.random() * 3),
-          completedAppointments: 3,
-          upcomingAppointments: 5,
+          const [patientsRes, appointmentsRes] = await Promise.all([
+            api.get(`/analytics/patients-monthly?doctorId=${doctorId}`),
+            api.get(`/analytics/appointments-weekly?doctorId=${doctorId}`),
+          ])
+
+          if (!patientsRes.data || !appointmentsRes.data) throw new Error("Failed to fetch analytics")
+
+          const patientsData: PatientMonth[] = patientsRes.data
+          const appointmentsData: AppointmentDay[] = appointmentsRes.data
+
+          set({
+            patientData: patientsData,
+            appointmentData: appointmentsData,
+            isLoading: false,
+          })
+        } catch (err) {
+          console.error("Error fetching analytics:", err)
+          set({ isLoading: false })
         }
-
-        set({ stats: newStats, isLoading: false })
       },
     }),
     { name: "dashboard-store" },

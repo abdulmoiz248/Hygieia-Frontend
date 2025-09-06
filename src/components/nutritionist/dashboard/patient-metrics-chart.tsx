@@ -5,15 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import { Activity } from "lucide-react"
+import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 
-const patientData = [
-  { month: "Jan", newPatients: 18, totalPatients: 210 },
-  { month: "Feb", newPatients: 22, totalPatients: 225 },
-  { month: "Mar", newPatients: 15, totalPatients: 235 },
-  { month: "Apr", newPatients: 28, totalPatients: 247 },
-  { month: "May", newPatients: 19, totalPatients: 260 },
-  { month: "Jun", newPatients: 24, totalPatients: 275 },
-]
+
 
 // Hook to handle resizing (same as in bar chart)
 function useWindowSize() {
@@ -27,8 +21,13 @@ function useWindowSize() {
 }
 
 export function PatientMetricsChart() {
+
+    const { patientData,  isLoading } = useDashboardStore()
   const [width] = useWindowSize()
 
+  if(isLoading)
+    return <>loading...</>
+    
   return (
     <Card className="w-full max-w-full sm:max-w-3xl mx-auto scale-in overflow-hidden bg-white/60">
       <CardHeader className="space-y-1">
