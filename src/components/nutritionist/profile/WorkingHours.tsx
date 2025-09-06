@@ -28,7 +28,8 @@ const batchOptions = [
   { label: "12–8", start: "12:00", end: "20:00" },
 ]
 
-export default function WorkingHoursCard({ value, onChange, disabled }: WorkingHoursCardProps) {
+export default function WorkingHoursCard({ value = [], onChange, disabled }: WorkingHoursCardProps) {
+
   const addDay = (day: string) => {
     if (!day || value.find((h) => h.day === day)) return
     onChange([...value, { day, start: "09:00", end: "17:00" }])

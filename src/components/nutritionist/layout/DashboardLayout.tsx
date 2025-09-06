@@ -18,7 +18,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  const isChatPage = pathname?.startsWith("/patient/chat")
+  const isChatPage = pathname?.startsWith("/nutritionist/chat")
 
   const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
    

@@ -23,7 +23,7 @@ Certifications: ${profile.certifications.join(", ")}
 Education: ${profile.education.join(", ")}
 Languages: ${profile.languages.join(", ")}
 Consultation Fee: ${profile.consultationFee}
-Working Hours: ${profile.workingHours.map(w => `${w.day} (${w.start} - ${w.end})`).join(", ")}
+Working Hours: ${profile.workingHours?.map(w => `${w.day} (${w.start} - ${w.end})`).join(", ")}
 Rating: ${profile.rating}
 
 **-Note:  you are writing in place of person so you dont have to write john is you have to write i am**

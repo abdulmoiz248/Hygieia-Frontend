@@ -190,170 +190,171 @@ export default function ProfilePage() {
               Nutritionist Information
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              {/* Column 1 */}
-              <div className="flex flex-col gap-4">
-                {/* Bio */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="bio" className="text-soft-coral">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={profile?.bio}
-                    onChange={(e) => setProfile((prev) => ({ ...prev, bio: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="Write a short professional bio..."
-                    rows={3}
-                  />
-                  {isEditing && (
-                    <button
-                      type="button"
-                      onClick={handleGenerate}
-                      disabled={isGenerating}
-                      className="mt-2 px-3 py-1 bg-soft-coral text-white rounded-lg text-sm hover:bg-opacity-90 transition flex items-center justify-center gap-2"
-                    >
-                      {isGenerating && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {isGenerating ? "Generating..." : "Generate with AI"}
-                    </button>
-                  )}
-                </div>
-                {/* Specialization */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="specialization" className="text-soft-coral">Specialization</Label>
-                  <Input
-                    id="specialization"
-                    value={profile?.specialization}
-                    onChange={(e) => setProfile((prev) => ({ ...prev, specialization: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="e.g. Sports Nutrition, Weight Management"
-                  />
-                </div>
-                {/* Experience */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="experienceYears" className="text-soft-coral">Years of Experience</Label>
-                  <Input
-                    id="experienceYears"
-                    type="number"
-                    value={profile?.experienceYears}
-                    onChange={(e) => setProfile((prev) => ({ ...prev, experienceYears: Number(e.target.value) }))}
-                    disabled={!isEditing}
-                    placeholder="e.g. 5"
-                  />
-                </div>
-                {/* Certifications */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="certifications" className="text-soft-coral">Certifications</Label>
-                  <Textarea
-                    id="certifications"
-                    value={profile?.certifications?.join(", ")}
-                    onChange={(e) =>
-                      setProfile((prev) => ({ ...prev, certifications: e.target.value.split(",").map((s) => s.trim()) }))
-                    }
-                    disabled={!isEditing}
-                    placeholder="e.g. Certified Dietitian, Sports Nutritionist"
-                    rows={2}
-                  />
-                  {isEditing && (
-                    <Suggestions
-                      items={["Certified Dietitian", "Sports Nutritionist", "Clinical Nutrition"]}
-                      onSelect={(item) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          certifications: prev.certifications.includes(item)
-                            ? prev.certifications
-                            : [...prev.certifications, item],
-                        }))
-                      }
-                    />
-                  )}
-                </div>
-              </div>
+        <CardContent>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+    {/* Column 1 */}
+    <div className="flex flex-col gap-4">
+      {/* Bio */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="bio" className="text-soft-coral">Bio</Label>
+        <Textarea
+          id="bio"
+          value={profile?.bio}
+          onChange={(e) => setProfile((prev) => ({ ...prev, bio: e.target.value }))}
+          disabled={!isEditing}
+          placeholder="Write a short professional bio..."
+          rows={3}
+        />
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="mt-2 px-3 py-1 bg-soft-coral text-white rounded-lg text-sm hover:bg-opacity-90 transition flex items-center justify-center gap-2"
+          >
+            {isGenerating && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isGenerating ? "Generating..." : "Generate with AI"}
+          </button>
+        )}
+      </div>
+      {/* Specialization */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="specialization" className="text-soft-coral">Specialization</Label>
+        <Input
+          id="specialization"
+          value={profile?.specialization}
+          onChange={(e) => setProfile((prev) => ({ ...prev, specialization: e.target.value }))}
+          disabled={!isEditing}
+          placeholder="e.g. Sports Nutrition, Weight Management"
+        />
+      </div>
+      {/* Experience */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="experienceYears" className="text-soft-coral">Years of Experience</Label>
+        <Input
+          id="experienceYears"
+          type="number"
+          value={profile?.experienceYears}
+          onChange={(e) => setProfile((prev) => ({ ...prev, experienceYears: Number(e.target.value) }))}
+          disabled={!isEditing}
+          placeholder="e.g. 5"
+        />
+      </div>
+      {/* Certifications */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="certifications" className="text-soft-coral">Certifications</Label>
+        <Textarea
+          id="certifications"
+          value={profile?.certifications?.join(", ")}
+          onChange={(e) =>
+            setProfile((prev) => ({ ...prev, certifications: e.target.value.split(",").map((s) => s.trim()) }))
+          }
+          disabled={!isEditing}
+          placeholder="e.g. Certified Dietitian, Sports Nutritionist"
+          rows={2}
+        />
+        {isEditing && (
+          <Suggestions
+            items={["Certified Dietitian", "Sports Nutritionist", "Clinical Nutrition"]}
+            onSelect={(item) =>
+              setProfile((prev) => ({
+                ...prev,
+                certifications: prev.certifications?.includes(item)
+                  ? prev.certifications
+                  : [...(prev.certifications ?? []), item],
+              }))
+            }
+          />
+        )}
+      </div>
+    </div>
 
-              {/* Column 2 */}
-              <div className="flex flex-col gap-4">
-                {/* Languages */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="languages" className="text-soft-coral">Languages</Label>
-                  <Textarea
-                    id="languages"
-                    value={profile?.languages?.join(", ")}
-                    onChange={(e) =>
-                      setProfile((prev) => ({ ...prev, languages: e.target.value.split(",").map((s) => s.trim()) }))
-                    }
-                    disabled={!isEditing}
-                    placeholder="e.g. English, Urdu, Arabic"
-                    rows={2}
-                  />
-                  {isEditing && (
-                    <Suggestions
-                      items={["English", "Urdu", "Arabic", "Spanish"]}
-                      onSelect={(item) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          languages: prev.languages.includes(item)
-                            ? prev.languages
-                            : [...prev.languages, item],
-                        }))
-                      }
-                    />
-                  )}
-                </div>
-                {/* Education */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="education" className="text-soft-coral">Education</Label>
-                  <Textarea
-                    id="education"
-                    value={profile?.education?.join(", ")}
-                    onChange={(e) =>
-                      setProfile((prev) => ({ ...prev, education: e.target.value.split(",").map((s) => s.trim()) }))
-                    }
-                    disabled={!isEditing}
-                    placeholder="e.g. BSc Nutrition, MSc Dietetics"
-                    rows={2}
-                  />
-                  {isEditing && (
-                    <Suggestions
-                      items={["BSc Nutrition", "MSc Dietetics", "Public Health"]}
-                      onSelect={(item) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          education: prev.education.includes(item)
-                            ? prev.education
-                            : [...prev.education, item],
-                        }))
-                      }
-                    />
-                  )}
-                </div>
-                {/* Consultation Fee */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="consultationFee" className="text-soft-coral">Consultation Fee</Label>
-                  <Input
-                    id="consultationFee"
-                    type="number"
-                    value={profile?.consultationFee}
-                    onChange={(e) => setProfile((prev) => ({ ...prev, consultationFee: Number(e.target.value) }))}
-                    disabled={!isEditing}
-                    placeholder="Enter fee in PKR"
-                  />
-                </div>
-              </div>
-            </div>
+    {/* Column 2 */}
+    <div className="flex flex-col gap-4">
+      {/* Languages */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="languages" className="text-soft-coral">Languages</Label>
+        <Textarea
+          id="languages"
+          value={profile?.languages?.join(", ")}
+          onChange={(e) =>
+            setProfile((prev) => ({ ...prev, languages: e.target.value.split(",").map((s) => s.trim()) }))
+          }
+          disabled={!isEditing}
+          placeholder="e.g. English, Urdu, Arabic"
+          rows={2}
+        />
+        {isEditing && (
+          <Suggestions
+            items={["English", "Urdu", "Arabic", "Spanish"]}
+            onSelect={(item) =>
+              setProfile((prev) => ({
+                ...prev,
+                languages: prev.languages?.includes(item)
+                  ? prev.languages
+                  : [...(prev.languages ?? []), item],
+              }))
+            }
+          />
+        )}
+      </div>
+      {/* Education */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="education" className="text-soft-coral">Education</Label>
+        <Textarea
+          id="education"
+          value={profile?.education?.join(", ")}
+          onChange={(e) =>
+            setProfile((prev) => ({ ...prev, education: e.target.value.split(",").map((s) => s.trim()) }))
+          }
+          disabled={!isEditing}
+          placeholder="e.g. BSc Nutrition, MSc Dietetics"
+          rows={2}
+        />
+        {isEditing && (
+          <Suggestions
+            items={["BSc Nutrition", "MSc Dietetics", "Public Health"]}
+            onSelect={(item) =>
+              setProfile((prev) => ({
+                ...prev,
+                education: prev.education?.includes(item)
+                  ? prev.education
+                  : [...(prev.education ?? []), item],
+              }))
+            }
+          />
+        )}
+      </div>
+      {/* Consultation Fee */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="consultationFee" className="text-soft-coral">Consultation Fee</Label>
+        <Input
+          id="consultationFee"
+          type="number"
+          value={profile?.consultationFee}
+          onChange={(e) => setProfile((prev) => ({ ...prev, consultationFee: Number(e.target.value) }))}
+          disabled={!isEditing}
+          placeholder="Enter fee in PKR"
+        />
+      </div>
+    </div>
+  </div>
 
-            {!isEditing && (
-              <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-medium text-yellow-800">Keep This Info Updated</h4>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Your specialization, certifications, and availability help clients choose the right nutritionist for their needs.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
+  {!isEditing && (
+    <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-1" />
+        <div>
+          <h4 className="font-medium text-yellow-800">Keep This Info Updated</h4>
+          <p className="text-sm text-yellow-700 mt-1">
+            Your specialization, certifications, and availability help clients choose the right nutritionist for their needs.
+          </p>
+        </div>
+      </div>
+    </div>
+  )}
+</CardContent>
+
         </Card>
       </motion.div>
     </motion.div>
