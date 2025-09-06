@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer";
+import  NutritionistProvider  from "@/Providers/NutritionistsProvider";
 
 
 
@@ -16,9 +17,11 @@ export default function RootLayout({
 }>) {
   return (
    <>
+   <NutritionistProvider>
      <Navbar/>
      {children}
      <Footer />
+     </NutritionistProvider>
    </>
   );
 }

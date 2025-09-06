@@ -7,161 +7,12 @@ import { NutritionistFilters } from "@/components/nutritionist-main/nutritionist
 import { Button } from "@/components/ui/button"
 import { Filter, Grid, List } from "lucide-react"
 import { NutritionistProfile } from "@/store/nutritionist/userStore"
+import { useNutritionists } from "@/hooks/useNutritionist"
 
 
-export const mockNutritionists: NutritionistProfile[] = [
-  {
-    id: "1",
-    name: "Dr. Sarah Chen",
-    email: "sarah.chen@nutrition.com",
-    phone: "+1 (555) 123-4567",
-    gender: "Female",
-    dateofbirth: "1985-03-15",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Sports Nutrition",
-    experienceYears: 8,
-    certifications: ["Certified Sports Nutritionist", "Registered Dietitian"],
-    education: ["MS in Nutrition Science - Stanford University", "BS in Dietetics - UC Berkeley"],
-    languages: ["English", "Mandarin", "Spanish"],
-    bio: "Specialized in optimizing athletic performance through personalized nutrition strategies. Worked with Olympic athletes and professional sports teams.",
-    consultationFee: 150,
-    workingHours: [
-      { day: "Monday", start: "09:00", end: "17:00" },
-      { day: "Tuesday", start: "09:00", end: "17:00" },
-      { day: "Wednesday", start: "09:00", end: "17:00" },
-      { day: "Thursday", start: "09:00", end: "17:00" },
-      { day: "Friday", start: "09:00", end: "15:00" },
-    ],
-    rating: 4.9,
-  },
-  {
-    id: "2",
-    name: "Dr. Michael Rodriguez",
-    email: "michael.rodriguez@wellness.com",
-    phone: "+1 (555) 234-5678",
-    gender: "Male",
-    dateofbirth: "1982-07-22",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Clinical Nutrition",
-    experienceYears: 12,
-    certifications: ["Registered Dietitian Nutritionist", "Certified Diabetes Educator"],
-    education: ["PhD in Clinical Nutrition - Harvard University", "MS in Nutrition - NYU"],
-    languages: ["English", "Spanish", "Portuguese"],
-    bio: "Expert in managing chronic diseases through evidence-based nutrition interventions. Specializes in diabetes, heart disease, and metabolic disorders.",
-    consultationFee: 180,
-    workingHours: [
-      { day: "Monday", start: "08:00", end: "16:00" },
-      { day: "Tuesday", start: "08:00", end: "16:00" },
-      { day: "Wednesday", start: "10:00", end: "18:00" },
-      { day: "Thursday", start: "08:00", end: "16:00" },
-      { day: "Friday", start: "08:00", end: "14:00" },
-    ],
-    rating: 4.8,
-  },
-  {
-    id: "3",
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@plantbased.com",
-    phone: "+1 (555) 345-6789",
-    gender: "Female",
-    dateofbirth: "1990-11-08",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Plant-Based Nutrition",
-    experienceYears: 6,
-    certifications: ["Plant-Based Nutrition Certificate", "Registered Dietitian"],
-    education: ["MS in Nutrition - Cornell University", "BS in Food Science - UC Davis"],
-    languages: ["English", "French"],
-    bio: "Passionate about sustainable nutrition and plant-based lifestyles. Helps clients transition to healthier, environmentally conscious eating patterns.",
-    consultationFee: 120,
-    workingHours: [
-      { day: "Monday", start: "10:00", end: "18:00" },
-      { day: "Tuesday", start: "10:00", end: "18:00" },
-      { day: "Wednesday", start: "09:00", end: "17:00" },
-      { day: "Thursday", start: "10:00", end: "18:00" },
-      { day: "Saturday", start: "09:00", end: "13:00" },
-    ],
-    rating: 4.7,
-  }
-  ,
-  {
-    id: "309",
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@plantbased.com",
-    phone: "+1 (555) 345-6789",
-    gender: "Female",
-    dateofbirth: "1990-11-08",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Plant-Based Nutrition",
-    experienceYears: 6,
-    certifications: ["Plant-Based Nutrition Certificate", "Registered Dietitian"],
-    education: ["MS in Nutrition - Cornell University", "BS in Food Science - UC Davis"],
-    languages: ["English", "French"],
-    bio: "Passionate about sustainable nutrition and plant-based lifestyles. Helps clients transition to healthier, environmentally conscious eating patterns.",
-    consultationFee: 120,
-    workingHours: [
-      { day: "Monday", start: "10:00", end: "18:00" },
-      { day: "Tuesday", start: "10:00", end: "18:00" },
-      { day: "Wednesday", start: "09:00", end: "17:00" },
-      { day: "Thursday", start: "10:00", end: "18:00" },
-      { day: "Saturday", start: "09:00", end: "13:00" },
-    ],
-    rating: 4.7,
-  },
-  
-  {
-    id: "39",
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@plantbased.com",
-    phone: "+1 (555) 345-6789",
-    gender: "Female",
-    dateofbirth: "1990-11-08",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Plant-Based Nutrition",
-    experienceYears: 6,
-    certifications: ["Plant-Based Nutrition Certificate", "Registered Dietitian"],
-    education: ["MS in Nutrition - Cornell University", "BS in Food Science - UC Davis"],
-    languages: ["English", "French"],
-    bio: "Passionate about sustainable nutrition and plant-based lifestyles. Helps clients transition to healthier, environmentally conscious eating patterns.",
-    consultationFee: 120,
-    workingHours: [
-      { day: "Monday", start: "10:00", end: "18:00" },
-      { day: "Tuesday", start: "10:00", end: "18:00" },
-      { day: "Wednesday", start: "09:00", end: "17:00" },
-      { day: "Thursday", start: "10:00", end: "18:00" },
-      { day: "Saturday", start: "09:00", end: "13:00" },
-    ],
-    rating: 4.7,
-  }
-  ,
-  {
-    id: "30",
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@plantbased.com",
-    phone: "+1 (555) 345-6789",
-    gender: "Female",
-    dateofbirth: "1990-11-08",
-    img: "/placeholder.svg?height=300&width=300",
-    specialization: "Plant-Based Nutrition",
-    experienceYears: 6,
-    certifications: ["Plant-Based Nutrition Certificate", "Registered Dietitian"],
-    education: ["MS in Nutrition - Cornell University", "BS in Food Science - UC Davis"],
-    languages: ["English", "French"],
-    bio: "Passionate about sustainable nutrition and plant-based lifestyles. Helps clients transition to healthier, environmentally conscious eating patterns.",
-    consultationFee: 120,
-    workingHours: [
-      { day: "Monday", start: "10:00", end: "18:00" },
-      { day: "Tuesday", start: "10:00", end: "18:00" },
-      { day: "Wednesday", start: "09:00", end: "17:00" },
-      { day: "Thursday", start: "10:00", end: "18:00" },
-      { day: "Saturday", start: "09:00", end: "13:00" },
-    ],
-    rating: 4.7,
-  },
-]
 
-export function getNutritionistById(id: string): NutritionistProfile | undefined {
-  return mockNutritionists.find((nutritionist) => nutritionist.id === id)
-}
+
+
 
 
 interface FilterState {
@@ -183,13 +34,17 @@ export default function NutritionistsPage() {
   })
 
 
+  const { data: nutritionists = [], isLoading, isError } = useNutritionists()
+
+
+
   
   const availableSpecializations = useMemo(() => {
-    return Array.from(new Set(mockNutritionists.map((n) => n.specialization)))
+    return Array.from(new Set(nutritionists.map((n) => n.specialization)))
   }, [])
 
   const filteredNutritionists = useMemo(() => {
-    return mockNutritionists.filter((nutritionist) => {
+    return nutritionists.filter((nutritionist) => {
       // Search query filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
@@ -232,6 +87,14 @@ export default function NutritionistsPage() {
       return true
     })
   }, [searchQuery, filters])
+
+
+  if (isLoading)
+    <div className="text-center py-12">Loading nutritionists...</div>
+
+  if(isError)
+       <div className="text-center py-12 text-red-500">Failed to load data</div>
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
