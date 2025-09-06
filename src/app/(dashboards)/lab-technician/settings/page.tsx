@@ -43,7 +43,7 @@ setactiveTab('')
   const handleVerifyEmail = async () => {
     setError("")
  
-       if(user.email!=email){
+       if(user?.email!=email){
         setEmailValid(false)
          setError("Incorrect Email Address")
        }else{
