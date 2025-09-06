@@ -23,6 +23,7 @@ export default function LabTestDetailClient({ id }: { id: string }) {
   useEffect(() => {
     const stored = localStorage.getItem("selectedLabTest")
     if (stored) {
+      localStorage.removeItem("selectedLabTest")
       const parsed: LabTest = JSON.parse(stored)
       if (parsed.id == id) {
         setSelectedTest(parsed)

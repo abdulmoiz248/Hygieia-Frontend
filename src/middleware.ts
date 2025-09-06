@@ -9,8 +9,9 @@ export function middleware(req: NextRequest) {
   const role = req.cookies.get('role')?.value
 
   // Protect dashboard routes
-  if ((url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/lab-technician')) && !token) {
-    url.pathname = '/login'
+  if ((url.pathname.startsWith('/lab-technician') || url.pathname.startsWith('/nutritionist')) && !token) {
+
+   url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
@@ -25,5 +26,5 @@ export function middleware(req: NextRequest) {
 
 // Apply to these paths only
 export const config = {
-  matcher: ['/login', '/signup', '/dashboard/:path*', '/lab-technician/:path*',],
+  matcher: ['/login', '/signup',  '/lab-technician/:path*','/nutritionist/:path*'],
 }

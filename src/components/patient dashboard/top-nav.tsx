@@ -149,10 +149,28 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-soft-coral hover:text-snow-white hover:bg-soft-coral">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </DropdownMenuItem>
+             <DropdownMenuItem
+  onClick={() => {
+    // clear localStorage + sessionStorage
+    localStorage.clear()
+    sessionStorage.clear()
+
+    // clear cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
+    })
+
+    // optional: redirect to login
+    window.location.href = "/login"
+  }}
+  className="text-soft-coral hover:text-snow-white hover:bg-soft-coral"
+>
+  <LogOut className="w-4 h-4 mr-2" />
+  Logout
+</DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
