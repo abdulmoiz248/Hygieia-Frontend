@@ -163,7 +163,7 @@ export function EditDietPlanDialog({ dietPlan, open, onOpenChange, onSave }: Edi
           </div>
 
           {/* Date Range */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-4  block">
             <div className="space-y-2">
               <Label className="text-soft-blue">Start Date</Label>
               <Popover>

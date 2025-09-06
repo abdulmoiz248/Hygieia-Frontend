@@ -6,7 +6,6 @@ import { SearchBar } from "@/components/nutritionist-main/search-bar"
 import { NutritionistFilters } from "@/components/nutritionist-main/nutritionist-filters"
 import { Button } from "@/components/ui/button"
 import { Filter, Grid, List } from "lucide-react"
-import { NutritionistProfile } from "@/store/nutritionist/userStore"
 import { useNutritionists } from "@/hooks/useNutritionist"
 
 
@@ -26,74 +25,85 @@ export default function NutritionistsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [filters, setFilters] = useState<FilterState>({
-    specializations: [],
-    experienceRange: [0, 20],
-    priceRange: [0, 300],
-    rating: 0,
+const [filters, setFilters] = useState<FilterState>({
+  specializations: [],
+  experienceRange: [0, 20],
+  priceRange: [0, 10000], // increase this
+  rating: 0,
+})
+
+
+
+  const { data: nutritionists , isLoading, isError } = useNutritionists()
+
+
+const filteredNutritionists = useMemo(() => {
+  return nutritionists?.filter((nutritionist) => {
+    // Search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const matchesSearch =
+        (nutritionist.name?.toLowerCase() ?? "").includes(query) ||
+        (nutritionist.specialization?.toLowerCase() ?? "").includes(query) ||
+        (nutritionist.bio?.toLowerCase() ?? "").includes(query)
+
+      if (!matchesSearch) return false
+    }
+
+    // Specialization filter
+    if (filters.specializations.length > 0) {
+      if (!filters.specializations.includes(nutritionist.specialization ?? "")) {
+        return false
+      }
+    }
+
+    // Experience filter
+    if (
+      (nutritionist.experienceYears ?? 0) < filters.experienceRange[0] ||
+      (nutritionist.experienceYears ?? 0) > filters.experienceRange[1]
+    ) {
+      return false
+    }
+
+    // Price filter
+    if (
+      (nutritionist.consultationFee ?? 0) < filters.priceRange[0] ||
+      (nutritionist.consultationFee ?? 0) > filters.priceRange[1]
+    ) {
+      return false
+    }
+
+    // Rating filter
+    if ((nutritionist.rating ?? 0) < filters.rating) {
+      return false
+    }
+
+    return true
   })
+}, [searchQuery, filters, nutritionists])
 
 
-  const { data: nutritionists = [], isLoading, isError } = useNutritionists()
-
-
+console.log("filteredNutritionists:", filteredNutritionists)
 
   
+
+
+
   const availableSpecializations = useMemo(() => {
-    return Array.from(new Set(nutritionists.map((n) => n.specialization)))
-  }, [])
-
-  const filteredNutritionists = useMemo(() => {
-    return nutritionists.filter((nutritionist) => {
-      // Search query filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase()
-        const matchesSearch =
-          nutritionist.name.toLowerCase().includes(query) ||
-          nutritionist.specialization.toLowerCase().includes(query) ||
-          nutritionist.bio.toLowerCase().includes(query)
-
-        if (!matchesSearch) return false
-      }
-
-      // Specialization filter
-      if (filters.specializations.length > 0) {
-        if (!filters.specializations.includes(nutritionist.specialization)) {
-          return false
-        }
-      }
-
-      // Experience filter
-      if (
-        nutritionist.experienceYears < filters.experienceRange[0] ||
-        nutritionist.experienceYears > filters.experienceRange[1]
-      ) {
-        return false
-      }
-
-      // Price filter
-      if (
-        nutritionist.consultationFee < filters.priceRange[0] ||
-        nutritionist.consultationFee > filters.priceRange[1]
-      ) {
-        return false
-      }
-
-      // Rating filter
-      if (nutritionist.rating < filters.rating) {
-        return false
-      }
-
-      return true
-    })
-  }, [searchQuery, filters])
+  return Array.from(new Set(nutritionists?.map((n) => n.specialization)))
+}, [nutritionists])
 
 
-  if (isLoading)
-    <div className="text-center py-12">Loading nutritionists...</div>
 
-  if(isError)
-       <div className="text-center py-12 text-red-500">Failed to load data</div>
+if (isLoading) {
+  return <div className="text-center py-12">Loading nutritionists...</div>
+}
+
+if (isError) {
+  return <div className="text-center py-12 text-red-500">Failed to load data</div>
+}
+
+
 
 
   return (
@@ -171,7 +181,7 @@ export default function NutritionistsPage() {
 
           {/* Results */}
           <div className="flex-1">
-            {filteredNutritionists.length === 0 ? (
+            {filteredNutritionists?.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold text-soft-coral mb-2">No nutritionists found</h3>
@@ -181,7 +191,7 @@ export default function NutritionistsPage() {
               <div
                 className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}
               >
-                {filteredNutritionists.map((nutritionist) => (
+                {filteredNutritionists?.map((nutritionist) => (
                   <NutritionistCard key={nutritionist.id} nutritionist={nutritionist} />
                 ))}
               </div>
