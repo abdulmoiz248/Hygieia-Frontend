@@ -9,17 +9,18 @@ import { PatientMetricsChart } from "@/components/nutritionist/dashboard/patient
 import { AppointmentTrendsChart } from "@/components/nutritionist/dashboard/appointment-trends-chart"
 import { SuccessRateChart } from "@/components/nutritionist/dashboard/success-rate-chart"
 import { NutritionGoalsChart } from "@/components/nutritionist/dashboard/nutrition-goals-chart"
-import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
+
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
-import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+
 import WelcomeSection from "@/components/nutritionist/dashboard/WelcomeSection"
 import NutritionistStats from "@/components/nutritionist/dashboard/StatsCards"
 import { AppointmentStatus } from "@/types/patient/appointment"
+import RecentDietPlans from "@/components/nutritionist/dashboard/Recent"
 
 export default function DashboardPage() {
 
   const { appointments,isLoading:isLoading2 } = useAppointmentStore()
-  const { dietPlans } = useDietPlanStore()
+
 
 
 
@@ -105,59 +106,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="scale-in">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-lg">
-                <TrendingUp className="h-5 w-5" style={{ color: "var(--color-mint-green)" }} />
-                <span>Recent Activity</span>
-              </CardTitle>
-              <CardDescription>Latest patient updates and achievements</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div
-                  className="w-3 h-3 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: "var(--color-mint-green)" }}
-                ></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm">
-                    <span className="font-medium">Sarah Davis</span> completed her 30-day meal plan
-                  </p>
-                  <p className="text-xs text-muted-foreground">2 hours ago</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div
-                  className="w-3 h-3 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: "var(--color-soft-blue)" }}
-                ></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm">
-                    <span className="font-medium">John Martinez</span> lost 5 lbs this week
-                  </p>
-                  <p className="text-xs text-muted-foreground">5 hours ago</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div
-                  className="w-3 h-3 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: "var(--color-soft-coral)" }}
-                ></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm">
-                    New diet plan assigned to <span className="font-medium">Lisa Thompson</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">1 day ago</p>
-                </div>
-              </div>
-
-              <Button variant="outline" className="w-full bg-transparent">
-                View All Activity
-              </Button>
-            </CardContent>
-          </Card>
+          <RecentDietPlans/>
         </div>
       </div>
   
