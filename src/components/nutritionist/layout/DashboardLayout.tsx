@@ -57,13 +57,13 @@ const {
     }, [profile, fetchDietPlans])
 
 
-     const {isLoading:isload, fetchAnalytics } = useDashboardStore() 
+     const {fetchAnalytics } = useDashboardStore() 
 
        useEffect(() => {
     fetchAnalytics()
   }, [fetchAnalytics])
 
-  if (loading || isLoading || isLoadingDietPlan || isload) return <p>Loading...</p>
+  if (loading || isLoading || isLoadingDietPlan ) return <p>Loading...</p>
 
 
   return (
