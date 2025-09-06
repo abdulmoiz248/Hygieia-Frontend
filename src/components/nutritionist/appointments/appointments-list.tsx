@@ -114,13 +114,26 @@ export function AppointmentsList() {
             <Badge className="flex items-center gap-1 bg-soft-coral/10 text-soft-coral rounded-md px-3 py-1">
               <span>🎥</span>{appointment.mode}
             </Badge>
+            
           </div>
 
           {/* Time */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-            <Clock className="h-4 w-4 text-soft-coral" />
-            <span className="text-dark-slate-gray font-semibold">{appointment.time}</span>
-          </div>
+ <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+  <Clock className="h-4 w-4 text-soft-coral" />
+  <div className="flex flex-col leading-tight">
+    <span className="text-dark-slate-gray font-semibold">
+      {new Date(appointment.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}
+    </span>
+    <span className="text-xs text-muted-foreground">
+      {appointment.time}
+    </span>
+  </div>
+</div>
+
 
           {/* Notes */}
           {appointment.notes && (
