@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus } from "lucide-react"
 import { NotionEditor } from "./notion-editor"
-
 import { useBlogStore, type Blog } from "@/store/nutritionist/blogs-store"
 
 interface BlogFormProps {
@@ -37,6 +35,10 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.title || !formData.excerpt || !formData.content || !formData.category || tags.length === 0 || !existingImageUrl) {
+      alert("Please fill in all fields, add at least one tag, and upload an image.")
+      return
+    }
 
     const data = new FormData()
     data.append("title", formData.title)
@@ -46,18 +48,11 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
     data.append("readTime", formData.readTime.toString())
     data.append("featured", formData.featured.toString())
     data.append("tags", JSON.stringify(tags))
-    
-
-    if (image) {
-      data.append("image", image)
-    }
+    if (image) data.append("image", image)
 
     try {
-      if (blog) {
-        await updateBlog(blog.id, data)
-      } else {
-        await createBlog(data)
-      }
+      if (blog) await updateBlog(blog.id, data)
+      else await createBlog(data)
       onSuccess()
     } catch (error) {
       console.error("Error saving blog:", error)
@@ -65,8 +60,9 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
   }
 
   const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()])
+    const trimmed = newTag.trim()
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed])
       setNewTag("")
     }
   }
@@ -79,22 +75,20 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
     const file = e.target.files?.[0]
     if (file) {
       setImage(file)
-      // Create preview URL for new image
-      const previewUrl = URL.createObjectURL(file)
-      setExistingImageUrl(previewUrl)
+      setExistingImageUrl(URL.createObjectURL(file))
     }
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-dark-slate-gray">{blog ? "Edit Blog Post" : "Create New Blog Post"}</CardTitle>
+    <Card className="max-w-4xl mx-auto shadow-lg border border-gray-200 rounded-xl">
+      <CardHeader className="">
+        <CardTitle className="text-2xl font-semibold text-soft-blue">{blog ? "Edit Blog Post" : "Create New Blog Post"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="text-soft-blue font-medium">Title <span className="text-soft-coral">*</span></Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -103,7 +97,7 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" className="text-soft-blue font-medium">Category <span className="text-soft-coral">*</span></Label>
               <Input
                 id="category"
                 value={formData.category}
@@ -114,18 +108,19 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
           </div>
 
           <div>
-            <Label htmlFor="excerpt">Excerpt</Label>
+            <Label htmlFor="excerpt" className=" text-soft-blue font-medium">Excerpt <span className="text-soft-coral">*</span></Label>
             <Textarea
               id="excerpt"
               value={formData.excerpt}
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
               rows={3}
               placeholder="A brief summary of your blog post..."
+              required
             />
           </div>
 
           <div>
-            <Label>Content</Label>
+            <Label className="font-medium text-soft-blue">Content <span className="text-soft-coral">*</span></Label>
             <NotionEditor
               content={formData.content}
               onChange={(content) => setFormData({ ...formData, content })}
@@ -133,37 +128,35 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="readTime">Read Time (minutes)</Label>
+              <Label htmlFor="readTime" className="font-medium text-soft-blue">Read Time (minutes) <span className="text-soft-coral">*</span></Label>
               <Input
                 id="readTime"
                 type="number"
                 value={formData.readTime}
                 onChange={(e) => setFormData({ ...formData, readTime: Number.parseInt(e.target.value) })}
                 min="1"
+                required
               />
             </div>
             <div>
-              <Label htmlFor="image">Featured Image</Label>
+              <Label htmlFor="image" className="font-medium text-soft-blue">Featured Image <span className="text-soft-coral">*</span></Label>
               <div className="space-y-2">
-                <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />
+                <Input id="image" type="file" accept="image/*" onChange={handleImageChange} required={!existingImageUrl} />
                 {existingImageUrl && (
                   <div className="relative">
                     <img
-                      src={existingImageUrl || "/placeholder.svg"}
+                      src={existingImageUrl}
                       alt="Featured image preview"
-                      className="w-full h-32 object-cover rounded-md border"
+                      className="w-full h-40 object-cover rounded-md border border-gray-300"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => {
-                        setImage(null)
-                        setExistingImageUrl(null)
-                      }}
+                      onClick={() => { setImage(null); setExistingImageUrl(null) }}
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -174,7 +167,7 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
           </div>
 
           <div>
-            <Label>Tags</Label>
+            <Label className="font-medium text-soft-blue">Tags <span className="text-soft-coral">*</span></Label>
             <div className="flex gap-2 mb-2">
               <Input
                 value={newTag}
@@ -188,9 +181,9 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
             </div>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="bg-mint-green/20 text-dark-slate-gray">
+                <Badge key={tag} variant="secondary" className="bg-mint-green/30 text-soft-blue px-2 py-1 rounded flex items-center gap-1">
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="ml-1 hover:text-soft-coral">
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-soft-coral">
                     <X className="w-3 h-3" />
                   </button>
                 </Badge>
@@ -198,21 +191,13 @@ export function BlogForm({ blog, onCancel, onSuccess }: BlogFormProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="featured"
-              checked={formData.featured}
-              onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-            />
-            <Label htmlFor="featured">Featured Post</Label>
-          </div>
 
-          <div className="flex gap-4">
-            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
+
+          <div className="flex gap-4 mt-4">
+            <Button type="submit" disabled={loading} className="bg-soft-blue text-snow-white hover:bg-soft-blue/90 flex-1">
               {loading ? "Saving..." : blog ? "Update Post" : "Create Post"}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button"  onClick={onCancel} className="flex-1 bg-snow-white text-soft-coral hover:bg-soft-coral hover:text-snow-white">
               Cancel
             </Button>
           </div>

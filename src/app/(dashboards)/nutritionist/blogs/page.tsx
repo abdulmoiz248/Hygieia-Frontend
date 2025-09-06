@@ -45,13 +45,8 @@ export default function BlogDashboard() {
 
   return (
     <div className="min-h-screen bg-snow-white">
-      <div className="container mx-auto px-4 py-8">
-        {currentView !== "list" && (
-          <Button variant="outline" onClick={handleBack} className="mb-6 bg-transparent">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Blog List
-          </Button>
-        )}
+      <div className="container">
+       
 
         {currentView === "list" && <BlogList onEdit={handleEdit} onCreate={handleCreate} onView={handleView} />}
 
