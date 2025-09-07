@@ -14,6 +14,7 @@ import MacroGraphToday from "@/components/patient dashboard/fitness/MacroGraph"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState,AppDispatch } from "@/store/patient/store"
 import { fetchFitness } from "@/types/patient/fitnessSlice"
+import WorkoutDashboard from "@/components/patient dashboard/fitness/workout-dashboard"
 
 
 
@@ -71,6 +72,7 @@ export default function FitnessPage() {
      
 <DietPlan/>
      
+     <WorkoutDashboard/>
     
     </motion.div>
   )

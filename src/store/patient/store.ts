@@ -9,6 +9,8 @@ import medicalRecordsReducer from '@/types/patient/medicalRecordsSlice'
 import chatSliceReducer from '@/types/patient/ChatSlice'
 import dietReducer from '@/types/patient/dietSlice'
 
+import workoutReducer from "@/types/patient/workoutSlice"
+
 export const store = configureStore({
   reducer: {
     profile: profileReducer,
@@ -20,6 +22,7 @@ export const store = configureStore({
     medicalRecords:medicalRecordsReducer,
      chat: chatSliceReducer,
       diet: dietReducer,
+        workout: workoutReducer,
   },
 })
 
