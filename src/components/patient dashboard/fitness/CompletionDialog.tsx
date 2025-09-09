@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import type { WorkoutRoutine } from "@/types/patient/workoutSlice"
 
+
 type Props = {
   open: boolean
   onClose: () => void
@@ -10,6 +11,20 @@ type Props = {
 }
 
 export default function CompletionDialog({ open, onClose, routine }: Props) {
+ 
+  
+
+    // useEffect(()=>{
+    //   dispatch(addCalories({ 
+    //     type:'burned', 
+    //     amount: routine?.totalCalories || 0, 
+    //     carbs: 0, 
+    //     protein: 0, 
+    //     fat: 0
+    //   }))
+
+    // },[routine]) 
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md bg-snow-white text-center py-8">

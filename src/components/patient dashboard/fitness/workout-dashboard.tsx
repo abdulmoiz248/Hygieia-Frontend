@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Dumbbell, Plus, Target, Home, Building } from "lucide-react"
+import { Dumbbell, Plus, Building } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -11,6 +11,10 @@ import RoutineCard from "./RoutineCard"
 import RoutineForm from "./RoutineForm"
 import CompletionDialog from "./CompletionDialog"
 import AIRecommendationDialog from "./AIRecommendationDialog"
+import { addCalories } from "@/types/patient/fitnessSlice"
+import { useDispatch } from "react-redux"
+import { AppDispatch } from "@/store/patient/store"
+
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -32,6 +36,7 @@ export default function WorkoutDashboard() {
 
 
 
+    const dispatch = useDispatch<AppDispatch>()
   const [isAddRoutineOpen, setIsAddRoutineOpen] = useState(false)
   const [isAIRecommendationOpen, setIsAIRecommendationOpen] = useState(false)
   const [isRoutineDetailsOpen, setIsRoutineDetailsOpen] = useState(false)
@@ -56,11 +61,19 @@ export default function WorkoutDashboard() {
 
   const handleCompleteRoutine = (routine: WorkoutRoutine) => {
     setSelectedRoutine(routine)
+    
+         dispatch(addCalories({ 
+        type:'burned', 
+        amount: routine?.totalCalories || 0, 
+        carbs: 0, 
+        protein: 0, 
+        fat: 0
+      }))
+
     setIsCompletionOpen(true)
   }
 
   const gymRoutines = routines.filter((r) => r.type === "gym")
-  const basicRoutines = routines.filter((r) => r.type === "basic")
 
   return (
     <motion.div variants={itemVariants} className="mt-6">
@@ -74,14 +87,14 @@ export default function WorkoutDashboard() {
 
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             
-                <Button
+                {/* <Button
                   size="sm"
                   className="bg-soft-blue text-snow-white w-full sm:w-auto hover:bg-soft-blue/90"
                   onClick={() => setIsAIRecommendationOpen(true)}
                 >
                   <Target className="w-4 h-4 mr-2" />
                   AI Recommendations
-                </Button>
+                </Button> */}
            
               <Button
                 size="sm"
@@ -117,8 +130,8 @@ export default function WorkoutDashboard() {
               ) : (
                 <div className="text-center py-6 bg-gradient-to-r from-soft-blue/5 to-soft-coral/5 rounded-xl border border-soft-blue/20">
                   <Building className="w-12 h-12 text-soft-blue mx-auto mb-3" />
-                  <p className="text-soft-blue font-medium mb-2">No Gym Routines Yet</p>
-                  <p className="text-cool-gray text-sm">Add structured routines like Chest Day, Leg Day, etc.</p>
+                  <p className="text-soft-blue font-medium mb-2">No Workout Routines Yet</p>
+                  <p className="text-cool-gray text-sm">Add structured routines like Chest Day, Leg Day, Yoga, Morning walk etc.</p>
                 </div>
               )}
           
@@ -143,7 +156,7 @@ export default function WorkoutDashboard() {
               selectedRoutine || {
                 id: Date.now().toString(),
                 name: "",
-                type: "basic",
+                type: "gym",
                 category: "full-body",
                 exercises: [],
                 totalDuration: 0,
