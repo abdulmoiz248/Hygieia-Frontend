@@ -16,7 +16,7 @@ import {
   Undo,
   Redo,
   LinkIcon,
-  ImageIcon,
+  
   Heading1,
   Heading2,
   Heading3,

@@ -60,9 +60,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       router.push(`/${role}/dashboard`)
     }
 
-  } catch (err: any) {
-    console.error(err)
-    setError(err.message || 'Something went wrong. Try again.')
+  } catch  {
+  
+    setError('Invalid Login Credentials')
   } finally {
     setIsLoading(false)
   }

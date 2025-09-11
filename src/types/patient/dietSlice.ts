@@ -93,7 +93,7 @@ initialState.todayMealSuggestions = getTodaysMeals()
 
 export const fetchDietPlan = createAsyncThunk<DietPlan | null>(
   "diet/fetchDietPlan",
-  async (_, { dispatch }) => {
+  async () => {
     try {
       const id = typeof window !== "undefined" ? localStorage.getItem("id") : null
       if (!id) return getTodaysDietPlan()

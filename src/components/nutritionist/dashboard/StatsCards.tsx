@@ -5,7 +5,6 @@ import { Users, Calendar, FileText, TrendingUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import CountUp from '@/blocks/TextAnimations/CountUp/CountUp'
-import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { AppointmentStatus } from '@/types/patient/appointment'
@@ -40,7 +39,7 @@ export default function NutritionistStats() {
     const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
   const completedToday = appointments.filter((apt) => apt.status === AppointmentStatus.Completed).length
   const upcomingToday = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming).length
-  const activePlans = dietPlans.filter((plan) => plan.status === "active").length
+  const activePlans = dietPlans.length
   const totalPatients = new Set(appointments.map((apt) => apt.patient?.id)).size
   const successRate = Math.round((completedToday / Math.max(todayAppointments.length, 1)) * 100)
   const mockGetNutritionistStats = async (): Promise<StatCardData[]> => {

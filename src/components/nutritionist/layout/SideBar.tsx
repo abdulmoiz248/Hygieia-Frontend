@@ -7,11 +7,9 @@ import {
   LayoutDashboard,
   Calendar,
   FileText,
-  Pill,
-  Bot,
+ 
   MessageCircle,
-  Stethoscope,
-  Activity,
+ 
   ChevronLeft,
   X,
   BookOpen,

@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { CheckCircle, FileText, Target, Plus } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
-import { DietPlan, useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import {  useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 
 export function MarkDoneModal() {
   const { selectedAppointment, setSelectedAppointment, markAppointmentDone } = useAppointmentStore()
@@ -51,11 +51,11 @@ export function MarkDoneModal() {
           return
         }
 
-        const newDietPlan:DietPlan = {
+        const newDietPlan:any = {
           id: `diet-${Date.now()}`,
           patientId: appointment.patient?.id || appointment.id,
           patientName: appointment.patient?.name || "",
-          patientAvatar: appointment.patient?.avatar,
+          //patientAvatar: appointment.patient?.avatar,
           planName: planName.trim(),
           startDate: new Date().toISOString().split("T")[0],
           endDate: new Date(Date.now() + Number.parseInt(planDuration) * 24 * 60 * 60 * 1000)

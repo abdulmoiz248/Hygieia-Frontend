@@ -72,7 +72,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
-      markAppointmentDone: (id, dietPlan) => {
+      markAppointmentDone: (id) => {
         set((state) => ({
           appointments: state.appointments.map((apt) =>
             apt.id === id ? { ...apt, status: AppointmentStatus.Completed as const } : apt,

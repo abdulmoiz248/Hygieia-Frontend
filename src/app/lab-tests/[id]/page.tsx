@@ -2,7 +2,7 @@ import LabTestDetailClient from "@/components/lab-tests/LabTestDetailClient"
 
 
 interface LabTestDetailPageProps {
-  params: { id: string }
+ params: Promise<{ id: string }>
 }
 
 export default async function LabTestDetailPage({ params }: LabTestDetailPageProps) {

@@ -51,7 +51,7 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-lg">
                 <Clock className="h-5 w-5" style={{ color: "var(--color-soft-blue)" }} />
-                <span>Today's Schedule</span>
+                <span>Today&apos;s Schedule</span>
               </CardTitle>
               <CardDescription>Your upcoming appointments</CardDescription>
             </CardHeader>

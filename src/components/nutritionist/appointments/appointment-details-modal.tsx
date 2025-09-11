@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Clock, MapPin, Phone, Mail, Calendar, FileText, User, Heart } from "lucide-react"
+import { Clock, MapPin,  Mail, Calendar, FileText, User, Heart } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 
 export function AppointmentDetailsModal() {

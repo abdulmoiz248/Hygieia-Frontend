@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import {  useState } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { TopNav } from "./top-nav"

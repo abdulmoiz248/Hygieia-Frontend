@@ -12,7 +12,6 @@ import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
 import LabTechnicianCard from "@/components/lab-tech/profile/profile"
 import { useLabStore } from "@/store/lab-tech/labTech"
-import api from "@/lib/axios"
 import { uploadUserAvatar } from "@/helpers/UploadProfilePic"
 
 const containerVariants = {

@@ -50,9 +50,12 @@ export function MedicalRecordsGrid({
           >
             <CardContent className="p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <Badge className={`${getTypeColor(record.type)} text-xs px-2 py-0.5 rounded-md`}>
-                  {record.type.replace("-", " ")}
+              {record.record_type &&
+                <Badge className={`${getTypeColor(record.record_type)} text-xs px-2 py-0.5 rounded-md`}>
+                  {record.record_type.replace("-", " ")}
                 </Badge>
+
+              }
               </div>
 
               <h3 className="font-semibold text-gray-800 text-base line-clamp-2">{record.title}</h3>
@@ -82,7 +85,7 @@ export function MedicalRecordsGrid({
                 </Button>
               
                   <Button
-                  onClick={()=>handleDownload(record.fileUrl,record.title)}
+                  onClick={()=>handleDownload(record.fileUrl || "",record.title)}
                     variant="default"
                     size="sm"
                     className="bg-soft-coral hover:bg-soft-coral/90 text-white px-3"

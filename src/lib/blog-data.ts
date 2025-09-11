@@ -1,6 +1,5 @@
-import type { BlogPost, BlogCategory } from "@/types/blog"
 
-export const blogCategories: BlogCategory[] = [
+export const blogCategories: any = [
   {
     id: "medical-research",
     name: "Medical Research",
@@ -21,7 +20,7 @@ export const blogCategories: BlogCategory[] = [
   },
 ]
 
-export const blogPosts: BlogPost[] = [
+export const blogPosts: any= [
   {
     id: "100",
     title: "Revolutionary Gene Therapy Shows Promise in Treating Rare Diseases",

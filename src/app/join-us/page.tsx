@@ -86,7 +86,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       doctorField: "",
       cv: null,
     })
-  } catch (error: any) {
+  } catch {
     setErrorMessage("Email already exists. Please use a different one.")
   } finally {
     setLoading(false)

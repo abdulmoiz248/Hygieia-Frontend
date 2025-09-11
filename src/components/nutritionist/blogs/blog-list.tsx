@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, Eye, Plus } from "lucide-react"
+import {  Trash2, Eye, Plus } from "lucide-react"
 import { motion, Variants } from "framer-motion"
 import { useBlogStore, Blog } from "@/store/nutritionist/blogs-store"
 import Image from "next/image"
@@ -154,7 +154,7 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
             <h2 className="text-lg font-bold text-soft-coral mb-4">Delete Blog?</h2>
-            <p className="text-cool-gray mb-6">Are you sure you want to delete "{blogToDelete.title}"? This action cannot be undone.</p>
+            <p className="text-cool-gray mb-6">Are you sure you want to delete &quot;{blogToDelete.title}&quot;? This action cannot be undone.</p>
             <div className="flex justify-center gap-4">
               <Button onClick={() => setBlogToDelete(null)} className="bg-cool-gray hover:bg-cool-gray/80 text-white">
                 Cancel

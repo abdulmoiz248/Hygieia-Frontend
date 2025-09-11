@@ -58,7 +58,7 @@ const handleDownload = async () => {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
-                <div className="text-3xl">{getTypeIcon(viewingRecord.type)}</div>
+                <div className="text-3xl">{getTypeIcon(viewingRecord.record_type || "")}</div>
                 <div>
                   <h2 className="text-xl font-semibold text-soft-coral">{viewingRecord.title}</h2>
                   <p className="text-cool-gray font-normal">
@@ -85,7 +85,7 @@ const handleDownload = async () => {
               <div className="p-4 bg-mint-green rounded-lg">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Type:</span> {viewingRecord.type.replace("-", " ")}
+                    <span className="font-medium">Type:</span> {viewingRecord.record_type?.replace("-", " ") || ""}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span> {formatDateOnly( viewingRecord.date)}

@@ -7,15 +7,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 
 import { Calendar } from "lucide-react"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 
-const appointmentData = [
-  { day: "Mon", scheduled: 12, completed: 10, cancelled: 2 },
-  { day: "Tue", scheduled: 15, completed: 13, cancelled: 2 },
-  { day: "Wed", scheduled: 18, completed: 16, cancelled: 2 },
-  { day: "Thu", scheduled: 14, completed: 12, cancelled: 2 },
-  { day: "Fri", scheduled: 16, completed: 14, cancelled: 2 },
-  { day: "Sat", scheduled: 8, completed: 7, cancelled: 1 },
-  { day: "Sun", scheduled: 6, completed: 5, cancelled: 1 },
-]
 
 // Hook to force chart re-render when window resizes (sidebar toggle)
 function useWindowSize() {

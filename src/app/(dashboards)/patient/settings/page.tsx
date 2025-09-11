@@ -46,6 +46,7 @@ export default function SettingsPage() {
 
   const user = useSelector((store: RootState) => store.profile)
 
+  console.log("email valid= ",emailValid)
  const handleVerifyEmail = async () => {
   setError("")
   if (user.email != email) {

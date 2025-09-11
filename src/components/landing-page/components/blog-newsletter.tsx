@@ -20,7 +20,7 @@ export default function BlogNewsletter() {
 
   const categoryMap = useMemo(() => {
     const map: Record<string, string> = {}
-    blogCategories.forEach((cat) => {
+    blogCategories.forEach((cat:any) => {
       map[cat.id.toLowerCase()] = cat.name
     })
     return map

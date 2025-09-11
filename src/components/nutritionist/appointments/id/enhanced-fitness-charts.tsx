@@ -86,13 +86,6 @@ export function EnhancedFitnessCharts({ data }: EnhancedFitnessChartsProps) {
       ? (((latestWeekAvgSteps - previousWeekAvgSteps) / previousWeekAvgSteps) * 100).toFixed(1)
       : "0.0"
 
-  // Macronutrient distribution for latest day
-  const latestDay = data[data.length - 1]
-  const macroData = [
-    { name: "Protein", value: latestDay?.protein || 0, color: "#FF6F61" },
-    { name: "Carbs", value: latestDay?.carbs || 0, color: "#34D399" },
-    { name: "Fat", value: latestDay?.fat || 0, color: "#3B82F6" },
-  ]
 
   // Weekly summary data
   const weeklyData = []

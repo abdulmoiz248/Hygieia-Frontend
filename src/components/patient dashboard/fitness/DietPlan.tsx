@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { ChefHat, Target, Utensils, Sparkles, Calendar, TrendingUp, Zap, Apple } from "lucide-react"
+import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Users } from "lucide-react"
@@ -15,8 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { useDiet } from "@/hooks/useDiet"
 import type { MealPreferences } from "@/types/patient/dietSlice"
-import { useDispatch, useSelector } from "react-redux"
-import { AppDispatch, RootState } from "@/store/patient/store"
+import {  useSelector } from "react-redux"
+import {  RootState } from "@/store/patient/store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -254,7 +254,7 @@ const handleConfirmReplace = () => {
                 {/* Meal Suggestions Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-soft-blue">Today's Meal Suggestions</h4>
+                    <h4 className="font-medium text-soft-blue">Today&apos;s Meal Suggestions</h4>
                    
                   </div>
 
@@ -294,7 +294,7 @@ const handleConfirmReplace = () => {
                   ) : (
                     <div className="text-center py-6 bg-gradient-to-r from-soft-coral/5 to-mint-green/5 rounded-xl border border-soft-coral/20">
                       <Utensils className="w-12 h-12 text-soft-coral mx-auto mb-3" />
-                      <p className="text-soft-coral font-medium mb-2">Get Today's Meal Suggestions</p>
+                      <p className="text-soft-coral font-medium mb-2">Get Today&apos;s Meal Suggestions</p>
                       <p className="text-cool-gray text-sm mb-4">
                         Get personalized meal recommendations based on your diet plan and preferences
                       </p>

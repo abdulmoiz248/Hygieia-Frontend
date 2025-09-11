@@ -1,11 +1,11 @@
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Clock, DollarSign, Microscope } from "lucide-react"
-import Link from "next/link"
+import { Clock } from "lucide-react"
+
 import { LabTest } from "@/types/patient/lab"
-import { motion } from "framer-motion"
+
 import { useRouter } from "next/navigation"
 interface LabTestCardProps {
   test: LabTest

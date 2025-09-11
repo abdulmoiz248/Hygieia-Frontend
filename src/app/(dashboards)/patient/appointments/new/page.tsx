@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { addAppointment } from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
 import { RootState } from "@/store/patient/store"
-import { AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
+import { Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 import { patientSuccess } from "@/toasts/PatientToast"
 
 
@@ -293,7 +293,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
         type: appointmentType as AppointmentTypes,
         notes: reason,
       mode:appointmentMode as AppointmentMode,
-      })
+      } as Appointment)
     )
        patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${mockDoctors.find((d) => d.id === selectedDoctor)?.name} Successfully`)
      setShowConfirmation(true)

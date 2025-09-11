@@ -9,7 +9,7 @@ import { Clock, MoreVertical, CheckCircle, XCircle, Calendar } from "lucide-reac
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+
 
 
 export function AppointmentsList() {
@@ -138,7 +138,7 @@ export function AppointmentsList() {
           {/* Notes */}
           {appointment.notes && (
             <p className="mt-3 text-sm italic border-l-2 text-dark-slate-gray rounded">
-              "{appointment.notes}"
+              &quot;{appointment.notes}&quot;
             </p>
           )}
         </div>

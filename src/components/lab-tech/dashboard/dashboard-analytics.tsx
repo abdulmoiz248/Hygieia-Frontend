@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import {Activity, Users } from "lucide-react"

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
-import axios from "axios"
+
 import api from "@/lib/axios"
 
 export interface DietPlan {

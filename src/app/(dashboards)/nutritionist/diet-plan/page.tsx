@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {  useState } from "react"
 import { DietPlanCard } from "@/components/nutritionist/diet-plan/diet-plan-card"
 import { useDietPlanStore, DietPlan } from "@/store/nutritionist/diet-plan-store"
 import useNutritionistStore from "@/store/nutritionist/userStore"
@@ -9,13 +9,14 @@ import PatientStats from "@/components/nutritionist/diet-plan/DietPlanStatsCard"
 import { PatientPlansFilters } from "@/components/nutritionist/diet-plan/DietPlanFilters"
 
 export default function DietPlanManager() {
-  const nutritionistId = useNutritionistStore().profile?.id!
+  const nutritionist= useNutritionistStore().profile
 
+  const nutritionistId = nutritionist?.id || ""
   const {
     dietPlans,
-    fetchDietPlans,
+  
     updateDietPlanBackend,
-    isLoading,
+  
   } = useDietPlanStore()
 
   const [searchTerm, setSearchTerm] = useState("")

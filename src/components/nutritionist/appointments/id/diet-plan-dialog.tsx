@@ -67,7 +67,6 @@ export function DietPlanDialog({ patientName, onAssign }: DietPlanDialogProps) {
   }
 
 
-  const today = new Date().toISOString().split("T")[0];
 
   const isFormIncomplete =
     !formData.dailyCalories || !formData.protein || !formData.carbs || !formData.fat || !formData.startDate || !formData.endDate

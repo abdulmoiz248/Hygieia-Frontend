@@ -108,6 +108,7 @@ export default function OTPVerificationPage() {
     // setIsVerifying(true)
     // setVerificationStatus("idle")
     try{
+      setIsVerifying(true)
       const res=await api.post(`/auth/verify-otp`,{email,otp:otpString})
       if(res.data.success){
         setShowModal(true)
@@ -126,7 +127,7 @@ export default function OTPVerificationPage() {
       console.log(err)
       setErrorMessage("Invalid or Otp Expired")
     }finally{
-      
+      setIsVerifying(false)
     }
   
   }

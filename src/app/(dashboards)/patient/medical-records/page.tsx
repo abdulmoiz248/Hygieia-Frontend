@@ -22,7 +22,6 @@ import { useEffect } from "react"
 
 
 
-interface Upload{ file: File; title: string; type: string }
 
 const containerVariants = {
   hidden: { opacity: 0 },
