@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, Filter, FileText } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,8 +15,8 @@ import Link from "next/link"
 
 
 import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
-import { cancelAppointment } from "@/types/patient/appointmentsSlice"
+import { AppDispatch, RootState } from "@/store/patient/store"
+import { cancelAppointment, fetchAppointments } from "@/types/patient/appointmentsSlice"
 import { Appointment } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
 import { patientDestructive } from "@/toasts/PatientToast"
@@ -37,13 +37,22 @@ const itemVariants = {
 
 
 export default function AppointmentsPage() {
-  const dispatch = useDispatch()
-  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const dispatch = useDispatch<AppDispatch>()
+  const { appointments, loading, error } = useSelector((state: RootState) => state.appointments)
   const router=useRouter()
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
+ const patientId='fb6b58a2-3509-4e27-9a00-5491d2927189'
+
+  useEffect(() => {
+   
+    dispatch(fetchAppointments(patientId!))
+  }, [dispatch, patientId])
+
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error: {error}</p>
 
   
     const handleDownload = () => {
@@ -165,9 +174,9 @@ export default function AppointmentsPage() {
 >
   <div className="flex items-start sm:items-center sm:flex-row flex-col gap-4 ">
     <Avatar className="w-12 h-12 shrink-0">
-      <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
+      <AvatarImage src={appointment.doctor?.img || "/placeholder.svg"} />
       <AvatarFallback>
-        {appointment.doctor.name
+        {appointment.doctor?.name
           .split(" ")
           .map((n) => n[0])
           .join("")}
@@ -223,7 +232,7 @@ export default function AppointmentsPage() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex gap-4">
               <Avatar className="w-12 h-12 shrink-0">
-                <AvatarImage src={appointment.doctor.avatar || "/placeholder.svg"} />
+                <AvatarImage src={appointment.doctor?.img || "/placeholder.svg"} />
                 <AvatarFallback>
                   {appointment.doctor.name
                     .split(" ")
@@ -306,7 +315,7 @@ export default function AppointmentsPage() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={selectedAppointment.doctor.avatar || "/placeholder.svg"} />
+                    <AvatarImage src={selectedAppointment.doctor?.img || "/placeholder.svg"} />
                     <AvatarFallback>
                       {selectedAppointment.doctor.name
                         .split(" ")
@@ -315,7 +324,7 @@ export default function AppointmentsPage() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-xl font-semibold">{selectedAppointment.doctor.name}</h2>
+                    <h2 className="text-xl font-semibold">{selectedAppointment.doctor?.name}</h2>
                     <p className="text-cool-gray font-normal">{selectedAppointment.doctor.specialty}</p>
                   </div>
                 </DialogTitle>
@@ -364,7 +373,7 @@ export default function AppointmentsPage() {
                         dispatch(cancelAppointment(selectedAppointment.id))
                         
                         setSelectedAppointment(null)
-                        patientDestructive(`Appointment with ${selectedAppointment.doctor.name} Cancelled Successfully`) 
+                        patientDestructive(`Appointment with ${selectedAppointment.doctor?.name} Cancelled Successfully`) 
                       }
                       
 }>Cancel</Button>

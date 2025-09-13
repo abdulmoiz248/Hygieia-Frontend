@@ -1,80 +1,68 @@
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit"
 
-import {Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes} from './appointment'
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { mockDoctors } from '@/mocks/data'
+import { Appointment, AppointmentStatus, mapAppointments } from "./appointment"
+import api from "@/lib/axios"
+
+export const fetchAppointments = createAsyncThunk(
+  "appointments/fetchAppointments",
+  async (patientId: string) => {
+    const res = await api.get(`/appointments`, { params: { patientId } })
+    return mapAppointments(res.data) as Appointment[]
+  }
+)
+
+
+export const fetchAppointmentById = createAsyncThunk(
+  "appointments/fetchAppointmentById",
+  async (id: string) => {
+    const res = await api.get(`/appointments/${id}`)
+    return res.data as Appointment
+  }
+)
+
+export const createAppointment = createAsyncThunk(
+  "appointments/createAppointment",
+  async (data: Partial<Appointment>) => {
+    const res = await api.post(`/appointments`, data)
+    return res.data as Appointment
+  }
+)
+
+export const updateAppointment = createAsyncThunk(
+  "appointments/updateAppointment",
+  async ({ id, dto }: { id: string; dto: Partial<Appointment> }) => {
+    const res = await api.patch(`/appointments/${id}`, dto)
+    return res.data as Appointment
+  }
+)
+
+export const cancelAppointment = createAsyncThunk(
+  "appointments/cancelAppointment",
+  async (id: string) => {
+    const res = await api.patch(`/appointments/${id}`, { status: "cancelled" })
+    return res.data as Appointment
+  }
+)
+
+// === Slice ===
 interface AppointmentState {
   appointments: Appointment[]
   current: Partial<Appointment>
+  loading: boolean
+  error: string | null
 }
 
-
-export const mockAppointments: Appointment[] = [
-  
-//@ts-expect-error will fix later
-  {
-    id: "1",
-    doctor: mockDoctors[0],
-    date: "2025-07-26",
-    time: "10:00 AM",
-    status: AppointmentStatus.Cancelled,
-    type: AppointmentTypes.Consultation,
-  mode:AppointmentMode.Online,
-  
-  },
-  
-//@ts-expect-error will fix later
-  {
-    id: "2",
-    doctor: mockDoctors[1],
-    date: "2025-07-28",
-    time: "2:30 PM",
-    status: AppointmentStatus.Completed,
-    type: AppointmentTypes.Emergency
-    ,report:'/temp/test.pdf',
-      mode:AppointmentMode.Online,
-  },
-  
-//@ts-expect-error will fix later
-   {
-    id: "3",
-     mode:AppointmentMode.Online,
-    doctor: mockDoctors[0],
-    date: "2025-08-26",
-    time: "10:00 AM",
-    status: AppointmentStatus.Upcoming,
-    type: AppointmentTypes.FollowUp
-  },
-]
-
-const extendedAppointments = mockAppointments.map((apt) => ({
-  ...apt,
-  
-}))
-
-
 const initialState: AppointmentState = {
-  appointments: extendedAppointments,
+  appointments: [],
   current: {},
+  loading: false,
+  error: null,
 }
 
 const appointmentSlice = createSlice({
   name: "appointments",
   initialState,
   reducers: {
-    setAppointments(state, action: PayloadAction<Appointment[]>) {
-      state.appointments = action.payload
-    },
-    addAppointment(state, action: PayloadAction<Appointment>) {
-      state.appointments.push(action.payload)
-    },
-    updateAppointment(state, action: PayloadAction<Appointment>) {
-      const index = state.appointments.findIndex((apt) => apt.id === action.payload.id)
-      if (index !== -1) state.appointments[index] = action.payload
-    },
-    cancelAppointment(state, action: PayloadAction<string>) {
-      const index = state.appointments.findIndex((apt) => apt.id === action.payload)
-      if (index !== -1) state.appointments[index].status = AppointmentStatus.Cancelled
-    },
     setCurrentAppointment(state, action: PayloadAction<Partial<Appointment>>) {
       state.current = action.payload
     },
@@ -82,19 +70,43 @@ const appointmentSlice = createSlice({
       state.current = {}
     },
   },
+  extraReducers: (builder) => {
+    builder
+      // Fetch all
+      .addCase(fetchAppointments.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchAppointments.fulfilled, (state, action) => {
+        state.loading = false
+        state.appointments = action.payload
+      })
+      .addCase(fetchAppointments.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || "Failed to load appointments"
+      })
+      // Fetch one
+      .addCase(fetchAppointmentById.fulfilled, (state, action) => {
+        state.current = action.payload
+      })
+      // Create
+      .addCase(createAppointment.fulfilled, (state, action) => {
+        state.appointments.push(action.payload)
+      })
+      // Update
+      .addCase(updateAppointment.fulfilled, (state, action) => {
+        const idx = state.appointments.findIndex((apt) => apt.id === action.payload.id)
+        if (idx !== -1) state.appointments[idx] = action.payload
+      })
+      // Cancel
+      .addCase(cancelAppointment.fulfilled, (state, action) => {
+        const idx = state.appointments.findIndex((apt) => apt.id === action.payload.id)
+        if (idx !== -1) state.appointments[idx].status=AppointmentStatus.Cancelled
+      })
+  },
 })
 
-export const {
-  setAppointments,
-  addAppointment,
-  updateAppointment,
-  cancelAppointment,
-  setCurrentAppointment,
-  clearCurrentAppointment,
-} = appointmentSlice.actions
-
+export const { setCurrentAppointment, clearCurrentAppointment } = appointmentSlice.actions
 export default appointmentSlice.reducer
-
-
 
 

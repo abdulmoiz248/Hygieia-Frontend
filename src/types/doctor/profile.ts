@@ -4,7 +4,7 @@ export interface Doctor {
   specialty: string
   rating: number
   location: string
-  avatar?: string
+  img: string
   experience: number
   consultationFee: number
 }
