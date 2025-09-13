@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, MapPin, Calendar, DollarSign, Video,  User } from "lucide-react"
+import { Star,  Calendar, DollarSign, Video,  User } from "lucide-react"
 import Link from "next/link"
 import type { ExtendedDoctor } from "@/mocks/doctor"
 
@@ -33,7 +33,7 @@ export function ProfessionalDoctorCard({ doctor }: ProfessionalDoctorCardProps) 
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
             <Avatar className="w-24 h-24 border border-gray-200 shadow-sm">
-              <AvatarImage src={doctor.avatar || "/placeholder.svg"} alt={doctor.name} />
+              <AvatarImage src={doctor.img || "/placeholder.svg"} alt={doctor.name} />
               <AvatarFallback className="bg-soft-blue text-white text-lg">
                 {doctor.name
                   .split(" ")
@@ -59,17 +59,14 @@ export function ProfessionalDoctorCard({ doctor }: ProfessionalDoctorCardProps) 
                 <h3 className="text-2xl font-semibold text-soft-coral mb-1">{doctor.name}</h3>
                 <div className="flex flex-wrap items-center gap-3 mb-2">
                   <Badge variant="secondary" className="bg-gray-100 text-soft-blue font-normal px-3 py-1 rounded-full">
-                    {doctor.specialty}
+                    {doctor.specialization}
                   </Badge>
-                  <div className="flex items-center gap-1 text-sm text-cool-gray">
-                    <MapPin className="w-3 h-3" />
-                    <span>{doctor.location}</span>
-                  </div>
+                 
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-cool-gray mb-4">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4 text-soft-blue" />
-                    <span>{doctor.experience} yrs experience</span>
+                    <span>{doctor.experienceYears} yrs experience</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <DollarSign className="w-4 h-4 text-soft-coral" />

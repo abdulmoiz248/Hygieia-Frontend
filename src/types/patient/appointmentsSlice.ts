@@ -35,7 +35,7 @@ export const createAppointment = createAsyncThunk(
       dataShared: data.dataShared,
     }
 
-    const res = await api.post(`/appointments`, payload)
+     await api.post(`/appointments`, payload)
     return data as Appointment
   }
 )
@@ -44,7 +44,7 @@ export const createAppointment = createAsyncThunk(
 export const updateAppointment = createAsyncThunk(
   "appointments/updateAppointment",
   async (data: Appointment) => {
-    const res = await api.patch(`/appointments/${data.id}`, data)
+     await api.patch(`/appointments/${data.id}`, data)
     return data as Appointment
   }
 )

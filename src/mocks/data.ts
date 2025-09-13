@@ -1,6 +1,6 @@
-import type { Doctor,  MedicalRecord, Prescription, FitnessGoal } from "@/types"
+import type {   MedicalRecord, Prescription, FitnessGoal } from "@/types"
 
-export const mockDoctors: Doctor[] = [
+export const mockDoctors: any[] = [
   {
     id: "1",
     name: "Dr. Sarah Johnson",

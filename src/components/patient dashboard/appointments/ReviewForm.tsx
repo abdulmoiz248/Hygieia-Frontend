@@ -144,12 +144,12 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                 </div>
                 <div className="flex items-center gap-2 text-cool-gray">
                   <Sparkles className="w-4 h-4 text-soft-blue" />
-                  <span>
-                    {appointment.doctor.specialty} • {appointment.doctor.experience} yrs
-                  </span>
+                  {/* <span>
+                    {appointment.doctor.} • {appointment.doctor.experience} yrs
+                  </span> */}
                 </div>
                 <div className="text-sm text-cool-gray">
-                  <span className="text-soft-blue">Location:</span> {appointment.doctor.location}
+                  {/* <span className="text-soft-blue">Location:</span> {appointment.doctor.location} */}
                   <span className="text-soft-coral"> • Fee:</span> ${appointment.doctor.consultationFee}
                 </div>
                 <div className="flex items-center gap-1 text-amber-400">
@@ -160,7 +160,7 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                 </div>
               </div>
               <Image
-                src={appointment.doctor.avatar || "/placeholder.svg"}
+                src={appointment.doctor.img || "/placeholder.svg"}
                 alt={appointment.doctor.name}
                 width={80}
                 height={80}
