@@ -39,7 +39,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
   set({ isLoading: true })
   try {
     const url = `/appointments?doctorId=${doctorId}${
-      status !== "all" ? `&status=all` : ""
+      status !== "all" ? `&status=${status}` : ""
     }`
     console.log(url)
     const res = await api.get(url)
