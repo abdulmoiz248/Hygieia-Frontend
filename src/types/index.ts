@@ -12,14 +12,22 @@ export interface User {
 }
 
 export interface Doctor {
-  id: string
+   id: string
   name: string
-  specialty: string
-  rating: number
-  location: string
-  avatar?: string
-  experience: number
+  email: string
+  phone: string
+  gender: string
+  dateofbirth: string
+  img: string
+  specialization: string
+  experienceYears: number
+  certifications: string[]
+  education: string[]
+  languages: string[]
+  bio: string
   consultationFee: number
+  workingHours: { day: string; start: string; end: string }[]
+  rating: number
 }
 
 

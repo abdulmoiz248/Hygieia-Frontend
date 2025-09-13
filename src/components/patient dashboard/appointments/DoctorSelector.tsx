@@ -5,10 +5,11 @@ import { Command, CommandInput, CommandItem, CommandList, CommandEmpty } from "@
 import { X, Check, ChevronsUpDown } from "lucide-react" // Added Check and ChevronsUpDown for visual feedback
 import { cn } from "@/lib/utils" // For conditional class names
 import { Doctor } from "@/types"
+import { NutritionistProfile } from "@/store/nutritionist/userStore"
 
 
 type DoctorSelectorProps = {
-  doctors: Doctor[]
+  doctors: Doctor[] | NutritionistProfile[]
   value: string // The currently selected doctor's name (or typed value)
   onChange: (value: string) => void // Callback to update the parent state
   placeholder?: string
@@ -30,7 +31,7 @@ export default function DoctorSelector({
     if (trimmed === "") return doctors // Show all doctors if input is empty
 
     return doctors.filter(
-      (doc) => doc.name.toLowerCase().includes(trimmed) || doc.specialty.toLowerCase().includes(trimmed),
+      (doc) => doc.name.toLowerCase().includes(trimmed) || doc.specialization.toLowerCase().includes(trimmed),
     )
   }, [inputValue, doctors])
 
@@ -112,7 +113,7 @@ export default function DoctorSelector({
                     <Check className={cn("mr-2 h-4 w-4", value === doctor.name ? "opacity-100" : "opacity-0")} />
                     <div className="flex flex-col w-full">
                       <span className="font-medium text-sm truncate">{doctor.name}</span>
-                      <span className="text-xs text-muted-foreground truncate">{doctor.specialty}</span>
+                      <span className="text-xs text-muted-foreground truncate">{doctor.specialization}</span>
                     </div>
                   </CommandItem>
                 ))

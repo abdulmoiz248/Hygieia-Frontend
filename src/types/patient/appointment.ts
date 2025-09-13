@@ -1,3 +1,4 @@
+import { NutritionistProfile } from "@/store/nutritionist/userStore"
 import { Doctor } from "../doctor/profile"
 import { ProfileType } from "./profile"
 
@@ -23,7 +24,7 @@ export enum AppointmentMode {
 export interface Appointment {
   id: string
   patient:ProfileType
-  doctor: Doctor
+  doctor: Doctor | NutritionistProfile
   date: string
   time: string
   status: AppointmentStatus

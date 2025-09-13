@@ -6,7 +6,7 @@ import api from "@/lib/axios"
 export const fetchAppointments = createAsyncThunk(
   "appointments/fetchAppointments",
   async (patientId: string) => {
-    const res = await api.get(`/appointments`, { params: { patientId } })
+    const res = await api.get(`/appointments/patient`, { params: { patientId } })
     return mapAppointments(res.data) as Appointment[]
   }
 )
@@ -22,17 +22,30 @@ export const fetchAppointmentById = createAsyncThunk(
 
 export const createAppointment = createAsyncThunk(
   "appointments/createAppointment",
-  async (data: Partial<Appointment>) => {
-    const res = await api.post(`/appointments`, data)
-    return res.data as Appointment
+  async (data: Appointment) => {
+    const payload = {
+      patientId: data.patient.id,
+      doctorId: data.doctor.id,
+      date: data.date,
+      time: data.time,
+      status: data.status,
+      type: data.type,
+      notes: data.notes,
+      mode: data.mode,
+      dataShared: data.dataShared,
+    }
+
+    const res = await api.post(`/appointments`, payload)
+    return data as Appointment
   }
 )
 
+
 export const updateAppointment = createAsyncThunk(
   "appointments/updateAppointment",
-  async ({ id, dto }: { id: string; dto: Partial<Appointment> }) => {
-    const res = await api.patch(`/appointments/${id}`, dto)
-    return res.data as Appointment
+  async (data: Appointment) => {
+    const res = await api.patch(`/appointments/${data.id}`, data)
+    return data as Appointment
   }
 )
 

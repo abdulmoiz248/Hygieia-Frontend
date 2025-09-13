@@ -44,7 +44,8 @@ export default function AppointmentsPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
- const patientId='fb6b58a2-3509-4e27-9a00-5491d2927189'
+ const user=useSelector((state:RootState)=>state.profile)
+ const patientId=user.id 
 
   useEffect(() => {
    
@@ -245,7 +246,7 @@ export default function AppointmentsPage() {
                 <h3 className="font-semibold text-soft-blue text-base sm:text-lg">
                   {appointment.doctor.name}
                 </h3>
-                <p className="text-soft-coral">{appointment.doctor.specialty}</p>
+                <p className="text-soft-coral">{appointment.notes}</p>
 
                 <div className="flex flex-wrap items-center gap-2 text-cool-gray mt-1">
                   <div className="flex items-center gap-1">
@@ -325,7 +326,7 @@ export default function AppointmentsPage() {
                   </Avatar>
                   <div>
                     <h2 className="text-xl font-semibold">{selectedAppointment.doctor?.name}</h2>
-                    <p className="text-cool-gray font-normal">{selectedAppointment.doctor.specialty}</p>
+                    <p className="text-cool-gray font-normal">{selectedAppointment.notes}</p>
                   </div>
                 </DialogTitle>
               </DialogHeader>

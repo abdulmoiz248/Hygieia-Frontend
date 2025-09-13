@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, User, FileText, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,17 +9,24 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarComponent } from "@/components/ui/calendar"
-import { mockDoctors } from "@/mocks/data"
-import Link from "next/link"
+
+
 import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSelector"
 
 
 import { useDispatch, useSelector } from "react-redux"
-import { addAppointment } from "@/types/patient/appointmentsSlice"
+import  {createAppointment, updateAppointment}  from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
-import { RootState } from "@/store/patient/store"
+import { AppDispatch, RootState } from "@/store/patient/store"
 import { Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 import { patientSuccess } from "@/toasts/PatientToast"
+import { useNutritionists } from "@/hooks/useNutritionist"
+import { useAvailableSlots } from "@/hooks/useFetchSlots"
+import NewAppointmentHeader from "@/components/patient dashboard/appointments/new/Header"
+import { Checkbox } from "@radix-ui/react-checkbox"
+import ShareDataCheckbox from "@/components/patient dashboard/appointments/new/Checker"
+import { Doctor } from "@/types"
+import { NutritionistProfile } from "@/store/nutritionist/userStore"
 
 
 const containerVariants = {
@@ -37,18 +44,20 @@ export default function NewAppointmentPage() {
   
   const user=useSelector((store:RootState)=>store.profile)
   const appointments=useSelector((store:RootState)=>store.appointments)
-const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
-const [showConfirmation, setShowConfirmation] = useState(false)
-const [appointmentMode, setAppointmentMode] = useState("")
-
-
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [appointmentMode, setAppointmentMode] = useState("")
   const [selectedDoctor, setSelectedDoctor] = useState("")
   const [appointmentType, setAppointmentType] = useState("")
   const [selectedTime, setSelectedTime] = useState("")
+  const [rescheduleApp,setRescheduleApp]=useState('')
   const [reason, setReason] = useState("")
   const [reschedule,setreschedule]=useState(false)
-  const dispatch=useDispatch()
-
+  const [checked,setChecked]=useState(false)
+  const dispatch=useDispatch<AppDispatch>()
+  
+  
+  const { data: nutritionists, isLoading, isError } = useNutritionists()
 
   useEffect(()=>{
     const appointmentId=localStorage.getItem("appointment")
@@ -68,10 +77,12 @@ const [appointmentMode, setAppointmentMode] = useState("")
   
   useEffect(()=>{
     const appointmentId=localStorage.getItem("reschedule")
+
     if(appointmentId){
          const app = appointments.appointments.find((a) => a.id == appointmentId)
          if(app)
          {
+          setRescheduleApp(app.id)
           setSelectedDoctor(app.doctor.id)
           setAppointmentType(app.type)
           setSelectedTime(app.time)
@@ -85,36 +96,44 @@ const [appointmentMode, setAppointmentMode] = useState("")
     }
   },[])
 
+  
+  
+  
+  const doctors:Doctor[] | NutritionistProfile[] =nutritionists!
+  
 
-  const timeSlots = [
-    "9:00 AM",
-    "9:30 AM",
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "2:00 PM",
-    "2:30 PM",
-    "3:00 PM",
-    "3:30 PM",
-    "4:00 PM",
-    "4:30 PM",
-  ]
+  const selectedDoctorRole = selectedDoctor ? "nutritionist" : undefined
+
+const {
+  data: slotData,
+  isLoading: slotsLoading,
+  isError: slotsError,
+} = useAvailableSlots(selectedDoctor, selectedDoctorRole!, selectedDate)
+
+const timeSlots = slotData?.availableSlots ?? []
+
+useEffect(()=>{
+        if(timeSlots.length==0) setSelectedTime("")
+  },[selectedDate])
+
+
+    if (isLoading) {
+      return <div className="text-center py-12">Loading nutritionists...</div>
+    }
+  
+    if (isError) {
+      return <div className="text-center py-12 text-red-500">Failed to load data</div>
+    }
+  
+ 
+
+
+
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center gap-4">
-        <Button  size="icon" className="text-white bg-soft-blue hover:bg-soft-blue/90 " asChild>
-          <Link href="/patient/appointments">
-            <ArrowLeft className="w-4 h-4  " />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-soft-coral">Book New Appointment</h1>
-          <p className="text-cool-gray">Schedule your consultation with a healthcare professional</p>
-        </div>
-      </motion.div>
+      <NewAppointmentHeader/>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointment Form */}
@@ -136,6 +155,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
   className="rounded-5 border-0 w-full max-w-[450px] mx-auto"
   disabled={(date: Date) => date < new Date()}
   showOutsideDays={false}
+  today={selectedDate}
 />
 
    
@@ -152,13 +172,12 @@ const [appointmentMode, setAppointmentMode] = useState("")
             <CardContent className="space-y-6">
               {/* Doctor Selection */}
           
-<DoctorSelector   doctors={mockDoctors}
+<DoctorSelector   doctors={doctors!}
       value={selectedDoctor}
       onChange={setSelectedDoctor} />
 
 
-
-          
+<ShareDataCheckbox  checked={checked} onChange={()=>setChecked(!checked)}/>
 
               {/* Appointment Type */}
               <div className="space-y-2">
@@ -201,22 +220,37 @@ const [appointmentMode, setAppointmentMode] = useState("")
 
 
               {/* Time Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-soft-blue">Select Time</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {timeSlots.map((time) => (
-                    <Button
-                      key={time}
-                    
-                      size="sm"
-                      onClick={() => setSelectedTime(time)}
-                      className={selectedTime === time ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white" : "text-cool-gray bg-transparent border-soft-blue border hover:bg-soft-blue/70 hover:text-snow-white"}
-                    >
-                      {time}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+            <div className="space-y-2">
+  <label className="text-sm font-medium text-soft-blue">Select Time</label>
+
+  {!selectedDate ? (
+    <p className="text-cool-gray text-sm">Please select a date first</p>
+  ) : slotsLoading ? (
+    <p className="text-cool-gray text-sm">Loading time slots...</p>
+  ) : slotsError ? (
+    <p className="text-red-500 text-sm">Failed to load slots</p>
+  ) : timeSlots.length === 0 ? (
+    <p className="text-cool-gray text-sm">No available slots for this date</p>
+  ) : (
+    <div className="grid grid-cols-3 gap-2">
+      {timeSlots.map((time: string) => (
+        <Button
+          key={time}
+          size="sm"
+          onClick={() => setSelectedTime(time)}
+          className={
+            selectedTime === time
+              ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
+              : "text-cool-gray bg-transparent border-soft-blue border hover:bg-soft-blue/70 hover:text-snow-white"
+          }
+        >
+          {time}
+        </Button>
+      ))}
+    </div>
+  )}
+</div>
+
 
               {/* Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,7 +274,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
       
 
           {/* Appointment Summary */}
-          <Card className={  (!selectedDoctor ||!appointmentType || !selectedDate || !selectedTime || !appointmentType)?'bg-cool-gray/10':'bg-white/40'}>
+          <Card className={  (!selectedDoctor ||!appointmentType || !selectedDate || !selectedTime || !appointmentType)?'bg-cool-gray/10 sticky top-0':'bg-white/40 sticky top-0'}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 ">
                 <FileText className="w-5 h-5 text-soft-coral" />
@@ -252,7 +286,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
                 <div className="flex justify-between">
                   <span className="text-sm text-cool-gray">Doctor:</span>
                   <span className="text-sm font-medium  text-soft-blue">
-                    {selectedDoctor ? mockDoctors.find((d) => d.id === selectedDoctor)?.name : "Not selected"}
+                    {selectedDoctor ? doctors?.find((d) => d.id === selectedDoctor)?.name : "Not selected"}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -272,9 +306,14 @@ const [appointmentMode, setAppointmentMode] = useState("")
                 <div className="flex justify-between">
                   <span className="text-sm text-cool-gray">Fee:</span>
                   <span className="text-sm font-medium  text-soft-blue">
-                    ${selectedDoctor ? mockDoctors.find((d) => d.id === selectedDoctor)?.consultationFee : "0"}
+                    Rs.{selectedDoctor ? doctors?.find((d) => d.id === selectedDoctor)?.consultationFee : "0"}
                   </span>
                 </div>
+                 {checked && (
+        <p className="text-xs text-soft-coral bg-white/60 border border-teal-200 rounded-md px-3 py-2">
+          You have chosen to share your data. All your reports will be accessible to the doctor.
+        </p>
+      )}
               </div>
 
               <div className="pt-4 border-t">
@@ -283,19 +322,44 @@ const [appointmentMode, setAppointmentMode] = useState("")
                 disabled={!selectedDoctor || !selectedDate || !selectedTime || !appointmentType || !appointmentMode}
 
                 onClick={() => {
-    dispatch(
-      addAppointment({
-        id: uuidv4(),
-        doctor: mockDoctors.find((d) => d.id === selectedDoctor)!,
+
+                  if(reschedule){
+
+                      dispatch(
+      updateAppointment({
+        patient:user,
+       doctor: doctors.find((d) => d.id === selectedDoctor)!,
+        id: rescheduleApp,
+       
         date: selectedDate!.toISOString(),
         time: selectedTime,
         status: AppointmentStatus.Upcoming,
         type: appointmentType as AppointmentTypes,
         notes: reason,
       mode:appointmentMode as AppointmentMode,
+      dataShared:checked
       } as Appointment)
     )
-       patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${mockDoctors.find((d) => d.id === selectedDoctor)?.name} Successfully`)
+                  }else{
+
+                      dispatch(
+      createAppointment({
+        patient:user,
+       doctor: doctors.find((d) => d.id === selectedDoctor)!,
+        id: uuidv4(),
+       
+        date: selectedDate!.toISOString(),
+        time: selectedTime,
+        status: AppointmentStatus.Upcoming,
+        type: appointmentType as AppointmentTypes,
+        notes: reason,
+      mode:appointmentMode as AppointmentMode,
+      dataShared:checked
+      } as Appointment)
+    )
+                  }
+  
+       patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${doctors?.find((d) => d.id === selectedDoctor)?.name} Successfully`)
      setShowConfirmation(true)
    }}
                >
@@ -325,7 +389,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
     <div className="space-y-4 text-sm text-dark-slate-gray">
       <div className="flex justify-between items-center">
         <span className="font-medium text-soft-blue">Doctor</span>
-        <span>{mockDoctors.find((d) => d.id === selectedDoctor)?.name}</span>
+        <span>{doctors?.find((d) => d.id === selectedDoctor)?.name}</span>
       </div>
       <div className="flex justify-between items-center">
         <span className="font-medium text-soft-blue">Date</span>
@@ -341,7 +405,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
       </div>
       <div className="flex justify-between items-center">
         <span className="font-medium text-soft-blue">Fee</span>
-        <span>${mockDoctors.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
+        <span>${doctors?.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
       </div>
     </div>
 
@@ -353,6 +417,7 @@ const [appointmentMode, setAppointmentMode] = useState("")
           setAppointmentType("")
           setSelectedTime("")
           setReason("")
+        
         }}
         className="w-full bg-soft-blue hover:bg-soft-blue/90 text-white py-3 rounded-xl text-base font-medium transition duration-200 shadow-md"
       >
