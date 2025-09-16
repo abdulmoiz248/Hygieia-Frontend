@@ -490,7 +490,9 @@ const handleConfirmReplace = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                
-                 <Button
+              {
+                currentDietPlan && 
+                   <Button
                                size="sm"
                                className="text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white w-full sm:w-auto"
                               
@@ -502,6 +504,7 @@ const handleConfirmReplace = () => {
                    
                    Downalod as Pdf
                 </Button>
+              }
                 <Button
                   size="sm"
                   className="text-mint-green bg-transparent border-1 border-mint-green hover:bg-mint-green hover:text-snow-white w-full sm:w-auto"
