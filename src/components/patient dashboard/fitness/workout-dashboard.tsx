@@ -14,9 +14,6 @@ import AIRecommendationDialog from "./AIRecommendationDialog"
 import { addCalories } from "@/types/patient/fitnessSlice"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/store/patient/store"
-  import { PDFDocument, rgb } from "pdf-lib"
-import jsPDF from "jspdf"
-import autoTable from "jspdf-autotable"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -193,8 +190,7 @@ const handleDownloadPdf = async () => {
           margin: { left: 40, right: 40 },
         })
 
-        // update cursor
-        // @ts-ignore
+       
         cursorY = (doc as any).lastAutoTable.finalY + 30
       })
     }

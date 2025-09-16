@@ -4,7 +4,7 @@ import type React from "react"
 import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Users } from "lucide-react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,6 @@ import { useDiet } from "@/hooks/useDiet"
 import type { MealPreferences } from "@/types/patient/dietSlice"
 import {  useSelector } from "react-redux"
 import {  RootState } from "@/store/patient/store"
-import { DietPlan as DP } from "@/store/nutritionist/diet-plan-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -215,7 +214,7 @@ const handleDownloadDietPdf = async (
       margin: { left: 40, right: 40 },
     })
 
-    // @ts-ignore
+    
     cursorY = (doc as any).lastAutoTable.finalY + 40
 
     // ===== Exercise Plan =====
@@ -237,7 +236,7 @@ const handleDownloadDietPdf = async (
       margin: { left: 40, right: 40 },
     })
 
-    // @ts-ignore
+   
     cursorY = (doc as any).lastAutoTable.finalY + 40
 
     // ===== Notes =====
@@ -283,7 +282,7 @@ const handleDownloadDietPdf = async (
         margin: { left: 40, right: 40 },
       })
 
-      // @ts-ignore
+    
       cursorY = (doc as any).lastAutoTable.finalY + 40
 
       // Goals Table
@@ -309,7 +308,7 @@ const handleDownloadDietPdf = async (
           margin: { left: 40, right: 40 },
         })
 
-        // @ts-ignore
+      
         cursorY = (doc as any).lastAutoTable.finalY + 40
       }
 
@@ -336,7 +335,6 @@ const handleDownloadDietPdf = async (
           margin: { left: 40, right: 40 },
         })
 
-        // @ts-ignore
         cursorY = (doc as any).lastAutoTable.finalY + 40
       }
     }
