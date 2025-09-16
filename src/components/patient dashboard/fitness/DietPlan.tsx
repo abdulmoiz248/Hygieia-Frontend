@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple } from "lucide-react"
+import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Users } from "lucide-react"
@@ -17,6 +17,7 @@ import { useDiet } from "@/hooks/useDiet"
 import type { MealPreferences } from "@/types/patient/dietSlice"
 import {  useSelector } from "react-redux"
 import {  RootState } from "@/store/patient/store"
+import { DietPlan as DP } from "@/store/nutritionist/diet-plan-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -53,6 +54,326 @@ useEffect(() => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMealModalOpen, setIsMealModalOpen] = useState(false)
   const [showConfirmReplace, setShowConfirmReplace] = useState(false)
+ const patientName=useSelector((store:RootState)=>store.profile.name)
+
+
+
+  // Utility: create watermark dataUrl
+const createWatermarkDataUrl = async (
+  url: string,
+  opacity = 0.06,
+  maxW = 600,
+  maxH = 600
+) => {
+  return await new Promise<string>((resolve, reject) => {
+    try {
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => {
+        const ratio = Math.min(maxW / img.width, maxH / img.height, 1)
+        const w = img.width * ratio
+        const h = img.height * ratio
+
+        const canvas = document.createElement("canvas")
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return reject("no-canvas-context")
+
+        ctx.clearRect(0, 0, w, h)
+        ctx.globalAlpha = opacity
+        ctx.drawImage(img, 0, 0, w, h)
+
+        resolve(canvas.toDataURL("image/png"))
+      }
+      img.onerror = (e) => reject(e)
+      img.src = url
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+
+const handleDownloadDietPdf = async (
+  dietPlan: any,
+
+) => {
+  try {
+    dietPlan = {
+      id: dietPlan?.id,
+      dailyCalories: dietPlan.daily_calories ||dietPlan.dailyCalories,
+      protein: dietPlan.protein,
+      carbs: dietPlan.carbs,
+      fat: dietPlan.fat,
+      deficiency: dietPlan.deficiency,
+      notes: dietPlan.notes,
+      caloriesBurned: dietPlan.calories_burned || dietPlan.caloriesBurned,
+      exercise: dietPlan.exercise,
+      startDate: new Date(dietPlan.start_date),
+      endDate: new Date(dietPlan.end_date),
+      patientId: dietPlan.patient_id,
+      patientName: dietPlan.patientName,
+      nutritionistId: dietPlan.nutritionist_id,
+    }
+
+    console.log(dietPlan)
+    const { default: jsPDF } = await import("jspdf")
+    const autoTable = (await import("jspdf-autotable")).default
+
+    const doc = new jsPDF({ unit: "pt", format: "a4" })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+
+    const primaryColor: [number, number, number] = [0, 131, 150]
+    const grayText: [number, number, number] = [80, 80, 80]
+
+    // ===== Helper: load image as base64 =====
+    const getBase64FromUrl = async (url: string): Promise<string> => {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    }
+
+    // Load logo
+    let logoDataUrl: string | null = null
+    try {
+      logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+    } catch (err) {
+      console.warn("Logo not loaded:", err)
+    }
+
+    // Load watermark
+    let watermarkDataUrl: string | null = null
+    try {
+      watermarkDataUrl = await createWatermarkDataUrl(
+        "/logo/logo-2.png",
+        0.05,
+        pageWidth * 0.5,
+        pageHeight * 0.5
+      )
+    } catch (err) {
+      console.warn("Watermark could not be loaded:", err)
+    }
+
+    // ===== Header =====
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, "PNG", 40, 25, 50, 50)
+    }
+
+    // Get today’s date in format: 13 Sep 2025
+    const today = new Date()
+    const dateStr = today.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+
+    doc.setFontSize(22)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(...primaryColor)
+    doc.text(`Diet Plan (${dateStr})`, pageWidth / 2, 55, { align: "center" })
+
+    // Patient name
+    doc.setFontSize(12)
+    doc.setFont("helvetica", "normal")
+    doc.setTextColor(...grayText)
+    doc.text(`Patient: ${patientName}`, pageWidth / 2, 75, { align: "center" })
+
+    // Divider
+    doc.setDrawColor(...primaryColor)
+    doc.setLineWidth(0.7)
+    doc.line(40, 95, pageWidth - 40, 95)
+
+    let cursorY = 120
+
+    // ===== Nutrition Summary =====
+    doc.setFontSize(14)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(...primaryColor)
+    doc.text("Nutrition Summary", 40, cursorY)
+    cursorY += 10
+
+    autoTable(doc, {
+      startY: cursorY,
+      head: [["Nutrient", "Value"]],
+      body: [
+        ["Daily Calories", dietPlan.dailyCalories],
+        ["Protein", dietPlan.protein],
+        ["Carbohydrates", dietPlan.carbs],
+        ["Fat", dietPlan.fat],
+        ["Deficiency", dietPlan.deficiency],
+      ],
+      theme: "grid",
+      styles: { fontSize: 11, cellPadding: 6 },
+      headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+      margin: { left: 40, right: 40 },
+    })
+
+    // @ts-ignore
+    cursorY = (doc as any).lastAutoTable.finalY + 40
+
+    // ===== Exercise Plan =====
+    doc.setFontSize(14)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(...primaryColor)
+    doc.text("Exercise Plan", 40, cursorY)
+    cursorY += 10
+
+    autoTable(doc, {
+      startY: cursorY,
+      body: [
+        ["Calories To Burn", dietPlan.caloriesBurned],
+        ["Exercise", dietPlan.exercise],
+      ],
+      theme: "grid",
+      styles: { fontSize: 11, cellPadding: 6 },
+      columnStyles: { 0: { fontStyle: "bold", textColor: primaryColor } },
+      margin: { left: 40, right: 40 },
+    })
+
+    // @ts-ignore
+    cursorY = (doc as any).lastAutoTable.finalY + 40
+
+    // ===== Notes =====
+    if (dietPlan.notes) {
+      doc.setFontSize(14)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(...primaryColor)
+      doc.text("Notes", 40, cursorY)
+      cursorY += 15
+
+      doc.setFontSize(11)
+      doc.setFont("helvetica", "normal")
+      doc.setTextColor(...grayText)
+
+      const splitNotes = doc.splitTextToSize(dietPlan.notes, pageWidth - 80)
+      doc.text(splitNotes, 60, cursorY)
+
+      cursorY += splitNotes.length * 14 + 20
+    }
+
+    // ===== Today's Progress =====
+    if (fitness) {
+      doc.setFontSize(14)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(...primaryColor)
+      doc.text("Today's Progress", 40, cursorY)
+      cursorY += 15
+
+      // Summary table (Calories + Macros)
+      autoTable(doc, {
+        startY: cursorY,
+        head: [["Metric", "Value"]],
+        body: [
+          ["Calories Consumed", fitness.caloriesConsumed],
+          ["Calories Burned", fitness.caloriesBurned],
+          ["Protein (g)", fitness.proteinConsumed],
+          ["Fat (g)", fitness.fatConsumed],
+          ["Carbs (g)", fitness.carbsConsumed],
+        ],
+        theme: "grid",
+        styles: { fontSize: 11, cellPadding: 6 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+        margin: { left: 40, right: 40 },
+      })
+
+      // @ts-ignore
+      cursorY = (doc as any).lastAutoTable.finalY + 40
+
+      // Goals Table
+      if (fitness.goals?.length > 0) {
+        doc.setFontSize(13)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(...primaryColor)
+        doc.text("Goals", 40, cursorY)
+        cursorY += 10
+
+        autoTable(doc, {
+          startY: cursorY,
+          head: [["Type", "Current", "Target", "Unit"]],
+          body: fitness.goals.map((g) => [
+            g.type,
+            g.current,
+            g.target,
+            g.unit,
+          ]),
+          theme: "grid",
+          styles: { fontSize: 11, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          margin: { left: 40, right: 40 },
+        })
+
+        // @ts-ignore
+        cursorY = (doc as any).lastAutoTable.finalY + 40
+      }
+
+      // Activity Log for Today
+      const todayDate = new Date().toISOString().split("T")[0]
+      const todayStatus = fitness.activityLog.find(
+        (d) => d.date === todayDate
+      )
+
+      if (todayStatus) {
+        doc.setFontSize(13)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(...primaryColor)
+        doc.text("Activity Log (Today)", 40, cursorY)
+        cursorY += 10
+
+        autoTable(doc, {
+          startY: cursorY,
+          head: [["Date", "Completed"]],
+          body: [[todayStatus.date, todayStatus.completed ? "✅ Yes" : "❌ No"]],
+          theme: "grid",
+          styles: { fontSize: 11, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          margin: { left: 40, right: 40 },
+        })
+
+        // @ts-ignore
+        cursorY = (doc as any).lastAutoTable.finalY + 40
+      }
+    }
+
+    // ===== Footer =====
+    const pageCount = doc.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(9)
+      doc.setTextColor(120, 120, 120)
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, {
+        align: "center",
+      })
+    }
+
+    // ===== Watermark =====
+    if (watermarkDataUrl) {
+      const wmW = pageWidth * 0.5
+      const wmH = pageHeight * 0.5
+      const x = (pageWidth - wmW) / 2
+      const y = (pageHeight - wmH) / 2
+
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i)
+        doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+      }
+    }
+
+    // Save
+    const safeName = patientName.replace(/\s+/g, "_")
+    doc.save(`${safeName}_diet_plan.pdf`)
+  } catch (err) {
+    console.error("PDF generation error:", err)
+  }
+}
+
+
 
 
 
@@ -168,15 +489,18 @@ const handleConfirmReplace = () => {
                 <span className="text-base sm:text-lg">Diet Plan Dashboard</span>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <Button
-                  size="sm"
-                  className="bg-mint-green text-snow-white w-full sm:w-auto hover:bg-mint-green/90"
-                  asChild
-                >
-                  <Link href="/nutritionists">
-                    <Users className="w-4 h-4 mr-2" />
-                    Find Nutritionist
-                  </Link>
+               
+                 <Button
+                               size="sm"
+                               className="text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white w-full sm:w-auto"
+                              
+                               onClick={()=>{
+                    handleDownloadDietPdf(currentDietPlan!)
+                  }}>
+                
+                    <File className="w-4 h-4 mr-2" />
+                   
+                   Downalod as Pdf
                 </Button>
                 <Button
                   size="sm"

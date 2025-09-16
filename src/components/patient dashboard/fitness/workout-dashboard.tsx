@@ -149,7 +149,7 @@ const handleDownloadPdf = async () => {
     doc.setFontSize(20)
     doc.setFont("helvetica", "bold") // make header bold
     doc.setTextColor(...primaryColor)
-    doc.text("Workout Report", pageWidth / 2, 55, { align: "center" })
+    doc.text("Workout Schedule", pageWidth / 2, 55, { align: "center" })
 
     // Thin line under header
     doc.setDrawColor(...primaryColor)
