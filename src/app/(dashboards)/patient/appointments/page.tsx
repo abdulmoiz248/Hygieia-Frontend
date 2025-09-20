@@ -49,7 +49,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
    
-    dispatch(fetchAppointments(patientId!))
+    if(appointments.length==0) dispatch(fetchAppointments(patientId!))
   }, [dispatch, patientId])
 
   if (loading) return <p>Loading...</p>

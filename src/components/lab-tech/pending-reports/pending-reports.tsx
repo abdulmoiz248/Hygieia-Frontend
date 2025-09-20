@@ -379,7 +379,7 @@ const handleValueSubmit = async(payload?: string) => {
   </div>
 
   <Button
-   
+ onClick={async()=>{await handleValueSubmit()}}
     disabled={(!reportValues.results || reportValues.results.length === 0) || isUploading}
     className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
   >

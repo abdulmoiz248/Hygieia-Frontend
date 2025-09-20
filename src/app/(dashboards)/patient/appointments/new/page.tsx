@@ -2,7 +2,7 @@
 
 import {  useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, User, FileText } from "lucide-react"
+import { Calendar, Clock, User, FileText, Coins } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -117,7 +117,7 @@ useEffect(()=>{
 
 
     if (isLoading) {
-      return <div className="text-center py-12">Loading nutritionists...</div>
+      return <div className="text-center py-12">Loading ...</div>
     }
   
     if (isError) {
@@ -371,60 +371,107 @@ useEffect(()=>{
         </motion.div>
       </div>
       {showConfirmation && (
- <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/40 transition-opacity duration-300 ease-in-out">
-  <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full max-w-md p-8 space-y-6 border border-soft-blue/20 animate-fadeIn scale-100">
-    <div className="flex flex-col items-center space-y-3">
-      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-soft-coral/10 text-soft-coral animate-pulse">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h2 className="text-2xl font-bold text-dark-slate-gray tracking-wide">Appointment Confirmed</h2>
-      <span className="text-xs font-semibold text-soft-blue bg-soft-blue/10 px-3 py-1 rounded-full shadow-sm">
-        #CONF-{Math.floor(Math.random() * 10000)}
-      </span>
-    </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/40 transition-opacity duration-300 ease-in-out">
+        <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full max-w-md p-6 space-y-5 border border-soft-blue/20 animate-fadeIn scale-100">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-soft-coral/10 text-soft-coral animate-pulse">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-dark-slate-gray tracking-wide">Appointment Confirmed</h2>
+            <span className="text-xs font-medium text-soft-blue bg-soft-blue/10 px-2 py-0.5 rounded-full">
+              #CONF-{Math.floor(Math.random() * 10000)}
+            </span>
+          </div>
+      
+          <div className="space-y-3 text-sm text-dark-slate-gray">
+            <div className="flex justify-between">
+              <span className="font-medium text-soft-blue">Doctor</span>
+              <span>{doctors?.find((d) => d.id === selectedDoctor)?.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-soft-blue">Date</span>
+              <span>{selectedDate?.toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-soft-blue">Time</span>
+              <span>{selectedTime}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-soft-blue">Type</span>
+              <span>{appointmentType}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-soft-blue">Fee</span>
+              <span>${doctors?.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
+            </div>
+          </div>
+      
+          <div className="flex gap-3 pt-4">
+  <button
+onClick={() => {
+  const doctorName = doctors?.find((d) => d.id === selectedDoctor)?.name || "Doctor";
 
-    <div className="space-y-4 text-sm text-dark-slate-gray">
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-soft-blue">Doctor</span>
-        <span>{doctors?.find((d) => d.id === selectedDoctor)?.name}</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-soft-blue">Date</span>
-        <span>{selectedDate?.toLocaleDateString()}</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-soft-blue">Time</span>
-        <span>{selectedTime}</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-soft-blue">Type</span>
-        <span>{appointmentType}</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-soft-blue">Fee</span>
-        <span>${doctors?.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
-      </div>
-    </div>
+  // Combine selectedDate and selectedTime
+  const [hours, minutes, seconds] = selectedTime.split(":").map(Number);
+  const startDate = selectedDate ? new Date(selectedDate) : new Date();
+  startDate.setHours(hours, minutes, seconds, 0);
 
-    <div className="pt-4">
-      <Button
-        onClick={() => {
-          setShowConfirmation(false)
-          setSelectedDoctor("")
-          setAppointmentType("")
-          setSelectedTime("")
-          setReason("")
-        
-        }}
-        className="w-full bg-soft-blue hover:bg-soft-blue/90 text-white py-3 rounded-xl text-base font-medium transition duration-200 shadow-md"
-      >
-        Close
-      </Button>
-    </div>
-  </div>
+  const endDate = new Date(startDate);
+  endDate.setHours(endDate.getHours() + 1); // Add 1 hour
+
+  const appointmentLocation = appointmentType === "physical" ? "physical" : "Online";
+
+  const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Appointment%20with%20${encodeURIComponent(
+    doctorName
+  )}&dates=${startDate.toISOString().replace(/-|:|\.\d+/g, "")}/${endDate
+    .toISOString()
+    .replace(/-|:|\.\d+/g, "")}&details=${encodeURIComponent(
+      `Appointment Type: ${appointmentType}\nLocation: ${appointmentLocation}\nTime: ${selectedTime} - ${(
+        hours + 1
+      )
+        .toString()
+        .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+  )}&location=${encodeURIComponent(appointmentLocation)}`;
+
+  window.open(calendarUrl, "_blank");
+}}
+
+    className="flex-1 flex items-center justify-center gap-2 border border-gray-300 bg-snow-white text-gray-800 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition duration-200"
+  >
+    <img
+      src="https://www.gstatic.com/images/branding/product/1x/calendar_2020q4_48dp.png"
+      alt="Google Calendar"
+      className="h-5 w-5"
+    />
+    <span>Add to Google Calendar</span>
+  </button>
+
+  <button className="flex-1 flex items-center justify-center gap-2 bg-mint-green hover:bg-mint-green/90 text-white py-2.5 rounded-lg text-sm font-medium shadow-md transition duration-200">
+    <Coins className="h-5 w-5" />
+    <span>Pay Online</span>
+  </button>
 </div>
+
+      
+          <div className="pt-2">
+            <Button
+              onClick={() => {
+                setShowConfirmation(false);
+                setSelectedDoctor("");
+                setAppointmentType("");
+                setSelectedTime("");
+                setReason("");
+              }}
+              className="w-full bg-soft-blue hover:bg-soft-blue/90 text-white py-2 rounded-lg text-sm font-medium transition duration-200"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      </div>
+      
 
 
 )}
