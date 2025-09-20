@@ -4,8 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Clock, MoreVertical, CheckCircle, XCircle, Calendar } from "lucide-react"
+import { Clock,  CheckCircle, XCircle, Calendar } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
@@ -157,24 +156,7 @@ export function AppointmentsList() {
           </Button>
         )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-gray-100">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="shadow-md rounded-xl">
-            {appointment.status === "upcoming" && (
-              <DropdownMenuItem
-                className="text-red-600 hover:bg-red-50"
-                onClick={() => handleCancelAppointment(appointment.id)}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Cancel
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+     
       </div>
     </div>
   </CardContent>
