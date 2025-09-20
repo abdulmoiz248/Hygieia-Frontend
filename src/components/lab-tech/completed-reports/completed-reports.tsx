@@ -21,13 +21,13 @@ export function CompletedReports() {
   })
 
 
-
- const handleDownload = (fileUrl: string, patientName: string) => {
+const handleDownload = (fileUrl: string, patientName: string) => {
   if (!fileUrl) {
     console.warn(`No file available for ${patientName}`);
     return;
   }
-  window.open(fileUrl, '_blank');
+  const url = `/viewReport?fileUrl=${encodeURIComponent(fileUrl)}&patientName=${encodeURIComponent(patientName)}`;
+  window.open(url, "_blank");
 }
 
 

@@ -64,7 +64,9 @@ export const useLabStore = create<LabStore>((set, get) => ({
       // for other report types, send JSON body
       const body = reportValues ? { resultData:reportValues.results, title: `${file?.name || "Report"}` } : {}
       const res= await api.post(`/${id}/upload-result`, body)
+    
       if(res.data){
+  
 file_url=res.data.file_url
       }
     }

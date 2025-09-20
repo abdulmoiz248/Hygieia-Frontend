@@ -21,13 +21,14 @@ export function PendingReports() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isUploading, setIsUploading] = useState(false)
 
-  const [reportValues, setReportValues] = useState({
-    results: "",
-    findings: "",
-    recommendations: "",
-    normalRange: "",
-    units: "",
-  })
+const [reportValues, setReportValues] = useState({
+  results: [] as { test: string; reference: string; unit: string; result: string }[],
+  findings: "",
+  recommendations: "",
+  normalRange: "",
+  units: "",
+})
+
 
   const uploadSectionRef = useRef<HTMLDivElement | null>(null)
 
@@ -41,25 +42,28 @@ export function PendingReports() {
     }
   }, [])
 
-  const handleValueSubmit = async() => {
-    if (selectedReport && (reportValues.results || reportValues.findings)) {
-       setIsUploading(true)
-      const reportData = JSON.stringify(reportValues)
-      const blob = new Blob([reportData], { type: "application/json" })
-      const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
+const handleValueSubmit = async(payload?: string) => {
+  if (selectedReport && (reportValues.results.length > 0 || reportValues.findings)) {
+    setIsUploading(true)
+    const reportData = JSON.stringify({
+      ...reportValues,
+      results: payload ?? JSON.stringify(reportValues.results),
+    })
+    const blob = new Blob([reportData], { type: "application/json" })
+    const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
 
-   await uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
-      setSelectedReport(null)
-        setIsUploading(false)
-      setReportValues({
-        results: "",
-        findings: "",
-        recommendations: "",
-        normalRange: "",
-        units: "",
-      })
-    }
+    await uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
+    setSelectedReport(null)
+    setIsUploading(false)
+    setReportValues({
+      results: [],
+      findings: "",
+      recommendations: "",
+      normalRange: "",
+      units: "",
+    })
   }
+}
 
   const handleUploadSubmit = async() => {
     if (selectedReport && uploadFile) {
@@ -271,32 +275,119 @@ export function PendingReports() {
               </Button>
             </>
           ) : (
-            <>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="results" className="text-sm font-medium text-soft-blue">
-                    Test Results *
-                  </Label>
-                  <Textarea
-                    id="results"
-                    placeholder="Enter the test results..."
-                    value={reportValues.results}
-                    onChange={(e) => setReportValues((prev) => ({ ...prev, results: e.target.value }))}
-                    rows={3}
-                    className="border-gray-200 focus:border-blue-500"
-                  />
-                </div>
-              </div>
+           <>
+  <div className="space-y-4">
+    <div className="space-y-2">
+      <Label className="text-sm font-medium text-soft-blue">
+        Test Results *
+      </Label>
 
-              <Button
-                onClick={handleValueSubmit}
-                disabled={!reportValues.results && !reportValues.findings || isUploading}
-                className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                {isUploading ? "Uploading..." : "Submit Report Data"}
-              </Button>
-            </>
+      <div className="border rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-3 py-2 text-left">Test</th>
+              <th className="px-3 py-2 text-left">Reference Ranges</th>
+              <th className="px-3 py-2 text-left">Unit</th>
+              <th className="px-3 py-2 text-left">Result</th>
+              <th className="px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {(reportValues.results || []).map((row: any, index: number) => (
+              <tr key={index} className="border-t">
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={row.test}
+                    onChange={(e) => {
+                      const newRows = [...reportValues.results]
+                      newRows[index].test = e.target.value
+                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                    }}
+                    className="w-full border rounded p-1 text-sm"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={row.reference}
+                    onChange={(e) => {
+                      const newRows = [...reportValues.results]
+                      newRows[index].reference = e.target.value
+                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                    }}
+                    className="w-full border rounded p-1 text-sm"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={row.unit}
+                    onChange={(e) => {
+                      const newRows = [...reportValues.results]
+                      newRows[index].unit = e.target.value
+                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                    }}
+                    className="w-full border rounded p-1 text-sm"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={row.result}
+                    onChange={(e) => {
+                      const newRows = [...reportValues.results]
+                      newRows[index].result = e.target.value
+                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                    }}
+                    className="w-full border rounded p-1 text-sm"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newRows = reportValues.results.filter((_: any, i: number) => i !== index)
+                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                    }}
+                    className="text-red-500 hover:underline text-xs"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="p-2">
+          <button
+            type="button"
+            onClick={() =>
+              setReportValues((prev:any) => ({
+                ...prev,
+                results: [...(prev.results || []), { test: "", reference: "", unit: "", result: "" }],
+              }))
+            }
+            className="text-soft-blue hover:underline text-sm"
+          >
+            + Add Row
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <Button
+   
+    disabled={(!reportValues.results || reportValues.results.length === 0) || isUploading}
+    className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white font-medium py-3"
+  >
+    <Edit3 className="w-4 h-4 mr-2" />
+    {isUploading ? "Uploading..." : "Submit Report Data"}
+  </Button>
+</>
+
           )}
         </>
       ) : (
