@@ -34,6 +34,7 @@ import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
 import api from "@/lib/axios"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import { generateAIReport } from "./AiReport"
 
 
 
@@ -80,6 +81,8 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
 
   const { appointments, fetchAppointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
   const [appointment, setAppointment] = useState<Appointment | null>(null)
+  const [isGeneratingAIReport, setIsGeneratingAIReport] = useState(false)
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
   const [assignedDietPlan, setAssignedDietPlan] = useState<any | null>(null)
@@ -109,9 +112,25 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
     if (appointment?.dataShared) getData()
   }, [appointment])
 
-  const handleGenerateAIReport = () => {
-    console.log("[v0] Generating AI report for patient:", appointment?.patient.name)
-    alert("AI Report generation started. You will receive the report shortly.")
+  const handleGenerateAIReport = async() => {
+    
+    if(!appointment?.dataShared){
+      alert("AI Report Cannot be generated because the patient has not shared their data.")
+      return
+    }
+    setIsGeneratingAIReport(true)
+    setIsDownloadingReport(true)
+    try {
+      const report = await generateAIReport(appointment.patient, fitnessData, medicalRecords)
+      await generateHealthReportPDF(report, appointment.patient.name)
+    } catch (error) {
+      console.error("Error generating AI report:", error)
+      alert("Failed to generate AI report. Please try again.")
+    } finally {
+      setIsGeneratingAIReport(false)
+      // Keep downloading state for a bit longer to show download completion
+      setTimeout(() => setIsDownloadingReport(false), 2000)
+    }
   }
 
   
@@ -157,6 +176,451 @@ if (assignedDietPlan) {
 
   const handleRemoveTest = (id: string) => {
     setReferredTests((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  const generateHealthReportPDF = async (report: string, patientName: string) => {
+    try {
+      const { default: jsPDF } = await import("jspdf")
+      const autoTable = (await import("jspdf-autotable")).default
+
+      const doc = new jsPDF({ unit: "pt", format: "a4" })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+
+      // Primary soft blue color
+      const primaryColor: [number, number, number] = [0, 131, 150]
+      const softCoral: [number, number, number] = [255, 107, 107]
+
+      // Load logo
+      const logoUrl = "/logo/logo.png"
+      const getBase64FromUrl = async (url: string): Promise<string> => {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+      }
+
+      let logoDataUrl: string | null = null
+      try {
+        logoDataUrl = await getBase64FromUrl(logoUrl)
+      } catch (err) {
+        console.warn("Logo not loaded:", err)
+      }
+
+      // Load watermark
+      let watermarkDataUrl: string | null = null
+      try {
+        watermarkDataUrl = await createWatermarkDataUrl(
+          "/logo/logo-2.png",
+          0.05,
+          pageWidth * 0.5,
+          pageHeight * 0.5
+        )
+      } catch (err) {
+        console.warn("Watermark could not be loaded:", err)
+      }
+
+      // ===== Header =====
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, "PNG", 40, 25, 50, 50)
+      }
+      doc.setFontSize(20)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(...primaryColor)
+      doc.text("Nutritionist AI Report", pageWidth / 2, 55, { align: "center" })
+
+      // Subtitle
+      doc.setFontSize(12)
+      doc.setFont("helvetica", "normal")
+      doc.setTextColor(100, 100, 100)
+      doc.text("30-Day Data Analysis & Nutritional Insights", pageWidth / 2, 75, { align: "center" })
+
+      // Patient name and date
+      doc.setFontSize(11)
+      doc.setTextColor(80, 80, 80)
+      doc.text(`Patient: ${patientName}`, 40, 95)
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 40, 95, { align: "right" })
+
+      // Thin line under header
+      doc.setDrawColor(...primaryColor)
+      doc.setLineWidth(0.5)
+      doc.line(40, 110, pageWidth - 40, 110)
+
+      let cursorY = 130
+
+      // ===== Content =====
+      // Split report into sections
+      const sections = report.split(/\*\*(.*?)\*\*/g)
+      
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i].trim()
+        if (!section) continue
+
+        // Check if this is a section header (odd indices after split)
+        if (i % 2 === 1) {
+          // Section header with enhanced styling
+          doc.setFillColor(240, 248, 255) // Light blue background
+          doc.rect(35, cursorY - 10, pageWidth - 70, 25, 'F')
+          
+          // Border around header
+          doc.setDrawColor(...primaryColor)
+          doc.setLineWidth(1)
+          doc.rect(35, cursorY - 10, pageWidth - 70, 25, 'S')
+          
+          doc.setFontSize(12)
+          doc.setFont("helvetica", "bold")
+          doc.setTextColor(...primaryColor)
+          doc.text(section, 50, cursorY + 5)
+          cursorY += 30
+        } else {
+          // Section content with better formatting
+          doc.setFontSize(9)
+          doc.setFont("helvetica", "normal")
+          doc.setTextColor(40, 40, 40)
+          
+          // Process content for better formatting
+          const processedContent = processReportContent(section)
+          
+          for (const paragraph of processedContent) {
+            if (paragraph.type === 'bullet') {
+              // Bullet points with proper indentation
+              doc.setFontSize(8)
+              doc.setTextColor(60, 60, 60)
+              doc.text('•', 50, cursorY)
+              const lines = doc.splitTextToSize(paragraph.text, pageWidth - 120)
+              doc.text(lines, 65, cursorY)
+              cursorY += lines.length * 10 + 8
+            } else if (paragraph.type === 'subheader') {
+              // Sub-headers
+              doc.setFontSize(10)
+              doc.setFont("helvetica", "bold")
+              doc.setTextColor(...softCoral)
+              doc.text(paragraph.text, 50, cursorY)
+              cursorY += 15
+            } else {
+              // Regular paragraphs
+              doc.setFontSize(9)
+              doc.setFont("helvetica", "normal")
+              doc.setTextColor(40, 40, 40)
+              const lines = doc.splitTextToSize(paragraph.text, pageWidth - 100)
+              doc.text(lines, 50, cursorY)
+              cursorY += lines.length * 11 + 10
+            }
+
+            // Check if we need a new page
+            if (cursorY > pageHeight - 120) {
+              doc.addPage()
+              cursorY = 50
+            }
+          }
+          
+          cursorY += 15 // Extra space between sections
+        }
+
+        // Check if we need a new page
+        if (cursorY > pageHeight - 100) {
+          doc.addPage()
+          cursorY = 50
+        }
+      }
+
+      // ===== Patient Nutritional Profile =====
+      if (appointment?.patient) {
+        cursorY += 30
+        if (cursorY > pageHeight - 200) {
+          doc.addPage()
+          cursorY = 50
+        }
+
+        // Section separator line
+        doc.setDrawColor(200, 200, 200)
+        doc.setLineWidth(1)
+        doc.line(40, cursorY - 10, pageWidth - 40, cursorY - 10)
+
+        doc.setFontSize(12)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(...primaryColor)
+        doc.text("Patient Nutritional Profile", 40, cursorY)
+        cursorY += 25
+
+        const bmi = (appointment.patient.weight / ((appointment.patient.height / 100) ** 2)).toFixed(1)
+        const bmiValue = parseFloat(bmi)
+        const bmiCategory = bmiValue < 18.5 ? "Underweight" : bmiValue < 25 ? "Normal" : bmiValue < 30 ? "Overweight" : "Obese"
+
+        const patientData = [
+          ["Metric", "Value", "Status"],
+          ["Name", appointment.patient.name, ""],
+          ["Age", `${new Date().getFullYear() - new Date(appointment.patient.dateOfBirth).getFullYear()} years`, ""],
+          ["Gender", appointment.patient.gender, ""],
+          ["Weight", `${appointment.patient.weight} kg`, ""],
+          ["Height", appointment.patient.height, ""],
+          ["BMI", `${bmi}`, bmiCategory],
+          ["Blood Type", appointment.patient.bloodType, ""],
+          ["Health Score", `${appointment.patient.healthscore}/100`, appointment.patient.healthscore > 70 ? "Good" : "Needs Attention"],
+          ["Adherence", appointment.patient.adherence, ""],
+          ["Allergies", appointment.patient.allergies || "None", ""],
+          ["Conditions", appointment.patient.conditions || "None", ""],
+        ]
+
+        autoTable(doc, {
+          startY: cursorY,
+          body: patientData,
+          theme: "grid",
+          styles: { 
+            fontSize: 9, 
+            cellPadding: 6,
+            lineColor: [200, 200, 200],
+            lineWidth: 0.5
+          },
+          headStyles: { 
+            fillColor: primaryColor, 
+            textColor: [255, 255, 255], 
+            fontSize: 10,
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { 
+            fillColor: [250, 250, 250] 
+          },
+          margin: { left: 40, right: 40 },
+          tableLineColor: [200, 200, 200],
+          tableLineWidth: 0.5
+        })
+
+        cursorY = (doc as any).lastAutoTable.finalY + 25
+      }
+
+      // ===== 30-Day Data Summary =====
+      if (fitnessData && fitnessData.length > 0) {
+        cursorY += 20
+        if (cursorY > pageHeight - 150) {
+          doc.addPage()
+          cursorY = 50
+        }
+
+        // Section separator line
+        doc.setDrawColor(200, 200, 200)
+        doc.setLineWidth(1)
+        doc.line(40, cursorY - 10, pageWidth - 40, cursorY - 10)
+
+        doc.setFontSize(12)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(...primaryColor)
+        doc.text("30-Day Data Summary", 40, cursorY)
+        cursorY += 25
+
+        // Process fitness data with proper structure
+        const fitnessMetrics = [
+          {
+            name: 'Steps',
+            values: fitnessData.map(f => f.steps || 0),
+            unit: ' steps'
+          },
+          {
+            name: 'Water Intake',
+            values: fitnessData.map(f => f.water || 0),
+            unit: ' glasses'
+          },
+          {
+            name: 'Sleep',
+            values: fitnessData.map(f => f.sleep || 0),
+            unit: ' hours'
+          },
+          {
+            name: 'Calories Burned',
+            values: fitnessData.map(f => f.calories_burned || 0),
+            unit: ' cal'
+          },
+          {
+            name: 'Calories Intake',
+            values: fitnessData.map(f => f.calories_intake || 0),
+            unit: ' cal'
+          },
+          {
+            name: 'Protein',
+            values: fitnessData.map(f => f.protein || 0),
+            unit: 'g'
+          },
+          {
+            name: 'Carbs',
+            values: fitnessData.map(f => f.carbs || 0),
+            unit: 'g'
+          },
+          {
+            name: 'Fat',
+            values: fitnessData.map(f => f.fat || 0),
+            unit: 'g'
+          }
+        ]
+
+        const summaryData = fitnessMetrics.map(metric => {
+          const values = metric.values.filter(v => v > 0) // Only non-zero values
+          const avg = values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : '0.0'
+          const min = values.length > 0 ? Math.min(...values).toFixed(1) : '0.0'
+          const max = values.length > 0 ? Math.max(...values).toFixed(1) : '0.0'
+          
+          return [metric.name, `${avg}${metric.unit}`, `${min}-${max}${metric.unit}`, `${fitnessData.length} days`]
+        })
+
+        const fitnessSummary = [
+          ["Metric Type", "Average", "Range", "Data Points"],
+          ...summaryData
+        ]
+
+        autoTable(doc, {
+          startY: cursorY,
+          body: fitnessSummary,
+          theme: "grid",
+          styles: { 
+            fontSize: 9, 
+            cellPadding: 6,
+            lineColor: [200, 200, 200],
+            lineWidth: 0.5
+          },
+          headStyles: { 
+            fillColor: softCoral, 
+            textColor: [255, 255, 255], 
+            fontSize: 10,
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { 
+            fillColor: [250, 250, 250] 
+          },
+          margin: { left: 40, right: 40 },
+          tableLineColor: [200, 200, 200],
+          tableLineWidth: 0.5
+        })
+
+        cursorY = (doc as any).lastAutoTable.finalY + 20
+      }
+
+      // ===== Footer =====
+      const pageCount = doc.getNumberOfPages()
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i)
+        
+        // Footer line
+        doc.setDrawColor(200, 200, 200)
+        doc.setLineWidth(0.5)
+        doc.line(40, pageHeight - 30, pageWidth - 40, pageHeight - 30)
+        
+        // Page number
+        doc.setFontSize(9)
+        doc.setTextColor(120, 120, 120)
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 15, { align: "center" })
+        
+        // Report generation info
+        doc.setFontSize(8)
+        doc.setTextColor(150, 150, 150)
+        doc.text(`Generated by Hygieia AI • ${new Date().toLocaleString()}`, pageWidth - 40, pageHeight - 15, { align: "right" })
+      }
+
+      // ===== Watermark =====
+      if (watermarkDataUrl) {
+        const wmW = pageWidth * 0.5
+        const wmH = pageHeight * 0.5
+        const x = (pageWidth - wmW) / 2
+        const y = (pageHeight - wmH) / 2
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+        }
+      }
+
+      // Save and open in new tab
+      const safeName = patientName.replace(/\s+/g, "_")
+      const pdfBlob = doc.output("blob")
+      const pdfUrl = URL.createObjectURL(pdfBlob)
+      
+      // Open in new tab
+      window.open(pdfUrl, "_blank")
+      
+      // Also trigger download automatically
+      const link = document.createElement('a')
+      link.href = pdfUrl
+      link.download = `${safeName}_nutritionist_report_${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Show success message
+      console.log(`Report generated and downloaded: ${safeName}_nutritionist_report_${new Date().toISOString().split('T')[0]}.pdf`)
+      
+      // Clean up the URL after a delay
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 2000)
+      
+    } catch (err) {
+      console.error("PDF generation error:", err)
+      throw err
+    }
+  }
+
+  // Helper function to process report content for better formatting
+  const processReportContent = (content: string) => {
+    const paragraphs = content.split('\n').filter(p => p.trim())
+    const processed: Array<{type: string, text: string}> = []
+    
+    for (const paragraph of paragraphs) {
+      const trimmed = paragraph.trim()
+      if (!trimmed) continue
+      
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+        // Bullet points
+        processed.push({
+          type: 'bullet',
+          text: trimmed.replace(/^[-•]\s*/, '')
+        })
+      } else if (trimmed.match(/^\d+\.\s/) || trimmed.match(/^[A-Z][^a-z]*:/)) {
+        // Sub-headers (numbered items or items ending with colon)
+        processed.push({
+          type: 'subheader',
+          text: trimmed
+        })
+      } else {
+        // Regular paragraphs
+        processed.push({
+          type: 'paragraph',
+          text: trimmed
+        })
+      }
+    }
+    
+    return processed
+  }
+
+  // Helper function to create watermark
+  const createWatermarkDataUrl = async (
+    imageUrl: string,
+    opacity: number,
+    width: number,
+    height: number
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"))
+          return
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        ctx.globalAlpha = opacity
+        ctx.drawImage(img, 0, 0, width, height)
+        
+        resolve(canvas.toDataURL("image/png"))
+      }
+      img.onerror = reject
+      img.src = imageUrl
+    })
   }
 
   if (isLoading) return <p>Loading...</p>
@@ -319,10 +783,11 @@ if (assignedDietPlan) {
               <CardContent className="p-6  py-0  space-y-3">
                 <Button
                   onClick={handleGenerateAIReport}
+                  disabled={isGeneratingAIReport || isDownloadingReport}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                 >
                   <Bot className="w-4 h-4" />
-                  Generate AI Report
+                  {isGeneratingAIReport ? "Generating..." : isDownloadingReport ? "Downloading..." : "Generate AI Report"}
                 </Button>
 
                 <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />
