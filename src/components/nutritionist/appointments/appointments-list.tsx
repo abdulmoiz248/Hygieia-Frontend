@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 
 
 export function AppointmentsList() {
-  const { appointments,    updateAppointmentStatus } =
+  const { appointments } =
     useAppointmentStore()
 
     const router=useRouter()
@@ -37,9 +37,7 @@ export function AppointmentsList() {
  
 
 
-  const handleCancelAppointment = (appointmentId: string) => {
-    updateAppointmentStatus(appointmentId, AppointmentStatus.Cancelled)
-  }
+
 
 
 

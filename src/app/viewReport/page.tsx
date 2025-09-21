@@ -1,11 +1,14 @@
 "use client";
-import { useRouter } from "next/navigation";
+
+import { useEffect, useState } from "react";
 
 export default function ViewReport() {
-  const router = useRouter();
-  const params = new URLSearchParams(window.location.search);
-  const fileUrl = params.get("fileUrl");
-  const patientName = params.get("patientName");
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setFileUrl(params.get("fileUrl"));
+  }, []);
 
   if (!fileUrl) return <p>No report available.</p>;
 
