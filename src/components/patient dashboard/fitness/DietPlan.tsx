@@ -634,8 +634,10 @@ const handleConfirmReplace = () => {
       <Loader /> Generating...
     </>
   ) : (
-    "Get Meal Ideas"
-  )}"
+    <>
+    Get Meal Ideas
+    </>
+  )}
                       </Button>
                     </div>
                   )}
