@@ -8,6 +8,7 @@ import {
   Card, CardHeader, CardTitle, CardContent, CardDescription
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import Loader from '@/components/loader/loader'
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -41,7 +42,11 @@ export default function LabTestDetailClient({ id }: { id: string }) {
     getData()
   }, [id])
 
-  if (!test) return <p>Loading test details...</p>
+  if (!test) return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
 
   return (
   <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">

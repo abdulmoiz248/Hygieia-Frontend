@@ -8,6 +8,7 @@ import {  useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import api from '@/lib/axios'
+import Loader from '@/components/loader/loader'
 
 
 const Signup = () => {
@@ -105,7 +106,13 @@ const Signup = () => {
                 disabled={loading}
                 className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white animate-slide-in-right delay-500"
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? (
+    <>
+      <Loader /> Verifying...
+    </>
+  ) : (
+    "Verify Email"
+  )}
               </Button>
             </form>
            

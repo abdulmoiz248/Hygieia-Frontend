@@ -8,9 +8,7 @@ import { LabTestCard } from "@/components/lab-tests/labTestCards"
 
 import { LabTestsFilters } from "@/components/lab-tests/LabTestFilters"
 import { useLabTests } from "@/hooks/useLabTests"
-
-
-
+import Loader from "@/components/loader/loader"
 
 
 export default function LabTestsPage() {
@@ -41,7 +39,13 @@ const filteredTests = labTests?.filter((test) => {
 })
 
 
-  if (isLoading) return <p>Loading lab tests...</p>
+  if (isLoading)  {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
+}
   if (isError) return <p>Something went wrong.</p>
 
 

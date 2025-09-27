@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, CheckCircle, AlertCircle } from "lucide-react"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import Loader from '@/components/loader/loader'
 
 
 const RecentDietPlans = () => {
@@ -20,7 +21,10 @@ const RecentDietPlans = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading diet plans...</p>
+           <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+
         ) : dietPlans.length === 0 ? (
           <p className="text-sm text-muted-foreground">No diet plans found</p>
         ) : (

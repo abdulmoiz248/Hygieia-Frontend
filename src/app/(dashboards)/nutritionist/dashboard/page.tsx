@@ -14,6 +14,7 @@ import WelcomeSection from "@/components/nutritionist/dashboard/WelcomeSection"
 import NutritionistStats from "@/components/nutritionist/dashboard/StatsCards"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import RecentDietPlans from "@/components/nutritionist/dashboard/Recent"
+import Loader from "@/components/loader/loader"
 
 export default function DashboardPage() {
 
@@ -25,8 +26,13 @@ export default function DashboardPage() {
  
 
   const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
-  if( isLoading2){
-    return <>loading....</>
+  if( isLoading2){ 
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
+
   }
 
   return (

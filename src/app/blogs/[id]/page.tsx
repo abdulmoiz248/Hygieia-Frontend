@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from "react"
 import { ShareModal } from "@/components/blog/share-modal"
 import { useParams } from "next/navigation"
 import { useBlogs } from "@/hooks/useBlogs"
+import Loader from "@/components/loader/loader"
 
 export default function BlogPostPage() {
   const { id } = useParams()
@@ -26,11 +27,12 @@ export default function BlogPostPage() {
   }, [isLoading, post])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-dark-slate-gray">Loading blog...</p>
-      </div>
-    )
+     return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
+    
   }
 
   if (isError) {

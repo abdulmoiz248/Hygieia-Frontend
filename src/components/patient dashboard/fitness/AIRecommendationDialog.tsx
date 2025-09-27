@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { WorkoutPreferences } from "@/types/patient/workoutSlice"
+import Loader from "@/components/loader/loader"
 
 type Props = {
   open: boolean
@@ -43,7 +44,13 @@ export default function AIRecommendationDialog({ open, onClose, prefs, setPrefs,
             onClick={onGenerate}
             disabled={isLoading}
           >
-            {isLoading ? "Generating..." : "Generate Plan"}
+            {isLoading ?  (
+    <>
+      <Loader /> Generating...
+    </>
+  ) : (
+    "Generating Plan"
+  )}"
           </Button>
         </div>
       </DialogContent>

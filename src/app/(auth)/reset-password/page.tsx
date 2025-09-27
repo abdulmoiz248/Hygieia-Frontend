@@ -8,7 +8,7 @@ import { Mail, AlertCircle, Loader2, CheckCircle, ArrowLeft, Lock, Eye, EyeOff, 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
-
+import Loader from "@/components/loader/loader"
 type Step = 'email' | 'otp' | 'newPassword' | 'success'
 
 export default function ResetPassword() {
@@ -173,8 +173,13 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
                 className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-300 flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? 'Sending OTP...' : 'Send OTP'}
+                 {isLoading ? (
+    <>
+      <Loader /> Sending OTP...
+    </>
+  ) : (
+    "Send OTP"
+  )}
               </Button>
             </form>
 
@@ -235,8 +240,15 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
                 className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-300 flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? 'Verifying...' : 'Verify OTP'}
+
+              
+                 {isLoading ? (
+    <>
+      <Loader /> Verifying...
+    </>
+  ) : (
+    "Verify OTP"
+  )}
               </Button>
             </form>
 
@@ -324,8 +336,13 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
                 className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-500 flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? 'Updating Password...' : 'Update Password'}
+                {isLoading ? (
+    <>
+      <Loader /> Updating Password
+    </>
+  ) : (
+    "Update Password"
+  )}
               </Button>
             </form>
           </CardContent>

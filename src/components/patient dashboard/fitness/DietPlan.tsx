@@ -4,6 +4,7 @@ import type React from "react"
 import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
+import Loader from "@/components/loader/loader"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -628,7 +629,13 @@ const handleConfirmReplace = () => {
                         className="bg-soft-coral hover:bg-soft-coral/90 text-white"
                         disabled={isLoadingMeals}
                       >
-                        {isLoadingMeals ? "Generating..." : "Get Meal Ideas"}
+                        {isLoadingMeals  ? (
+    <>
+      <Loader /> Generating...
+    </>
+  ) : (
+    "Get Meal Ideas"
+  )}"
                       </Button>
                     </div>
                   )}
@@ -649,7 +656,13 @@ const handleConfirmReplace = () => {
                     onClick={handleGenerateAIPlan}
                     disabled={isLoadingPlan}
                   >
-                    {isLoadingPlan ? "Generating..." : "Generate AI Plan"}
+                    {isLoadingPlan ? (
+    <>
+      <Loader /> Generating...
+    </>
+  ) : (
+    "Generate AI Plan"
+  )}
                   </Button>
                 </div>
               </div>
@@ -727,7 +740,13 @@ const handleConfirmReplace = () => {
                   disabled={isLoadingPlan}
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  {isLoadingPlan ? "Generating..." : "Generate Plan"}
+                  {isLoadingPlan ?  (
+    <>
+      <Loader /> Generating...
+    </>
+  ) : (
+    "Generate Plan"
+  )}
                 </Button>
                 <Button
                   type="button"
@@ -817,7 +836,13 @@ const handleConfirmReplace = () => {
                 className="flex-1 bg-soft-coral hover:bg-soft-coral/90 text-white"
                 disabled={isLoadingMeals}
               >
-                {isLoadingMeals ? "Generating..." : "Get Meal Suggestions"}
+                {isLoadingMeals ?  (
+    <>
+      <Loader /> Generating...
+    </>
+  ) : (
+    "Suggesting meals"
+  )}
               </Button>
               <Button type="button" variant="outline" onClick={() => setIsMealModalOpen(false)}>
                 Cancel

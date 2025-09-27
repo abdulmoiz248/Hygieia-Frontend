@@ -7,6 +7,7 @@ import { NutritionistFilters } from "@/components/nutritionist-main/nutritionist
 import { Button } from "@/components/ui/button"
 import { Filter, Grid, List } from "lucide-react"
 import { useNutritionists } from "@/hooks/useNutritionist"
+import Loader from "@/components/loader/loader" 
 
 
 
@@ -96,7 +97,11 @@ console.log("filteredNutritionists:", filteredNutritionists)
 
 
 if (isLoading) {
-  return <div className="text-center py-12">Loading nutritionists...</div>
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
 }
 
 if (isError) {

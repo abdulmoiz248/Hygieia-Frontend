@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Loader from '@/components/loader/loader'
 
 interface GoogleLoginButtonProps {
   redirectUrl?: string
@@ -31,7 +32,13 @@ const GoogleLoginButton = ({
       ) : (
         <GoogleIcon className="h-5 w-5" />
       )}
-      <span>{isLoading ? "Connecting..." : "Continue with Google"}</span>
+      <span>{isLoading ? (
+    <>
+      <Loader /> Connecting...
+    </>
+  ) : (
+    "Continue with Google"
+  )}</span>
     </button>
   )
 }

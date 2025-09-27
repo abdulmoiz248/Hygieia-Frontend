@@ -10,6 +10,7 @@ import { AppointmentStatus } from "@/types/patient/appointment"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
+import Loader from "@/components/loader/loader"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -63,7 +64,10 @@ const {
     fetchAnalytics()
   }, [fetchAnalytics])
 
-  if (loading || isLoading || isLoadingDietPlan ) return <p>Loading...</p>
+  if (loading || isLoading || isLoadingDietPlan ) return  <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+
 
 
   return (

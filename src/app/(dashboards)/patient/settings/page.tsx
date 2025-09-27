@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useSelector } from "react-redux"
 import { RootState } from "@/store/patient/store"
 import api from "@/lib/axios"
+import Loader from "@/components/loader/loader"
 
 
 
@@ -239,7 +240,13 @@ export default function SettingsPage() {
                         onClick={handleVerifyEmail}
                         disabled={!email || isLoading}
                       >
-                        {isLoading ? "Verifying..." : "Verify Email"}
+                        {isLoading ? (
+    <>
+      <Loader /> Verifying...
+    </>
+  ) : (
+    "Verify OTP"
+  )}
                       </Button>
                     </div>
                   )}
@@ -259,7 +266,13 @@ export default function SettingsPage() {
                         className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Verifying..." : "Verify OTP"}
+                       {isLoading ? (
+    <>
+      <Loader /> Verifying...
+    </>
+  ) : (
+    "Verify OTP"
+  )}
                       </Button>
                     </form>
                   )}
@@ -294,7 +307,13 @@ export default function SettingsPage() {
                         className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Updating..." : "Update Password"}
+                       {isLoading ? (
+    <>
+      <Loader /> Verifying...
+    </>
+  ) : (
+    "Verify OTP"
+  )}
                       </Button>
                     </form>
                   )}

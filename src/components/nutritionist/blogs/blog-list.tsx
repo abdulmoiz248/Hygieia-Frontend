@@ -8,6 +8,7 @@ import {  Trash2, Eye, Plus } from "lucide-react"
 import { motion, Variants } from "framer-motion"
 import { useBlogStore, Blog } from "@/store/nutritionist/blogs-store"
 import Image from "next/image"
+import Loader from '@/components/loader/loader'
 
 interface BlogListProps {
   onEdit: (blog: Blog) => void
@@ -36,11 +37,12 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-cool-gray">Loading blogs...</div>
-      </div>
-    )
+    return 
+      (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
   }
 
   if (error) {

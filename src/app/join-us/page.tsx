@@ -13,6 +13,7 @@ import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle, Loader2 } from "
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
 import api from "@/lib/axios"
+import Loader from '@/components/loader/loader'
 
 type Role = "doctor" | "lab_technician" | "nutritionist" | ""
 type DoctorField = "cardiology" | "neurology" | "pediatrics" | "orthopedics" | "dermatology" | ""
@@ -276,14 +277,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       className="w-full bg-soft-blue hover:bg-soft-blue/90 border-2 border-soft-blue text-snow-white"
                       disabled={!isFormValid() || loading}
                     >
-                       {loading ? (
-                        <>
-                          <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Complete Registration"
-                      )}
+                       {loading ?  (
+    <>
+      <Loader /> Submitting...
+    </>
+  ) : (
+    "Complete Registration"
+  )}
                     </Button>
                   </form>
                   {errorMessage && (

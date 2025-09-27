@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation"
 import { NutritionistProfile as NP } from "@/store/nutritionist/userStore"
 import { useNutritionists } from "@/hooks/useNutritionist"
+import Loader from "@/components/loader/loader"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -34,7 +35,10 @@ export function NutritionistProfile({ id }: { id: string }) {
   const { data: nutritionists, isLoading, isError } = useNutritionists()
   const [showQR, setShowQR] = useState(false)
   if (isLoading) {
-    return <div className="text-center py-12">Loading nutritionists...</div>
+    return  <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+
   }
 
   if (isError) {

@@ -6,6 +6,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import { Activity } from "lucide-react"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
+import Loader from "@/components/loader/loader"
 
 
 
@@ -26,7 +27,11 @@ export function PatientMetricsChart() {
   const [width] = useWindowSize()
 
   if(isLoading)
-    return <>loading...</>
+    (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
     
   return (
     <Card className="w-full max-w-full sm:max-w-3xl mx-auto scale-in overflow-hidden bg-white/60">

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import Loader from "@/components/loader/loader"
 import {
   Dialog,
   DialogContent,
@@ -162,7 +163,13 @@ export function MedicalRecordsHeader({
               onClick={handleUpload}
               disabled={loading}
             >
-              {loading ? "Uploading..." : "Upload Record"}
+              {loading ? (
+    <>
+      <Loader /> Uploading...
+    </>
+  ) : (
+    "Upload Record"
+  )}
             </Button>
           </div>
         </DialogContent>

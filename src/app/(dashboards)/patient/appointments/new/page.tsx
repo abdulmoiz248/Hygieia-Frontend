@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarComponent } from "@/components/ui/calendar"
+import Loader from '@/components/loader/loader'
 
 
 import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSelector"
@@ -117,7 +118,11 @@ useEffect(()=>{
 
 
     if (isLoading) {
-      return <div className="text-center py-12">Loading ...</div>
+       return (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader />
+          </div>
+        )
     }
   
     if (isError) {

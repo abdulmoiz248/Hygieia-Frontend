@@ -6,6 +6,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import { Calendar } from "lucide-react"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
+import Loader from '@/components/loader/loader'
 
 
 // Hook to force chart re-render when window resizes (sidebar toggle)
@@ -23,7 +24,11 @@ export function AppointmentTrendsChart() {
     const { appointmentData, isLoading } = useDashboardStore()
   const [width] = useWindowSize()
 
-  if(isLoading) return <>Loading...</>
+  if(isLoading) return  (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
   return (
     <Card className="w-full max-w-full sm:max-w-3xl mx-auto scale-in overflow-hidden bg-white/60">
       <CardHeader className="space-y-1">

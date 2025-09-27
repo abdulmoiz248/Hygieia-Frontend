@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
+import Loader from '@/components/loader/loader'
 import {
   Calendar,
   Heart,
@@ -623,7 +624,11 @@ if (assignedDietPlan) {
     })
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) { return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )}
 
   if (!appointment) {
     return (
@@ -787,7 +792,13 @@ if (assignedDietPlan) {
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                 >
                   <Bot className="w-4 h-4" />
-                  {isGeneratingAIReport ? "Generating..." : isDownloadingReport ? "Downloading..." : "Generate AI Report"}
+                  {isGeneratingAIReport ? "Generating..." : isDownloadingReport ? (
+    <>
+      <Loader /> Downloading...
+    </>
+  ) : (
+    "Generate AI report"
+  )}
                 </Button>
 
                 <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />

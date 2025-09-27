@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {  CalendarComponent } from "@/components/ui/calendar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
+import Loader from "@/components/loader/loader"
 
 
 
@@ -52,7 +53,13 @@ export default function AppointmentsPage() {
     if(appointments.length==0) dispatch(fetchAppointments(patientId!))
   }, [dispatch, patientId])
 
-  if (loading) return <p>Loading...</p>
+  if (loading)  {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader />
+    </div>
+  )
+}
   if (error) return <p>Error: {error}</p>
 
   

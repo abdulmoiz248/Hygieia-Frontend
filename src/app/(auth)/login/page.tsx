@@ -9,6 +9,7 @@ import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
+import Loader from "@/components/loader/loader"
 import Cookies from 'js-cookie'
 
 export default  function Login() {
@@ -124,8 +125,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                 className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-400 flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? 'Logging In...' : 'Login'}
+                {isLoading ? (
+    <>
+      <Loader /> Logging in...
+    </>
+  ) : (
+    "Login"
+  )}
               </Button>
             </form>
 

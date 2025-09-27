@@ -6,6 +6,7 @@ import { BlogCard } from "@/components/blog/blog-card"
 import { CategoryFilter } from "@/components/blog/category-filter"
 import { BlogHero } from "@/components/blog/blog-hero"
 import { TrendingUp, Star, Clock } from "lucide-react"
+import Loader from '@/components/loader/loader'
 
 export default function BlogPage() {
   const { data, isLoading, isError } = useBlogs()
@@ -23,11 +24,13 @@ export default function BlogPage() {
   const regularPosts = filteredPosts.filter((post) => !post.featured)
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-dark-slate-gray">Loading blogs...</p>
-      </div>
-    )
+   
+       return (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader />
+          </div>
+       
+       )
   }
 
   if (isError) {
