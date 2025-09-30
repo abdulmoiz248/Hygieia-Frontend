@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import Loader from '@/components/loader/loader'
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle, ArrowRight } from "lucide-react"
+import { CheckCircle } from "lucide-react"
 import type { KeyboardEvent, ClipboardEvent, ChangeEvent } from "react"
 import api from "@/lib/axios"
 

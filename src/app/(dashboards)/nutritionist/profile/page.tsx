@@ -2,7 +2,7 @@
 import Suggestions from '@/components/patient dashboard/profile/Suggestions'
 import { useEffect, useState } from "react"
 import { motion, Variants } from "framer-motion"
-import { User,  Save, Edit,  Heart, AlertTriangle, Loader2 } from "lucide-react"
+import { User, Edit,  Heart, AlertTriangle} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

@@ -18,8 +18,8 @@ import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import { BellRing } from "@/components/ui/BellRing"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
-  // Fetch profile via hook
-  const { data: profile, isLoading } = useLabTechnicianProfile()
+
+  const { data: profile} = useLabTechnicianProfile()
   const { notifications, markAllAsRead } = useLabTechnicianStore()
 
   const unreadCount = notifications.filter((n) => n.unread).length

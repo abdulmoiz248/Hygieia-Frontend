@@ -27,13 +27,18 @@ const GoogleLoginButton = ({
       className={`flex items-center mt-3 justify-center gap-2 w-full bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 border border-gray-300 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? "opacity-70 cursor-not-allowed" : ""} ${className}`}
       aria-label="Continue with Google"
     >
-      <span>{isLoading ? (
+     <span className="flex items-center gap-2">
+  {isLoading ? (
     <>
       <Loader /> Connecting...
     </>
   ) : (
-    "Continue with Google"
-  )}</span>
+    <>
+      <GoogleIcon className="h-5 w-5" />
+      Continue with Google
+    </>
+  )}
+</span>
     </button>
   )
 }
