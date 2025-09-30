@@ -45,7 +45,7 @@ export default function DietPlan() {
   } = useDiet()
 
 
-
+  
 useEffect(() => {
   getDietPlan()
 }, [])
@@ -635,7 +635,7 @@ const handleConfirmReplace = () => {
     </>
   ) : (
     "Get Meal Ideas"
-  )}"
+  )}
                       </Button>
                     </div>
                   )}

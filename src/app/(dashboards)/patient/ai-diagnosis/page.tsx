@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef } from "react"
+import Image from "next/image"
 import { Upload,  FileImage, X } from "lucide-react"
 import Card from "@/components/patient dashboard/ai diagnosis/Card"
 import CardContent from "@/components/patient dashboard/ai diagnosis/CardContent"
@@ -244,7 +245,7 @@ export default function AIDiagnosisPage() {
                 ) : (
                   <div className="space-y-4">
                     <div className="relative">
-                      <img
+                      <Image
                         src={uploadedImage || ""}
                         alt="Uploaded for analysis"
                         className="w-full h-64 object-cover rounded-lg"

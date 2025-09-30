@@ -1,81 +1,73 @@
-
-
 "use client"
 
 import { motion } from "framer-motion"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
 import { useEffect, useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
-import useLabTechnicianStore from "@/store/lab-tech/userStore"
-import { useLabStore } from "@/store/lab-tech/labTech"
+import { useLabTechnicianProfile } from "@/hooks/useLabTechnicianProfile"
+import { useLabTechnicianDashboard } from "@/hooks/useLabTechnicianDashboard"
 
-export default function WelcomeSection() {
+export default function WelcomeSection({ techId }: { techId: string }) {
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
 
-    const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-}
+  const { data: profile } = useLabTechnicianProfile()
+  const { data: dashboard } = useLabTechnicianDashboard()
 
+  const pendingCount = dashboard?.pendingReports?.length ?? 0
 
-   const user=useLabTechnicianStore().profile
-   const {getPendingCount}=useLabStore()
-   
-    
-      const [showDes,setShowDes]=useState(false)
-      const handleAnimationComplete = () => {
-      setShowDes(true)
-    };
+  const [showDes, setShowDes] = useState(false)
+  const handleAnimationComplete = () => setShowDes(true)
 
-    useEffect(() => {
-  const timer = setTimeout(() => setShowDes(true), 1000); // fallback
-  return () => clearTimeout(timer);
-}, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDes(true), 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
-   
-       <motion.div variants={itemVariants}>
- 
- <SplitText
-   text={   <span>
-       <span className="text-soft-coral">Welcome, </span>
-       <span className="text-dark-slate-gray">{user?.name || 'user'}! 👋</span>
-     </span>
-     }
-   className="text-3xl font-bold mb-2"
-   delay={100}
-   duration={0.4}
-   ease="power3.out"
-   splitType="chars"
-   from={{ opacity: 0, y: 40 }}
-   to={{ opacity: 1, y: 0 }}
-   threshold={0.1}
-   rootMargin="-100px"
-   textAlign="center"
-   onLetterAnimationComplete={handleAnimationComplete}
- />
- 
- {showDes && (
-   <div className="block mt-2 ">
-     <TextType
-       text={ [
-  getPendingCount() === 0 
-  ? "🎉 Great job! No pending reports." 
-  : `🧪 You have ${getPendingCount()} sample${getPendingCount() > 1 ? 's' : ''} pending for processing.`
-,"📋 Review and validate today's test reports before submission.",
-  "⚠️ Double-check patient details to avoid labeling errors.",
-  "🧼 Maintain lab hygiene — disinfect equipment regularly."
-]}
+    <motion.div variants={itemVariants}>
+      <SplitText
+        text={
+          <span>
+            <span className="text-soft-coral">Welcome, </span>
+            <span className="text-dark-slate-gray">{profile?.name || "user"}! 👋</span>
+          </span>
+        }
+        className="text-3xl font-bold mb-2"
+        delay={100}
+        duration={0.4}
+        ease="power3.out"
+        splitType="chars"
+        from={{ opacity: 0, y: 40 }}
+        to={{ opacity: 1, y: 0 }}
+        threshold={0.1}
+        rootMargin="-100px"
+        textAlign="center"
+        onLetterAnimationComplete={handleAnimationComplete}
+      />
 
-       typingSpeed={75}
-       pauseDuration={1500}
-       showCursor={true}
-       cursorCharacter="|"
-     textColors={['-cool-gray']}
-     className="font-bold"
-     />
-   </div>
- )}
- 
+      {showDes && (
+        <div className="block mt-2">
+          <TextType
+            text={[
+              pendingCount === 0
+                ? "🎉 Great job! No pending reports."
+                : `🧪 You have ${pendingCount} sample${pendingCount > 1 ? "s" : ""} pending for processing.`,
+              "📋 Review and validate today's test reports before submission.",
+              "⚠️ Double-check patient details to avoid labeling errors.",
+              "🧼 Maintain lab hygiene — disinfect equipment regularly.",
+            ]}
+            typingSpeed={75}
+            pauseDuration={1500}
+            showCursor={true}
+            cursorCharacter="|"
+            textColors={["-cool-gray"]}
+            className="font-bold"
+          />
+        </div>
+      )}
     </motion.div>
   )
 }

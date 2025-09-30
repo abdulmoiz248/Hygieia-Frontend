@@ -1,9 +1,6 @@
 import { Badge } from "@/components/ui/badge"
-import { useLabStore } from "@/store/lab-tech/labTech"
 
-export default function CompletedHeader() {
-  const { completedReports } = useLabStore()
-  const completedCount = completedReports.length
+export default function CompletedHeader({ completedCount }: { completedCount: number }) {
 
   return (
     <div className="mb-4">

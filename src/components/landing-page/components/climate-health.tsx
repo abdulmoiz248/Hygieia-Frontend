@@ -6,6 +6,7 @@ import { Cloud, CloudRain, Sun, Thermometer, Snowflake, Wind, AlertTriangle, Dro
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Loader from '@/components/loader/loader'
 
 
 const weatherIcons = {
@@ -284,7 +285,7 @@ export default function ClimateHealth() {
               ) : loading ? (
                 <div className="p-8 bg-snow-white/50 flex items-center justify-center" style={{ minHeight: "300px" }}>
                   <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                   <Loader/>
                     <p className="text-cool-gray">Fetching weather data...</p>
                   </div>
                 </div>

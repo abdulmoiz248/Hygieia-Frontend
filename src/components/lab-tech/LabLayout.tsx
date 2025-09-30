@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useLabStore } from "@/store/lab-tech/labTech"
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
-  const  loading  = useLabStore().isLoading
+
   
   const activeTab = useLabStore((state) => state.activeTab)
   const setActiveTab = useLabStore((state) => state.setActiveTab)
@@ -17,7 +17,6 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const isAppLoading = loading
 
   useEffect(() => {
     setMounted(true)
@@ -28,7 +27,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleEsc)
   }, [])
 
-  if (!mounted || isAppLoading) return null
+  if (!mounted) return null
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

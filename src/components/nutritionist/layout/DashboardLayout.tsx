@@ -52,7 +52,6 @@ const {
   } = useDietPlanStore()
 
 
-  
   useEffect(() => {
       if(dietPlans.length==0 && profile?.id) fetchDietPlans(profile?.id)
     }, [profile, fetchDietPlans])

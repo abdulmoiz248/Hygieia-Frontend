@@ -8,17 +8,32 @@ import { useLabStore } from "@/store/lab-tech/labTech"
 import CompletedHeader from "./CompletedHeader"
 import { PendingReportFilter } from "../pending-reports/PendingReportsFilter"
 import {DownloadIcon} from '@/components/ui/Download'
+import { useLabTechnicianDashboard } from "@/hooks/useLabTechnicianDashboard"
+import Loader from '@/components/loader/loader'
 
-export function CompletedReports() {
-  const { completedReports } = useLabStore()
+export function CompletedReports({ techId }: { techId: string }) {
   const [searchTerm, setSearchTerm] = useState("")
+  const { data, isLoading, isError } = useLabTechnicianDashboard(techId)
+
+  const completedReports = data?.completedReports ?? []
 
   const filteredReports = completedReports.filter((report) => {
     const matchesSearch =
       report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.testName.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch 
+    return matchesSearch
   })
+
+  if (isLoading) {
+         return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader />
+            </div>
+          )
+      }
+  if (isError) {
+    return <p className="p-6 text-red-500">Failed to load reports</p>
+  }
 
 
 const handleDownload = (fileUrl: string, patientName: string) => {
@@ -34,7 +49,7 @@ const handleDownload = (fileUrl: string, patientName: string) => {
   return (
     <div className="space-y-6 fade-in p-6 bg-snow-white">
       {/* Header */}
-      <CompletedHeader/>
+      <CompletedHeader completedCount={completedReports.length} />
       {/* Filters */}
      <PendingReportFilter searchQuery={searchTerm} setSearchQuery={setSearchTerm}/>
       {/* Completed Reports List */}

@@ -4,7 +4,7 @@ import DialogContent from "./DialogContent";
 import DialogHeader from "./DialogHeader";
 import DialogTitle from "./DialogTitle";
 import Progress from "./Progress";
-import { Loader2 } from "lucide-react";
+import Loader from '@/components/loader/loader'
 
 interface AnalysisProgressModalProps {
   open: boolean;
@@ -17,7 +17,7 @@ const AnalysisProgressModal: React.FC<AnalysisProgressModalProps> = ({ open, sel
     <DialogContent className="max-w-md">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          <Loader2 className="w-5 h-5 animate-spin text-soft-blue" />
+          <Loader/>
           Analyzing Your Image
         </DialogTitle>
       </DialogHeader>

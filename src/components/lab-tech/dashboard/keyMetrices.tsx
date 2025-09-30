@@ -1,27 +1,38 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TestTube, FileCheck, Clock,  Calendar } from 'lucide-react'
+import { TestTube, FileCheck, Clock, Calendar } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-
-import { useLabStore } from '@/store/lab-tech/labTech'
 import CountUp from '@/blocks/TextAnimations/CountUp/CountUp'
+import { useLabTechnicianDashboard } from '@/hooks/useLabTechnicianDashboard'
+import Loader from '@/components/loader/loader'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 }
 }
 
-export default function KeyMetrics() {
-  const { analytics,  getPendingCount, getCompletedCount } = useLabStore()
+export default function KeyMetrics({ techId }: { techId: string }) {
+  const { data, isLoading, isError } = useLabTechnicianDashboard(techId)
 
+  
+  const analytics = data?.analytics ?? { totalTests: 0, completedTests: 0, pendingReports: 0, todayTests: 0 }
+  const currentPendingCount = data?.pendingReports.length ?? 0
+  const currentCompletedCount = data?.completedReports.length ?? 0
+  const completionRate = analytics.totalTests > 0 
+      ? Math.round((currentCompletedCount / analytics.totalTests) * 100) 
+      : 0
 
-
-  const currentPendingCount = getPendingCount()
-  const currentCompletedCount = getCompletedCount()
-  const completionRate = analytics.totalTests > 0 ? Math.round((currentCompletedCount / analytics.totalTests) * 100) : 0
+  if (isLoading){
+         return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader />
+            </div>
+          )
+      }
+  if (isError) return <p className="p-6 text-red-500">Failed to load metrics</p>
 
   return (
     <motion.div
@@ -76,13 +87,11 @@ export default function KeyMetrics() {
                 <p className="text-2xl font-bold text-soft-coral">
                   <CountUp from={0} to={currentPendingCount} separator="," direction="up" duration={1} className="text-soft-coral" />
                 </p>
-              {
-                currentPendingCount!=0
-                 &&
-                   <Badge variant="outline" className="mt-1 text-xs border-soft-coral/30 text-soft-coral">
-                  Requires attention
-                </Badge>
-              }
+                {currentPendingCount !== 0 && (
+                  <Badge variant="outline" className="mt-1 text-xs border-soft-coral/30 text-soft-coral">
+                    Requires attention
+                  </Badge>
+                )}
               </div>
               <Clock className="w-8 h-8 text-soft-coral" />
             </div>
@@ -99,7 +108,6 @@ export default function KeyMetrics() {
                 <p className="text-2xl font-bold text-cool-gray">
                   <CountUp from={0} to={analytics.todayTests} separator="," direction="up" duration={1} className="text-cool-gray" />
                 </p>
-              
               </div>
               <Calendar className="w-8 h-8 text-cool-gray" />
             </div>

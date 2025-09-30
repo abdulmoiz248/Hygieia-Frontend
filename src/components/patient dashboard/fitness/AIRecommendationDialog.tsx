@@ -50,7 +50,7 @@ export default function AIRecommendationDialog({ open, onClose, prefs, setPrefs,
     </>
   ) : (
     "Generating Plan"
-  )}"
+  )}
           </Button>
         </div>
       </DialogContent>

@@ -88,7 +88,7 @@ export default function DashboardStats() {
   }
 
   const [data, setData] = useState<StatCardData[] | null>(null)
-
+ 
   useEffect(() => {
     mockGetDashboardStats().then(setData)
   }, [])

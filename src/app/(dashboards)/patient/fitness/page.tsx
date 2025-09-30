@@ -34,6 +34,7 @@ export default function FitnessPage() {
    const profile=useSelector((state:RootState)=>state.profile)
   const dispatch=useDispatch<AppDispatch>()
 
+
   useEffect(()=>{
       dispatch(fetchFitness(profile.id))   
   },[])

@@ -1,9 +1,7 @@
 "use client"
 
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-import {Activity, Users } from "lucide-react"
+import { Activity, Users } from "lucide-react"
 import {
   BarChart,
   Bar,
@@ -15,43 +13,57 @@ import {
   PieChart,
   Pie,
   Cell,
-
 } from "recharts"
+
 import WelcomeSection from "./WelcomeSection"
 import KeyMetrics from "./keyMetrices"
 import RecentActivity from "./RecentActivity"
-import { useLabStore } from "@/store/lab-tech/labTech"
+import Loader from '@/components/loader/loader'
+import { useLabTechnicianDashboard } from "@/hooks/useLabTechnicianDashboard"
 
+const COLORS = [
+  "var(--color-mint-green)",
+  "var(--color-soft-blue)",
+  "var(--color-cool-gray)",
+  "var(--color-soft-coral)",
+  "var(--color-dark-slate-gray)",
+]
 
+interface DashboardAnalyticsProps {
+  techId: string
+}
 
+export function DashboardAnalytics({ techId }: DashboardAnalyticsProps) {
+  const { data, isLoading, isError } = useLabTechnicianDashboard(techId)
 
+  const weeklyData = data?.weeklyData ?? []
+  const testCategoryData = data?.testCategoryData ?? []
 
+  const todayIndex = new Date().getDay()
 
-const COLORS = ["var(--color-mint-green)", "var(--color-soft-blue)", "var(--color-cool-gray)", "var(--color-soft-coral)", "var(--color-dark-slate-gray)"]
+  const orderedWeeklyData = [
+    ...weeklyData.slice(todayIndex + 1),
+    ...weeklyData.slice(0, todayIndex + 1),
+  ]
 
-export function DashboardAnalytics() {
-
-
-
-   const {weeklyData,testCategoryData}=useLabStore()
-   // Get current day index (0 = Sun, 6 = Sat)
-const todayIndex = new Date().getDay();
-
-// Reorder weeklyData so current day is last
-const orderedWeeklyData = [
-  ...weeklyData.slice(todayIndex + 1),
-  ...weeklyData.slice(0, todayIndex + 1)
-];
-
+  if (isLoading)
+    {
+           return (
+              <div className="flex items-center justify-center min-h-[400px]">
+                <Loader />
+              </div>
+            )
+        }
+  if (isError)
+    return <p className="p-6 text-center text-red-500">Failed to load dashboard analytics</p>
 
   return (
     <div className="space-y-6 mt-0 p-6 bg-snow-white min-h-screen">
       {/* Header */}
-     <WelcomeSection/>
+      <WelcomeSection techId={techId} />
 
-    <KeyMetrics/>
-
-    
+      {/* Key Metrics */}
+      <KeyMetrics techId={techId}/>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -64,23 +76,30 @@ const orderedWeeklyData = [
             </CardTitle>
           </CardHeader>
           <CardContent>
-           <ResponsiveContainer width="100%" height={320}>
-  <BarChart data={orderedWeeklyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-    <XAxis dataKey="day" stroke="#666" />
-    <YAxis stroke="#666" />
-    <Tooltip
-      contentStyle={{
-        backgroundColor: "white",
-        border: "1px solid #e5e7eb",
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-      }}
-    />
-    <Bar dataKey="completed" fill="var(--color-mint-green)" name="Completed" radius={[4, 4, 0, 0]} />
-  </BarChart>
-</ResponsiveContainer>
-
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart
+                data={orderedWeeklyData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="day" stroke="#666" />
+                <YAxis stroke="#666" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  }}
+                />
+                <Bar
+                  dataKey="completed"
+                  fill="var(--color-mint-green)"
+                  name="Completed"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
@@ -116,10 +135,8 @@ const orderedWeeklyData = [
         </Card>
       </div>
 
-    
-
       {/* Recent Activity */}
-      <RecentActivity/>
+      <RecentActivity />
     </div>
   )
 }

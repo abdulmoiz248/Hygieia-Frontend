@@ -1,4 +1,3 @@
-import api from "@/lib/axios"
 import { create } from "zustand"
 
 export interface LabTechnicianProfile {
@@ -24,7 +23,6 @@ export interface LabTechnicianStore {
   notifications: Notification[]
   loading: boolean
   setProfile: (profileData: LabTechnicianProfile) => void
-  fetchProfile: () => Promise<void>
   updateProfileField: <K extends keyof LabTechnicianProfile>(
     field: K,
     value: LabTechnicianProfile[K]
@@ -34,70 +32,40 @@ export interface LabTechnicianStore {
   markAsRead: (id: string) => void
   markAllAsRead: () => void
   clearNotifications: () => void
-  
 }
 
-const useLabTechnicianStore = create<LabTechnicianStore>((set) => {
-  const fetchProfile = async () => {
-    try {
-      set({ loading: true })
+const useLabTechnicianStore = create<LabTechnicianStore>((set) => ({
+  profile: null,
+  notifications: [],
+  loading: false,
 
-      const id = localStorage.getItem("id")
-      const role = localStorage.getItem("role")
-      console.log("id=",id," role= ",role)
+  setProfile: (profileData) => set({ profile: profileData }),
 
-      if (!id || !role) throw new Error("Missing id or role in localStorage")
-        
+  updateProfileField: (field, value) =>
+    set((state) => ({
+      profile: state.profile ? { ...state.profile, [field]: value } : null,
+    })),
 
-     const res=await api.get(`/auth/user?id=${id}&role=${role}`)
+  resetProfile: () => set({ profile: null }),
 
+  addNotification: (notification) =>
+    set((state) => ({
+      notifications: [{ ...notification, unread: true }, ...state.notifications],
+    })),
 
-      if (!res.data.success) throw new Error("Failed to fetch profile")
-      const data = await res.data
+  markAsRead: (id) =>
+    set((state) => ({
+      notifications: state.notifications.map((n) =>
+        n.id === id ? { ...n, unread: false } : n
+      ),
+    })),
 
-      set({ profile: data, loading: false })
-    } catch (err) {
-      console.error("Error fetching profile:", err)
-      set({ profile: null, loading: false })
-    }
-  }
+  markAllAsRead: () =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, unread: false })),
+    })),
 
-  return {
-    profile: null,
-    notifications: [],
-    loading: false,
-   setProfile: async(profileData) => {
-    const role=localStorage.getItem('role')
-   
-        await api.post(`/auth/user?role=${role}`, {profileData})
-    set({ profile: profileData })
-
-   },
-
-
-    fetchProfile,
-    updateProfileField: (field, value) =>
-      set((state) => ({
-        profile: state.profile ? { ...state.profile, [field]: value } : null,
-      })),
-    resetProfile: () => set({ profile: null }),
-    addNotification: (notification) =>
-      set((state) => ({
-        notifications: [{ ...notification, unread: true }, ...state.notifications],
-      })),
-    markAsRead: (id) =>
-      set((state) => ({
-        notifications: state.notifications.map((n) =>
-          n.id === id ? { ...n, unread: false } : n
-        ),
-      })),
-    markAllAsRead: () =>
-      set((state) => ({
-        notifications: state.notifications.map((n) => ({ ...n, unread: false })),
-      })),
-    clearNotifications: () => set({ notifications: [] }),
-  }
-})
-
+  clearNotifications: () => set({ notifications: [] }),
+}))
 
 export default useLabTechnicianStore

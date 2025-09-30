@@ -15,6 +15,7 @@ import WorkingHours from '@/components/nutritionist/profile/WorkingHours'
 import LabTechnicianCard from '@/components/lab-tech/profile/profile'
 import { uploadUserAvatar } from '@/helpers/UploadProfilePic'
 import { generateBio } from '@/components/nutritionist/profile/GenerateBio'
+import Loader from '@/components/loader/loader'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -78,20 +79,19 @@ export default function ProfilePage() {
           disabled={isSaving}
         >
           {isEditing ? (
-            <>
-              {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {isSaving ? "Saving..." : "Save Changes"}
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </>
-          )}
+  isSaving ? (
+    <span className="flex items-center gap-2">
+      <Loader /> Saving
+    </span>
+  ) : (
+    "Save"
+  )
+) : (
+  <span className="flex items-center gap-2">
+    <Edit className="w-4 h-4" />
+    Edit Profile
+  </span>
+)}
         </Button>
       </motion.div>
 
@@ -212,8 +212,13 @@ export default function ProfilePage() {
             disabled={isGenerating}
             className="mt-2 px-3 py-1 bg-soft-coral text-white rounded-lg text-sm hover:bg-opacity-90 transition flex items-center justify-center gap-2"
           >
-            {isGenerating && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isGenerating ? "Generating..." : "Generate with AI"}
+            {isGenerating ? (
+                <>
+                  <Loader /> Generating...
+                </>
+              ) : (
+                "Generate with AI"
+              )}
           </button>
         )}
       </div>

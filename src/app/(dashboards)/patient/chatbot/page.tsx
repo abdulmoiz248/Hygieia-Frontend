@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, Bot, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 import { useSelector } from "react-redux"
 import type { RootState } from "@/store/patient/store"
+import Loader from "@/components/loader/loader"
 
 interface Message {
   id: string
@@ -40,7 +42,7 @@ export default function ChatbotPage() {
   }, [])
 
   useEffect(() => {
-    if (!isInitial) scrollToBottom()
+    if (!isInitial) scrollToBottom() 
     sessionStorage.setItem("chatMessages", JSON.stringify(messages))
   }, [messages])
 
@@ -171,7 +173,7 @@ export default function ChatbotPage() {
                       {message.sender === "user" && (
                         <Avatar className="w-8 h-8">
                           {userDp && (
-                            <img
+                            <Image
                               src={userDp}
                               alt={userName}
                               className="w-full h-full object-cover rounded-full"
@@ -232,11 +234,8 @@ export default function ChatbotPage() {
                   disabled={!inputValue.trim() || isTyping}
                   className="bg-soft-blue hover:bg-soft-blue/90"
                 >
-                  {isTyping ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  ) : (
-                    <Send className="w-4 h-4 text-white" />
-                  )}
+                  {isTyping ? <Loader /> : <Send className="w-4 h-4 text-white" />}
+
                 </Button>
               </div>
             </CardContent>

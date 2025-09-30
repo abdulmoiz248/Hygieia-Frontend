@@ -1,6 +1,7 @@
 "use client"
 
 import {  useEffect, useState } from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Calendar, Clock, User, FileText, Coins } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -115,7 +116,6 @@ const timeSlots = slotData?.availableSlots ?? []
 useEffect(()=>{
         if(timeSlots.length==0) setSelectedTime("")
   },[selectedDate])
-
 
     if (isLoading) {
        return (
@@ -445,7 +445,7 @@ onClick={() => {
 
     className="flex-1 flex items-center justify-center gap-2 border border-gray-300 bg-snow-white text-gray-800 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition duration-200"
   >
-    <img
+    <Image
       src="https://www.gstatic.com/images/branding/product/1x/calendar_2020q4_48dp.png"
       alt="Google Calendar"
       className="h-5 w-5"

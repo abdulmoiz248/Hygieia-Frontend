@@ -1,6 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -51,7 +52,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               className="flex items-center gap-3"
             >
               <div className="w-10 h-10 bg-transparent from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg">
-                <img src='/logo/logo.png' alt="logo" className="text-white font-bold text-lg"></img>
+                <Image src='/logo/logo.png' alt="logo" className="text-white font-bold text-lg"/>
               </div>
               <div>
                 <span className="font-bold text-xl text-soft-blue">Hygieia</span>

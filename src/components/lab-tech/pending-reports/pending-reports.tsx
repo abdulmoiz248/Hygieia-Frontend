@@ -1,38 +1,40 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback,  useRef } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3 } from "lucide-react"
-import { useLabStore } from "@/store/lab-tech/labTech"
+import { Upload, FileText, Clock, AlertTriangle, CheckCircle, Edit3 } from "lucide-react"
 import type { PendingReport } from "@/types/lab-tech/lab-reports"
 import PendingHeader from "./PendingHeader"
 import { PendingReportFilter } from "./PendingReportsFilter"
+import { useLabTechnicianDashboard } from "@/hooks/useLabTechnicianDashboard"
+import { useUploadReport } from "@/hooks/useUploadReport"
+import Loader from "@/components/loader/loader"
 
-export function PendingReports() {
-  const { pendingReports, uploadReport } = useLabStore()
+export function PendingReports({ techId }: { techId: string }) {
+  const { data } = useLabTechnicianDashboard(techId)
+  const uploadReport = useUploadReport()
+
+  const pendingReports = data?.pendingReports ?? []
+
   const [selectedReport, setSelectedReport] = useState<PendingReport | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isUploading, setIsUploading] = useState(false)
 
-const [reportValues, setReportValues] = useState({
-  results: [] as { test: string; reference: string; unit: string; result: string }[],
-  findings: "",
-  recommendations: "",
-  normalRange: "",
-  units: "",
-})
-
+  const [reportValues, setReportValues] = useState({
+    results: [] as { test: string; reference: string; unit: string; result: string }[],
+    findings: "",
+    recommendations: "",
+    normalRange: "",
+    units: "",
+  })
 
   const uploadSectionRef = useRef<HTMLDivElement | null>(null)
-
-  
-
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -41,53 +43,60 @@ const [reportValues, setReportValues] = useState({
     }
   }, [])
 
-const handleValueSubmit = async(payload?: string) => {
-  if (selectedReport && (reportValues.results.length > 0 || reportValues.findings)) {
-    setIsUploading(true)
-    const reportData = JSON.stringify({
-      ...reportValues,
-      results: payload ?? JSON.stringify(reportValues.results),
-    })
-    const blob = new Blob([reportData], { type: "application/json" })
-    const file = new File([blob], `${selectedReport.testName}-results.json`, { type: "application/json" })
+  const handleValueSubmit = async (payload?: string) => {
+    if (selectedReport && (reportValues.results.length > 0 || reportValues.findings)) {
+      setIsUploading(true)
+      const reportData = JSON.stringify({
+        ...reportValues,
+        results: payload ?? JSON.stringify(reportValues.results),
+      })
+      const blob = new Blob([reportData], { type: "application/json" })
+      const file = new File([blob], `${selectedReport.testName}-results.json`, {
+        type: "application/json",
+      })
 
-    await uploadReport(selectedReport.id, file, reportValues, selectedReport.type)
-    setSelectedReport(null)
-    setIsUploading(false)
-    setReportValues({
-      results: [],
-      findings: "",
-      recommendations: "",
-      normalRange: "",
-      units: "",
-    })
+      await uploadReport.mutateAsync({
+        id: selectedReport.id,
+        file,
+        reportValues,
+        type: selectedReport.type,
+      })
+
+      setSelectedReport(null)
+      setIsUploading(false)
+      setReportValues({
+        results: [],
+        findings: "",
+        recommendations: "",
+        normalRange: "",
+        units: "",
+      })
+    }
   }
-}
 
-  const handleUploadSubmit = async() => {
+  const handleUploadSubmit = async () => {
     if (selectedReport && uploadFile) {
-       setIsUploading(true)
-      await uploadReport(selectedReport.id, uploadFile, undefined, selectedReport.type)
+      setIsUploading(true)
+      await uploadReport.mutateAsync({
+        id: selectedReport.id,
+        file: uploadFile,
+        type: selectedReport.type,
+      })
       setSelectedReport(null)
       setUploadFile(null)
-       setIsUploading(false)
+      setIsUploading(false)
       const fileInput = document.getElementById("report-file") as HTMLInputElement
       if (fileInput) fileInput.value = ""
     }
   }
 
-  const isFileUploadOnly = (reportType: string) => {
-    
-    return reportType === "scan"
-  }
+  const isFileUploadOnly = (reportType: string) => reportType === "scan"
 
   const filteredReports = pendingReports.filter((report) => {
     const matchesSearch =
       report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.testName.toLowerCase().includes(searchTerm.toLowerCase())
-  
-
-    return matchesSearch 
+    return matchesSearch
   })
 
   const getStatusIcon = (status: string) => {
@@ -102,7 +111,6 @@ const handleValueSubmit = async(payload?: string) => {
         return <Clock className="w-4 h-4 text-gray-400" />
     }
   }
-
 
   return (
     <div className="space-y-6 p-6 bg-snow-white min-h-screen">
@@ -225,7 +233,7 @@ const handleValueSubmit = async(payload?: string) => {
     <CardContent className="space-y-6 relative">
      {isUploading && (
   <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm bg-white/30 z-20">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-soft-blue border-solid mb-4"></div>
+   <Loader/>
     <span className="text-soft-blue font-semibold">Uploading...</span>
   </div>
 )}

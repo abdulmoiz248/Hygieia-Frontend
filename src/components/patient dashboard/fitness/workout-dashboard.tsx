@@ -45,6 +45,7 @@ export default function WorkoutDashboard() {
   const [aiPrefs, setAiPrefs] = useState<WorkoutPreferences>(preferences)
   const [selectedRoutine, setSelectedRoutine] = useState<WorkoutRoutine | null>(null)
 
+
   useEffect(() => {
     if (routines.length === 0) fetchWorkouts()
   }, [])

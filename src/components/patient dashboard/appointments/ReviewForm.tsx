@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import StarRating from "./star-rating"
 import { Appointment } from "@/types/patient/appointment"
+import Loader from '@/components/loader/loader'
 
 
 
@@ -486,16 +487,16 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                   disabled={!isFormValid || isSubmitting}
                 >
                   {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 border-2 border-snow-white border-t-transparent rounded-full animate-spin" />
-                      <span>Submitting your review...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Heart className="w-5 h-5 text-xl" />
-                      <span>Submit Review</span>
-                    </div>
-                  )}
+  <div className="flex items-center space-x-2">
+    <Loader />
+    <span>Submitting your review...</span>
+  </div>
+) : (
+  <div className="flex items-center space-x-2">
+    <Heart className="w-5 h-5 text-xl" />
+    <span>Submit Review</span>
+  </div>
+)}
                 </Button>
               </form>
             </CardContent>

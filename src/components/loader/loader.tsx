@@ -5,7 +5,7 @@ import Image from "next/image"
 
 const Loader = () => {
   return (
-    <div className="flex items-center justify-center bg-white">
+    <div className="flex items-center justify-center">
       {/* loader */}
       <div className="animate-pulse">
         <Image

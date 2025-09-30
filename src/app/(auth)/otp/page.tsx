@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import Loader from '@/components/loader/loader'
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle, ArrowRight } from "lucide-react"
@@ -31,7 +32,7 @@ export default function OTPVerificationPage() {
     else{
       router.push('/signup')
     }
-  },[])
+  },[router])
 
   const handleChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -240,14 +241,10 @@ export default function OTPVerificationPage() {
           >
             {isVerifying ? (
               <>
-                <div className="w-5 h-5 border-2 border-dark-slate-gray border-t-transparent rounded-full animate-spin" />
-                <span>Verifying...</span>
+                 <Loader /> Verifying...
               </>
             ) : (
-              <>
-                <span>Verify Code</span>
-                <ArrowRight className="w-5 h-5" />
-              </>
+             "Verify Code"
             )}
           </button>
 

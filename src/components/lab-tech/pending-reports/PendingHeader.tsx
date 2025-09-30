@@ -1,9 +1,29 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
-import { useLabStore } from "@/store/lab-tech/labTech"
+import { useLabTechnicianDashboard } from "@/hooks/useLabTechnicianDashboard"
+import useLabTechnicianStore from "@/store/lab-tech/userStore" 
+import Loader from '@/components/loader/loader'
 
 export default function PendingHeader() {
-  const { getPendingCount } = useLabStore()
-  const currentPendingCount = getPendingCount()
+ 
+  const techId = useLabTechnicianStore((state) => state.profile?.id)
+
+  const { data, isLoading, isError } = useLabTechnicianDashboard(techId)
+
+  const currentPendingCount = data?.pendingReports?.length ?? 0
+
+  if (isLoading) {
+         return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader />
+            </div>
+          )
+      }
+
+  if (isError) {
+    return <p className="mb-4 pb-3 text-red-500">Failed to load pending reports</p>
+  }
 
   return (
     <div className="mb-4 pb-3">

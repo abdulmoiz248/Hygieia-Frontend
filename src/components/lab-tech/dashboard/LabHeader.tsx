@@ -13,25 +13,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Link from "next/link"
+import { useLabTechnicianProfile } from "@/hooks/useLabTechnicianProfile"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import { BellRing } from "@/components/ui/BellRing"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
-  const { profile, notifications, markAllAsRead } = useLabTechnicianStore()
+  // Fetch profile via hook
+  const { data: profile, isLoading } = useLabTechnicianProfile()
+  const { notifications, markAllAsRead } = useLabTechnicianStore()
+
   const unreadCount = notifications.filter((n) => n.unread).length
 
-const safeProfile = profile ?? { name: "user" }
+  // Fallback while loading
+  const safeProfile = profile ?? { name: "User", img: "/default-avatar.png" }
 
-const userInitials = (safeProfile.name || "user")
-  .split(" ")
-  .map((n) => n[0])
-  .join("")
-  .toUpperCase()
-
+  const userInitials = (safeProfile.name || "User")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0 sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-full">
       <div className="flex items-center justify-between">
+        {/* Left section: Mobile menu + logo */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -48,7 +53,9 @@ const userInitials = (safeProfile.name || "user")
           </div>
         </div>
 
+        {/* Right section: Notifications + Profile */}
         <div className="flex items-center gap-3">
+          {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
@@ -96,16 +103,17 @@ const userInitials = (safeProfile.name || "user")
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={profile?.img || "/default-avatar.png"} />
+                  <AvatarImage src={safeProfile.img} />
                   <AvatarFallback className="border p-2 bg-soft-blue text-white">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden sm:block">{profile?.name || 'user'}</span>
+                <span className="hidden sm:block">{safeProfile.name}</span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -123,28 +131,22 @@ const userInitials = (safeProfile.name || "user")
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-           <DropdownMenuItem
-  onClick={() => {
-    // clear localStorage + sessionStorage
-    localStorage.clear()
-    sessionStorage.clear()
-
-    // clear cookies
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
-    })
-
-    // optional: redirect to login
-    window.location.href = "/login"
-  }}
-  className="text-soft-coral hover:text-snow-white hover:bg-soft-coral"
->
-  <LogOut className="w-4 h-4 mr-2" />
-  Logout
-</DropdownMenuItem>
-
+              <DropdownMenuItem
+                onClick={() => {
+                  localStorage.clear()
+                  sessionStorage.clear()
+                  document.cookie.split(";").forEach((c) => {
+                    document.cookie = c
+                      .replace(/^ +/, "")
+                      .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
+                  })
+                  window.location.href = "/login"
+                }}
+                className="text-soft-coral hover:text-snow-white hover:bg-soft-coral"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

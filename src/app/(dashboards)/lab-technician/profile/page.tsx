@@ -1,59 +1,75 @@
 "use client"
 import { useEffect, useState } from "react"
 import { motion, Variants } from "framer-motion"
-import { User,  Save, Edit,  } from "lucide-react"
+import { User, Save, Edit } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import useLabTechnicianStore from "@/store/lab-tech/userStore"
-import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
+import { LabTechnicianProfile } from "@/store/lab-tech/userStore"
 import LabTechnicianCard from "@/components/lab-tech/profile/profile"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import { uploadUserAvatar } from "@/helpers/UploadProfilePic"
+import { useLabTechnicianProfile } from "@/hooks/useLabTechnicianProfile" 
+import Loader from '@/components/loader/loader'
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 }
 
-const itemVariants:Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
 
-
-
 export default function ProfilePage() {
+  const { data, isLoading, isError } = useLabTechnicianProfile()   // ✅ fetch profile from server
+  const setActiveTab = useLabStore((state) => state.setActiveTab)
 
-  const reduxProfile=useLabTechnicianStore().profile
-  const saveProfile=useLabTechnicianStore().setProfile
-  const updateField=useLabTechnicianStore().updateProfileField
-   const setactiveTab = useLabStore((state) => state.setActiveTab)
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<LabTechnicianProfile>(reduxProfile!)
+  const [profile, setProfile] = useState<LabTechnicianProfile | null>(null)
 
+  // When query gives profile data, set local state
   useEffect(() => {
-  setProfile(reduxProfile!)
-  setactiveTab('')
-}, [reduxProfile])
+    if (data) {
+      setProfile(data)
+    }
+    setActiveTab("")
+  }, [data, setActiveTab])
 
-  const handleSave = () => {
-    setIsEditing(false)
-    saveProfile(profile)
-    
+  if (isLoading) {
+         return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader />
+            </div>
+          )
+      }
+
+  if (isError) {
+    return <div className="p-6 text-red-500">Failed to load profile</div>
   }
 
+  if (!profile) {
+    return <div className="p-6">No profile data</div>
+  }
 
+  const handleSave = () => {
+    // 🔹 Right now this only updates local state
+    // Later you should replace with a mutation hook that PUTs/PATCHes profile to API
+    setIsEditing(false)
+    console.log("Profile saved (local only):", profile)
+  }
 
-
-
-
-  
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 p-6 bg-snow-white">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 p-6 bg-snow-white"
+    >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
         <div>
@@ -81,22 +97,19 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Picture & Basic Info */}
-<LabTechnicianCard
-  profile={profile}
-  isEditing={isEditing}
-  itemVariants={itemVariants}
-  onAvatarChange={(file) =>
-    uploadUserAvatar<LabTechnicianProfile>(
-      file,
-      "lab-technician",
-      profile.id,
-      updateField
-    )
-  }
-/>
-
-
-
+        <LabTechnicianCard
+          profile={profile}
+          isEditing={isEditing}
+          itemVariants={itemVariants}
+          onAvatarChange={(file) =>
+            uploadUserAvatar<LabTechnicianProfile>(
+              file,
+              "lab-technician",
+              profile.id,
+              (field, value) => setProfile((prev) => prev ? { ...prev, [field]: value } : prev)
+            )
+          }
+        />
 
         {/* Personal Information */}
         <motion.div variants={itemVariants} className="lg:col-span-2">
@@ -107,71 +120,72 @@ export default function ProfilePage() {
                 Personal Information
               </CardTitle>
             </CardHeader>
-           <CardContent className="space-y-4 px-4 md:px-6 py-6">
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div className="flex flex-col">
-      <Label className="pb-1 text-soft-blue" htmlFor="name">Full Name</Label>
-      <Input
-        id="name"
-        value={profile.name}
-        onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
-        disabled={!isEditing}
-      />
-    </div>
-    <div className="flex flex-col">
-      <Label className="pb-1 text-soft-blue" htmlFor="email">Email</Label>
-      <Input
-        id="email"
-        type="email"
-        value={profile.email}
-        onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))}
-        disabled={!isEditing}
-      />
-    </div>
-     <div>
-              <label className="text-sm font-medium text-soft-blue">Gender</label>
-           <Select value={profile.gender}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
-  <SelectTrigger>
-    <SelectValue placeholder="Select gender" />
-  </SelectTrigger>
-  <SelectContent className='bg-snow-white'>
-    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="male">Male</SelectItem>
-    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="female">Female</SelectItem>
-    <SelectItem className='hover:bg-mint-green hover:text-snow-white' value="other">Other</SelectItem>
-  </SelectContent>
-</Select>
-
-            </div>
-    <div className="flex flex-col">
-      <Label className="pb-1 text-soft-blue" htmlFor="phone">Phone Number</Label>
-      <Input
-        id="phone"
-        value={profile.phone}
-        onChange={(e) => setProfile((prev) => ({ ...prev, phone: e.target.value }))}
-        disabled={!isEditing}
-      />
-    </div>
-    <div className="flex flex-col">
-      <Label className="pb-1 text-soft-blue" htmlFor="dob">Date of Birth</Label>
-    <Input
-  id="dob"
-  type="date"
-  value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split('T')[0] : ''}
-  onChange={(e) => setProfile((prev) => ({ ...prev, dateofbirth: new Date(e.target.value) }))}
-  disabled={!isEditing}
-/>
-
-    </div>
-  </div>
-
-</CardContent>
-
+            <CardContent className="space-y-4 px-4 md:px-6 py-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <Label className="pb-1 text-soft-blue" htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    value={profile.name}
+                    onChange={(e) => setProfile((prev) => prev ? { ...prev, name: e.target.value } : prev)}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <Label className="pb-1 text-soft-blue" htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profile.email}
+                    onChange={(e) => setProfile((prev) => prev ? { ...prev, email: e.target.value } : prev)}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-soft-blue">Gender</label>
+                  <Select
+                    value={profile.gender}
+                    disabled={!isEditing}
+                    onValueChange={(value) =>
+                      setProfile((prev) => prev ? { ...prev, gender: value } : prev)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-snow-white">
+                      <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="male">Male</SelectItem>
+                      <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="female">Female</SelectItem>
+                      <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col">
+                  <Label className="pb-1 text-soft-blue" htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    value={profile.phone}
+                    onChange={(e) => setProfile((prev) => prev ? { ...prev, phone: e.target.value } : prev)}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <Label className="pb-1 text-soft-blue" htmlFor="dob">Date of Birth</Label>
+                  <Input
+                    id="dob"
+                    type="date"
+                    value={profile.dateofbirth ? new Date(profile.dateofbirth).toISOString().split("T")[0] : ""}
+                    onChange={(e) =>
+                      setProfile((prev) => prev ? { ...prev, dateofbirth: new Date(e.target.value) } : prev)
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
       </div>
-
-
-
     </motion.div>
   )
 }
