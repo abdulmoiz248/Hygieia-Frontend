@@ -67,15 +67,16 @@ export default function NutritionistStats() {
         icon: "plans",
         color: "soft-coral"
       },
-      {
-        id: "success",
-        title: "Success Rate",
-        value: successRate,
-        subtitle: "Client goal achievement",
-        icon: "success",
-        color: "mint-green",
-        colorText: "mint-green"
-      }
+      // },
+      // {
+      //   id: "success",
+      //   title: "Success Rate",
+      //   value: successRate,
+      //   subtitle: "Client goal achievement",
+      //   icon: "success",
+      //   color: "mint-green",
+      //   colorText: "mint-green"
+      // }
     ]
   }
 
@@ -100,7 +101,7 @@ export default function NutritionistStats() {
       variants={{
         visible: { transition: { staggerChildren: 0.1 } }
       }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6"
     >
       {data.map((card) => {
         const Icon = iconMap[card.icon as keyof typeof iconMap]
