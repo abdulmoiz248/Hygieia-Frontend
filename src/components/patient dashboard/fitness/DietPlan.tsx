@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File } from "lucide-react"
+import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Loader from "@/components/loader/loader"
@@ -646,7 +646,7 @@ const handleConfirmReplace = () => {
                   >
                     {isLoadingPlan ? (
     <>
-      <Loader /> Generating...
+      <Loader2  className="w-4 h-4 animate-spin"/> Generating...
     </>
   ) : (
     "Generate AI Plan"
@@ -660,94 +660,81 @@ const handleConfirmReplace = () => {
       </motion.div>
 
       {/* AI Plan Generation Modal */}
-      <Dialog open={isModalOpen} onOpenChange={resetModal}>
-        <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[600px] md:max-w-[700px] lg:max-w-[850px] xl:max-w-[1000px] 2xl:max-w-[1100px] max-h-[90vh] overflow-y-auto px-4 md:px-6 pt-6 pb-8 bg-snow-white rounded-3xl shadow-2xl border-0">
-          <DialogHeader className="mb-6 relative">
-            <DialogTitle className="flex items-center gap-3 text-soft-coral text-2xl font-bold relative z-10">
-              <div className="p-2 bg-gradient-to-br from-soft-coral/10 to-soft-coral/20 rounded-xl">
-                <ChefHat className="w-7 h-7 text-soft-coral" />
-              </div>
-              <span className="bg-gradient-to-r from-soft-coral to-soft-blue bg-clip-text text-transparent">
-                Generate AI Diet Plan
-              </span>
-              <Sparkles className="w-5 h-5 text-mint-green animate-pulse" />
-            </DialogTitle>
-          </DialogHeader>
+     <Dialog open={isModalOpen} onOpenChange={resetModal}>
+  <DialogContent className="w-[90vw] max-w-[600px] max-h-[85vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+    <DialogHeader className="mb-4">
+      <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-soft-coral">
+        <ChefHat className="w-5 h-5 text-soft-coral" />
+        <span>Generate AI Diet Plan</span>
+        <Sparkles className="w-4 h-4 text-mint-green animate-pulse" />
+      </DialogTitle>
+    </DialogHeader>
 
-          {isLoadingPlan ? (
-            <div className="flex flex-col items-center justify-center py-20 relative">
-              <div className="relative z-10 text-center">
-                <div className="w-16 h-16 border-4 border-mint-green/30 border-t-mint-green rounded-full animate-spin mx-auto mb-6"></div>
-                <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-dark-slate-gray to-soft-blue bg-clip-text text-transparent">
-                  Generating Your Personalized Plan
-                </h3>
-                <p className="text-cool-gray text-center max-w-md leading-relaxed">
-                  Our AI is analyzing your preferences and creating a customized diet plan just for you...
-                </p>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleFormSubmit} className="space-y-8">
-             
-              <div className="">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-soft-blue" />
-                    <Label htmlFor="goal" className="text-soft-blue font-semibold">
-                      Primary Goal
-                    </Label>
-                  </div>
-                  <Select
-                    value={formData.goal}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, goal: value }))}
-                  >
-                    <SelectTrigger className="h-12 rounded-xl border-2 border-cool-gray/20 hover:border-soft-blue/50 transition-all">
-                      <SelectValue placeholder="Select your goal" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-snow-white rounded-xl border-2 shadow-xl">
-                      {["weight-loss", "weight-gain", "muscle-gain", "maintenance", "general-health"].map((goal) => (
-                        <SelectItem
-                          key={goal}
-                          value={goal}
-                          className="hover:text-snow-white hover:bg-mint-green rounded-lg m-1 capitalize font-medium"
-                        >
-                          {goal.replace("-", " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-             
-              </div>
-
-              <div className="flex g pt-6">
-                <Button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-soft-blue to-soft-blue/90 hover:from-soft-blue/90 hover:to-soft-blue text-snow-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-                  disabled={isLoadingPlan}
+    {isLoadingPlan ? (
+      <div className="flex flex-col items-center justify-center py-14">
+        <div className="w-12 h-12 border-4 border-mint-green/30 border-t-mint-green rounded-full animate-spin mb-4"></div>
+        <h3 className="text-lg font-semibold text-dark-slate-gray mb-1">Generating Your Plan</h3>
+        <p className="text-sm text-cool-gray text-center max-w-sm">
+          Analyzing preferences and crafting your personalized diet plan...
+        </p>
+      </div>
+    ) : (
+      <form onSubmit={handleFormSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="goal" className="flex items-center gap-2 text-soft-blue font-medium">
+            <Target className="w-4 h-4 text-soft-blue" />
+            Primary Goal
+          </Label>
+          <Select
+            value={formData.goal}
+            onValueChange={(value) => setFormData((prev) => ({ ...prev, goal: value }))}
+          >
+            <SelectTrigger className="h-10 rounded-lg border border-cool-gray/20 hover:border-soft-blue/40 transition-all">
+              <SelectValue placeholder="Select goal" />
+            </SelectTrigger>
+            <SelectContent className="bg-white rounded-lg border shadow-md">
+              {["weight-loss", "weight-gain", "muscle-gain", "maintenance", "general-health"].map((goal) => (
+                <SelectItem
+                  key={goal}
+                  value={goal}
+                  className="hover:bg-mint-green/90 hover:text-white rounded-md capitalize text-sm"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {isLoadingPlan ?  (
-    <>
-      <Loader /> Generating...
-    </>
-  ) : (
-    "Generate Plan"
-  )}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={resetModal}
-                  className="hover:bg-soft-coral/90 hover:text-white bg-soft-coral hover:border-soft-coral transition-all duration-300 py-3 px-6 rounded-xl font-semibold"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+                  {goal.replace("-", " ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <Button
+            type="submit"
+            className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-white font-medium py-2.5 rounded-lg shadow-md transition-all duration-200"
+            disabled={isLoadingPlan}
+          >
+            {isLoadingPlan ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" /> Generate Plan
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={resetModal}
+            className="bg-soft-coral text-white hover:bg-soft-coral/90 px-5 rounded-lg font-medium transition-all duration-200"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    )}
+  </DialogContent>
+</Dialog>
+
 
       {/* Meal Preferences Modal */}
       <Dialog open={isMealModalOpen} onOpenChange={setIsMealModalOpen}>
@@ -826,7 +813,7 @@ const handleConfirmReplace = () => {
               >
                 {isLoadingMeals ?  (
     <>
-      <Loader /> Generating...
+      <Loader2 className="w-4 h-4 animate-spin" /> Generating...
     </>
   ) : (
     "Suggesting meals"

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { WorkoutPreferences } from "@/types/patient/workoutSlice"
 import Loader from "@/components/loader/loader"
+import { Loader2 } from "lucide-react"
 
 type Props = {
   open: boolean
@@ -46,7 +47,7 @@ export default function AIRecommendationDialog({ open, onClose, prefs, setPrefs,
           >
             {isLoading ?  (
     <>
-      <Loader /> Generating...
+      <Loader2 className="w-4 h-4 animate-spin" /> Generating...
     </>
   ) : (
     <>
