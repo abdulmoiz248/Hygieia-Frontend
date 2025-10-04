@@ -20,7 +20,8 @@ interface DashboardStore {
   patientData: PatientMonth[]
   appointmentData: AppointmentDay[]
   isLoading: boolean
-  fetchAnalytics: () => Promise<void>
+  setDashboardData: (patientData: PatientMonth[], appointmentData: AppointmentDay[]) => void
+
 }
 
 export const useDashboardStore = create<DashboardStore>()(
@@ -29,34 +30,9 @@ export const useDashboardStore = create<DashboardStore>()(
       patientData: [],
       appointmentData: [],
       isLoading: false,
+      setDashboardData: (patientData, appointmentData) => set({ patientData, appointmentData }),
 
-      fetchAnalytics: async () => {
-        set({ isLoading: true })
-
-        try {
-          const doctorId = localStorage.getItem("id")
-          if (!doctorId) throw new Error("Doctor ID not found in localStorage")
-
-          const [patientsRes, appointmentsRes] = await Promise.all([
-            api.get(`/analytics/patients-monthly?doctorId=${doctorId}`),
-            api.get(`/analytics/appointments-weekly?doctorId=${doctorId}`),
-          ])
-
-          if (!patientsRes.data || !appointmentsRes.data) throw new Error("Failed to fetch analytics")
-
-          const patientsData: PatientMonth[] = patientsRes.data
-          const appointmentsData: AppointmentDay[] = appointmentsRes.data
-
-          set({
-            patientData: patientsData,
-            appointmentData: appointmentsData,
-            isLoading: false,
-          })
-        } catch (err) {
-          console.error("Error fetching analytics:", err)
-          set({ isLoading: false })
-        }
-      },
+     
     }),
     { name: "dashboard-store" },
   ),

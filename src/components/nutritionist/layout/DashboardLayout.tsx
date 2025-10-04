@@ -14,6 +14,7 @@ import Loader from "@/components/loader/loader"
 import { useNutritionistProfile } from "@/hooks/nutritionist/useNutritionistProfile"
 import { useNutritionistAppointment } from "@/hooks/nutritionist/useNitritionistAppointment"
 import { useNutritionistDietPlan } from "@/hooks/nutritionist/useNutritionistDietPlan"
+import { useNutritionistDashboard } from "@/hooks/nutritionist/useNutritionistDashboard"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -88,19 +89,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [dietPlans])
 
 
+     const {setDashboardData } = useDashboardStore() 
 
-
-
-
-     const {fetchAnalytics } = useDashboardStore() 
+    const { data:DashboardData, isLoading:isLoadingDashboard, error:error4 } = useNutritionistDashboard(id)
 
        useEffect(() => {
-    fetchAnalytics()
-  }, [fetchAnalytics])
+    if (DashboardData) {
+      setDashboardData(DashboardData.patientData, DashboardData.appointmentData)
+    }
+  }, [DashboardData]) 
+ 
 
-  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile || !dietPlans || !appointments) return   <Loader />
+  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile || !dietPlans || !appointments || isLoadingDashboard ) return   <Loader />
   
 
+  if (error1 || error2 || error3 || error4) throw new Error("Failed to load data")
 
 
   return (
