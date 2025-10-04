@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, Filter, FileText } from "lucide-react"
+import { Calendar, Clock, Filter, FileText, File } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +61,191 @@ export default function AppointmentsPage() {
   )
 }
   if (error) return <p>Error: {error}</p>
+
+const handleDownloadAppointmentSchedulePdf = async () => {
+  try {
+    const { default: jsPDF } = await import("jspdf")
+    const autoTable = (await import("jspdf-autotable")).default
+
+    const doc = new jsPDF({ unit: "pt", format: "a4" })
+    const jsDoc = doc as any
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+
+    const primaryColor: [number, number, number] = [0, 131, 150]
+    const grayText: [number, number, number] = [60, 60, 60]
+    const M = { left: 48, right: 48, top: 160, bottom: 72 }
+    const headerHeight = 120
+
+    const getBase64FromUrl = async (url: string): Promise<string> => {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    }
+
+    const createWatermarkDataUrl = async (url: string, opacity: number, width: number, height: number): Promise<string> => {
+      const img = new Image()
+      img.src = url
+      await new Promise((res, rej) => {
+        img.onload = res
+        img.onerror = rej
+      })
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext("2d")!
+      ctx.globalAlpha = opacity
+      ctx.drawImage(img, 0, 0, width, height)
+      return canvas.toDataURL("image/png")
+    }
+
+    let logoDataUrl: string | null = null
+    let watermarkDataUrl: string | null = null
+    try {
+      logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+      watermarkDataUrl = await createWatermarkDataUrl("/logo/logo.png", 0.05, pageWidth * 0.5, pageHeight * 0.5)
+    } catch {}
+
+    const now = new Date()
+    const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+
+    const hospitalName = "Hygieia"
+    const hospitalTagline = "From Past to Future of Healthcare"
+    const hospitalAddress = "www.hygieia-frontend.vercel.app"
+    const hospitalContact = "+92 80 1234 5678 • hygieia.fyp@gmail.com"
+
+    const drawHeader = (doc: any) => {
+      if (logoDataUrl) doc.addImage(logoDataUrl, "PNG", M.left, 44, 56, 56)
+      doc.setTextColor(...primaryColor)
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(16)
+      doc.text(hospitalName, M.left + 70, 60)
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(11)
+      doc.setTextColor(...grayText)
+      doc.text(hospitalTagline, M.left + 70, 78)
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(hospitalAddress, M.left + 70, 94)
+      doc.text(hospitalContact, M.left + 70, 108)
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(18)
+      doc.setTextColor(...primaryColor)
+      doc.text("Appointment Schedule", pageWidth - M.right, 64, { align: "right" })
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(`Generated: ${dateStr} • ${timeStr}`, pageWidth - M.right, 80, { align: "right" })
+      doc.setDrawColor(...primaryColor)
+      doc.setLineWidth(2)
+      doc.line(M.left, headerHeight, pageWidth - M.right, headerHeight)
+    }
+
+    const drawFooter = (doc: any, pageNumber: number, pageCount: number) => {
+      doc.setDrawColor(...primaryColor)
+      doc.setLineWidth(2)
+      doc.line(M.left, pageHeight - M.bottom, pageWidth - M.right, pageHeight - M.bottom)
+      const disclaimer =
+        "This document is computer-generated and may contain confidential information. If you are not the intended recipient, please delete it."
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(9)
+      doc.setTextColor(110, 110, 110)
+      const wrapped = doc.splitTextToSize(disclaimer, pageWidth - M.left - M.right - 140)
+      doc.text(wrapped, M.left, pageHeight - M.bottom + 18)
+      doc.setFontSize(9)
+      doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth / 2, pageHeight - 16, { align: "center" })
+    }
+
+    const drawWatermark = (doc: any) => {
+      if (!watermarkDataUrl) return
+      const wmW = pageWidth * 0.45
+      const wmH = pageHeight * 0.45
+      const x = (pageWidth - wmW) / 2
+      const y = (pageHeight - wmH) / 2
+      doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+    }
+
+    const pageContentHook = () => {
+      drawWatermark(doc)
+      drawHeader(doc)
+      const pageNumber = jsDoc.internal.getCurrentPageInfo().pageNumber
+      const pageCount = jsDoc.internal.getNumberOfPages()
+      drawFooter(doc, pageNumber, pageCount)
+    }
+
+    let cursorY = M.top
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.setTextColor(...primaryColor)
+    doc.text("Patient Information", M.left, cursorY - 16)
+
+    autoTable(doc, {
+      startY: cursorY,
+      theme: "grid",
+      styles: { fontSize: 11, cellPadding: 6 },
+      headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+      margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+      head: [["Field", "Details"]],
+      body: [
+        ["Patient Name", user?.name || "-"],
+        ["Patient Email", user?.email || "-"],
+        ["Patient Contact", user?.phone || "-"],
+      ],
+      didDrawPage: pageContentHook,
+    })
+
+    cursorY = jsDoc.lastAutoTable.finalY + 30
+
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.setTextColor(...primaryColor)
+    doc.text("Upcoming Appointments", M.left, cursorY - 10)
+
+    if (!appointments || appointments.length === 0) {
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(11)
+      doc.setTextColor(...grayText)
+      doc.text("No appointments found.", M.left, cursorY + 10)
+    } else {
+      const sortedAppointments = [...appointments].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
+
+      const body = sortedAppointments.map((a, i) => [
+        i + 1,
+        `${a.doctor?.name || "-"} (${a.type})`,
+        new Date(a.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+        a.time,
+        a.mode,
+        a.status,
+      ])
+
+      autoTable(doc, {
+        startY: cursorY + 8,
+        theme: "grid",
+        styles: { fontSize: 11, cellPadding: 6 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+        head: [["#", "Doctor", "Date", "Time", "Mode", "Status"]],
+        body,
+        didDrawPage: pageContentHook,
+      })
+    }
+
+    const safeName = (user?.name || "patient").replace(/\s+/g, "_")
+    doc.save(`${safeName}_appointment_schedule.pdf`)
+  } catch (err) {
+    console.error("PDF generation error:", err)
+  }
+}
+
 
   
     const handleDownload = () => {
@@ -222,11 +407,25 @@ export default function AppointmentsPage() {
     <motion.div variants={itemVariants}>
   <Card className="bg-white/40">
     <CardHeader>
-      <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
+     
+
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+       <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
         <Clock className="w-5 h-5 text-mint-green" />
         Your Appointments
         <span className="text-mint-green">({filteredAppointments.length})</span>
       </CardTitle>
+        <Button
+          size="sm"
+          className="text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+          onClick={async () => {
+            await handleDownloadAppointmentSchedulePdf()
+          }}
+        >
+          <File className="w-4 h-4 mr-2" />
+          Download Schedule
+        </Button>
+      </CardHeader>
     </CardHeader>
 
     <CardContent className="space-y-4">
