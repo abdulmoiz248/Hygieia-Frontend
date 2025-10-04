@@ -80,7 +80,7 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
     const { addDietPlan } = useDietPlanStore.getState()
     
 
-  const { appointments, fetchAppointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
+  const { appointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [isGeneratingAIReport, setIsGeneratingAIReport] = useState(false)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
@@ -92,11 +92,6 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
   const [appointmentDone, setAppointmentDone] = useState(false)
   const router=useRouter()
 
-  useEffect(() => {
-    if (appointments.length === 0) {
-      fetchAppointments(AppointmentStatus.Upcoming)
-    }
-  }, [appointments.length, fetchAppointments])
 
   useEffect(() => {
     const foundAppointment = appointments.find((apt) => apt.id === appointmentId)
