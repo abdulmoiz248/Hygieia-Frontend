@@ -11,37 +11,54 @@ import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import Loader from "@/components/loader/loader"
+import { useNutritionistProfile } from "@/hooks/nutritionist/useNutritionistProfile"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+//id,role
+  const [id,setId]=useState<string>('')
+  const [userRole,setUserRole]=useState<string>('')
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/nutritionist/chat")
 
   const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
+
+  //tanstack hook
+  const { data:profile, isLoading:isLoadingProfile, isError:error } = useNutritionistProfile(id, userRole)
+  const {   setProfileData ,profile:p2 } = useNutritionistStore()  
+
+  useEffect(() => {
    
+      if(!profile || !isLoadingProfile){
+         setProfileData(profile)
+      }
+      
+  }, [profile])
   
   useEffect(() => {
        if(appointments.length==0)
           fetchAppointments(AppointmentStatus.Upcoming)  
         
   }, [fetchAppointments])
-    
-    
-  const {
-    profile,
-    fetchProfile,
-  loading
-  } = useNutritionistStore()
+  
+ useEffect(()=>{
+    const storedId = localStorage.getItem('id');
+    const storedRole = localStorage.getItem('role');
+    if(storedId)setId(storedId);
+    if(storedRole)setUserRole(storedRole);
+  },[])
 
-    useEffect(() => {
-      if(!profile)
-    fetchProfile()
-  }, [fetchProfile])
+    
+    
+
+
+
 
 
 const {
@@ -64,9 +81,8 @@ const {
     fetchAnalytics()
   }, [fetchAnalytics])
 
-  if (loading || isLoading || isLoadingDietPlan ) return  <div className="flex items-center justify-center min-h-[400px]">
-      <Loader />
-    </div>
+  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile) return   <Loader />
+  
 
 
 

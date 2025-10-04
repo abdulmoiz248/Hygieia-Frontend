@@ -13,16 +13,11 @@ import useLabTechnicianStore from "@/store/lab-tech/userStore"
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
 
-
   const [id,setId]=useState<string>('')
-  const [userRole,setUserRole]=useState<string>('lab-technician')
-
-
-
+  const [userRole,setUserRole]=useState<string>('')
   const { data: profile, isLoading:loading, isError:error } = useFetchProfile(id, userRole)
   const {setData}=useLabTechnicianStore()
   const { data, isLoading, isError } = useLabTechData(id)
-
   const setLabData = useLabStore((state) => state.setLabData)
 
   useEffect(() => {
@@ -34,7 +29,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
-    console.log("Profile data:", profile);
+   
      if (profile) {
       setData(profile)
     }

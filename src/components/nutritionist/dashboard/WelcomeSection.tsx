@@ -4,13 +4,12 @@
 
 import { motion } from "framer-motion"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
 
 import useNutritionistStore from "@/store/nutritionist/userStore"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
-import Loader from "@/components/loader/loader"
 
 export default function WelcomeSection() {
 
@@ -23,9 +22,9 @@ export default function WelcomeSection() {
      const {
     profile:user,
    
-  loading
+  
   } = useNutritionistStore()
-     const { appointments,isLoading } = useAppointmentStore()
+     const { appointments } = useAppointmentStore()
   const upcomingToday = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming).length
     
       const [showDes,setShowDes]=useState(false)
@@ -34,12 +33,11 @@ export default function WelcomeSection() {
     };
 
 
-    if(loading || isLoading){
-      return  <div className="flex items-center justify-center min-h-[400px]">
-      <Loader />
-    </div>
+     useEffect(() => {
+      const timer = setTimeout(() => setShowDes(true), 500); // fallback
+      return () => clearTimeout(timer);
+    }, []);
 
-    }
   return (
    
        <motion.div variants={itemVariants}>

@@ -33,7 +33,7 @@ export interface NutritionistStore {
   notifications: Notification[]
   loading: boolean
   setProfile: (profileData: NutritionistProfile) => void
-  fetchProfile: () => Promise<void>
+ 
   updateProfileField: <K extends keyof NutritionistProfile>(
     field: K,
     value: NutritionistProfile[K]
@@ -43,31 +43,14 @@ export interface NutritionistStore {
   markAsRead: (id: string) => void
   markAllAsRead: () => void
   clearNotifications: () => void
+  setProfileData: (profileData: NutritionistProfile) => void
 }
 
 const useNutritionistStore = create<NutritionistStore>((set) => {
-  const fetchProfile = async () => {
-    try {
-      set({ loading: true })
-      const id = localStorage.getItem("id")
-      const role = 'nutritionist'
-
-      if (!id || !role) throw new Error("Missing id or role in localStorage")
-
-      const res = await api.get(`/auth/user?id=${id}&role=${role}`)
-
-      if (!res.data.success) throw new Error("Failed to fetch profile")
-      const data = res.data
-
-      set({ profile: data, loading: false })
-    } catch (err) {
-      console.error("Error fetching profile:", err)
-      set({ profile: null, loading: false })
-    }
-  }
-
+  
   return {
     profile: null,
+   
     notifications: [],
     loading: true,
     setProfile: async (profileData) => {
@@ -75,7 +58,12 @@ const useNutritionistStore = create<NutritionistStore>((set) => {
       await api.post(`/auth/user?role=${role}`, { profileData })
       set({ profile: profileData })
     },
-    fetchProfile,
+   
+    setProfileData: (profileData: NutritionistProfile) => {
+      set({ profile: profileData })
+     
+    },
+
     updateProfileField: (field, value) =>
       set((state) => ({
         profile: state.profile ? { ...state.profile, [field]: value } : null,

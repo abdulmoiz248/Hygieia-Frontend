@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/nutritionist/layout/DashboardLayout";
+import ReactQueryProvider from "@/Providers/BlogsQueryProvider";
 import type { Metadata } from "next";
 
 
@@ -18,10 +19,12 @@ export default function RootLayout({
   return (
    <>
 
+<ReactQueryProvider>
     <DashboardLayout>
      {children}
      </DashboardLayout>
 
-   </>
+   </ReactQueryProvider>
+    </>
   );
 }
