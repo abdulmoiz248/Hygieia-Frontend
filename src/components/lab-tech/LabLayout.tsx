@@ -5,10 +5,50 @@ import LabSidebar from "@/components/lab-tech/dashboard/LabSidebar"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
 import { cn } from "@/lib/utils"
 import { useLabStore } from "@/store/lab-tech/labTech"
+import { useLabTechData } from "@/hooks/lab-tech/useLabTechData"
+import { useFetchProfile } from "@/hooks/lab-tech/useLabTechProfile"
+import Loader from "../loader/loader"
+import useLabTechnicianStore from "@/store/lab-tech/userStore"
+
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
-  const  loading  = useLabStore().isLoading
+
+
+  const [id,setId]=useState<string>('')
+  const [userRole,setUserRole]=useState<string>('lab-technician')
+
+
+
+  const { data: profile, isLoading:loading, isError:error } = useFetchProfile(id, userRole)
+  const {setData}=useLabTechnicianStore()
+  const { data, isLoading, isError } = useLabTechData(id)
+
+  const setLabData = useLabStore((state) => state.setLabData)
+
+  useEffect(() => {
+    if (data) {
+
+      setLabData(data)
+    }
+  }, [data])
+
+
+  useEffect(() => {
+    console.log("Profile data:", profile);
+     if (profile) {
+      setData(profile)
+    }
+  }, [profile])
   
+
+  useEffect(()=>{
+    const storedId = localStorage.getItem('id');
+    const storedRole = localStorage.getItem('role');
+    if(storedId)setId(storedId);
+    if(storedRole)setUserRole(storedRole);
+  },[])
+
+
   const activeTab = useLabStore((state) => state.activeTab)
   const setActiveTab = useLabStore((state) => state.setActiveTab)
 
@@ -17,7 +57,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const isAppLoading = loading
+  const isAppLoading = isLoading || loading || !profile || !data
 
   useEffect(() => {
     setMounted(true)
@@ -28,7 +68,8 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleEsc)
   }, [])
 
-  if (!mounted || isAppLoading) return null
+  if (!mounted || isAppLoading) return <Loader/>
+  if (error || isError) throw new Error('Failed to load data')
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

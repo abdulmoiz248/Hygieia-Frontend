@@ -1,6 +1,4 @@
 import { create } from "zustand"
-
-import useLabTechnicianStore from "./userStore"
 import type { PendingReport, LabAnalytics, LabTest, BookedLabTest,WeeklyDataItem } from "@/types/lab-tech/lab-reports"
 import { LabTechapi as api } from "@/axios-api/lab-tech"
 
@@ -23,7 +21,7 @@ uploadReport:  (id:any, file:any, reportValues: any, type: string) => void
   getPendingCount: () => number
   getCompletedCount: () => number
   getTotalTests: () => number
-  initialize: () => Promise<void>
+  setLabData: (data:any) =>void,
 }
 
 export const useLabStore = create<LabStore>((set, get) => ({
@@ -110,47 +108,25 @@ file_url=res.data.file_url
   getTotalTests: () => get().pendingReports.length + get().completedReports.length,
 
   
- initialize: async () => {
-   set({ isLoading: true })
-  const userStore = useLabTechnicianStore.getState()
-  await userStore.fetchProfile()
-    
-  
-
-  const techId = useLabTechnicianStore.getState().profile?.id
-  if (!techId) return
-
- 
-
-  try {
-    const res = await api.get(`/technician/${techId}`)
-    const allReports = res.data.bookings
-
-    const pendingReports = allReports.filter((r:PendingReport) => r.status === "pending")
-    const completedReports = allReports.filter((r:PendingReport) => r.status === "completed")
-
-    const analytics: LabAnalytics = {
-      totalTests: allReports.length,
-      completedTests: completedReports.length,
-      pendingReports: pendingReports.length,
-      todayTests: allReports.filter(
-        (r:PendingReport) => new Date(r.scheduledDate).toDateString() === new Date().toDateString()
-      ).length,
-      
-      
-    }
-
-    set({ pendingReports, completedReports, analytics, isInitialized: true,weeklyData:res.data.weeklyData,testCategoryData:res.data.testCategoryData })
-  } catch (err) {
-    console.error("Failed to fetch lab data:", err)
-  } finally {
-    set({ isLoading: false })
-  }
+  setLabData: (data) => {
+    const pending = data.pendingReports || []
+    const completed = data.completedReports || []
+    const analytics = {
+      totalTests: data.analytics.totalTests || 0,
+      completedTests: data.analytics.completedTests || 0,
+      pendingReports: data.analytics.pendingReports || 0,
+      todayTests: data.analytics.todayTests || 0,
 }
 
+
+    set({
+      pendingReports: pending,
+      completedReports: completed,
+      analytics,
+      weeklyData: data.weeklyData,
+      testCategoryData: data.testCategoryData,
+    })
+  },
+
 }))
-
-// Auto-fetch when store is first imported
-useLabStore.getState().initialize()
-
 

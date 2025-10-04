@@ -27,7 +27,7 @@ export default function WelcomeSection() {
     };
 
     useEffect(() => {
-  const timer = setTimeout(() => setShowDes(true), 1000); // fallback
+  const timer = setTimeout(() => setShowDes(true), 500); // fallback
   return () => clearTimeout(timer);
 }, []);
 
@@ -35,7 +35,9 @@ export default function WelcomeSection() {
    
        <motion.div variants={itemVariants}>
  
- <SplitText
+{
+  showDes &&
+   <SplitText
    text={   <span>
        <span className="text-soft-coral">Welcome, </span>
        <span className="text-dark-slate-gray">{user?.name || 'user'}! 👋</span>
@@ -53,6 +55,7 @@ export default function WelcomeSection() {
    textAlign="center"
    onLetterAnimationComplete={handleAnimationComplete}
  />
+}
  
  {showDes && (
    <div className="block mt-2 ">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import LabLayout from "@/components/lab-tech/LabLayout"
+import ReactQueryProvider from "@/Providers/BlogsQueryProvider"
 
 export const metadata: Metadata = {
   title: "Lab Technician | Hygieia",
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <LabLayout >{children}</LabLayout>
+  return (
+    <ReactQueryProvider>
+      <LabLayout>{children}</LabLayout>
+    </ReactQueryProvider>
+  )
 }
