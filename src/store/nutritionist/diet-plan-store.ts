@@ -31,7 +31,7 @@ interface DietPlanStore {
   isLoading: boolean
 
   // Actions
-  fetchDietPlans: (nutritionistId: string) => Promise<void>
+  setDietPlansData: (plans: DietPlan[]) => void 
   updateDietPlanBackend: (dietPlanId: string, updates: Partial<DietPlan>, nutritionistId: string) => Promise<void>
   setDietPlans: (plans: DietPlan[]) => void
   setSelectedDietPlan: (plan: DietPlan | null) => void
@@ -57,38 +57,10 @@ export const useDietPlanStore = create<DietPlanStore>()(
       setFilters: (newFilters) => set((state) => ({ filters: { ...state.filters, ...newFilters } })),
       setLoading: (loading) => set({ isLoading: loading }),
 
-      // fetch diet plans assigned to the nutritionist from backend
-    fetchDietPlans: async (nutritionistId) => {
-  set({ isLoading: true })
-  try {
-    const { data } = await api.get(`/diet-plans/assigned?nutritionistId=${nutritionistId}`)
- 
-   const camelData:DietPlan[] = data.map((plan: any) => ({
-  id: plan.id,
-  dailyCalories: plan.daily_calories,
-  protein: plan.protein,
-  carbs: plan.carbs,
-  fat: plan.fat,
-  deficiency: plan.deficiency,
-  notes: plan.notes,
-  caloriesBurned: plan.calories_burned,
-  exercise: plan.exercise,
-  startDate: new Date(plan.start_date),
-  endDate: new Date(plan.end_date),
-  patientId: plan.patient_id,
-  patientName: plan.patientName,
-  nutritionistId: plan.nutritionist_id,
-}))
+      setDietPlansData: (plans) => {
+        set({ dietPlans: plans })
+      },
 
-   
-    set({ dietPlans: camelData })
-  } catch (err: any) {
-    console.error("Failed to fetch diet plans:", err.message || err)
-  } finally {
-    set({ isLoading: false })
-  }
-}
-,
 
       // update diet plan both in store and backend
     updateDietPlanBackend: async (dietPlanId, updates, nutritionistId) => {

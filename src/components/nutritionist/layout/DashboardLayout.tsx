@@ -13,6 +13,7 @@ import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import Loader from "@/components/loader/loader"
 import { useNutritionistProfile } from "@/hooks/nutritionist/useNutritionistProfile"
 import { useNutritionistAppointment } from "@/hooks/nutritionist/useNitritionistAppointment"
+import { useNutritionistDietPlan } from "@/hooks/nutritionist/useNutritionistDietPlan"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -28,14 +29,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/nutritionist/chat")
 
+  //tanstack hook profile
   const { setAppointments ,setLoading} = useAppointmentStore()
-  const { data:appointments, isLoading, isError } = useNutritionistAppointment(id, AppointmentStatus.Upcoming)
+  const { data:appointments, isLoading, isError:error1 } = useNutritionistAppointment(id, AppointmentStatus.Upcoming)
   
 
     useEffect(() => {
 
-      if(appointments) {
-       console.log("Appointments fetched:", appointments);    
+      if(appointments) {  
         setAppointments(appointments)
         setLoading(false)
       }
@@ -43,9 +44,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [appointments])
 
 
-  //tanstack hook
-  const { data:profile, isLoading:isLoadingProfile, isError:error } = useNutritionistProfile(id, userRole)
+  //tanstack hook profile
+  const { data:profile, isLoading:isLoadingProfile, isError:error2 } = useNutritionistProfile(id, userRole)
   const {   setProfileData  } = useNutritionistStore()  
+
+
 
   useEffect(() => {
    
@@ -67,22 +70,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     
     
 
+  const { data:dietPlans, isLoading:isLoadingDietPlan, isError:error3 } = useNutritionistDietPlan(id)
 
 
-
-
-const {
-    dietPlans,
-    fetchDietPlans,
-  
-    isLoading:isLoadingDietPlan,
+  const {
+  setDietPlansData,
+  setLoading:isLoadingDietPlanStore,
   } = useDietPlanStore()
 
 
   
   useEffect(() => {
-      if(dietPlans.length==0 && profile?.id) fetchDietPlans(profile?.id)
-    }, [profile, fetchDietPlans])
+    if (dietPlans) {
+      setDietPlansData(dietPlans)
+      isLoadingDietPlanStore(false)
+    }
+  }, [dietPlans])
+
+
+
+
 
 
      const {fetchAnalytics } = useDashboardStore() 
@@ -91,7 +98,7 @@ const {
     fetchAnalytics()
   }, [fetchAnalytics])
 
-  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile) return   <Loader />
+  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile || !dietPlans || !appointments) return   <Loader />
   
 
 
