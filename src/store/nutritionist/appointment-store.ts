@@ -13,12 +13,13 @@ interface AppointmentStore {
   }
   isLoading: boolean
 
-  fetchAppointments: (status?: AppointmentStatus | "all") => Promise<void>
+
   setSelectedAppointment: (appointment: Appointment | null) => void
   updateAppointmentStatus: (id: string, status: Appointment["status"]) => void
   setFilters: (filters: Partial<AppointmentStore["filters"]>) => void
   setLoading: (loading: boolean) => void
   markAppointmentDone: (id: string, dietPlan?: any) => void
+  setAppointments: (appointments: Appointment[]) => void
 }
 
 export const useAppointmentStore = create<AppointmentStore>()(
@@ -33,28 +34,7 @@ export const useAppointmentStore = create<AppointmentStore>()(
       },
       isLoading: true,
 
-     fetchAppointments: async (status = "all") => {
-  const doctorId = localStorage.getItem("id")
-  if (!doctorId) return
-  set({ isLoading: true })
-  try {
-    const url = `/appointments?doctorId=${doctorId}${
-      status !== "all" ? `&status=${status}` : ""
-    }`
-    console.log(url)
-    const res = await api.get(url)
-    console.log(res.data.items)
-
-    const data: Appointment[] = res.data.items ?? []
-    set({ appointments: data })
-    
-  } catch (err) {
-    console.error("Failed to fetch appointments:", err)
-  } finally {
-    set({ isLoading: false })
-  }
-},
-
+      setAppointments: (appointments) => set({ appointments }),
 
       setSelectedAppointment: (appointment) => set({ selectedAppointment: appointment }),
 

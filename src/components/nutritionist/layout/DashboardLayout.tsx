@@ -12,6 +12,7 @@ import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { useDashboardStore } from "@/store/nutritionist/dashboard-store"
 import Loader from "@/components/loader/loader"
 import { useNutritionistProfile } from "@/hooks/nutritionist/useNutritionistProfile"
+import { useNutritionistAppointment } from "@/hooks/nutritionist/useNitritionistAppointment"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -27,25 +28,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/nutritionist/chat")
 
-  const { appointments,fetchAppointments,isLoading } = useAppointmentStore()
+  const { setAppointments ,setLoading} = useAppointmentStore()
+  const { data:appointments, isLoading, isError } = useNutritionistAppointment(id, AppointmentStatus.Upcoming)
+  
+
+    useEffect(() => {
+
+      if(appointments) {
+       console.log("Appointments fetched:", appointments);    
+        setAppointments(appointments)
+        setLoading(false)
+      }
+
+  }, [appointments])
+
 
   //tanstack hook
   const { data:profile, isLoading:isLoadingProfile, isError:error } = useNutritionistProfile(id, userRole)
-  const {   setProfileData ,profile:p2 } = useNutritionistStore()  
+  const {   setProfileData  } = useNutritionistStore()  
 
   useEffect(() => {
    
-      if(!profile || !isLoadingProfile){
+      if(profile && !isLoadingProfile){
          setProfileData(profile)
       }
       
   }, [profile])
   
-  useEffect(() => {
-       if(appointments.length==0)
-          fetchAppointments(AppointmentStatus.Upcoming)  
-        
-  }, [fetchAppointments])
+
   
  useEffect(()=>{
     const storedId = localStorage.getItem('id');
