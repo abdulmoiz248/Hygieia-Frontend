@@ -4,11 +4,10 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Mail, AlertCircle,  CheckCircle, ArrowLeft, Lock, Eye, EyeOff, Shield } from 'lucide-react'
+import { Mail, AlertCircle,  CheckCircle, ArrowLeft, Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
-import Loader from "@/components/loader/loader"
 type Step = 'email' | 'otp' | 'newPassword' | 'success'
 
 export default function ResetPassword() {
@@ -175,7 +174,7 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
               >
                  {isLoading ? (
     <>
-      <Loader /> Sending OTP...
+       <Loader2 className='h-4 w-4 animate-spin' /> Sending OTP...
     </>
   ) : (
     "Send OTP"
@@ -244,7 +243,7 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
               
                  {isLoading ? (
     <>
-      <Loader /> Verifying...
+       <Loader2 className='h-4 w-4 animate-spin' /> Verifying...
     </>
   ) : (
     "Verify OTP"
@@ -338,7 +337,7 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
               >
                 {isLoading ? (
     <>
-      <Loader /> Updating Password
+       <Loader2 className='h-4 w-4 animate-spin' /> Updating Password
     </>
   ) : (
     "Update Password"

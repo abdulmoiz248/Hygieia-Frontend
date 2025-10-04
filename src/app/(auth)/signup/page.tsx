@@ -3,12 +3,12 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, Mail, Lock,  AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock,  AlertCircle, Loader2 } from 'lucide-react'
 import {  useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import api from '@/lib/axios'
-import Loader from '@/components/loader/loader'
+
 
 
 const Signup = () => {
@@ -108,7 +108,7 @@ const Signup = () => {
               >
                 {loading ? (
     <>
-      <Loader /> Verifying...
+      <Loader2 className='h-4 w-4 animate-spin' /> Verifying...
     </>
   ) : (
     "Verify Email"

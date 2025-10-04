@@ -1,7 +1,8 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import { useState } from "react"
-import Loader from '@/components/loader/loader'
+
 
 interface GoogleLoginButtonProps {
   redirectUrl?: string
@@ -34,7 +35,7 @@ const GoogleLoginButton = ({
       )}
       <span>{isLoading ? (
     <>
-      <Loader /> Connecting...
+    Connecting...
     </>
   ) : (
     "Continue with Google"

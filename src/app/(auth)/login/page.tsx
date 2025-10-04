@@ -4,12 +4,12 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import GoogleLoginButton from '@/components/oAuth/GoogleLoginButton'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
-import Loader from "@/components/loader/loader"
+
 import Cookies from 'js-cookie'
 
 export default  function Login() {
@@ -127,7 +127,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               >
                 {isLoading ? (
     <>
-      <Loader /> Logging in...
+      <Loader2 className='h-4 w-4 animate-spin' /> Logging in...
     </>
   ) : (
     "Login"
