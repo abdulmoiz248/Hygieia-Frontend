@@ -54,7 +54,8 @@ useEffect(() => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMealModalOpen, setIsMealModalOpen] = useState(false)
   const [showConfirmReplace, setShowConfirmReplace] = useState(false)
- const patientName=useSelector((store:RootState)=>store.profile.name)
+  const profile=useSelector((store:RootState)=>store.profile)
+ const patientName=profile?.name
 
 
 
@@ -95,286 +96,547 @@ const createWatermarkDataUrl = async (
 }
 
 
-const handleDownloadDietPdf = async (
-  dietPlan: any,
+// const handleDownloadDietPdf = async (
+//   dietPlan: any,
 
-) => {
-  try {
-    dietPlan = {
-      id: dietPlan?.id,
-      dailyCalories: dietPlan.daily_calories ||dietPlan.dailyCalories,
-      protein: dietPlan.protein,
-      carbs: dietPlan.carbs,
-      fat: dietPlan.fat,
-      deficiency: dietPlan.deficiency,
-      notes: dietPlan.notes,
-      caloriesBurned: dietPlan.calories_burned || dietPlan.caloriesBurned,
-      exercise: dietPlan.exercise,
-      startDate: new Date(dietPlan.start_date),
-      endDate: new Date(dietPlan.end_date),
-      patientId: dietPlan.patient_id,
-      patientName: dietPlan.patientName,
-      nutritionistId: dietPlan.nutritionist_id,
-    }
+// ) => {
+//   try {
+//     dietPlan = {
+//       id: dietPlan?.id,
+//       dailyCalories: dietPlan.daily_calories ||dietPlan.dailyCalories,
+//       protein: dietPlan.protein,
+//       carbs: dietPlan.carbs,
+//       fat: dietPlan.fat,
+//       deficiency: dietPlan.deficiency,
+//       notes: dietPlan.notes,
+//       caloriesBurned: dietPlan.calories_burned || dietPlan.caloriesBurned,
+//       exercise: dietPlan.exercise,
+//       startDate: new Date(dietPlan.start_date),
+//       endDate: new Date(dietPlan.end_date),
+//       patientId: dietPlan.patient_id,
+//       patientName: dietPlan.patientName,
+//       nutritionistId: dietPlan.nutritionist_id,
+//     }
 
-    console.log(dietPlan)
-    const { default: jsPDF } = await import("jspdf")
-    const autoTable = (await import("jspdf-autotable")).default
+//     console.log(dietPlan)
+//     const { default: jsPDF } = await import("jspdf")
+//     const autoTable = (await import("jspdf-autotable")).default
 
-    const doc = new jsPDF({ unit: "pt", format: "a4" })
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const pageHeight = doc.internal.pageSize.getHeight()
+//     const doc = new jsPDF({ unit: "pt", format: "a4" })
+//     const pageWidth = doc.internal.pageSize.getWidth()
+//     const pageHeight = doc.internal.pageSize.getHeight()
 
-    const primaryColor: [number, number, number] = [0, 131, 150]
-    const grayText: [number, number, number] = [80, 80, 80]
+//     const primaryColor: [number, number, number] = [0, 131, 150]
+//     const grayText: [number, number, number] = [80, 80, 80]
 
-    // ===== Helper: load image as base64 =====
-    const getBase64FromUrl = async (url: string): Promise<string> => {
-      const res = await fetch(url)
-      const blob = await res.blob()
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
-    }
+//     // ===== Helper: load image as base64 =====
+//     const getBase64FromUrl = async (url: string): Promise<string> => {
+//       const res = await fetch(url)
+//       const blob = await res.blob()
+//       return new Promise((resolve, reject) => {
+//         const reader = new FileReader()
+//         reader.onload = () => resolve(reader.result as string)
+//         reader.onerror = reject
+//         reader.readAsDataURL(blob)
+//       })
+//     }
 
-    // Load logo
-    let logoDataUrl: string | null = null
-    try {
-      logoDataUrl = await getBase64FromUrl("/logo/logo.png")
-    } catch (err) {
-      console.warn("Logo not loaded:", err)
-    }
+//     // Load logo
+//     let logoDataUrl: string | null = null
+//     try {
+//       logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+//     } catch (err) {
+//       console.warn("Logo not loaded:", err)
+//     }
 
-    // Load watermark
-    let watermarkDataUrl: string | null = null
-    try {
-      watermarkDataUrl = await createWatermarkDataUrl(
-        "/logo/logo-2.png",
-        0.05,
-        pageWidth * 0.5,
-        pageHeight * 0.5
-      )
-    } catch (err) {
-      console.warn("Watermark could not be loaded:", err)
-    }
+//     // Load watermark
+//     let watermarkDataUrl: string | null = null
+//     try {
+//       watermarkDataUrl = await createWatermarkDataUrl(
+//         "/logo/logo-2.png",
+//         0.05,
+//         pageWidth * 0.5,
+//         pageHeight * 0.5
+//       )
+//     } catch (err) {
+//       console.warn("Watermark could not be loaded:", err)
+//     }
 
-    // ===== Header =====
-    if (logoDataUrl) {
-      doc.addImage(logoDataUrl, "PNG", 40, 25, 50, 50)
-    }
+//     // ===== Header =====
+//     if (logoDataUrl) {
+//       doc.addImage(logoDataUrl, "PNG", 40, 25, 50, 50)
+//     }
 
-    // Get today’s date in format: 13 Sep 2025
-    const today = new Date()
-    const dateStr = today.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
+//     // Get today’s date in format: 13 Sep 2025
+//     const today = new Date()
+//     const dateStr = today.toLocaleDateString("en-GB", {
+//       day: "2-digit",
+//       month: "short",
+//       year: "numeric",
+//     })
 
-    doc.setFontSize(22)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(...primaryColor)
-    doc.text(`Diet Plan (${dateStr})`, pageWidth / 2, 55, { align: "center" })
+//     doc.setFontSize(22)
+//     doc.setFont("helvetica", "bold")
+//     doc.setTextColor(...primaryColor)
+//     doc.text(`Diet Plan (${dateStr})`, pageWidth / 2, 55, { align: "center" })
 
-    // Patient name
-    doc.setFontSize(12)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(...grayText)
-    doc.text(`Patient: ${patientName}`, pageWidth / 2, 75, { align: "center" })
+//     // Patient name
+//     doc.setFontSize(12)
+//     doc.setFont("helvetica", "normal")
+//     doc.setTextColor(...grayText)
+//     doc.text(`Patient: ${patientName}`, pageWidth / 2, 75, { align: "center" })
 
-    // Divider
-    doc.setDrawColor(...primaryColor)
-    doc.setLineWidth(0.7)
-    doc.line(40, 95, pageWidth - 40, 95)
+//     // Divider
+//     doc.setDrawColor(...primaryColor)
+//     doc.setLineWidth(0.7)
+//     doc.line(40, 95, pageWidth - 40, 95)
 
-    let cursorY = 120
+//     let cursorY = 120
 
-    // ===== Nutrition Summary =====
-    doc.setFontSize(14)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(...primaryColor)
-    doc.text("Nutrition Summary", 40, cursorY)
-    cursorY += 10
+//     // ===== Nutrition Summary =====
+//     doc.setFontSize(14)
+//     doc.setFont("helvetica", "bold")
+//     doc.setTextColor(...primaryColor)
+//     doc.text("Nutrition Summary", 40, cursorY)
+//     cursorY += 10
 
-    autoTable(doc, {
-      startY: cursorY,
-      head: [["Nutrient", "Value"]],
-      body: [
-        ["Daily Calories", dietPlan.dailyCalories],
-        ["Protein", dietPlan.protein],
-        ["Carbohydrates", dietPlan.carbs],
-        ["Fat", dietPlan.fat],
-        ["Deficiency", dietPlan.deficiency],
-      ],
-      theme: "grid",
-      styles: { fontSize: 11, cellPadding: 6 },
-      headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-      margin: { left: 40, right: 40 },
-    })
+//     autoTable(doc, {
+//       startY: cursorY,
+//       head: [["Nutrient", "Value"]],
+//       body: [
+//         ["Daily Calories", dietPlan.dailyCalories],
+//         ["Protein", dietPlan.protein],
+//         ["Carbohydrates", dietPlan.carbs],
+//         ["Fat", dietPlan.fat],
+//         ["Deficiency", dietPlan.deficiency],
+//       ],
+//       theme: "grid",
+//       styles: { fontSize: 11, cellPadding: 6 },
+//       headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+//       margin: { left: 40, right: 40 },
+//     })
 
     
-    cursorY = (doc as any).lastAutoTable.finalY + 40
+//     cursorY = (doc as any).lastAutoTable.finalY + 40
 
-    // ===== Exercise Plan =====
-    doc.setFontSize(14)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(...primaryColor)
-    doc.text("Exercise Plan", 40, cursorY)
-    cursorY += 10
+//     // ===== Exercise Plan =====
+//     doc.setFontSize(14)
+//     doc.setFont("helvetica", "bold")
+//     doc.setTextColor(...primaryColor)
+//     doc.text("Exercise Plan", 40, cursorY)
+//     cursorY += 10
 
-    autoTable(doc, {
-      startY: cursorY,
-      body: [
-        ["Calories To Burn", dietPlan.caloriesBurned],
-        ["Exercise", dietPlan.exercise],
-      ],
-      theme: "grid",
-      styles: { fontSize: 11, cellPadding: 6 },
-      columnStyles: { 0: { fontStyle: "bold", textColor: primaryColor } },
-      margin: { left: 40, right: 40 },
-    })
+//     autoTable(doc, {
+//       startY: cursorY,
+//       body: [
+//         ["Calories To Burn", dietPlan.caloriesBurned],
+//         ["Exercise", dietPlan.exercise],
+//       ],
+//       theme: "grid",
+//       styles: { fontSize: 11, cellPadding: 6 },
+//       columnStyles: { 0: { fontStyle: "bold", textColor: primaryColor } },
+//       margin: { left: 40, right: 40 },
+//     })
 
    
-    cursorY = (doc as any).lastAutoTable.finalY + 40
+//     cursorY = (doc as any).lastAutoTable.finalY + 40
 
-    // ===== Notes =====
-    if (dietPlan.notes) {
-      doc.setFontSize(14)
+//     // ===== Notes =====
+//     if (dietPlan.notes) {
+//       doc.setFontSize(14)
+//       doc.setFont("helvetica", "bold")
+//       doc.setTextColor(...primaryColor)
+//       doc.text("Notes", 40, cursorY)
+//       cursorY += 15
+
+//       doc.setFontSize(11)
+//       doc.setFont("helvetica", "normal")
+//       doc.setTextColor(...grayText)
+
+//       const splitNotes = doc.splitTextToSize(dietPlan.notes, pageWidth - 80)
+//       doc.text(splitNotes, 60, cursorY)
+
+//       cursorY += splitNotes.length * 14 + 20
+//     }
+
+//     // ===== Today's Progress =====
+//     if (fitness) {
+//       doc.setFontSize(14)
+//       doc.setFont("helvetica", "bold")
+//       doc.setTextColor(...primaryColor)
+//       doc.text("Today's Progress", 40, cursorY)
+//       cursorY += 15
+
+//       // Summary table (Calories + Macros)
+//       autoTable(doc, {
+//         startY: cursorY,
+//         head: [["Metric", "Value"]],
+//         body: [
+//           ["Calories Consumed", fitness.caloriesConsumed],
+//           ["Calories Burned", fitness.caloriesBurned],
+//           ["Protein (g)", fitness.proteinConsumed],
+//           ["Fat (g)", fitness.fatConsumed],
+//           ["Carbs (g)", fitness.carbsConsumed],
+//         ],
+//         theme: "grid",
+//         styles: { fontSize: 11, cellPadding: 6 },
+//         headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+//         margin: { left: 40, right: 40 },
+//       })
+
+    
+//       cursorY = (doc as any).lastAutoTable.finalY + 40
+
+//       // Goals Table
+//       if (fitness.goals?.length > 0) {
+//         doc.setFontSize(13)
+//         doc.setFont("helvetica", "bold")
+//         doc.setTextColor(...primaryColor)
+//         doc.text("Goals", 40, cursorY)
+//         cursorY += 10
+
+//         autoTable(doc, {
+//           startY: cursorY,
+//           head: [["Type", "Current", "Target", "Unit"]],
+//           body: fitness.goals.map((g) => [
+//             g.type,
+//             g.current,
+//             g.target,
+//             g.unit,
+//           ]),
+//           theme: "grid",
+//           styles: { fontSize: 11, cellPadding: 6 },
+//           headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+//           margin: { left: 40, right: 40 },
+//         })
+
+      
+//         cursorY = (doc as any).lastAutoTable.finalY + 40
+//       }
+
+//       // Activity Log for Today
+//       const todayDate = new Date().toISOString().split("T")[0]
+//       const todayStatus = fitness.activityLog.find(
+//         (d) => d.date === todayDate
+//       )
+
+//       if (todayStatus) {
+//         doc.setFontSize(13)
+//         doc.setFont("helvetica", "bold")
+//         doc.setTextColor(...primaryColor)
+//         doc.text("Activity Log (Today)", 40, cursorY)
+//         cursorY += 10
+
+//         autoTable(doc, {
+//           startY: cursorY,
+//           head: [["Date", "Completed"]],
+//           body: [[todayStatus.date, todayStatus.completed ? "✅ Yes" : "❌ No"]],
+//           theme: "grid",
+//           styles: { fontSize: 11, cellPadding: 6 },
+//           headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+//           margin: { left: 40, right: 40 },
+//         })
+
+//         cursorY = (doc as any).lastAutoTable.finalY + 40
+//       }
+//     }
+
+//     // ===== Footer =====
+//     const pageCount = doc.getNumberOfPages()
+//     for (let i = 1; i <= pageCount; i++) {
+//       doc.setPage(i)
+//       doc.setFontSize(9)
+//       doc.setTextColor(120, 120, 120)
+//       doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, {
+//         align: "center",
+//       })
+//     }
+
+//     // ===== Watermark =====
+//     if (watermarkDataUrl) {
+//       const wmW = pageWidth * 0.5
+//       const wmH = pageHeight * 0.5
+//       const x = (pageWidth - wmW) / 2
+//       const y = (pageHeight - wmH) / 2
+
+//       for (let i = 1; i <= pageCount; i++) {
+//         doc.setPage(i)
+//         doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+//       }
+//     }
+
+//     // Save
+//     const safeName = patientName.replace(/\s+/g, "_")
+//     doc.save(`${safeName}_diet_plan.pdf`)
+//   } catch (err) {
+//     console.error("PDF generation error:", err)
+//   }
+// }
+
+
+
+
+ const handleDownloadDietPdf = async (dietPlan: any) => {
+    try {
+      // Normalize known shapes/keys
+      dietPlan = {
+        id: dietPlan?.id,
+        dailyCalories: dietPlan.daily_calories ?? dietPlan.dailyCalories,
+        protein: dietPlan.protein,
+        carbs: dietPlan.carbs,
+        fat: dietPlan.fat,
+        deficiency: dietPlan.deficiency,
+        notes: dietPlan.notes,
+        caloriesBurned: dietPlan.calories_burned ?? dietPlan.caloriesBurned,
+        exercise: dietPlan.exercise,
+        startDate: dietPlan.startDate ? new Date(dietPlan.startDate) : new Date(dietPlan.start_date),
+        endDate: dietPlan.endDate ? new Date(dietPlan.endDate) : new Date(dietPlan.end_date),
+        patientId: dietPlan.patient_id ?? dietPlan.patientId,
+        patientName: dietPlan.patientName ?? patientName,
+        nutritionistId: dietPlan.nutritionist_id ?? dietPlan.nutritionistId,
+      }
+
+      const { default: jsPDF } = await import("jspdf")
+      const autoTable = (await import("jspdf-autotable")).default
+
+      const doc = new jsPDF({ unit: "pt", format: "a4" })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+
+      // Brand + neutrals
+      const primaryColor: [number, number, number] = [0, 131, 150]
+      const grayText: [number, number, number] = [60, 60, 60]
+      const lightRule: [number, number, number] = [220, 220, 220]
+
+      // Layout
+      const M = { left: 48, right: 48, top: 160, bottom: 72 }
+      const headerHeight = 120
+
+      // ===== Helper: load image as base64 =====
+      const getBase64FromUrl = async (url: string): Promise<string> => {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+      }
+
+      let logoDataUrl: string | null = null
+      try {
+        logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+      } catch (err) {
+        console.warn("Logo not loaded:", err)
+      }
+
+      let watermarkDataUrl: string | null = null
+      try {
+        watermarkDataUrl = await createWatermarkDataUrl("/logo/logo.png", 0.05, pageWidth * 0.5, pageHeight * 0.5)
+      } catch (err) {
+        console.warn("Watermark could not be loaded:", err)
+      }
+
+      // Meta: date strings
+      const now = new Date()
+      const dateStr = now.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+      const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+
+      // Hospital identity (customize as needed)
+      const hospitalName = "Hygieia"
+      const hospitalTagline = "From Past to Future of Healthcare"
+      const hospitalAddress = "www.hygieia-frontend.vercel.app"
+      const hospitalContact = "+92 80 1234 5678 • hygieia.fyp@gmail.com"
+
+      // Header/Footer/Watermark helpers
+      const drawHeader = () => {
+        // Brand rule
+     
+        // Logo
+        if (logoDataUrl) {
+          doc.addImage(logoDataUrl, "PNG", M.left, 44, 56, 56)
+        }
+
+        // Hospital identity
+        doc.setTextColor(...primaryColor)
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(16)
+        doc.text(hospitalName, M.left + 70, 60)
+
+        doc.setFont("helvetica", "normal")
+        doc.setFontSize(11)
+        doc.setTextColor(...grayText)
+        doc.text(hospitalTagline, M.left + 70, 78)
+
+        doc.setFontSize(10)
+        doc.setTextColor(100)
+        doc.text(hospitalAddress, M.left + 70, 94)
+        doc.text(hospitalContact, M.left + 70, 108)
+
+        // Document title + generation time
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(18)
+        doc.setTextColor(...primaryColor)
+        doc.text("Diet Plan Report", pageWidth - M.right, 64, { align: "right" })
+
+        doc.setFont("helvetica", "normal")
+        doc.setFontSize(10)
+        doc.setTextColor(100)
+        doc.text(`Generated: ${dateStr} • ${timeStr}`, pageWidth - M.right, 80, { align: "right" })
+
+        doc.setDrawColor(...primaryColor)
+        doc.setLineWidth(2)
+        // doc.line(M.left, 36, pageWidth - M.right, 36)
+
+        doc.line(M.left,  headerHeight, pageWidth - M.right,headerHeight)
+      }
+
+      const drawFooter = (pageNumber: number, pageCount: number) => {
+        // Top rule of footer
+
+         doc.setDrawColor(...primaryColor)
+        doc.setLineWidth(2)
+        doc.line(M.left, pageHeight - M.bottom, pageWidth - M.right, pageHeight - M.bottom)
+
+        // Disclaimer
+        const disclaimer =
+          "This document is computer-generated from the hospital information system and does not require a physical signature. " +
+          "It may contain confidential medical information. If you are not the intended recipient, please notify the sender and delete this report."
+
+        doc.setFont("helvetica", "normal")
+        doc.setFontSize(9)
+        doc.setTextColor(110, 110, 110)
+
+        const wrapped = doc.splitTextToSize(disclaimer, pageWidth - M.left - M.right - 140)
+        doc.text(wrapped, M.left, pageHeight - M.bottom + 18)
+
+        // Page number (center)
+        doc.setFontSize(9)
+        doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth / 2, pageHeight - 16, { align: "center" })
+
+      }
+
+      const drawWatermark = () => {
+        if (!watermarkDataUrl) return
+        const wmW = pageWidth * 0.45
+        const wmH = pageHeight * 0.45
+        const x = (pageWidth - wmW) / 2
+        const y = (pageHeight - wmH) / 2
+        doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+      }
+
+      // ============ CONTENT ============
+      let cursorY = M.top
+
+      // Patient Information
       doc.setFont("helvetica", "bold")
+      doc.setFontSize(13)
       doc.setTextColor(...primaryColor)
-      doc.text("Notes", 40, cursorY)
-      cursorY += 15
+      doc.text("Patient Information", M.left, cursorY - 16)
 
-      doc.setFontSize(11)
-      doc.setFont("helvetica", "normal")
-      doc.setTextColor(...grayText)
-
-      const splitNotes = doc.splitTextToSize(dietPlan.notes, pageWidth - 80)
-      doc.text(splitNotes, 60, cursorY)
-
-      cursorY += splitNotes.length * 14 + 20
-    }
-
-    // ===== Today's Progress =====
-    if (fitness) {
-      doc.setFontSize(14)
-      doc.setFont("helvetica", "bold")
-      doc.setTextColor(...primaryColor)
-      doc.text("Today's Progress", 40, cursorY)
-      cursorY += 15
-
-      // Summary table (Calories + Macros)
       autoTable(doc, {
         startY: cursorY,
-        head: [["Metric", "Value"]],
-        body: [
-          ["Calories Consumed", fitness.caloriesConsumed],
-          ["Calories Burned", fitness.caloriesBurned],
-          ["Protein (g)", fitness.proteinConsumed],
-          ["Fat (g)", fitness.fatConsumed],
-          ["Carbs (g)", fitness.carbsConsumed],
-        ],
         theme: "grid",
         styles: { fontSize: 11, cellPadding: 6 },
         headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-        margin: { left: 40, right: 40 },
+        margin: { left: M.left, right: M.right },
+        head: [["Field", "Details"]],
+        body: [
+          ["Patient Name", dietPlan.patientName || "-"],
+          [
+            "Patient Email",
+            `${profile.email || "-"}`,
+          ],
+          ["Patient Contact", profile.phone || "-"],
+        ],
       })
+      cursorY = (doc as any).lastAutoTable.finalY + 30
 
-    
-      cursorY = (doc as any).lastAutoTable.finalY + 40
+      // Nutrition Summary
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(13)
+      doc.setTextColor(...primaryColor)
+      doc.text("Nutrition Summary", M.left, cursorY - 10)
 
-      // Goals Table
-      if (fitness.goals?.length > 0) {
-        doc.setFontSize(13)
+      autoTable(doc, {
+        startY: cursorY,
+        theme: "grid",
+        styles: { fontSize: 11, cellPadding: 6 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+        margin: { left: M.left, right: M.right },
+        head: [["Nutrient", "Value"]],
+        body: [
+          ["Daily Calories", dietPlan.dailyCalories ?? "-"],
+          ["Protein (g)", dietPlan.protein ?? "-"],
+          ["Carbohydrates (g)", dietPlan.carbs ?? "-"],
+          ["Fat (g)", dietPlan.fat ?? "-"],
+          ["Deficiency", dietPlan.deficiency ?? "-"],
+        ],
+      })
+      cursorY = (doc as any).lastAutoTable.finalY + 30
+
+      // Exercise Plan
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(13)
+      doc.setTextColor(...primaryColor)
+      doc.text("Exercise Plan", M.left, cursorY - 10)
+
+      autoTable(doc, {
+        startY: cursorY,
+        theme: "grid",
+        styles: { fontSize: 11, cellPadding: 6 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+        margin: { left: M.left, right: M.right },
+        head: [["Metric", "Value"]],
+        body: [
+          ["Calories To Burn", dietPlan.caloriesBurned ?? "-"],
+          ["Exercise", dietPlan.exercise ?? "-"],
+        ],
+      })
+      cursorY = (doc as any).lastAutoTable.finalY + 30
+      // Notes
+      if (dietPlan.notes) {
         doc.setFont("helvetica", "bold")
+        doc.setFontSize(13)
         doc.setTextColor(...primaryColor)
-        doc.text("Goals", 40, cursorY)
-        cursorY += 10
+        doc.text("Clinical Notes", M.left, cursorY - 10)
 
+        doc.setFont("helvetica", "normal")
+        doc.setFontSize(11)
+        doc.setTextColor(...grayText)
+
+        const splitNotes = doc.splitTextToSize(dietPlan.notes, pageWidth - M.left - M.right)
         autoTable(doc, {
           startY: cursorY,
-          head: [["Type", "Current", "Target", "Unit"]],
-          body: fitness.goals.map((g) => [
-            g.type,
-            g.current,
-            g.target,
-            g.unit,
-          ]),
-          theme: "grid",
-          styles: { fontSize: 11, cellPadding: 6 },
-          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-          margin: { left: 40, right: 40 },
+          theme: "plain",
+          styles: { fontSize: 11, cellPadding: 0, textColor: grayText },
+          margin: { left: M.left, right: M.right },
+          body: splitNotes.map((line: string) => [line]),
+          columns: [{ header: "", dataKey: "text" }],
         })
-
-      
-        cursorY = (doc as any).lastAutoTable.finalY + 40
+        cursorY = (doc as any).lastAutoTable.finalY + 24
       }
 
-      // Activity Log for Today
-      const todayDate = new Date().toISOString().split("T")[0]
-      const todayStatus = fitness.activityLog.find(
-        (d) => d.date === todayDate
-      )
-
-      if (todayStatus) {
-        doc.setFontSize(13)
-        doc.setFont("helvetica", "bold")
-        doc.setTextColor(...primaryColor)
-        doc.text("Activity Log (Today)", 40, cursorY)
-        cursorY += 10
-
-        autoTable(doc, {
-          startY: cursorY,
-          head: [["Date", "Completed"]],
-          body: [[todayStatus.date, todayStatus.completed ? "✅ Yes" : "❌ No"]],
-          theme: "grid",
-          styles: { fontSize: 11, cellPadding: 6 },
-          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-          margin: { left: 40, right: 40 },
-        })
-
-        cursorY = (doc as any).lastAutoTable.finalY + 40
-      }
-    }
-
-    // ===== Footer =====
-    const pageCount = doc.getNumberOfPages()
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i)
-      doc.setFontSize(9)
-      doc.setTextColor(120, 120, 120)
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, {
-        align: "center",
-      })
-    }
-
-    // ===== Watermark =====
-    if (watermarkDataUrl) {
-      const wmW = pageWidth * 0.5
-      const wmH = pageHeight * 0.5
-      const x = (pageWidth - wmW) / 2
-      const y = (pageHeight - wmH) / 2
-
+      // ============ HEADER / FOOTER / WATERMARK ON EVERY PAGE ============
+      const pageCount = doc.getNumberOfPages()
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
-        doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+        drawWatermark() // draw under text
+        drawHeader()
+        drawFooter(i, pageCount)
       }
+
+      const safeName = (dietPlan.patientName || "patient").replace(/\s+/g, "_")
+      doc.save(`${safeName}_diet_plan.pdf`)
+    } catch (err) {
+      console.error("PDF generation error:", err)
     }
-
-    // Save
-    const safeName = patientName.replace(/\s+/g, "_")
-    doc.save(`${safeName}_diet_plan.pdf`)
-  } catch (err) {
-    console.error("PDF generation error:", err)
   }
-}
-
-
-
-
 
 
 
