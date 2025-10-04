@@ -36,7 +36,7 @@ export default function WorkoutDashboard() {
 
 
     const dispatch = useDispatch<AppDispatch>()
-    const patientName=useSelector((store:RootState)=>store.profile.name)
+    const profile=useSelector((store:RootState)=>store.profile)
   const [isAddRoutineOpen, setIsAddRoutineOpen] = useState(false)
   const [isAIRecommendationOpen, setIsAIRecommendationOpen] = useState(false)
   const [isRoutineDetailsOpen, setIsRoutineDetailsOpen] = useState(false)
@@ -93,21 +93,21 @@ const createWatermarkDataUrl = async (url: string, opacity = 0.06, maxW = 600, m
 
 
 
-
 const handleDownloadPdf = async () => {
   try {
     const { default: jsPDF } = await import("jspdf")
     const autoTable = (await import("jspdf-autotable")).default
 
     const doc = new jsPDF({ unit: "pt", format: "a4" })
+    const jsDoc = doc as any
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
 
-    // Primary soft blue
     const primaryColor: [number, number, number] = [0, 131, 150]
+    const grayText: [number, number, number] = [60, 60, 60]
+    const M = { left: 48, right: 48, top: 160, bottom: 72 }
+    const headerHeight = 120
 
-    // Load logo (for header)
-    const logoUrl = "/logo/logo.png"
     const getBase64FromUrl = async (url: string): Promise<string> => {
       const res = await fetch(url)
       const blob = await res.blob()
@@ -119,59 +119,133 @@ const handleDownloadPdf = async () => {
       })
     }
 
+   
     let logoDataUrl: string | null = null
-    try {
-      logoDataUrl = await getBase64FromUrl(logoUrl)
-    } catch (err) {
-      console.warn("Logo not loaded:", err)
-    }
-
-    // Load watermark
     let watermarkDataUrl: string | null = null
     try {
-      watermarkDataUrl = await createWatermarkDataUrl(
-        "/logo/logo-2.png",
-        0.05,
-        pageWidth * 0.5,
-        pageHeight * 0.5
-      )
-    } catch (err) {
-      console.warn("Watermark could not be loaded:", err)
+      logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+      watermarkDataUrl = await createWatermarkDataUrl("/logo/logo.png", 0.05, pageWidth * 0.5, pageHeight * 0.5)
+    } catch {}
+
+    const now = new Date()
+    const dateStr = now.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+    const timeStr = now.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+
+    const hospitalName = "Hygieia"
+    const hospitalTagline = "From Past to Future of Healthcare"
+    const hospitalAddress = "www.hygieia-frontend.vercel.app"
+    const hospitalContact = "+92 80 1234 5678 • hygieia.fyp@gmail.com"
+
+    const drawHeader = (doc: any) => {
+      if (logoDataUrl) doc.addImage(logoDataUrl, "PNG", M.left, 44, 56, 56)
+      doc.setTextColor(...primaryColor)
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(16)
+      doc.text(hospitalName, M.left + 70, 60)
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(11)
+      doc.setTextColor(...grayText)
+      doc.text(hospitalTagline, M.left + 70, 78)
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(hospitalAddress, M.left + 70, 94)
+      doc.text(hospitalContact, M.left + 70, 108)
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(18)
+      doc.setTextColor(...primaryColor)
+      doc.text("Workout Schedule Report", pageWidth - M.right, 64, { align: "right" })
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(`Generated: ${dateStr} • ${timeStr}`, pageWidth - M.right, 80, { align: "right" })
+      doc.setDrawColor(...primaryColor)
+      doc.setLineWidth(2)
+      doc.line(M.left, headerHeight, pageWidth - M.right, headerHeight)
     }
 
-    // ===== Header =====
-    if (logoDataUrl) {
-      doc.addImage(logoDataUrl, "PNG", 40, 25, 50, 50) // logo left
+    const drawFooter = (doc: any, pageNumber: number, pageCount: number) => {
+      doc.setDrawColor(...primaryColor)
+      doc.setLineWidth(2)
+      doc.line(M.left, pageHeight - M.bottom, pageWidth - M.right, pageHeight - M.bottom)
+      const disclaimer =
+        "This document is computer-generated and may contain confidential information. If you are not the intended recipient, please delete it."
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(9)
+      doc.setTextColor(110, 110, 110)
+      const wrapped = doc.splitTextToSize(disclaimer, pageWidth - M.left - M.right - 140)
+      doc.text(wrapped, M.left, pageHeight - M.bottom + 18)
+      doc.setFontSize(9)
+      doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth / 2, pageHeight - 16, { align: "center" })
     }
-    doc.setFontSize(20)
-    doc.setFont("helvetica", "bold") // make header bold
+
+    const drawWatermark = (doc: any) => {
+      if (!watermarkDataUrl) return
+      const wmW = pageWidth * 0.45
+      const wmH = pageHeight * 0.45
+      const x = (pageWidth - wmW) / 2
+      const y = (pageHeight - wmH) / 2
+      doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
+    }
+
+    const pageContentHook = () => {
+      drawWatermark(doc)
+      drawHeader(doc)
+      const pageNumber = jsDoc.internal.getCurrentPageInfo().pageNumber
+      const pageCount = jsDoc.internal.getNumberOfPages()
+      drawFooter(doc, pageNumber, pageCount)
+    }
+
+    let cursorY = M.top
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
     doc.setTextColor(...primaryColor)
-    doc.text("Workout Schedule", pageWidth / 2, 55, { align: "center" })
+    doc.text("Patient Information", M.left, cursorY - 16)
 
-    // Thin line under header
-    doc.setDrawColor(...primaryColor)
-    doc.setLineWidth(0.5)
-    doc.line(40, 80, pageWidth - 40, 80)
+    autoTable(doc, {
+      startY: cursorY,
+      theme: "grid",
+      styles: { fontSize: 11, cellPadding: 6 },
+      headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+      margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+      head: [["Field", "Details"]],
+      body: [
+        ["Patient Name", profile?.name || "-"],
+        ["Patient Email", profile?.email || "-"],
+        ["Patient Contact", profile?.phone || "-"],
+      ],
+      didDrawPage: pageContentHook,
+    })
 
-    let cursorY = 130
+    cursorY = jsDoc.lastAutoTable.finalY + 30
 
-    // ===== Content =====
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.setTextColor(...primaryColor)
+    doc.text("Workout Routines", M.left, cursorY - 10)
+
     if (!gymRoutines || gymRoutines.length === 0) {
-      doc.text("No workout routines available.", 40, cursorY)
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(11)
+      doc.setTextColor(...grayText)
+      doc.text("No workout routines available.", M.left, cursorY + 10)
     } else {
       gymRoutines.forEach((routine, index) => {
-        // Routine header
-        doc.setFontSize(13)
+        const title = `${index + 1}. ${routine.name} — ${routine.category} (${routine.totalDuration ?? 0} min • ${
+          routine.totalCalories ?? 0
+        } kcal)`
         doc.setFont("helvetica", "bold")
+        doc.setFontSize(12)
         doc.setTextColor(...primaryColor)
-        doc.text(
-          `${index + 1}. ${routine.name} — ${routine.category} (${routine.totalDuration ?? 0} min • ${routine.totalCalories ?? 0} kcal)`,
-          40,
-          cursorY
-        )
-        cursorY += 15
+        doc.text(title, M.left, cursorY + 15)
+        cursorY += 10
 
-        // Table body
         const body = (routine.exercises || []).map((ex: any) => [
           ex.name ?? "-",
           `${ex.sets ?? "-"} x ${ex.reps ?? "-"}`,
@@ -180,50 +254,30 @@ const handleDownloadPdf = async () => {
         ])
 
         autoTable(doc, {
-          startY: cursorY,
-          head: [["Exercise", "Sets x Reps", "Rest", "Calories"]],
-          body,
+          startY: cursorY + 8,
           theme: "grid",
-          styles: { fontSize: 10, cellPadding: 6 },
+          styles: { fontSize: 11, cellPadding: 6 },
           headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
           alternateRowStyles: { fillColor: [245, 245, 245] },
-          margin: { left: 40, right: 40 },
+          margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+          head: [["Exercise", "Sets x Reps", "Rest", "Calories"]],
+          body,
+          didDrawPage: pageContentHook,
         })
 
-       
-        cursorY = (doc as any).lastAutoTable.finalY + 30
+        cursorY = jsDoc.lastAutoTable.finalY + 28
       })
     }
 
-    // ===== Footer =====
-    const pageCount = doc.getNumberOfPages()
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i)
-      doc.setFontSize(9)
-      doc.setTextColor(120, 120, 120)
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: "center" })
-    }
-
-    // ===== Watermark =====
-    if (watermarkDataUrl) {
-      const wmW = pageWidth * 0.5
-      const wmH = pageHeight * 0.5
-      const x = (pageWidth - wmW) / 2
-      const y = (pageHeight - wmH) / 2
-
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i)
-        doc.addImage(watermarkDataUrl, "PNG", x, y, wmW, wmH)
-      }
-    }
-
-    // Save
-    const safeName = patientName.replace(/\s+/g, "_")
+    const safeName = (profile?.name || "patient").replace(/\s+/g, "_")
     doc.save(`${safeName}_workout_report.pdf`)
   } catch (err) {
     console.error("PDF generation error:", err)
   }
 }
+
+
+
 
 
 
@@ -265,8 +319,8 @@ const handleDownloadPdf = async () => {
                <Button
                 size="sm"
                 className="text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white w-full sm:w-auto"
-                onClick={() => {
-                handleDownloadPdf()
+                onClick={async () => {
+                await handleDownloadPdf()
                 }}
               >
                 <File className="w-4 h-4 mr-2" />
