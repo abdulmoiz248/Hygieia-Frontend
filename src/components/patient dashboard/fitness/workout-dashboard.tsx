@@ -324,7 +324,7 @@ const handleDownloadPdf = async () => {
                 }}
               >
                 <File className="w-4 h-4 mr-2" />
-               Downalod as Pdf
+               Download as Pdf
               </Button>
 
             }
