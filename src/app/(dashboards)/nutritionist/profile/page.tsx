@@ -15,6 +15,7 @@ import WorkingHours from '@/components/nutritionist/profile/WorkingHours'
 import LabTechnicianCard from '@/components/lab-tech/profile/profile'
 import { uploadUserAvatar } from '@/helpers/UploadProfilePic'
 import { generateBio } from '@/components/nutritionist/profile/GenerateBio'
+import { generateResume } from '@/helpers/generateResume'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -72,6 +73,12 @@ export default function ProfilePage() {
           <p className="text-cool-gray">Manage your personal and medical information</p>
         </div>
 
+   <Button
+        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+        onClick={() => generateResume(profile)}
+      >
+        Download Resume
+      </Button>
         <Button
           onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
           className={isEditing ? "bg-mint-green hover:bg-mint-green/90" : "bg-soft-blue hover:bg-soft-blue/90"}
