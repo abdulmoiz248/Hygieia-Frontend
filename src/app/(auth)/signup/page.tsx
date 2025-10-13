@@ -108,22 +108,22 @@ const Signup = () => {
               >
                 {loading ? (
     <>
-      <Loader2 className='h-4 w-4 animate-spin' /> Verifying...
+      <Loader2 className='h-4 w-4 animate-spin' /> Creating Account...
     </>
   ) : (
-    "Verify Email"
+    "Create Account"
   )}
               </Button>
             </form>
            
            <GoogleLoginButton/>
           <div className="mt-4 text-center text-sm text-snow-white animate-slide-in-right delay-500">
-              Don&apos;t have an account?{' '}
+              Already Have Account?{' '}
               <Link
-                href={`/signup`}
+                href={`/login`}
                 className="text-soft-blue hover:text-blue-300 transition-colors duration-300"
               >
-                Sign up
+                Login
               </Link>
             </div>
         
