@@ -413,7 +413,7 @@ useEffect(()=>{
             </div>
           </div>
       
-          <div className="flex gap-3 pt-4">
+          <div className="flex  pt-4">
   <button
 onClick={() => {
   const doctorName = doctors?.find((d) => d.id === selectedDoctor)?.name || "Doctor";
@@ -453,10 +453,7 @@ onClick={() => {
     <span>Add to Google Calendar</span>
   </button>
 
-  <button className="flex-1 flex items-center justify-center gap-2 bg-mint-green hover:bg-mint-green/90 text-white py-2.5 rounded-lg text-sm font-medium shadow-md transition duration-200">
-    <Coins className="h-5 w-5" />
-    <span>Pay Online</span>
-  </button>
+ 
 </div>
 
       
