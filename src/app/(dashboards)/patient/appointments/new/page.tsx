@@ -104,11 +104,20 @@ export default function NewAppointmentPage() {
 
   const selectedDoctorRole = selectedDoctor ? "nutritionist" : undefined
 
+
+
 const {
   data: slotData,
   isLoading: slotsLoading,
   isError: slotsError,
-} = useAvailableSlots(selectedDoctor, selectedDoctorRole!, selectedDate)
+} = useAvailableSlots(selectedDoctor, selectedDoctorRole!, selectedDate ? new Date(Date.UTC(
+  selectedDate.getFullYear(),
+  selectedDate.getMonth(),
+  selectedDate.getDate(),
+  selectedDate.getHours(),
+  selectedDate.getMinutes()
+)) : undefined)
+
 
 const timeSlots = slotData?.availableSlots ?? []
 
@@ -329,13 +338,21 @@ useEffect(()=>{
 
                   if(reschedule){
 
+                     if (!selectedDate) return
+const utcDate = new Date(Date.UTC(
+  selectedDate.getFullYear(),
+  selectedDate.getMonth(),
+  selectedDate.getDate(),
+  selectedDate.getHours(),
+  selectedDate.getMinutes()
+))
                       dispatch(
       updateAppointment({
         patient:user,
        doctor: doctors.find((d) => d.id === selectedDoctor)!,
         id: rescheduleApp,
        
-        date: selectedDate!.toISOString(),
+        date: utcDate.toISOString(),
         time: selectedTime,
         status: AppointmentStatus.Upcoming,
         type: appointmentType as AppointmentTypes,
@@ -346,21 +363,32 @@ useEffect(()=>{
     )
                   }else{
 
-                      dispatch(
-      createAppointment({
-        patient:user,
-       doctor: doctors.find((d) => d.id === selectedDoctor)!,
-        id: uuidv4(),
-       
-        date: selectedDate!.toISOString(),
-        time: selectedTime,
-        status: AppointmentStatus.Upcoming,
-        type: appointmentType as AppointmentTypes,
-        notes: reason,
-      mode:appointmentMode as AppointmentMode,
-      dataShared:checked
-      } as Appointment)
-    )
+                      
+                      if (!selectedDate) return
+const utcDate = new Date(Date.UTC(
+  selectedDate.getFullYear(),
+  selectedDate.getMonth(),
+  selectedDate.getDate(),
+  selectedDate.getHours(),
+  selectedDate.getMinutes()
+))
+
+dispatch(
+  createAppointment({
+    patient: user,
+    doctor: doctors.find((d) => d.id === selectedDoctor)!,
+    id: uuidv4(),
+    date: utcDate.toISOString(),
+    time: selectedTime,
+    status: AppointmentStatus.Upcoming,
+    type: appointmentType as AppointmentTypes,
+    notes: reason,
+    mode: appointmentMode as AppointmentMode,
+    dataShared: checked
+  } as Appointment)
+)
+
+     
                   }
   
        patientSuccess(`Appointment ${reschedule?'Rescheduled':'Booked'} with ${doctors?.find((d) => d.id === selectedDoctor)?.name} Successfully`)
