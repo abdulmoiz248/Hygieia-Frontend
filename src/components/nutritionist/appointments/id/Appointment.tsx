@@ -817,8 +817,7 @@ if (assignedDietPlan) {
     appointment.mode==AppointmentMode.Online &&
      <Button
       onClick={() =>{
-        console.log("Joining meeting at:", appointment.start_link);
-        console.log("Appointment details:", appointment);
+    
          window.open(appointment.start_link, "_blank")}}
       className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
     >

@@ -44,34 +44,33 @@ export default function LabTests({ onReferTest }: { onReferTest: (t: LabTest) =>
                   key={test.id}
                   className="group bg-cool-gray/10 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col"
                 >
-                  <CardContent className="px-4 py-3 flex flex-col flex-1">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold text-soft-blue text-base line-clamp-1">{test.name}</h4>
-                      <Badge
-                        variant="secondary"
-                        className="text-xs px-2 py-0.5 rounded-md bg-soft-coral text-snow-white"
-                      >
-                        {test.category}
-                      </Badge>
-                    </div>
+                <CardContent className="px-4 py-3 flex flex-col flex-1">
+  <div>
+    <h4 className="font-semibold text-soft-blue text-base">{test.name}</h4>
+    <Badge
+      variant="secondary"
+      className="mt-1 text-xs px-2 py-0.5 rounded-md bg-soft-coral text-snow-white inline-block"
+    >
+      {test.category}
+    </Badge>
+  </div>
 
-                    <p className="text-sm text-gray-600">{test.description}</p>
+  <div className="flex items-center gap-2 text-sm text-gray-600 pt-2">
+    <Clock className="h-4 w-4 text-soft-coral" />
+    <span>{test.duration}</span>
+  </div>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-600 pt-1">
-                      <Clock className="h-4 w-4 text-soft-coral" />
-                      <span>{test.duration}</span>
-                    </div>
+  <div className="mt-auto pt-3">
+    <Button
+      onClick={() => onReferTest(test)}
+      size="sm"
+      className="w-full bg-transparent border-soft-blue text-soft-blue border hover:bg-soft-blue hover:text-snow-white"
+    >
+      Refer Test
+    </Button>
+  </div>
+</CardContent>
 
-                    <div className="mt-auto pt-3">
-                      <Button
-                        onClick={() => onReferTest(test)}
-                        size="sm"
-                        className="w-full bg-transparent border-soft-blue text-soft-blue border hover:bg-soft-blue hover:text-snow-white"
-                      >
-                        Refer Test
-                      </Button>
-                    </div>
-                  </CardContent>
                 </Card>
               ))}
             </div>
