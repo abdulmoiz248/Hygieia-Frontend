@@ -25,8 +25,9 @@ import {
   Star,
   Target,
   ClipboardList,
+  Video,
 } from "lucide-react"
-import { AppointmentStatus, type Appointment } from "@/types/patient/appointment"
+import { AppointmentMode, AppointmentStatus, type Appointment } from "@/types/patient/appointment"
 import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
 import { MedicalRecord } from "@/types"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
@@ -777,40 +778,57 @@ if (assignedDietPlan) {
 
              {/* Action Buttons */}
             <Card className="hover-lift border-accent/20">
-              <CardHeader className="bg-accent/5">
-                <CardTitle className="text-soft-coral flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6  py-0  space-y-3">
-                <Button
-                  onClick={handleGenerateAIReport}
-                  disabled={isGeneratingAIReport || isDownloadingReport}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
-                >
-                  <Bot className="w-4 h-4" />
-                  {isGeneratingAIReport ? "Generating..." : isDownloadingReport ? (
-    <>
-      <Loader /> Downloading...
-    </>
-  ) : (
-    "Generate AI report"
-  )}
-                </Button>
+  <CardHeader className="bg-accent/5">
+    <CardTitle className="text-soft-coral flex items-center gap-2">
+      <BarChart3 className="w-5 h-5" />
+      Quick Actions
+    </CardTitle>
+  </CardHeader>
 
-                <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />
+  <CardContent className="p-6 py-0 space-y-3">
+    <Button
+      onClick={handleGenerateAIReport}
+      disabled={isGeneratingAIReport || isDownloadingReport}
+      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+    >
+      <Bot className="w-4 h-4" />
+      {isGeneratingAIReport ? (
+        "Generating..."
+      ) : isDownloadingReport ? (
+        <>
+          <Loader /> Downloading...
+        </>
+      ) : (
+        "Generate AI report"
+      )}
+    </Button>
 
-                     <Button
-                       onClick={handleScrollToLabTests}
-                        className="border-soft-coral w-full bg-soft-coral hover:bg-soft-coral/90 hover:text-white text-white"
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Refer Test
-                      </Button>
-               
-              </CardContent>
-            </Card>
+    <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />
+
+    <Button
+      onClick={handleScrollToLabTests}
+      className="border-soft-coral w-full bg-soft-coral hover:bg-soft-coral/90 hover:text-white text-white"
+    >
+      <FileText className="w-4 h-4 mr-2" />
+      Refer Test
+    </Button>
+
+   {
+    appointment.mode==AppointmentMode.Online &&
+     <Button
+      onClick={() =>{
+        console.log("Joining meeting at:", appointment.start_link);
+        console.log("Appointment details:", appointment);
+         window.open(appointment.start_link, "_blank")}}
+      className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
+    >
+      <Video className="w-4 h-4" />
+      Join Meeting
+    </Button>
+   }
+  </CardContent>
+</Card>
+
 
             {/* Appointment Details */}
             <Card className="hover-lift">

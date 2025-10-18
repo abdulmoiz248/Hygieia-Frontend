@@ -33,6 +33,7 @@ export interface Appointment {
  report?: string
  mode:AppointmentMode
  dataShared:boolean
+ start_link?:string 
 }
 
 
