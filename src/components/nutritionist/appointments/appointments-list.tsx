@@ -133,15 +133,14 @@ export function AppointmentsList() {
                             )}
 
                           {
-                              canMarkDone && 
+                            //  canMarkDone && 
                                   <Button
                               onClick={() => router.push(`/nutritionist/appointments/${appointment.id}`)}
                               size="sm"
-                              disabled={!canMarkDone}
+                            
                              className={`w-full rounded-lg shadow-sm font-medium text-xs ${
-  canMarkDone
-    ? "bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
-    : "bg-soft-coral text-dar cursor-not-allowed"
+ "bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
+   
 }`}
 
                             >

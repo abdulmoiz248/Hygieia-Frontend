@@ -36,6 +36,8 @@ import LabTests from "@/components/nutritionist/appointments/id/LabTest"
 import api from "@/lib/axios"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { generateAIReport } from "./AiReport"
+import PreviousAppointmentsCard from "./PreviousAppointment"
+import useNutritionistStore from "@/store/nutritionist/userStore"
 
 
 
@@ -78,6 +80,7 @@ export async function completeNutritionistAppointment(
 export default function Appointment({appointmentId}:{appointmentId:string}) {
     
     const { addDietPlan } = useDietPlanStore.getState()
+    const user=useNutritionistStore().profile
     
 
   const { appointments, isLoading,updateAppointmentStatus } = useAppointmentStore()
@@ -923,6 +926,8 @@ if (assignedDietPlan) {
     </div>
   </CardContent>
 </Card>
+
+<PreviousAppointmentsCard nutritionistId={user?.id!} patientId={patient.id} />
 
            
           </div>
