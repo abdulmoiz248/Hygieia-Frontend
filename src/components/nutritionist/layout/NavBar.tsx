@@ -30,9 +30,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
   const {
     data: notifications,
-    isLoading,
-    error,
-  }: UseQueryResult<Notification[]> = useNutritionistNotifications(user?.id!)
+  }: UseQueryResult<Notification[]> = useNutritionistNotifications(user?.id || "")
 
   const unreadCount = notifications
     ? notifications.filter((n) => !n.is_read).length

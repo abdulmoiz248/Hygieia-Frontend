@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { Appointment, AppointmentStatus } from "@/types/patient/appointment"
-import api from "@/lib/axios"
+
 
 interface AppointmentStore {
   appointments: Appointment[]

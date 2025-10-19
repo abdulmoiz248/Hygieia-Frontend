@@ -944,7 +944,7 @@ if (assignedDietPlan) {
   </CardContent>
 </Card>
 
-<PreviousAppointmentsCard nutritionistId={user?.id!} patientId={patient.id} />
+<PreviousAppointmentsCard nutritionistId={user?.id || ""} patientId={patient.id} />
 
            
           </div>

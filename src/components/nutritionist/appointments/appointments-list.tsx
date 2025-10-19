@@ -61,7 +61,7 @@ export function AppointmentsList() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-dark-slate-gray mb-1">No appointments yet</h3>
-                <p className="text-sm text-cool-gray">Once patients book appointments, they'll appear here</p>
+                <p className="text-sm text-cool-gray">Once patients book appointments, they&apos;ll appear here</p>
               </div>
             </div>
           </CardContent>
@@ -129,11 +129,11 @@ export function AppointmentsList() {
                             </div>
 
                             {appointment.notes && (
-                              <p className="text-xs text-cool-gray italic mb-4 line-clamp-2">"{appointment.notes}"</p>
+                              <p className="text-xs text-cool-gray italic mb-4 line-clamp-2">&quot; {appointment.notes} &quot;</p>
                             )}
 
                           {
-                            //  canMarkDone && 
+                             canMarkDone && 
                                   <Button
                               onClick={() => router.push(`/nutritionist/appointments/${appointment.id}`)}
                               size="sm"

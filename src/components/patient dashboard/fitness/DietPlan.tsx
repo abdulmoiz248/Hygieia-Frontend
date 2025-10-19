@@ -130,7 +130,7 @@ const createWatermarkDataUrl = async (
       // Brand + neutrals
       const primaryColor: [number, number, number] = [0, 131, 150]
       const grayText: [number, number, number] = [60, 60, 60]
-      const lightRule: [number, number, number] = [220, 220, 220]
+      // const lightRule: [number, number, number] = [220, 220, 220]
 
       // Layout
       const M = { left: 48, right: 48, top: 160, bottom: 72 }

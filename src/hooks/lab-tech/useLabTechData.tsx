@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
 import { LabTechapi as api } from "@/axios-api/lab-tech"
 
 export const useLabTechData = (id: string) => {

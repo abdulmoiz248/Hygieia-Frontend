@@ -36,13 +36,11 @@ export default function NutritionistStats() {
 
   const { appointments } = useAppointmentStore()
   const { dietPlans } = useDietPlanStore()
-    const todayAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming || apt.status === "completed")
-  const completedToday = appointments.filter((apt) => apt.status === AppointmentStatus.Completed).length
+ 
   const upcomingToday = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming).length
   const activePlans = dietPlans.length
   const totalPatients = new Set(appointments.map((apt) => apt.patient?.id)).size
-  const successRate = Math.round((completedToday / Math.max(todayAppointments.length, 1)) * 100)
-  const mockGetNutritionistStats = async (): Promise<StatCardData[]> => {
+ const mockGetNutritionistStats = async (): Promise<StatCardData[]> => {
     return [
       {
         id: "patients",
@@ -53,7 +51,7 @@ export default function NutritionistStats() {
       },
       {
         id: "appointments",
-        title: "Today's Consultations",
+        title: "Total Upcoming Consultations",
         value: upcomingToday,
      
         icon: "calendar",
