@@ -1,0 +1,6 @@
+color-soft-blue: #008396
+color-mint-green: #46bba5
+color-soft-coral: #ff1c6c
+color-snow-white: #fbf9ea
+color-dark-slate-gray: #001016
+color-cool-gray: #17433b
