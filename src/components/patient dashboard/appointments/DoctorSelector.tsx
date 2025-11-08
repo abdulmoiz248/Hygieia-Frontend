@@ -1,137 +1,203 @@
 "use client"
-import { useMemo, useRef, useState, useEffect, useCallback } from "react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandInput, CommandItem, CommandList, CommandEmpty } from "@/components/ui/command"
-import { X, Check, ChevronsUpDown } from "lucide-react" // Added Check and ChevronsUpDown for visual feedback
-import { cn } from "@/lib/utils" // For conditional class names
-import { Doctor } from "@/types"
-import { NutritionistProfile } from "@/store/nutritionist/userStore"
+import { useState, useCallback, useMemo } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Star, Search, X } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { Doctor } from "@/types"
+import type { NutritionistProfile } from "@/store/nutritionist/userStore"
 
-
-type DoctorSelectorProps = {
+type DoctorSelectorModalProps = {
   doctors: Doctor[] | NutritionistProfile[]
-  value: string // The currently selected doctor's name (or typed value)
-  onChange: (value: string) => void // Callback to update the parent state
-  placeholder?: string
+  value: string
+  onChange: (value: string) => void
+  onOpenChange?: (open: boolean) => void
 }
 
-export default function DoctorSelector({
-  doctors,
-  value,
-  onChange,
-  placeholder = "Type or select a doctor",
-}: DoctorSelectorProps) {
+export default function DoctorSelectorModal({ doctors, value, onChange, onOpenChange }: DoctorSelectorModalProps) {
   const [open, setOpen] = useState(false)
-  const [inputValue, setInputValue] = useState(value) // Internal state for CommandInput
-  const inputRef = useRef<HTMLInputElement>(null) // Ref for the CommandInput element
+  const [searchQuery, setSearchQuery] = useState("")
 
-  // Filter doctors based on inputValue
+  // Filter doctors based on search query
   const filteredDoctors = useMemo(() => {
-    const trimmed = inputValue.trim().toLowerCase()
-    if (trimmed === "") return doctors // Show all doctors if input is empty
+    const query = searchQuery.toLowerCase().trim()
+    if (!query) return doctors
 
     return doctors.filter(
-      (doc) => doc.name.toLowerCase().includes(trimmed) || doc.specialization.toLowerCase().includes(trimmed),
+      (doc) => doc.name.toLowerCase().includes(query) || doc.specialization.toLowerCase().includes(query),
     )
-  }, [inputValue, doctors])
+  }, [searchQuery, doctors])
 
-  // Update internal inputValue when external value prop changes
-  useEffect(() => {
-    setInputValue(value)
-  }, [value])
-
-  // Handle selection of a doctor from the list
+  // Handle doctor selection
   const handleSelect = useCallback(
-    (doctorName: string) => {
-      onChange(doctorName) // Update parent state
-      setInputValue(doctorName) // Update internal input state
-      setOpen(false) // Close the popover
-      // Focus the input after selection to allow immediate further interaction
-      setTimeout(() => {
-        inputRef.current?.focus()
-      }, 0)
+    (doctorId: string) => {
+      onChange(doctorId)
+      setOpen(false)
+      setSearchQuery("")
+      onOpenChange?.(false)
     },
-    [onChange],
+    [onChange, onOpenChange],
   )
 
-  // Handle clearing the input
-  const handleClear = useCallback(() => {
-    onChange("") // Clear parent state
-    setInputValue("") // Clear internal input state
-    setOpen(false) // Close popover
-    setTimeout(() => {
-      inputRef.current?.focus()
-    }, 0)
-  }, [onChange])
+  // Get selected doctor info
+  const selectedDoctor = doctors.find((d) => d.id === value)
 
   return (
     <div className="space-y-2">
-      <label htmlFor="doctor-combobox" className="text-sm text-soft-blue  font-medium">
-        Select  Doctor
-      </label>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          {/* The button acts as the visual trigger and displays the current value */}
-          <button
-            type="button"
-            role="combobox"
-            aria-expanded={open}
-            aria-controls="doctor-suggestions"
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {doctors.find((d) => d.id === value)?.name || placeholder}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-snow-white" align="start">
-          <Command>
-            {/* CommandInput handles the actual typing and filtering */}
-            <CommandInput
-              ref={inputRef} // Attach ref to CommandInput
-              placeholder={placeholder}
-              value={doctors.find((d) => d.id === inputValue)?.name } // Bind to internal inputValue
-              onValueChange={(currentValue) => {
-                setInputValue(currentValue) // Update internal state
-                onChange(currentValue) // Also update parent state as user types
-                setOpen(true) // Keep popover open while typing
-              }}
-              id="doctor-combobox" // Link to label
-              aria-label="Search for a doctor"
+      <label className="text-sm font-medium text-foreground block">Select Doctor</label>
+
+      <button
+        onClick={() => setOpen(true)}
+        className={cn(
+          "flex h-10 w-full items-center justify-between rounded-lg border border-input bg-background px-4 py-2 text-sm",
+          "hover:bg-accent/50 transition-colors duration-200",
+          selectedDoctor && "bg-accent/20 border-primary/50",
+        )}
+      >
+        <span className={selectedDoctor ? "text-foreground font-medium" : "text-muted-foreground"}>
+          {selectedDoctor ? selectedDoctor.name : "Select a doctor or nutritionist..."}
+        </span>
+        <Search className="h-4 w-4 text-muted-foreground" />
+      </button>
+
+      <Dialog
+        open={open}
+        onOpenChange={(newOpen) => {
+          setOpen(newOpen)
+          onOpenChange?.(newOpen)
+        }}
+      >
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Select Doctor or Nutritionist</DialogTitle>
+          </DialogHeader>
+
+          {/* Search Input */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or specialization..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10"
+              autoFocus
             />
-            <CommandList id="doctor-suggestions">
-              {/* Show all doctors if input is empty, otherwise show filtered */}
-              {filteredDoctors.length === 0 && inputValue.trim() !== "" ? (
-                <CommandEmpty className="py-2 px-4 text-sm text-soft-coral">No doctor found.</CommandEmpty>
-              ) : (
-                filteredDoctors.map((doctor) => (
-                  <CommandItem
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Doctor Cards Grid */}
+          <div className="overflow-y-auto flex-1 pr-4">
+            {filteredDoctors.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground mb-2">No doctors found</p>
+                <p className="text-sm text-muted-foreground">Try adjusting your search</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredDoctors.map((doctor) => (
+                  <button
                     key={doctor.id}
-                    value={doctor.name} // Value for CommandItem search
-                    onSelect={() => handleSelect(doctor.id)}
-                    className="cursor-pointer hover:bg-mint-green hover:text-snow-white"
+                    onClick={() => handleSelect(doctor.id)}
+                    className={cn(
+                      "p-4 rounded-xl border-2 transition-all duration-200 text-left hover:shadow-lg",
+                      value === doctor.id
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50 bg-card hover:bg-accent/30",
+                    )}
                   >
-                    <Check className={cn("mr-2 h-4 w-4", value === doctor.name ? "opacity-100" : "opacity-0")} />
-                    <div className="flex flex-col w-full">
-                      <span className="font-medium text-sm truncate">{doctor.name}</span>
-                      <span className="text-xs text-muted-foreground truncate">{doctor.specialization}</span>
+                    {/* Doctor Image and Basic Info */}
+                    <div className="flex gap-3 mb-3">
+                      {doctor.img && (
+                        <img
+                          src={doctor.img || "/placeholder.svg"}
+                          alt={doctor.name}
+                          className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-dark-slate-gray truncate">{doctor.name}</h3>
+                        <p className="text-sm text-soft-coral font-medium truncate">{doctor.specialization}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium text-foreground">{doctor.rating}</span>
+                          </div>
+                          <span className="text-xs text-cool-gray">{doctor.experienceYears}+ years</span>
+                        </div>
+                      </div>
                     </div>
-                  </CommandItem>
-                ))
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      {value && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-2 top-[calc(2rem+1px)] -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          aria-label="Clear selected doctor"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
+
+                    {/* Bio/Description */}
+                    {doctor.bio && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{doctor.bio}</p>}
+
+                    {/* Consultation Fee */}
+                    <div className="mb-3 pb-3 border-b border-border">
+                      <p className="text-sm font-semibold text-foreground">
+                        Rs.{doctor.consultationFee}
+                        <span className="text-xs font-normal text-soft-coral ml-1">per session</span>
+                      </p>
+                    </div>
+
+                    {/* Info Badges */}
+                    <div className="space-y-2 text-xs">
+                      {doctor.languages && doctor.languages.length > 0 && (
+                        <div>
+                          <p className="font-medium text-soft-blue mb-1">Languages</p>
+                          <div className="flex flex-wrap gap-1">
+                            {doctor.languages.slice(0, 3).map((lang) => (
+                              <Badge key={lang} variant="secondary" className="text-xs py-0.5">
+                                {lang}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {doctor.certifications && doctor.certifications.length > 0 && (
+                        <div>
+                          <p className="font-medium text-soft-blue mb-1">Certifications</p>
+                          <div className="flex flex-wrap gap-1">
+                            {doctor.certifications.slice(0, 2).map((cert) => (
+                            
+                               <Badge key={cert} variant="secondary" className="text-xs py-0.5">
+                                {cert}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {doctor.education && doctor.education.length > 0 && (
+                        <div>
+                          <p className="font-medium text-soft-blue mb-1">Education</p>
+                          <p className="text-muted-foreground line-clamp-1">{doctor.education[0]}</p>
+                        </div>
+                      )}
+
+                    
+                    </div>
+
+                    {/* Selection Indicator */}
+                    {value === doctor.id && (
+                      <div className="mt-3 pt-3 border-t border-primary/20">
+                        <p className="text-xs font-medium text-primary">✓ Selected</p>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
