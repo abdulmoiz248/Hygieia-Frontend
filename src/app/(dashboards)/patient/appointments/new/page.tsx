@@ -83,7 +83,7 @@ export default function NewAppointmentPage() {
          if(app)
          {
           setRescheduleApp(app.id)
-          setSelectedDoctor(app.doctor.id)
+          setSelectedDoctor(app.doctor.id.trim())
           setAppointmentType(app.type)
           setSelectedTime(app.time)
           setSelectedDate(new Date(app.date))
@@ -110,7 +110,7 @@ const {
   data: slotData,
   isLoading: slotsLoading,
   isError: slotsError,
-} = useAvailableSlots(selectedDoctor, selectedDoctorRole!, selectedDate ? new Date(Date.UTC(
+} = useAvailableSlots(selectedDoctor.trim(), selectedDoctorRole!, selectedDate ? new Date(Date.UTC(
   selectedDate.getFullYear(),
   selectedDate.getMonth(),
   selectedDate.getDate(),

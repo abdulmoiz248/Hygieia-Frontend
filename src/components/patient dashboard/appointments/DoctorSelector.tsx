@@ -32,7 +32,8 @@ export default function DoctorSelectorModal({ doctors, value, onChange, onOpenCh
   // Handle doctor selection
   const handleSelect = useCallback(
     (doctorId: string) => {
-      onChange(doctorId)
+      console.log("Selected doctor ID:", doctorId)
+      onChange(doctorId.trim())
       setOpen(false)
       setSearchQuery("")
       onOpenChange?.(false)

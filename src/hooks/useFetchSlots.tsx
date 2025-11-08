@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import api from "@/lib/axios"
 
 const fetchAvailableSlots = async (providerId: string, role: string, date: string) => {
-  console.log("👉 Calling backend with:", { providerId, role, date })
+  console.log("👉 Calling backend with:", { providerId: providerId.trim(), role, date })
   const res = await api.get("/appointments/available-slots", {
-    params: { providerId, role, date },
+    params: { providerId: providerId.trim(), role, date },
   })
   console.log("✅ Backend response:", res.data)
   return res.data
