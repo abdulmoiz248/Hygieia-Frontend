@@ -116,6 +116,7 @@ const fitnessSlice = createSlice({
         state.error = null
 
         const data = action.payload || {}
+        
         state.goals = [
           { id: "steps", type: "steps", unit: "steps", current: data.steps || 0, target: 10000 },
           { id: "water", type: "water", unit: "liters", current: data.water || 0, target: 8 },

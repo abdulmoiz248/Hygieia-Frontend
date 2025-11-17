@@ -228,6 +228,7 @@ const handleDownloadLabSchedulePdf = async () => {
     dispatch(fetchLabTests())
   }
   if (!bookedTests || bookedTests.length === 0) {
+    // if already no report it will spam fetch
     dispatch(fetchBookedTests())
   }
 }, [dispatch, availableTests, bookedTests])

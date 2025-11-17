@@ -138,15 +138,6 @@ const handleTabChange = (tab: string) => {
           })}
         </nav>
 
-        {/* Footer */}
-        {!collapsed && (
-          <div className="p-4 border-t border-gray-100">
-            <div className="text-xs text-gray-500 text-center">
-              <div className="font-medium">Hygieia Lab Portal</div>
-              <div className="text-gray-400">v2.1.0</div>
-            </div>
-          </div>
-        )}
       </div>
     </motion.aside>
   )
