@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3 } from "lucide-react"
+import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3, ChevronDown, ChevronUp } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import type { PendingReport } from "@/types/lab-tech/lab-reports"
 import PendingHeader from "./PendingHeader"
@@ -27,6 +27,20 @@ const [reportValues, setReportValues] = useState({
   normalRange: "",
   units: "",
 })
+
+  const [collapsedRows, setCollapsedRows] = useState<Set<number>>(new Set())
+
+  const toggleRowCollapse = (index: number) => {
+    setCollapsedRows(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(index)) {
+        newSet.delete(index)
+      } else {
+        newSet.add(index)
+      }
+      return newSet
+    })
+  }
 
 
   const uploadSectionRef = useRef<HTMLDivElement | null>(null)
@@ -81,14 +95,30 @@ const handleValueSubmit = async(payload?: string) => {
     return reportType === "scan"
   }
 
-  const filteredReports = pendingReports.filter((report) => {
-    const matchesSearch =
-      report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.testName.toLowerCase().includes(searchTerm.toLowerCase())
-  
+  const filteredReports = pendingReports
+    .filter((report) => {
+      const matchesSearch =
+        report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.testName.toLowerCase().includes(searchTerm.toLowerCase())
+    
 
-    return matchesSearch 
-  })
+      return matchesSearch 
+    })
+    .sort((a, b) => {
+      // Sort by date and time - earliest appointments first
+      const dateA = new Date(a.scheduledDate)
+      const dateB = new Date(b.scheduledDate)
+      
+      // Parse time (assuming format like "10:00 AM" or "14:00")
+      const timeA = a.scheduledTime
+      const timeB = b.scheduledTime
+      
+      // Combine date and time for comparison
+      const dateTimeA = new Date(`${dateA.toDateString()} ${timeA}`)
+      const dateTimeB = new Date(`${dateB.toDateString()} ${timeB}`)
+      
+      return dateTimeA.getTime() - dateTimeB.getTime()
+    })
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -144,7 +174,7 @@ const handleValueSubmit = async(payload?: string) => {
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-500 font-medium">
-                  {new Date(report.scheduledDate).toLocaleDateString()} at {report.scheduledTime}
+                  {new Date(report.scheduledDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} at {report.scheduledTime}
                 </span>
                 <Badge
                   variant="outline"
@@ -248,12 +278,12 @@ const handleValueSubmit = async(payload?: string) => {
             <>
               <div className="space-y-2">
                 <Label htmlFor="report-file" className="text-sm font-medium text-soft-blue">
-                  Upload Scan File
+                  Upload Scan Image 
                 </Label>
                 <Input
                   id="report-file"
                   type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.png,.dicom"
+                  accept="image/jpeg,image/jpg,image/png"
                   onChange={handleFileUpload}
                   className="border-gray-200 focus:border-blue-500"
                 />
@@ -276,106 +306,119 @@ const handleValueSubmit = async(payload?: string) => {
           ) : (
            <>
   <div className="space-y-4">
-    <div className="space-y-2">
-      <Label className="text-sm font-medium text-soft-blue">
-        Test Results *
-      </Label>
+  <Label className="text-sm font-medium text-soft-blue">Test Results *</Label>
 
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-3 py-2 text-left">Test</th>
-              <th className="px-3 py-2 text-left">Reference Ranges</th>
-              <th className="px-3 py-2 text-left">Unit</th>
-              <th className="px-3 py-2 text-left">Result</th>
-              <th className="px-3 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(reportValues.results || []).map((row: any, index: number) => (
-              <tr key={index} className="border-t">
-                <td className="px-3 py-2">
-                  <input
-                    type="text"
-                    value={row.test}
-                    onChange={(e) => {
-                      const newRows = [...reportValues.results]
-                      newRows[index].test = e.target.value
-                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
-                    }}
-                    className="w-full border rounded p-1 text-sm"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="text"
-                    value={row.reference}
-                    onChange={(e) => {
-                      const newRows = [...reportValues.results]
-                      newRows[index].reference = e.target.value
-                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
-                    }}
-                    className="w-full border rounded p-1 text-sm"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="text"
-                    value={row.unit}
-                    onChange={(e) => {
-                      const newRows = [...reportValues.results]
-                      newRows[index].unit = e.target.value
-                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
-                    }}
-                    className="w-full border rounded p-1 text-sm"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="text"
-                    value={row.result}
-                    onChange={(e) => {
-                      const newRows = [...reportValues.results]
-                      newRows[index].result = e.target.value
-                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
-                    }}
-                    className="w-full border rounded p-1 text-sm"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newRows = reportValues.results.filter((_: any, i: number) => i !== index)
-                      setReportValues((prev:any) => ({ ...prev, results: newRows }))
-                    }}
-                    className="text-red-500 hover:underline text-xs"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="p-2">
+  <div className="space-y-3">
+    {(reportValues.results || []).map((row: any, index: number) => (
+      <div
+        key={index}
+        className="rounded-xl border p-4 bg-white shadow-sm flex flex-col gap-3"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold text-soft-coral">Test {index + 1}</span>
           <button
             type="button"
-            onClick={() =>
-              setReportValues((prev:any) => ({
-                ...prev,
-                results: [...(prev.results || []), { test: "", reference: "", unit: "", result: "" }],
-              }))
-            }
-            className="text-soft-blue hover:underline text-sm"
+            onClick={() => toggleRowCollapse(index)}
+            className="text-soft-blue hover:text-soft-blue/80 transition-colors"
           >
-            + Add Row
+            {collapsedRows.has(index) ? (
+              <ChevronDown className="w-5 h-5" />
+            ) : (
+              <ChevronUp className="w-5 h-5" />
+            )}
           </button>
         </div>
+
+        {!collapsedRows.has(index) && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Test Name"
+                value={row.test}
+                onChange={(e) => {
+                  const newRows = [...reportValues.results]
+                  newRows[index].test = e.target.value
+                  setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                }}
+                className="border rounded-lg p-2 text-sm focus:ring-2 focus:ring-soft-blue w-full"
+              />
+
+              <input
+                type="text"
+                placeholder="Reference Range"
+                value={row.reference}
+                onChange={(e) => {
+                  const newRows = [...reportValues.results]
+                  newRows[index].reference = e.target.value
+                  setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                }}
+                className="border rounded-lg p-2 text-sm focus:ring-2 focus:ring-soft-blue w-full"
+              />
+
+              <input
+                type="text"
+                placeholder="Unit"
+                value={row.unit}
+                onChange={(e) => {
+                  const newRows = [...reportValues.results]
+                  newRows[index].unit = e.target.value
+                  setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                }}
+                className="border rounded-lg p-2 text-sm focus:ring-2 focus:ring-soft-blue w-full"
+              />
+
+              <input
+                type="text"
+                placeholder="Result"
+                value={row.result}
+                onChange={(e) => {
+                  const newRows = [...reportValues.results]
+                  newRows[index].result = e.target.value
+                  setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                }}
+                className="border rounded-lg p-2 text-sm focus:ring-2 focus:ring-soft-blue w-full"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const newRows = reportValues.results.filter((_: any, i: number) => i !== index)
+                  setReportValues((prev:any) => ({ ...prev, results: newRows }))
+                  // Remove from collapsed set if it was collapsed
+                  setCollapsedRows(prev => {
+                    const newSet = new Set(prev)
+                    newSet.delete(index)
+                    return newSet
+                  })
+                }}
+                className="text-red-500 text-sm hover:underline"
+              >
+                Remove
+              </button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    ))}
+
+    <button
+      type="button"
+      onClick={() =>
+        setReportValues((prev:any) => ({
+          ...prev,
+          results: [...(prev.results || []), { test: "", reference: "", unit: "", result: "" }],
+        }))
+      }
+      className="text-soft-blue hover:underline text-sm"
+    >
+      + Add Test
+    </button>
   </div>
+</div>
+
 
   <Button
  onClick={async()=>{await handleValueSubmit()}}
