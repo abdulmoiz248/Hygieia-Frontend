@@ -39,6 +39,9 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const markAllAsRead = async () => {
     if (!user?.id || unreadCount === 0) return
     await api.patch(`/notifications/mark-read/${user.id}`)
+    notifications?.forEach((notification) => {
+          notification.is_read = true
+        })
   }
 
   const userInitials = (user?.name ?? "John")

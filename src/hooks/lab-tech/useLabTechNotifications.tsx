@@ -10,18 +10,18 @@ export interface Notification {
   unread: boolean
 }
 
-const useNutritionistNotifications = (
-  nutritionistId: string
+const useLabTechNotifications = (
+  labTechId: string
 ): UseQueryResult<Notification[]> => {
   return useQuery({
-    queryKey: ['nutritionistNotifications', nutritionistId],
+    queryKey: ['labTechNotifications', labTechId],
     queryFn: async () => {
-      if (!nutritionistId) throw new Error('Nutritionist ID is required')
-      const res = await api.get(`/notifications/${nutritionistId}`)
+      if (!labTechId) throw new Error('Lab Tech ID is required')
+      const res = await api.get(`/notifications/${labTechId}`)
       return res.data as Notification[]
     },
-    enabled: !!nutritionistId,
+    enabled: !!labTechId,
   })
 }
 
-export default useNutritionistNotifications
+export default useLabTechNotifications

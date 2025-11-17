@@ -15,10 +15,34 @@ import Image from "next/image"
 import Link from "next/link"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import { BellRing } from "@/components/ui/BellRing"
+import { UseQueryResult } from "@tanstack/react-query"
+import { Notification } from "@/hooks/lab-tech/useLabTechNotifications"
+import useLabTechNotifications from "@/hooks/lab-tech/useLabTechNotifications"
+import { timeAgo } from "@/helpers/formatTimeAgo"
+import api from "@/lib/axios"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
-  const { profile, notifications, markAllAsRead } = useLabTechnicianStore()
-  const unreadCount = notifications.filter((n) => n.unread).length
+  const { profile } = useLabTechnicianStore()
+
+
+
+    const {
+      data: notifications,
+    }: UseQueryResult<Notification[]> = useLabTechNotifications(profile?.id || "")
+
+
+    const markAllAsRead = async () => {
+        if (!profile?.id || unreadCount === 0) return
+        await api.patch(`/notifications/mark-read/${profile.id}`)
+        notifications?.forEach((notification) => {
+          notification.is_read = true
+        })
+      }
+
+
+    const unreadCount = notifications
+    ? notifications.filter((n) => !n.is_read).length
+    : 0
 
 const safeProfile = profile ?? { name: "user" }
 
@@ -60,40 +84,60 @@ const userInitials = (safeProfile.name || "user")
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-white">
-              <div className="p-3 border-b">
-                <h3 className="font-semibold text-soft-blue">Notifications</h3>
-                <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer">
+        
+          <DropdownMenuContent
+            align="end"
+            className="w-80 bg-white p-0 overflow-hidden shadow-lg rounded-2xl"
+            sideOffset={8}
+          >
+            <div className="sticky top-0 z-10 bg-white p-3 border-b">
+              <h3 className="font-semibold text-soft-blue">Notifications</h3>
+              <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
+            </div>
+        
+            <div className="max-h-[60vh] overflow-y-auto">
+              {notifications?.length ? (
+                notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className="p-4 cursor-pointer focus:bg-mint-green/10"
+                  >
                     <div className="flex gap-3 w-full">
                       <div
                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                          notification.unread ? "bg-soft-coral" : "bg-transparent"
+                          !notification.is_read ? "bg-soft-coral" : "bg-transparent"
                         }`}
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-sm text-cool-gray line-clamp-2">{notification.message}</p>
-                        <p className="text-xs text-cool-gray mt-1">{notification.time}</p>
+                        <p className="text-sm text-cool-gray line-clamp-2">
+                          {notification.notification_msg}
+                        </p>
+                        <p className="text-xs text-cool-gray mt-1">
+                          {timeAgo(notification.created_at)}
+                        </p>
                       </div>
                     </div>
                   </DropdownMenuItem>
-                ))}
-              </div>
-              <div className="p-2 border-t">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full bg-soft-blue text-snow-white"
-                  onClick={markAllAsRead}
-                >
-                  Mark All As Read
-                </Button>
-              </div>
-            </DropdownMenuContent>
+                ))
+              ) : (
+                <div className="p-4 text-sm text-center text-cool-gray">
+                  no notifications
+                </div>
+              )}
+            </div>
+        
+            <div className="sticky bottom-0  p-2 border-t">
+              <Button
+             
+                size="sm"
+                className="w-full bg-soft-blue text-snow-white hover:bg-soft-coral"
+                onClick={() => markAllAsRead()}
+              >
+                Mark All As Read
+              </Button>
+            </div>
+          </DropdownMenuContent>
           </DropdownMenu>
 
           <DropdownMenu>
