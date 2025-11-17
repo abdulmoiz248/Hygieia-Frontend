@@ -3,9 +3,9 @@ import LabLayout from "@/components/lab-tech/LabLayout"
 import ReactQueryProvider from "@/Providers/BlogsQueryProvider"
 
 export const metadata: Metadata = {
-  title: "Lab Technician | Hygieia",
+  title: "Pathologist | Hygieia",
   description:
-    "Comprehensive Lab Technician dashboard for managing health records and more.",
+    "Comprehensive Pathologist dashboard for managing health records and more.",
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

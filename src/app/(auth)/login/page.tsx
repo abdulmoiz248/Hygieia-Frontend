@@ -48,7 +48,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (!data.success) {
       throw new Error(data.message || 'Login failed')
     } else {
-      const role = data.role.includes('lab') ? 'lab-technician' : data.role.toLowerCase()
+      const role = data.role.includes('lab') ? 'pathologist' : data.role.toLowerCase()
       
       // Store in cookies
       Cookies.set('token', data.accessToken, { expires: 7, sameSite: 'strict' })

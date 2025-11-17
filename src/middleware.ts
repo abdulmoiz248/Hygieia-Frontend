@@ -9,7 +9,7 @@ export function middleware(req: NextRequest) {
   const role = req.cookies.get('role')?.value
 
   // Protect dashboard routes
-  if ((url.pathname.startsWith('/lab-technician') || url.pathname.startsWith('/nutritionist')) && !token) {
+  if ((url.pathname.startsWith('/pathologist') || url.pathname.startsWith('/nutritionist')) && !token) {
 
    url.pathname = '/login'
     return NextResponse.redirect(url)
