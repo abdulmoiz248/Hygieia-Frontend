@@ -112,7 +112,7 @@ file_url=res.data.file_url
     const pending = data.pendingReports || []
     const completed = data.completedReports || []
     const analytics = {
-      totalTests: data.analytics.totalTests || 0,
+      totalTests: data.analytics.completedTests + data.analytics.pendingReports || 0,
       completedTests: data.analytics.completedTests || 0,
       pendingReports: data.analytics.pendingReports || 0,
       todayTests: data.analytics.todayTests || 0,
