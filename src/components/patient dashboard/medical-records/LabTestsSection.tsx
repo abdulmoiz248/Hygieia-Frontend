@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import { setShowBookingModal, setSelectedTest, cancelLabTest } from "@/types/patient/labTestsSlice"
-import { LabTestBookingModal } from "./LabTestBookingModal"
+import { cancelLabTest } from "@/types/patient/labTestsSlice"
 import type { LabTest,BookedLabTest } from "@/types/patient/lab"
 import { useEffect, useState } from "react"
 import { patientDestructive } from "@/toasts/PatientToast"
-
+import { useRouter } from "next/navigation"
 import { fetchLabTests, fetchBookedTests } from '@/types/patient/labTestsSlice'
 import { formatDateOnly } from "@/helpers/date"
 import { useSelector } from "react-redux"
@@ -24,9 +23,10 @@ const itemVariants = {
 
 export function LabTestsSection() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   
   const profile=useSelector((state:RootState)=>state.profile)
-  const { availableTests, bookedTests, selectedTest } = useAppSelector((state) => state.labTests)
+  const { availableTests, bookedTests } = useAppSelector((state) => state.labTests)
 
   const [selectTestModal,setSelectedTestModal]=useState<BookedLabTest | null>()
   const pendingTests = bookedTests.filter((test) => test.status === "pending")
@@ -243,8 +243,7 @@ useEffect(()=>{
 },[])
 
   const handleBookTest = (test: LabTest) => {
-    dispatch(setSelectedTest(test))
-    dispatch(setShowBookingModal(true))
+    router.push(`/patient/lab-tests/book/${test.id}`)
   }
 
   const handleCancelTest = (testId: string) => {
@@ -429,9 +428,6 @@ useEffect(()=>{
             </div>
        
       </motion.div>
-
-      {/* Booking Modal */}
-      {selectedTest && <LabTestBookingModal test={selectedTest} />}
     </div>
   )
 }

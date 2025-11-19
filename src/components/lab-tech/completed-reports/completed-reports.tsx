@@ -3,11 +3,11 @@
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Calendar, FileText, User, Clock, EyeIcon } from "lucide-react"
+import { CheckCircle, Calendar, FileText, User,  EyeIcon } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import CompletedHeader from "./CompletedHeader"
 import { PendingReportFilter } from "../pending-reports/PendingReportsFilter"
-import {DownloadIcon} from '@/components/ui/Download'
+
 
 export function CompletedReports() {
   const { completedReports } = useLabStore()
