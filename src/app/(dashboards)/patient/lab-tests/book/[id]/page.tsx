@@ -3,11 +3,14 @@
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, MapPin, AlertCircle, FileText, TestTube } from "lucide-react"
+import { Calendar, Clock, MapPin, AlertCircle, FileText, TestTube, Home, Building2, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAppDispatch, useAppSelector } from "@/hooks/redux"
 import { bookLabTest, fetchLabTests } from "@/types/patient/labTestsSlice"
 import { CalendarComponent } from "@/components/ui/calendar"
@@ -43,14 +46,209 @@ export default function BookLabTestPage() {
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() + 86400 * 1000))
   const [selectedTime, setSelectedTime] = useState("")
-  const [location, setLocation] = useState("Main Lab - Floor 2")
+  const [locationType, setLocationType] = useState<"home" | "branch">("branch")
+  const [location, setLocation] = useState("")
+  const [selectedBranch, setSelectedBranch] = useState("")
+  const [manualAddress, setManualAddress] = useState("")
+  const [showMapModal, setShowMapModal] = useState(false)
+  const [mapCoordinates, setMapCoordinates] = useState<{ lat: number; lng: number } | null>(null)
+  const [mapAddress, setMapAddress] = useState("")
+  const [locationError, setLocationError] = useState("")
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [marker, setMarker] = useState<google.maps.Marker | null>(null)
   const [notes, setNotes] = useState("")
   const [showConfirmation, setShowConfirmation] = useState(false)
+
+  // Available branches
+  const branches = [
+    "Main Lab - Floor 2, Medical Center",
+    "Downtown Branch - Street 15, Block A",
+    "North Branch - Plaza Center, 3rd Floor",
+    "South Branch - Healthcare Complex, Wing B",
+  ]
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return
     const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
     setSelectedDate(normalizedDate)
+  }
+
+  // Update location string based on type
+  useEffect(() => {
+    if (locationType === "home") {
+      if (manualAddress) {
+        setLocation(`Home Sampling - ${manualAddress}`)
+      } else if (mapAddress) {
+        setLocation(`Home Sampling - ${mapAddress}`)
+      } else {
+        setLocation("")
+      }
+    } else {
+      setLocation(selectedBranch)
+    }
+  }, [locationType, selectedBranch, manualAddress, mapAddress])
+
+  // Load Keyless Google Maps Script
+  useEffect(() => {
+    const loadGoogleMaps = () => {
+      if (typeof window !== "undefined" && !window.google) {
+        const script = document.createElement("script")
+        script.src = "https://cdn.jsdelivr.net/gh/somanchiu/Keyless-Google-Maps-API@v7.1/mapsJavaScriptAPI.js"
+        script.async = true
+        script.defer = true
+        document.head.appendChild(script)
+      }
+    }
+    loadGoogleMaps()
+  }, [])
+
+  const getAddressFromCoordinates = async (lat: number, lng: number) => {
+    try {
+      // Use Nominatim (OpenStreetMap) for reverse geocoding - free alternative
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'Hygieia-Frontend'
+          }
+        }
+      )
+      const data = await response.json()
+      
+      if (data.display_name) {
+        return data.display_name
+      }
+      return ""
+    } catch (error) {
+      console.error("Geocoding error:", error)
+      return ""
+    }
+  }
+
+  const initializeMap = (mapContainer: HTMLDivElement, initialLat?: number, initialLng?: number) => {
+    if (!window.google || !mapContainer) return
+
+    const mapOptions: google.maps.MapOptions = {
+      zoom: 15,
+      center: initialLat && initialLng ? { lat: initialLat, lng: initialLng } : { lat: 0, lng: 0 },
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+    }
+
+    const newMap = new google.maps.Map(mapContainer, mapOptions)
+    setMap(newMap)
+
+    const newMarker = new google.maps.Marker({
+      map: newMap,
+      position: initialLat && initialLng ? { lat: initialLat, lng: initialLng } : undefined,
+      draggable: true,
+    })
+    setMarker(newMarker)
+
+    // Update address when marker is dragged
+    newMarker.addListener("dragend", async () => {
+      const position = newMarker.getPosition()
+      if (position) {
+        const address = await getAddressFromCoordinates(position.lat(), position.lng())
+        setMapAddress(address)
+        setMapCoordinates({ lat: position.lat(), lng: position.lng() })
+      }
+    })
+
+    // Add click listener to map
+    newMap.addListener("click", async (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) {
+        newMarker.setPosition(e.latLng)
+        const address = await getAddressFromCoordinates(e.latLng.lat(), e.latLng.lng())
+        setMapAddress(address)
+        setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+      }
+    })
+
+    // Add double-click listener to auto-confirm
+    newMap.addListener("dblclick", async (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) {
+        newMarker.setPosition(e.latLng)
+        const address = await getAddressFromCoordinates(e.latLng.lat(), e.latLng.lng())
+        setMapAddress(address)
+        setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        
+        // Auto-confirm and close modal after getting address
+        setTimeout(() => {
+          setManualAddress("")
+          setShowMapModal(false)
+        }, 300)
+      }
+    })
+  }
+
+  const handleOpenMap = () => {
+    setLocationError("")
+    setIsLoadingLocation(true)
+    setShowMapModal(true)
+    
+    // Request user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          setMapCoordinates({ lat, lng })
+          
+          // Get address from coordinates
+          const address = await getAddressFromCoordinates(lat, lng)
+          setMapAddress(address)
+          
+          setIsLoadingLocation(false)
+          
+          // Initialize map with user location
+          setTimeout(() => {
+            const mapContainer = document.getElementById("google-map") as HTMLDivElement
+            if (mapContainer) {
+              initializeMap(mapContainer, lat, lng)
+            }
+          }, 100)
+        },
+        (error) => {
+          setIsLoadingLocation(false)
+          let errorMessage = "Location access denied. "
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += "Please enable location permissions in your browser settings to use this feature."
+              break
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += "Location information is unavailable."
+              break
+            case error.TIMEOUT:
+              errorMessage += "Location request timed out."
+              break
+            default:
+              errorMessage += "An unknown error occurred."
+          }
+          
+          setLocationError(errorMessage)
+          console.error("Geolocation error:", error)
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      )
+    } else {
+      setIsLoadingLocation(false)
+      setLocationError("Geolocation is not supported by your browser.")
+    }
+  }
+
+  const handleMapConfirm = () => {
+    if (mapAddress) {
+      setManualAddress("") // Clear manual address when using map
+      setShowMapModal(false)
+    }
   }
 
   const handleBookTest = () => {
@@ -189,16 +387,101 @@ export default function BookLabTestPage() {
 
               {/* Location */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-soft-blue">Location</label>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-soft-blue" />
-                  <Input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Enter Lab Location or Home Sampling"
-                  />
-                </div>
+                <label className="text-sm font-medium text-soft-blue">Location Type</label>
+                <RadioGroup value={locationType} onValueChange={(value: "home" | "branch") => setLocationType(value)}>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-soft-blue/5 cursor-pointer">
+                    <RadioGroupItem value="home" id="home" />
+                    <Label htmlFor="home" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <Home className="h-4 w-4 text-soft-coral" />
+                      <span>Home Sampling</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-soft-blue/5 cursor-pointer">
+                    <RadioGroupItem value="branch" id="branch" />
+                    <Label htmlFor="branch" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <Building2 className="h-4 w-4 text-mint-green" />
+                      <span>Visit Branch</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
+
+              {/* Home Sampling Options */}
+              {locationType === "home" && (
+                <div className="space-y-4 p-4 bg-soft-coral/5 rounded-lg border border-soft-coral/20">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-soft-blue">Select Location Method</label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {/* Map Selection */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full justify-start gap-2 h-auto py-3"
+                        onClick={handleOpenMap}
+                      >
+                        <Map className="h-4 w-4 text-soft-coral" />
+                        <div className="text-left flex-1">
+                          <div className="font-medium">Select on Map</div>
+                          <div className="text-xs text-cool-gray">Choose your location from map</div>
+                        </div>
+                      </Button>
+
+                      {/* Manual Address Input */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-cool-gray">Or Enter Address Manually</label>
+                        <Textarea
+                          value={manualAddress}
+                          onChange={(e) => {
+                            setManualAddress(e.target.value)
+                            setMapCoordinates(null)
+                            setMapAddress("") // Clear map address when typing
+                          }}
+                          placeholder="Enter your complete address (House #, Street, Area, City)"
+                          rows={3}
+                          className="resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Display selected location */}
+                  {(manualAddress || mapAddress) && (
+                    <div className="p-3 bg-white rounded-lg border border-soft-coral/30">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-soft-coral mt-0.5" />
+                        <div className="flex-1">
+                          <div className="text-xs font-medium text-soft-blue mb-1">Selected Location:</div>
+                          <div className="text-sm text-dark-slate-gray">
+                            {manualAddress || mapAddress}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Branch Selection */}
+              {locationType === "branch" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-soft-blue">Select Branch</label>
+                  <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose a branch location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((branch, index) => (
+                        <SelectItem key={index} value={branch}>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-mint-green" />
+                            {branch}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Additional Notes */}
               <div className="space-y-2">
@@ -251,16 +534,13 @@ export default function BookLabTestPage() {
                   <span className="text-sm text-cool-gray">Time:</span>
                   <span className="text-sm font-medium text-soft-blue">{selectedTime || "Not selected"}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-start">
                   <span className="text-sm text-cool-gray">Location:</span>
-                  <span className="text-sm font-medium text-soft-blue">{location}</span>
+                  <span className="text-sm font-medium text-soft-blue text-right max-w-[200px] truncate" title={location}>
+                    {location}
+                  </span>
                 </div>
-                {notes && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-cool-gray">Notes:</span>
-                    <span className="text-sm font-medium text-soft-blue">{notes}</span>
-                  </div>
-                )}
+               
                 <div className="flex justify-between">
                   <span className="text-sm text-cool-gray">Price:</span>
                   <span className="text-sm font-medium text-soft-blue">Rs.{test.price}</span>
@@ -270,7 +550,7 @@ export default function BookLabTestPage() {
               <div className="pt-4 border-t">
                 <Button
                   className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
-                  disabled={!selectedDate || !selectedTime}
+                  disabled={!selectedDate || !selectedTime || !location}
                   onClick={handleBookTest}
                 >
                   <Clock className="w-4 h-4 mr-2" />
@@ -301,23 +581,23 @@ export default function BookLabTestPage() {
             <div className="space-y-3 text-sm text-dark-slate-gray">
               <div className="flex justify-between">
                 <span className="font-medium text-soft-blue">Test</span>
-                <span>{test.name}</span>
+                <span className="text-right">{test.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-soft-blue">Date</span>
-                <span>{selectedDate?.toLocaleDateString()}</span>
+                <span className="text-right">{selectedDate?.toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-soft-blue">Time</span>
-                <span>{selectedTime}</span>
+                <span className="text-right">{selectedTime}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-soft-blue">Location</span>
-                <span>{location}</span>
+                <span className="text-right">{location}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-soft-blue">Price</span>
-                <span>Rs.{test.price}</span>
+                <span className="text-right">Rs.{test.price}</span>
               </div>
             </div>
 
@@ -331,6 +611,108 @@ export default function BookLabTestPage() {
               >
                 Close
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Map Modal */}
+      {showMapModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-soft-coral">Select Your Location</h2>
+                <p className="text-sm text-cool-gray">
+                  {isLoadingLocation ? "Getting your location..." : "Click or drag marker to select. Double-click to confirm instantly."}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowMapModal(false)
+                  setLocationError("")
+                }}
+                className="text-cool-gray hover:text-soft-coral"
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {/* Location Error */}
+              {locationError && (
+                <div className="p-4 bg-soft-coral/10 border border-soft-coral/30 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-soft-coral mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-soft-coral mb-1">Location Permission Required</h4>
+                      <p className="text-sm text-dark-slate-gray">{locationError}</p>
+                      <p className="text-xs text-cool-gray mt-2">
+                        Please enable location access and try again, or enter your address manually.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {isLoadingLocation && (
+                <div className="w-full h-96 bg-gradient-to-br from-soft-blue/10 to-mint-green/10 rounded-lg flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <div className="w-12 h-12 border-4 border-soft-blue/30 border-t-soft-blue rounded-full animate-spin mx-auto"></div>
+                    <p className="text-sm text-cool-gray">Requesting location access...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Google Map */}
+              {!isLoadingLocation && !locationError && (
+                <div 
+                  id="google-map"
+                  className="w-full h-96 rounded-lg border-2 border-soft-blue/20"
+                  style={{ minHeight: "400px" }}
+                >
+                </div>
+              )}
+              
+              {/* Address Display - Editable */}
+              {mapAddress && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-soft-blue flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-soft-coral" />
+                    Selected Address (You can edit this)
+                  </label>
+                  <Textarea
+                    value={mapAddress}
+                    onChange={(e) => setMapAddress(e.target.value)}
+                    rows={3}
+                    className="resize-none text-sm"
+                  />
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowMapModal(false)
+                    setLocationError("")
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-white"
+                  onClick={handleMapConfirm}
+                  disabled={!mapAddress}
+                >
+                  Confirm Location
+                </Button>
+              </div>
             </div>
           </div>
         </div>
