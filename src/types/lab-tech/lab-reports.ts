@@ -6,6 +6,7 @@ export interface PendingReport extends Omit<BookedLabTest, "bookedAt"  | "instru
   uploadedAt?: Date
   reportFile?: string
   results?:string
+  instructions?:string[]
 }
 
 export interface LabAnalytics {

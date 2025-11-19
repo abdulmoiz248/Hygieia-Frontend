@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3, ChevronDown, ChevronUp } from "lucide-react"
+import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3, ChevronDown, ChevronUp, MapPin, Home } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import type { PendingReport } from "@/types/lab-tech/lab-reports"
 import PendingHeader from "./PendingHeader"
@@ -159,38 +159,34 @@ const handleValueSubmit = async(payload?: string) => {
           }
         }}
       >
-        <CardContent className="p-4 py-1">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-3 text-soft-coral">
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            {/* Header Section */}
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-3 flex-1">
                 {getStatusIcon(report.status)}
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-soft-coral text-lg">{report.patientName}</h3>
                   <p className="text-gray-600 font-medium">{report.testName}</p>
-                  <Badge variant="outline" className="text-xs mt-1 capitalize bg-soft-blue text-snow-white">
-                    {report.type && report.type.replace("-", " ")}
-                  </Badge>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-xs capitalize bg-soft-blue text-snow-white">
+                      {report.type && report.type.replace("-", " ")}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-xs capitalize font-medium bg-soft-coral text-snow-white"
+                    >
+                      {report.status.replace("-", " ")}
+                    </Badge>
+                    {report.location && report.location.toLowerCase().includes("home sampling") && (
+                      <Badge variant="outline" className="text-xs font-medium bg-mint-green text-black flex items-center gap-1">
+                        <Home className="w-3 h-3" />
+                        Home Visit
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-500 font-medium">
-                  {new Date(report.scheduledDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} at {report.scheduledTime}
-                </span>
-                <Badge
-                  variant="outline"
-                  className="text-xs capitalize font-medium bg-soft-coral text-snow-white"
-                >
-                  {report.status.replace("-", " ")}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="text-xs capitalize font-medium bg-mint-green text-black"
-                >
-                  {report.location}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -205,6 +201,32 @@ const handleValueSubmit = async(payload?: string) => {
               >
                 <FileText className="w-4 h-4 text-soft-blue" />
               </Button>
+            </div>
+
+            {/* Details Section */}
+            <div className="space-y-2 pl-7">
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-600 font-medium">
+                  {new Date(report.scheduledDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} at {report.scheduledTime}
+                </span>
+              </div>
+              
+              <div className="flex items-start gap-2 text-sm">
+                <MapPin className="w-4 h-4 text-mint-green mt-0.5 flex-shrink-0" />
+                <span className="text-gray-600 font-medium line-clamp-2" title={report.location}>
+                  {report.location}
+                </span>
+              </div>
+
+              {report.instructions && report.instructions.length > 0 && report.instructions[0] && (
+                <div className="flex items-start gap-2 text-sm">
+                  <FileText className="w-4 h-4 text-soft-coral mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-600 italic line-clamp-2" title={report.instructions.join(", ")}>
+                    {report.instructions.join(", ")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
