@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
@@ -51,12 +52,9 @@ export default function BookLabTestPage() {
   const [selectedBranch, setSelectedBranch] = useState("")
   const [manualAddress, setManualAddress] = useState("")
   const [showMapModal, setShowMapModal] = useState(false)
-  const [mapCoordinates, setMapCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [mapAddress, setMapAddress] = useState("")
   const [locationError, setLocationError] = useState("")
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null)
   const [notes, setNotes] = useState("")
   const [showConfirmation, setShowConfirmation] = useState(false)
 
@@ -138,14 +136,12 @@ export default function BookLabTestPage() {
     }
 
     const newMap = new google.maps.Map(mapContainer, mapOptions)
-    setMap(newMap)
 
     const newMarker = new google.maps.Marker({
       map: newMap,
       position: initialLat && initialLng ? { lat: initialLat, lng: initialLng } : undefined,
       draggable: true,
     })
-    setMarker(newMarker)
 
     // Update address when marker is dragged
     newMarker.addListener("dragend", async () => {
@@ -153,7 +149,6 @@ export default function BookLabTestPage() {
       if (position) {
         const address = await getAddressFromCoordinates(position.lat(), position.lng())
         setMapAddress(address)
-        setMapCoordinates({ lat: position.lat(), lng: position.lng() })
       }
     })
 
@@ -163,7 +158,6 @@ export default function BookLabTestPage() {
         newMarker.setPosition(e.latLng)
         const address = await getAddressFromCoordinates(e.latLng.lat(), e.latLng.lng())
         setMapAddress(address)
-        setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() })
       }
     })
 
@@ -173,7 +167,6 @@ export default function BookLabTestPage() {
         newMarker.setPosition(e.latLng)
         const address = await getAddressFromCoordinates(e.latLng.lat(), e.latLng.lng())
         setMapAddress(address)
-        setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() })
         
         // Auto-confirm and close modal after getting address
         setTimeout(() => {
@@ -195,7 +188,6 @@ export default function BookLabTestPage() {
         async (position) => {
           const lat = position.coords.latitude
           const lng = position.coords.longitude
-          setMapCoordinates({ lat, lng })
           
           // Get address from coordinates
           const address = await getAddressFromCoordinates(lat, lng)
@@ -433,7 +425,6 @@ export default function BookLabTestPage() {
                           value={manualAddress}
                           onChange={(e) => {
                             setManualAddress(e.target.value)
-                            setMapCoordinates(null)
                             setMapAddress("") // Clear map address when typing
                           }}
                           placeholder="Enter your complete address (House #, Street, Area, City)"

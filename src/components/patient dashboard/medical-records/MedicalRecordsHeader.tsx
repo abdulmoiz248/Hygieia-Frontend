@@ -1,7 +1,6 @@
 import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import Loader from "@/components/loader/loader"
 import {
   Dialog,
   DialogContent,
