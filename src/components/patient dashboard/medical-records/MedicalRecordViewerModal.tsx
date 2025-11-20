@@ -85,7 +85,7 @@ const handleDownload = async () => {
               <div className="p-4 bg-mint-green rounded-lg">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Type:</span> {viewingRecord.record_type?.replace("-", " ") || ""}
+                    <span className="font-medium">Type:</span> {viewingRecord.type?.replace("-", " ") || ""}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span> {formatDateOnly( viewingRecord.date)}

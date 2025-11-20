@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Upload } from "lucide-react"
+import { Loader2, Upload } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -127,7 +127,6 @@ export function MedicalRecordsHeader({
                 </SelectTrigger>
                 <SelectContent className="bg-snow-white">
                   <SelectItem value="lab-result" className="hover:text-white hover:bg-mint-green">Lab Result</SelectItem>
-                  <SelectItem value="prescription" className="hover:text-white hover:bg-mint-green">Prescription</SelectItem>
                   <SelectItem value="scan" className="hover:text-white hover:bg-mint-green">Scan/X-Ray</SelectItem>
                   <SelectItem value="report" className="hover:text-white hover:bg-mint-green">Medical Report</SelectItem>
                 </SelectContent>
@@ -165,7 +164,7 @@ export function MedicalRecordsHeader({
             >
               {loading ? (
     <>
-      <Loader /> Uploading...
+      <Loader2 className="w-4 h-4" /> Uploading...
     </>
   ) : (
     "Upload Record"
