@@ -4,7 +4,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, MapPin, AlertCircle, FileText, TestTube, Home, Building2, Map } from "lucide-react"
+import { Calendar, Clock, MapPin, AlertCircle, FileText, TestTube, Home, Building2, Map, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -105,7 +105,7 @@ export default function BookLabTestPage() {
     try {
       // Use Nominatim (OpenStreetMap) for reverse geocoding - free alternative
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`,
         {
           headers: {
             'User-Agent': 'Hygieia-Frontend'
@@ -114,13 +114,46 @@ export default function BookLabTestPage() {
       )
       const data = await response.json()
       
-      if (data.display_name) {
+      if (data.address) {
+        // Build a detailed address from components
+        const addressParts = []
+        
+        // House number and road
+        if (data.address.house_number) addressParts.push(data.address.house_number)
+        if (data.address.road) addressParts.push(data.address.road)
+        
+        // Neighborhood/suburb
+        if (data.address.neighbourhood) addressParts.push(data.address.neighbourhood)
+        else if (data.address.suburb) addressParts.push(data.address.suburb)
+        
+        // City/town
+        if (data.address.city) addressParts.push(data.address.city)
+        else if (data.address.town) addressParts.push(data.address.town)
+        else if (data.address.village) addressParts.push(data.address.village)
+        
+        // State/province
+        if (data.address.state) addressParts.push(data.address.state)
+        
+        // Postal code
+        if (data.address.postcode) addressParts.push(data.address.postcode)
+        
+        // Country
+        if (data.address.country) addressParts.push(data.address.country)
+        
+        // If we have specific address parts, use them; otherwise fall back to display_name
+        if (addressParts.length > 0) {
+          return addressParts.join(', ')
+        } else if (data.display_name) {
+          return data.display_name
+        }
+      } else if (data.display_name) {
         return data.display_name
       }
-      return ""
+      
+      return `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
     } catch (error) {
       console.error("Geocoding error:", error)
-      return ""
+      return `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
     }
   }
 
@@ -663,10 +696,24 @@ export default function BookLabTestPage() {
 
                 {/* Google Map */}
                 {!isLoadingLocation && !locationError && (
-                  <div 
-                    id="google-map"
-                    className="w-full h-64 sm:h-80 md:h-96 rounded-lg border-2 border-soft-blue/20"
-                  >
+                  <div className="space-y-3">
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={handleOpenMap}
+                        className="gap-2 text-soft-blue border-soft-blue/30 hover:bg-soft-blue/10"
+                      >
+                        <Navigation className="h-4 w-4" />
+                        Use My Current Location
+                      </Button>
+                    </div>
+                    <div 
+                      id="google-map"
+                      className="w-full h-64 sm:h-80 md:h-96 rounded-lg border-2 border-soft-blue/20"
+                    >
+                    </div>
                   </div>
                 )}
                 
@@ -681,7 +728,7 @@ export default function BookLabTestPage() {
                       value={mapAddress}
                       onChange={(e) => setMapAddress(e.target.value)}
                       rows={3}
-                      className="resize-none text-xs sm:text-sm"
+                      className="resize-none text-xs sm:text-sm w-full border-soft-blue/30 focus:border-soft-blue focus:ring-2 focus:ring-soft-blue/20 rounded-lg p-3"
                       placeholder="Edit the address if needed..."
                     />
                   </div>
