@@ -609,12 +609,13 @@ export default function BookLabTestPage() {
 
       {/* Map Modal */}
       {showMapModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/40">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="p-4 border-b flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-soft-coral">Select Your Location</h2>
-                <p className="text-sm text-cool-gray">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+            {/* Header - Fixed */}
+            <div className="p-4 sm:p-6 border-b flex items-start justify-between flex-shrink-0">
+              <div className="flex-1 pr-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-soft-coral mb-1">Select Your Location</h2>
+                <p className="text-xs sm:text-sm text-cool-gray">
                   {isLoadingLocation ? "Getting your location..." : "Click or drag marker to select. Double-click to confirm instantly."}
                 </p>
               </div>
@@ -625,70 +626,75 @@ export default function BookLabTestPage() {
                   setShowMapModal(false)
                   setLocationError("")
                 }}
-                className="text-cool-gray hover:text-soft-coral"
+                className="text-cool-gray hover:text-soft-coral flex-shrink-0"
               >
                 ✕
               </Button>
             </div>
             
-            <div className="p-6 space-y-4">
-              {/* Location Error */}
-              {locationError && (
-                <div className="p-4 bg-soft-coral/10 border border-soft-coral/30 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-soft-coral mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-soft-coral mb-1">Location Permission Required</h4>
-                      <p className="text-sm text-dark-slate-gray">{locationError}</p>
-                      <p className="text-xs text-cool-gray mt-2">
-                        Please enable location access and try again, or enter your address manually.
-                      </p>
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 sm:p-6 space-y-4">
+                {/* Location Error */}
+                {locationError && (
+                  <div className="p-3 sm:p-4 bg-soft-coral/10 border border-soft-coral/30 rounded-lg">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <AlertCircle className="h-5 w-5 text-soft-coral mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-soft-coral mb-1 text-sm sm:text-base">Location Permission Required</h4>
+                        <p className="text-xs sm:text-sm text-dark-slate-gray">{locationError}</p>
+                        <p className="text-xs text-cool-gray mt-2">
+                          Please enable location access and try again, or enter your address manually.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Loading State */}
-              {isLoadingLocation && (
-                <div className="w-full h-96 bg-gradient-to-br from-soft-blue/10 to-mint-green/10 rounded-lg flex items-center justify-center">
-                  <div className="text-center space-y-3">
-                    <div className="w-12 h-12 border-4 border-soft-blue/30 border-t-soft-blue rounded-full animate-spin mx-auto"></div>
-                    <p className="text-sm text-cool-gray">Requesting location access...</p>
+                {/* Loading State */}
+                {isLoadingLocation && (
+                  <div className="w-full h-64 sm:h-80 md:h-96 bg-gradient-to-br from-soft-blue/10 to-mint-green/10 rounded-lg flex items-center justify-center">
+                    <div className="text-center space-y-3 p-4">
+                      <div className="w-12 h-12 border-4 border-soft-blue/30 border-t-soft-blue rounded-full animate-spin mx-auto"></div>
+                      <p className="text-xs sm:text-sm text-cool-gray">Requesting location access...</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Google Map */}
-              {!isLoadingLocation && !locationError && (
-                <div 
-                  id="google-map"
-                  className="w-full h-96 rounded-lg border-2 border-soft-blue/20"
-                  style={{ minHeight: "400px" }}
-                >
-                </div>
-              )}
-              
-              {/* Address Display - Editable */}
-              {mapAddress && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-soft-blue flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-soft-coral" />
-                    Selected Address (You can edit this)
-                  </label>
-                  <Textarea
-                    value={mapAddress}
-                    onChange={(e) => setMapAddress(e.target.value)}
-                    rows={3}
-                    className="resize-none text-sm"
-                  />
-                </div>
-              )}
-              
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
+                {/* Google Map */}
+                {!isLoadingLocation && !locationError && (
+                  <div 
+                    id="google-map"
+                    className="w-full h-64 sm:h-80 md:h-96 rounded-lg border-2 border-soft-blue/20"
+                  >
+                  </div>
+                )}
+                
+                {/* Address Display - Editable */}
+                {mapAddress && (
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-soft-blue flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-soft-coral flex-shrink-0" />
+                      <span>Selected Address (You can edit this)</span>
+                    </label>
+                    <Textarea
+                      value={mapAddress}
+                      onChange={(e) => setMapAddress(e.target.value)}
+                      rows={3}
+                      className="resize-none text-xs sm:text-sm"
+                      placeholder="Edit the address if needed..."
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Action Buttons - Fixed at Bottom */}
+            <div className="p-4 sm:p-6 border-t bg-gray-50/50 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 order-2 sm:order-1"
                   onClick={() => {
                     setShowMapModal(false)
                     setLocationError("")
@@ -697,10 +703,11 @@ export default function BookLabTestPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-white"
+                  className="flex-1 bg-soft-blue hover:bg-soft-blue/90 text-white order-1 sm:order-2"
                   onClick={handleMapConfirm}
                   disabled={!mapAddress}
                 >
+                  <MapPin className="w-4 h-4 mr-2" />
                   Confirm Location
                 </Button>
               </div>
