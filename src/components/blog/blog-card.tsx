@@ -10,7 +10,7 @@ interface BlogCardProps {
   featured?: boolean
 }
 
-export function BlogCard({ post, featured = false }: BlogCardProps) {
+export function BlogCard({ post}: BlogCardProps) {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "medical-research":

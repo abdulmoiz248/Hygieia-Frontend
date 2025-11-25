@@ -471,7 +471,7 @@ const handleConfirmReplace = () => {
   }
 
   const getRemainingCalories = () => {
-    // @ts-ignore
+    // @ts-expect-error type mismatch picked up
     const daily = Number.parseInt(currentDietPlan?.dailyCalories ||( currentDietPlan?.daily_calories  || "0"))
     const consumed = getTodaysCaloriesConsumed()
     return daily - consumed
@@ -552,7 +552,7 @@ const handleConfirmReplace = () => {
                       <p className="text-2xl font-bold text-soft-coral">{getTodaysCaloriesConsumed()}</p>
                       
                       <p className="text-xs text-cool-gray">of {
-                        // @ts-ignore
+                        // @ts-expect-error type mismatch picked up
                       currentDietPlan.dailyCalories || currentDietPlan.daily_calories
                       } kcal</p>
                       <p className="text-xs text-mint-green">{getRemainingCalories()} remaining</p>

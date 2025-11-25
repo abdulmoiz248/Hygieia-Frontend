@@ -17,9 +17,10 @@ export default function BlogNewsletter() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
  
-  const [error, setError] = useState("")
   const router = useRouter()
-   const { data, isLoading:loading, isError } = useBlogs()
+   const { data, isLoading:loading } = useBlogs()
+   
+ 
    const {posts:blogPosts,categories:blogCategories}=data || {posts:[],categories:[]}
     const [isLoading, setIsLoading] = useState(false)
 
@@ -44,7 +45,7 @@ export default function BlogNewsletter() {
     e.preventDefault()
     if (email) {
       setIsLoading(true)
-      setError("")
+     
       try {
         await api.post("/subscribe-newsletter", { email })
         setIsSubmitted(true)

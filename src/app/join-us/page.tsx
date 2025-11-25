@@ -13,7 +13,6 @@ import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle, Loader2 } from "
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
 import api from "@/lib/axios"
-import Loader from '@/components/loader/loader'
 
 type Role = "doctor" | "lab_technician" | "nutritionist" | ""
 type DoctorField = "cardiology" | "neurology" | "pediatrics" | "orthopedics" | "dermatology" | ""
