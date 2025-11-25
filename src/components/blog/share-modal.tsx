@@ -77,7 +77,7 @@ export function ShareModal({ isOpen, onClose, postTitle, postUrl }: ShareModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px] bg-gradient-to-br from-snow-white to-mint-green/5 p-8 rounded-2xl shadow-2xl border border-soft-blue/20">
+      <DialogContent className="sm:max-w-[480px] bg-snow-white to-mint-green/5 p-8 rounded-2xl shadow-2xl border border-soft-blue/20">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-soft-blue to-mint-green bg-clip-text text-transparent">
             Share this post
