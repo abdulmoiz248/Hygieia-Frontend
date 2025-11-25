@@ -10,7 +10,6 @@ import { ShareModal } from "@/components/blog/share-modal"
 import { useParams } from "next/navigation"
 import { useBlogs } from "@/hooks/useBlogs"
 import Loader from "@/components/loader/loader"
-import Head from "next/head"
 
 export default function BlogPostPage() {
   const { id } = useParams()
@@ -37,47 +36,6 @@ export default function BlogPostPage() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  // Update document title and meta tags dynamically
-  useEffect(() => {
-    if (post) {
-      document.title = `${post.title} | Hygieia Blog`
-      
-      // Update or create meta tags
-      const updateMetaTag = (property: string, content: string, isProperty = true) => {
-        const attribute = isProperty ? 'property' : 'name'
-        let element = document.querySelector(`meta[${attribute}="${property}"]`) as HTMLMetaElement
-        
-        if (!element) {
-          element = document.createElement('meta')
-          element.setAttribute(attribute, property)
-          document.head.appendChild(element)
-        }
-        element.content = content
-      }
-
-      // Standard meta tags
-      updateMetaTag('description', post.excerpt, false)
-      updateMetaTag('keywords', post.tags.join(', '), false)
-      updateMetaTag('author', post.author, false)
-
-      // Open Graph meta tags
-      updateMetaTag('og:title', post.title)
-      updateMetaTag('og:description', post.excerpt)
-      updateMetaTag('og:type', 'article')
-      updateMetaTag('og:image', post.image || '/placeholder.svg')
-      updateMetaTag('og:url', window.location.href)
-      updateMetaTag('article:published_time', post.publishedat)
-      updateMetaTag('article:author', post.author)
-      updateMetaTag('article:tag', post.tags.join(', '))
-
-      // Twitter Card meta tags
-      updateMetaTag('twitter:card', 'summary_large_image', false)
-      updateMetaTag('twitter:title', post.title, false)
-      updateMetaTag('twitter:description', post.excerpt, false)
-      updateMetaTag('twitter:image', post.image || '/placeholder.svg', false)
-    }
-  }, [post])
 
   if (isLoading) {
     return (
