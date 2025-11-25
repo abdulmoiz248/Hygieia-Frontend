@@ -155,13 +155,13 @@ const userInitials = (safeProfile.name || "user")
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white">
               <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
-                <Link href="/lab-technician/profile">
+                <Link href="/pathologist/profile">
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="hover:bg-mint-green hover:text-snow-white">
-                <Link href="/lab-technician/settings">
+                <Link href="/pathologist/settings">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Link>
