@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle } from "lucide-react"
+import { Upload, Stethoscope, FlaskConical, Apple, CheckCircle, Loader2 } from "lucide-react"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
 import api from "@/lib/axios"
@@ -149,7 +149,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <div className="mx-auto w-16 h-16 bg-mint-green/10 rounded-full flex items-center justify-center mb-4">
                     <FlaskConical className="w-8 h-8 text-mint-green" />
                   </div>
-                  <CardTitle className="text-mint-green">Lab Technician</CardTitle>
+                  <CardTitle className="text-mint-green">Pathologist</CardTitle>
                   <CardDescription>Laboratory professionals conducting tests and analysis</CardDescription>
                 </CardHeader>
               </Card>
@@ -279,7 +279,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     >
                        {loading ?  (
     <>
-      <Loader /> Submitting...
+      <Loader2 className="h-4 w-4 animate-spin" /> Submitting...
     </>
   ) : (
     "Complete Registration"
