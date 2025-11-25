@@ -674,24 +674,23 @@ if (assignedDietPlan) {
             {/* Patient Profile Card */}
             <Card className="hover-lift bg-white overflow-hidden">
               <div className="p-6">
-               <div className="flex items-center justify-center">
-  <div className="flex items-center space-x-4">
-    <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+               <div className="flex flex-col items-center justify-center text-center">
+    <Avatar className="w-28 h-28 border-4 border-background shadow-lg mb-4">
       <AvatarImage src={patient.avatar || "/placeholder.svg"} alt={patient.name} />
-      <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+      <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
         {patient.name
           .split(" ")
           .map((n) => n[0])
           .join("")}
       </AvatarFallback>
     </Avatar>
-    <div className="flex-1">
+    <div className="w-full">
       <h3 className="text-xl font-bold text-soft-coral">{patient.name}</h3>
       <p className="text-cool-gray">
         {patient.gender} • {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} years
       </p>
       {dataShared && (
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center justify-center gap-2 mt-2">
           <div className="flex items-center">
             <Star className="w-4 h-4 text-yellow-500 fill-current" />
             <span className="text-sm font-medium ml-1">Health Score</span>
@@ -702,7 +701,6 @@ if (assignedDietPlan) {
         </div>
       )}
     </div>
-  </div>
 </div>
 
               </div>
