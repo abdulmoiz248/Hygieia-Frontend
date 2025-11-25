@@ -117,21 +117,20 @@ export default function DoctorQuiz() {
 
   useEffect(() => {
     // Filter scenarios based on difficulty
-    if (difficulty === "all") {
-      setFilteredScenarios(scenarios)
-    } else {
-      setFilteredScenarios(scenarios.filter((scenario) => scenario.difficulty === difficulty))
-    }
-
+    const newFilteredScenarios = difficulty === "all" 
+      ? scenarios 
+      : scenarios.filter((scenario) => scenario.difficulty === difficulty)
+    
+    setFilteredScenarios(newFilteredScenarios)
+    
     // Reset to first scenario of filtered list
-    if (filteredScenarios.length > 0) {
+    if (newFilteredScenarios.length > 0) {
       setScenarioIndex(0)
-      setCurrentScenario(filteredScenarios[0])
+      setCurrentScenario(newFilteredScenarios[0])
+      setSelectedOption(null)
+      setShowResult(false)
+      setScore(0)
     }
-
-    setSelectedOption(null)
-    setShowResult(false)
-    setScore(0)
   }, [difficulty])
 
   useEffect(() => {
@@ -202,16 +201,16 @@ const itemVariants: Variants = {
 
 
 
-  const getDifficultyBg = (diff: "easy" | "medium" | "hard") => {
+  const getDifficultyColor = (diff: "easy" | "medium" | "hard") => {
     switch (diff) {
       case "easy":
-        return "bg-mint-green/20"
+        return "bg-mint-green text-dark-slate-gray"
       case "medium":
-        return "bg-soft-blue/20"
+        return "bg-soft-blue text-snow-white"
       case "hard":
-        return "bg-soft-coral/20"
+        return "bg-soft-coral text-snow-white"
       default:
-        return "bg-mint-green/20"
+        return "bg-mint-green text-dark-slate-gray"
     }
   }
 
@@ -236,7 +235,7 @@ const itemVariants: Variants = {
               <Stethoscope className="h-14 w-14 text-snow-white" />
             </motion.div>
           </div>
-          <h2 className="text-4xl py-2 md:text-6xl font-extrabold text-snow-white mb-4">
+          <h2 className="text-4xl py-2 md:text-6xl font-extrabold text-dark-slate-gray mb-4">
             Interactive Diagnosis Game
           </h2>
           <p className="text-xl text-dark-slate-gray max-w-2xl mx-auto font-medium">
@@ -245,38 +244,64 @@ const itemVariants: Variants = {
         </motion.div>
 
         {/* Difficulty selector */}
-        <div className="mb-8 flex justify-center">
-          <div className="inline-flex p-1 rounded-lg bg-cool-gray/10">
-            {(["all", "easy", "medium", "hard"] as const).map((diff) => (
-              <button
-                key={diff}
-                onClick={() => handleDifficultyChange(diff)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  difficulty === diff
-                    ? `bg-soft-blue text-snow-white shadow-md`
-                    : `text-cool-gray hover:bg-cool-gray/20`
-                }`}
-              >
-                {diff.charAt(0).toUpperCase() + diff.slice(1)}
-              </button>
-            ))}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex justify-center"
+        >
+          <div className="inline-flex gap-2 p-2 rounded-xl bg-cool-gray/10 shadow-lg backdrop-blur-sm">
+            {(["all", "easy", "medium", "hard"] as const).map((diff) => {
+              const isActive = difficulty === diff
+              const getBgClass = () => {
+                if (!isActive) return "text-dark-slate-gray hover:bg-cool-gray/20"
+                switch (diff) {
+                  case "easy": return "bg-mint-green text-dark-slate-gray shadow-md"
+                  case "medium": return "bg-soft-blue text-snow-white shadow-md"
+                  case "hard": return "bg-soft-coral text-snow-white shadow-md"
+                  default: return "bg-gradient-to-r from-soft-blue to-mint-green text-snow-white shadow-md"
+                }
+              }
+              return (
+                <motion.button
+                  key={diff}
+                  onClick={() => handleDifficultyChange(diff)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
+                    getBgClass()
+                  }`}
+                >
+                  {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                </motion.button>
+              )
+            })}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-bold text-soft-blue">Progress</span>
-            <span className="text-sm font-bold text-soft-blue bg-soft-blue/10 px-3 py-1 rounded-full">
-              {scenarioIndex + 1}/{filteredScenarios.length}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-8"
+        >
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm font-bold text-soft-blue flex items-center gap-2">
+              <span className="w-2 h-2 bg-soft-blue rounded-full animate-pulse"></span>
+              Progress
             </span>
+            <motion.span
+              key={`${scenarioIndex}-${filteredScenarios.length}`}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              className="text-sm font-bold text-snow-white bg-gradient-to-r from-soft-blue to-mint-green px-4 py-1.5 rounded-full shadow-md"
+            >
+              {scenarioIndex + 1} / {filteredScenarios.length}
+            </motion.span>
           </div>
           <Progress
             value={progress}
-        //    className="h-3 bg-cool-gray/20 rounded-full"
-            // Fixed TypeScript error by using className with a template string
-            className={`h-3 bg-cool-gray/20 rounded-full [&>div]:bg-gradient-to-r [&>div]:from-soft-blue [&>div]:to-mint-green [&>div]:rounded-full`}
+            className={`h-3 bg-cool-gray/20 rounded-full shadow-inner [&>div]:bg-gradient-to-r [&>div]:from-soft-blue [&>div]:to-mint-green [&>div]:rounded-full [&>div]:shadow-md`}
           />
-        </div>
+        </motion.div>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -301,11 +326,13 @@ const itemVariants: Variants = {
                     </motion.div>
                     Play Doctor
                   </CardTitle>
-                  <span
-                    className={`text-xs font-bold px-3 py-1 rounded-full ${getDifficultyBg(currentScenario.difficulty)}`}
+                  <motion.span
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className={`text-xs font-bold px-4 py-1.5 rounded-full shadow-md ${getDifficultyColor(currentScenario.difficulty)}`}
                   >
                     {currentScenario.difficulty.toUpperCase()}
-                  </span>
+                  </motion.span>
                 </div>
                 <CardDescription className="text-snow-white/90 text-base">
                   Diagnose the patient based on their symptoms

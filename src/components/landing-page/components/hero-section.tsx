@@ -62,7 +62,7 @@ export default function HeroSection() {
           className="space-y-3"
         >
           {[
-            "AI-powered symptom analysis with 95% accuracy",
+            "AI-powered symptom analysis",
             "Personalized health recommendations",
             "Connect with certified healthcare professionals",
             "Secure and private health data management",
