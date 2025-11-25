@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
@@ -10,15 +10,22 @@ import { Input } from "@/components/ui/input"
 import { Check } from "lucide-react"
 import Image from "next/image"
 import api from "@/lib/axios"
-import { blogPosts, blogCategories } from "@/lib/blog-data"
 import type { BlogPost } from "@/types/blog"
+import { useBlogs } from "@/hooks/useBlogs"
 
 export default function BlogNewsletter() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+ 
   const [error, setError] = useState("")
   const router = useRouter()
+   const { data, isLoading:loading, isError } = useBlogs()
+   const {posts:blogPosts,categories:blogCategories}=data || {posts:[],categories:[]}
+    const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+      setIsLoading(loading)
+    }, [loading])
 
   const categoryMap = useMemo(() => {
     const map: Record<string, string> = {}
@@ -26,12 +33,12 @@ export default function BlogNewsletter() {
       map[cat.id.toLowerCase()] = cat.name
     })
     return map
-  }, [])
+  }, [blogCategories])
 
   const featuredPosts = useMemo(() => {
     const shuffled = [...blogPosts].sort(() => 0.5 - Math.random())
     return shuffled.slice(0, 3)
-  }, [])
+  }, [blogPosts])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
