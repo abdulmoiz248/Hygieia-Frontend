@@ -8,8 +8,8 @@ export const fetchFitness = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const res = await api.get(`/fitness?userId=${userId}`)
-      console.log(res)
-      return res.data[0]
+      console.log("FITNESS DATA=",res.data)
+      return res.data
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Failed to fetch fitness")
     }
