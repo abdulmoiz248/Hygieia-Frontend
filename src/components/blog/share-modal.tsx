@@ -77,26 +77,30 @@ export function ShareModal({ isOpen, onClose, postTitle, postUrl }: ShareModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-snow-white p-6 rounded-lg shadow-lg">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-dark-slate-gray">Share this post</DialogTitle>
-          <DialogDescription className="text-cool-gray">
+      <DialogContent className="sm:max-w-[480px] bg-gradient-to-br from-snow-white to-mint-green/5 p-8 rounded-2xl shadow-2xl border border-soft-blue/20">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-soft-blue to-mint-green bg-clip-text text-transparent">
+            Share this post
+          </DialogTitle>
+          <DialogDescription className="text-cool-gray text-base">
             Share &quot;{postTitle}&quot; with your friends and followers.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-4 py-4">
+        <div className="grid grid-cols-2 gap-3 py-6">
           {shareOptions.map((option) => (
             <Button
               key={option.name}
               variant="outline"
-              className="flex items-center hover:border-soft-coral justify-center gap-2 py-3 px-4 rounded-md border border-soft-blue/20 text-dark-slate-gray hover:bg-soft-blue/10  transition-all duration-200 bg-transparent"
+              className="flex items-center justify-center gap-3 py-6 px-4 rounded-xl border-2 border-soft-blue/20 text-dark-slate-gray hover:bg-gradient-to-br hover:from-soft-blue/10 hover:to-mint-green/10 hover:border-soft-blue/40 hover:scale-105 transition-all duration-300 bg-snow-white shadow-sm hover:shadow-md group"
               onClick={() => {
                 option.action()
                 if (option.name !== "Copy Link") onClose()
               }}
             >
-              {option.icon}
-              <span className="text-base font-medium">{option.name}</span>
+              <span className="group-hover:scale-110 transition-transform duration-300">
+                {option.icon}
+              </span>
+              <span className="text-sm font-semibold">{option.name}</span>
             </Button>
           ))}
         </div>

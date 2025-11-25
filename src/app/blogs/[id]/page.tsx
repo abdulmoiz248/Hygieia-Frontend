@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { BlogContent } from "@/components/blog/blog-content"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Home, Share2 } from "lucide-react"
+import { ArrowLeft, Home, Share2, BookmarkPlus } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import { ShareModal } from "@/components/blog/share-modal"
 import { useParams } from "next/navigation"
@@ -15,9 +15,9 @@ export default function BlogPostPage() {
   const { id } = useParams()
   const { data, isLoading, isError } = useBlogs()
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
 
   const posts = data?.posts || []
-
   const post = useMemo(() => posts.find((p) => p.id === id), [posts, id])
 
   useEffect(() => {
@@ -26,19 +26,32 @@ export default function BlogPostPage() {
     }
   }, [isLoading, post])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
+      const progress = (window.scrollY / totalHeight) * 100
+      setScrollProgress(progress)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   if (isLoading) {
-     return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <Loader />
-    </div>
-  )
-    
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-mint-green/20 via-snow-white to-soft-blue/20">
+        <Loader />
+      </div>
+    )
   }
 
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-red-500">Failed to load blog. Please try again later.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-soft-coral/10 to-snow-white">
+        <div className="text-center space-y-4">
+          <p className="text-2xl font-semibold text-dark-slate-gray">Oops! Something went wrong</p>
+          <p className="text-lg text-cool-gray">Failed to load blog. Please try again later.</p>
+        </div>
       </div>
     )
   }
@@ -48,51 +61,28 @@ export default function BlogPostPage() {
   const postUrl = `/blog/${post.id}`
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green pt-20">
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-soft-blue/10">
-        <div className="max-w-4xl mx-auto py-4 px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/blogs">
-                <Button
-                  variant="ghost"
-                  className="text-soft-blue hover:text-soft-blue/80 hover:bg-soft-blue/10 transition-all duration-300"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Blog
-                </Button>
-              </Link>
-              <div className="hidden md:flex items-center gap-2 text-sm text-cool-gray">
-                <Link href="/" className="hover:text-soft-blue transition-colors">
-                  <Home className="w-4 h-4" />
-                </Link>
-                <span>/</span>
-                <Link href="/blogs" className="hover:text-soft-blue transition-colors">
-                  Blog
-                </Link>
-                <span>/</span>
-                <span className="text-dark-slate-gray font-medium truncate max-w-32">{post.title}</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-mint-green/20">
+        <div
+          className="h-full bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral transition-all duration-150"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
 
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                className="text-soft-blue hover:text-soft-blue/80 hover:bg-soft-blue/10 transition-all duration-300"
-                onClick={() => setIsShareModalOpen(true)}
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-            </div>
+    
+
+      {/* Main Content */}
+      <div className="relative pt-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-mint-green/5 via-transparent to-soft-blue/5 pointer-events-none" />
+        
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-snow-white rounded-3xl shadow-xl border border-soft-blue/10 overflow-hidden">
+            <BlogContent post={post} />
           </div>
         </div>
       </div>
-      <div className="py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <BlogContent post={post} />
-        </div>
-      </div>
+
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
