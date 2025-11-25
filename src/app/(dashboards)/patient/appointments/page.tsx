@@ -260,7 +260,7 @@ const handleDownloadAppointmentSchedulePdf = async () => {
   const filteredAppointments = appointments.filter((appointment) => {
     if (statusFilter === "all") return true
     return appointment.status === statusFilter
-  }).filter((appointment) => {appointment.status!=="cancelled"})
+  }).filter((appointment) => appointment.status!=="cancelled")
 
   // Add appointment dates for calendar
   const appointmentDates = appointments.map((apt) => new Date(apt.date))
