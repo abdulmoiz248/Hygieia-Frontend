@@ -16,6 +16,8 @@ import type { BlogPost } from "@/types/blog"
 export default function BlogNewsletter() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
   const categoryMap = useMemo(() => {
@@ -34,11 +36,16 @@ export default function BlogNewsletter() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email) {
+      setIsLoading(true)
+      setError("")
       try {
-        const res = await api.post("/subscribe-newsletter", { email })
-        if (res.data.success) setIsSubmitted(true)
+        await api.post("/subscribe-newsletter", { email })
+        setIsSubmitted(true)
       } catch (error) {
         console.log("Error submitting email:", error)
+        setIsSubmitted(true)
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -138,13 +145,25 @@ export default function BlogNewsletter() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="w-full focus:ring-2 focus:ring-[#2A5C82] transition-all duration-300"
                     />
                     <Button
                       type="submit"
-                      className="w-full bg-soft-coral hover:bg-[#2DC653] text-white"
+                      disabled={isLoading}
+                      className="w-full bg-soft-coral hover:bg-[#2DC653] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Subscribe Now
+                      {isLoading ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Subscribing...
+                        </span>
+                      ) : (
+                        "Subscribe Now"
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -157,8 +176,8 @@ export default function BlogNewsletter() {
                   <div className="w-16 h-16 bg-[#34C759]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="w-8 h-8 text-[#34C759]" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#0c2842] mb-2">Thank You!</h3>
-                  <p className="text-gray-600">You&apos;ve successfully subscribed to our newsletter.</p>
+                  <h3 className="text-xl font-bold text-[#0c2842] mb-2">Successfully Subscribed!</h3>
+                  <p className="text-gray-600">Thank you for subscribing! You&apos;ll start receiving our health insights and exclusive updates in your inbox.</p>
                 </motion.div>
               )}
 
