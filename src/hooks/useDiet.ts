@@ -23,8 +23,10 @@ export const useDiet = () => {
   const generateAIDietPlan = async (preferences: string): Promise<DietPlan> => {
     dispatch(setLoadingPlan(true))
     const plan = await generateAIDietPlanGrok(profile, preferences)
+    // Mark as AI-generated for localStorage storage
+    const aiPlan = { ...plan, isAIGenerated: true }
     dispatch(setLoadingPlan(false))
-    return plan
+    return aiPlan
   }
 
   const generateMealSuggestions = async (
@@ -107,6 +109,13 @@ export const useDiet = () => {
     dispatch(setMealPreferences(preferences))
   }
 
+  const deleteAIDietPlan = () => {
+    // Only delete if it's an AI-generated plan
+    if (dietState.currentDietPlan?.isAIGenerated) {
+      dispatch(clearDietPlan())
+    }
+  }
+
   return {
     ...dietState,
     generateAIDietPlan,
@@ -116,5 +125,6 @@ export const useDiet = () => {
     removeDietPlan,
     saveMealSuggestions,
     saveMealPreferences,
+    deleteAIDietPlan,
   }
 }

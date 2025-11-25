@@ -17,6 +17,7 @@ export interface DietPlan {
   patientId?: string
   patientName?: string
   nutritionistId?: string
+  isAIGenerated?: boolean
 }
 
 export interface MealSuggestion {
@@ -58,14 +59,21 @@ const initialState: DietState = {
   isLoadingMeals: false,
 }
 
-const getTodaysDietPlan = (): DietPlan | null => {
+const getAIDietPlanFromStorage = (): DietPlan | null => {
   if (typeof window === "undefined") return null
   try {
     const stored = localStorage.getItem("aiDietPlan")
     if (!stored) return null
-    const { plan, date } = JSON.parse(stored)
-    const today = new Date().toDateString()
-    if (date === today) return plan
+    const { plan, timestamp } = JSON.parse(stored)
+    const now = new Date().getTime()
+    const twentyFourHours = 24 * 60 * 60 * 1000
+    
+    // Check if 24 hours have passed
+    if (now - timestamp < twentyFourHours) {
+      return { ...plan, isAIGenerated: true }
+    }
+    
+    // Expired, remove from localStorage
     localStorage.removeItem("aiDietPlan")
     return null
   } catch {
@@ -88,7 +96,8 @@ const getTodaysMeals = (): MealSuggestion[] => {
   }
 }
 
-initialState.currentDietPlan = getTodaysDietPlan()
+// Don't load from localStorage initially - will check backend first
+// initialState.currentDietPlan = null
 initialState.todayMealSuggestions = getTodaysMeals()
 
 export const fetchDietPlan = createAsyncThunk<DietPlan | null>(
@@ -96,8 +105,9 @@ export const fetchDietPlan = createAsyncThunk<DietPlan | null>(
   async () => {
     try {
       const id = typeof window !== "undefined" ? localStorage.getItem("id") : null
-      if (!id) return getTodaysDietPlan()
+      if (!id) return getAIDietPlanFromStorage()
 
+      // Try to get nutritionist-assigned plan from backend
       const res = await api.get(`/diet-plans/patient/${id}`)
       const data = res.data as DietPlan | DietPlan[] | null
 
@@ -109,20 +119,16 @@ export const fetchDietPlan = createAsyncThunk<DietPlan | null>(
         plan = data
       }
 
+      // If nutritionist plan exists, return it (DON'T save to localStorage)
       if (plan) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem(
-            "aiDietPlan",
-            JSON.stringify({ plan, date: new Date().toDateString() })
-          )
-        }
-        return plan
+        return { ...plan, isAIGenerated: false }
       }
 
-      // No backend plan, fallback to localStorage
-      return getTodaysDietPlan()
+      // No nutritionist plan, check localStorage for AI plan
+      return getAIDietPlanFromStorage()
     } catch {
-      return getTodaysDietPlan()
+      // Backend error, fallback to localStorage AI plan
+      return getAIDietPlanFromStorage()
     }
   }
 )
@@ -134,10 +140,11 @@ const dietSlice = createSlice({
   reducers: {
     setDietPlan: (state, action: PayloadAction<DietPlan>) => {
       state.currentDietPlan = action.payload
-      if (typeof window !== "undefined") {
+      // Only save AI-generated plans to localStorage
+      if (typeof window !== "undefined" && action.payload.isAIGenerated) {
         const dataToStore = {
           plan: action.payload,
-          date: new Date().toDateString(),
+          timestamp: new Date().getTime(),
         }
         localStorage.setItem("aiDietPlan", JSON.stringify(dataToStore))
       }
