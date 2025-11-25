@@ -80,7 +80,7 @@ export function NutritionistCard({ nutritionist }: NutritionistCardProps) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
           
-            <span>${nutritionist.consultationFee}/session</span>
+            <span>Rs.{nutritionist.consultationFee}/session</span>
           </div>
         </div>
 
