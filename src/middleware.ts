@@ -26,5 +26,5 @@ export function middleware(req: NextRequest) {
 
 // Apply to these paths only
 export const config = {
-  matcher: ['/login', '/signup',  '/lab-technician/:path*','/nutritionist/:path*'],
+  matcher: ['/login', '/signup',  '/pathologist/:path*','/nutritionist/:path*'],
 }

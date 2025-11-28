@@ -36,7 +36,7 @@ const handleTabChange = (tab: string) => {
   if(pathname.includes('dashboard')){
      onTabChange(tab)
   }else{
-  router.push(`/lab-technician/dashboard`)
+  router.push(`/pathologist/dashboard`)
   setactiveTab(tab)
   }
 
