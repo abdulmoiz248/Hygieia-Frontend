@@ -157,8 +157,8 @@ const handleDownload = (fileUrl: string, patientName: string) => {
                 <div className="space-y-2.5 mb-4">
                   {/* Scheduled Date */}
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-peach/10 flex items-center justify-center flex-shrink-0">
-                      <Calendar className="w-4 h-4 text-peach" />
+                    <div className="w-8 h-8 rounded-lg bg-dark-slate-gray/10 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-dark-slate-gray" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-cool-gray/60 mb-0.5">Scheduled</p>
