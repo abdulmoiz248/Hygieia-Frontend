@@ -23,6 +23,7 @@ export function PendingReports() {
   const [typeFilter, setTypeFilter] = useState("all")
   const [locationFilter, setLocationFilter] = useState("all")
   const [dateFilter, setDateFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("date-asc")
 
 const [reportValues, setReportValues] = useState({
   results: [] as { test: string; reference: string; unit: string; result: string }[],
@@ -147,19 +148,24 @@ const handleValueSubmit = async(payload?: string) => {
       return matchesSearch && matchesStatus && matchesType && matchesLocation && matchesDate
     })
     .sort((a, b) => {
-      // Sort by date and time - earliest appointments first
-      const dateA = new Date(a.scheduledDate)
-      const dateB = new Date(b.scheduledDate)
-      
-      // Parse time (assuming format like "10:00 AM" or "14:00")
-      const timeA = a.scheduledTime
-      const timeB = b.scheduledTime
-      
-      // Combine date and time for comparison
-      const dateTimeA = new Date(`${dateA.toDateString()} ${timeA}`)
-      const dateTimeB = new Date(`${dateB.toDateString()} ${timeB}`)
-      
-      return dateTimeA.getTime() - dateTimeB.getTime()
+      switch (sortBy) {
+        case "date-asc":
+          // Sort by date and time - earliest appointments first
+          const dateTimeA = new Date(`${new Date(a.scheduledDate).toDateString()} ${a.scheduledTime}`)
+          const dateTimeB = new Date(`${new Date(b.scheduledDate).toDateString()} ${b.scheduledTime}`)
+          return dateTimeA.getTime() - dateTimeB.getTime()
+        case "date-desc":
+          // Sort by date and time - latest appointments first
+          const dateTimeC = new Date(`${new Date(a.scheduledDate).toDateString()} ${a.scheduledTime}`)
+          const dateTimeD = new Date(`${new Date(b.scheduledDate).toDateString()} ${b.scheduledTime}`)
+          return dateTimeD.getTime() - dateTimeC.getTime()
+        case "name-asc":
+          return a.patientName.localeCompare(b.patientName)
+        case "name-desc":
+          return b.patientName.localeCompare(a.patientName)
+        default:
+          return 0
+      }
     })
 
   const getStatusIcon = (status: string) => {
@@ -195,6 +201,8 @@ const handleValueSubmit = async(payload?: string) => {
         setLocationFilter={setLocationFilter}
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
 
          <div className="space-y-3">

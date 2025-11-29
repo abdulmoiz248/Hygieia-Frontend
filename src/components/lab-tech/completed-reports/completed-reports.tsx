@@ -6,18 +6,74 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, Calendar, FileText, User,  EyeIcon } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import CompletedHeader from "./CompletedHeader"
-import { PendingReportFilter } from "../pending-reports/PendingReportsFilter"
+import { CompletedReportsFilter } from "./CompletedReportsFilter"
 
 
 export function CompletedReports() {
   const { completedReports } = useLabStore()
   const [searchTerm, setSearchTerm] = useState("")
+  const [locationFilter, setLocationFilter] = useState("all")
+  const [dateFilter, setDateFilter] = useState("all")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("newest")
 
   const filteredReports = completedReports.filter((report) => {
     const matchesSearch =
       report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.testName.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch 
+    
+    // Type filter
+    const matchesType = typeFilter === "all" || report.type === typeFilter
+
+    // Location filter
+    const matchesLocation = 
+      locationFilter === "all" ||
+      (locationFilter === "home" && report.location?.toLowerCase().includes("home")) ||
+      (locationFilter === "lab" && !report.location?.toLowerCase().includes("home"))
+
+    // Date filter (based on uploadedAt)
+    let matchesDate = true
+    if (dateFilter !== "all" && report.uploadedAt) {
+      const reportDate = new Date(report.uploadedAt)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      
+      switch (dateFilter) {
+        case "today":
+          matchesDate = reportDate.toDateString() === today.toDateString()
+          break
+        case "yesterday":
+          matchesDate = reportDate.toDateString() === yesterday.toDateString()
+          break
+        case "this-week":
+          const weekStart = new Date(today)
+          weekStart.setDate(weekStart.getDate() - 7)
+          matchesDate = reportDate >= weekStart && reportDate <= today
+          break
+        case "this-month":
+          const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+          matchesDate = reportDate >= monthStart && reportDate <= today
+          break
+      }
+    }
+
+    return matchesSearch && matchesType && matchesLocation && matchesDate
+  })
+  .sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.uploadedAt || 0).getTime() - new Date(a.uploadedAt || 0).getTime()
+      case "oldest":
+        return new Date(a.uploadedAt || 0).getTime() - new Date(b.uploadedAt || 0).getTime()
+      case "name-asc":
+        return a.patientName.localeCompare(b.patientName)
+      case "name-desc":
+        return b.patientName.localeCompare(a.patientName)
+      default:
+        return 0
+    }
   })
 
 
@@ -36,7 +92,18 @@ const handleDownload = (fileUrl: string, patientName: string) => {
       {/* Header */}
       <CompletedHeader/>
       {/* Filters */}
-     <PendingReportFilter searchQuery={searchTerm} setSearchQuery={setSearchTerm}/>
+     <CompletedReportsFilter 
+        searchQuery={searchTerm} 
+        setSearchQuery={setSearchTerm}
+        locationFilter={locationFilter}
+        setLocationFilter={setLocationFilter}
+        dateFilter={dateFilter}
+        setDateFilter={setDateFilter}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
       {/* Completed Reports List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredReports.length > 0 ? (

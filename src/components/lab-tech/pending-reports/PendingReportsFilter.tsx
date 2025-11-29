@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, X, ChevronDown, Clock, FileText, MapPin, Calendar } from "lucide-react"
+import { Search, Filter, X, ChevronDown, Clock, FileText, MapPin, Calendar, SortAsc } from "lucide-react"
 
 interface SearchCardProps {
   searchQuery: string
@@ -18,6 +18,8 @@ interface SearchCardProps {
   setLocationFilter: (value: string) => void
   dateFilter: string
   setDateFilter: (value: string) => void
+  sortBy: string
+  setSortBy: (value: string) => void
 }
 
 export function PendingReportFilter({ 
@@ -30,17 +32,20 @@ export function PendingReportFilter({
   locationFilter,
   setLocationFilter,
   dateFilter,
-  setDateFilter
+  setDateFilter,
+  sortBy,
+  setSortBy
 }: SearchCardProps) {
   const [showFilters, setShowFilters] = useState(false)
 
-  const activeFilterCount = [statusFilter, typeFilter, locationFilter, dateFilter].filter(f => f !== "all").length
+  const activeFilterCount = [statusFilter, typeFilter, locationFilter, dateFilter].filter(f => f !== "all").length + (sortBy !== "date-asc" ? 1 : 0)
 
   const clearAllFilters = () => {
     setStatusFilter("all")
     setTypeFilter("all")
     setLocationFilter("all")
     setDateFilter("all")
+    setSortBy("date-asc")
   }
 
   return (
@@ -77,7 +82,7 @@ export function PendingReportFilter({
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-4 border-t border-cool-gray/20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-cool-gray/20">
               {/* Status Filter */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-dark-slate-gray uppercase tracking-wide flex items-center gap-2">
@@ -100,8 +105,6 @@ export function PendingReportFilter({
                   ))}
                 </div>
               </div>
-
-            
 
               {/* Location Filter */}
               <div className="space-y-2">
@@ -144,6 +147,34 @@ export function PendingReportFilter({
                       }`}
                     >
                       {date === "all" ? "All" : date === "this-week" ? "This Week" : date.charAt(0).toUpperCase() + date.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sort By Filter */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-dark-slate-gray uppercase tracking-wide flex items-center gap-2">
+                  <SortAsc className="w-3.5 h-3.5 text-soft-blue" />
+                  Sort By
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: "date-asc", label: "Date ↑" },
+                    { value: "date-desc", label: "Date ↓" },
+                    { value: "name-asc", label: "Name A-Z" },
+                    { value: "name-desc", label: "Name Z-A" }
+                  ].map((sort) => (
+                    <button
+                      key={sort.value}
+                      onClick={() => setSortBy(sort.value)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        sortBy === sort.value
+                          ? "bg-soft-blue text-snow-white shadow-md scale-105"
+                          : "bg-cool-gray/10 text-dark-slate-gray hover:bg-soft-blue/20 hover:scale-105"
+                      }`}
+                    >
+                      {sort.label}
                     </button>
                   ))}
                 </div>
