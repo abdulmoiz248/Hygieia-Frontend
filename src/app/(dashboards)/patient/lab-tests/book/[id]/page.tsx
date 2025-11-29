@@ -37,6 +37,11 @@ export default function BookLabTestPage() {
   const profile = useAppSelector((state) => state.profile)
   const { availableTests } = useAppSelector((state) => state.labTests)
   
+
+  useEffect(() => {
+
+    localStorage.removeItem("booktest")
+  },[])
   const test = availableTests.find((t) => t.id === testId)
 
   useEffect(() => {
