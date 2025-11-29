@@ -259,8 +259,7 @@ const handleValueSubmit = async(payload?: string) => {
         </div>
 
         {/* Sticky Upload Section */}
-     {/* Sticky Upload Section */}
-<div ref={uploadSectionRef} className="space-y-4 lg:sticky lg:top-6">
+<div ref={uploadSectionRef} className="space-y-4 sticky top-20 self-start">
   <Card className={`border-0 shadow-lg bg-white/60 ${isUploading ? "opacity-50 pointer-events-none" : ""}`}>
     <CardHeader className="pb-1">
       <CardTitle className="flex items-center space-x-2 text-xl">
