@@ -3,20 +3,17 @@
 import { AppointmentsList } from "@/components/nutritionist/appointments/appointments-list"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 
-import { motion, Variants } from "framer-motion"
+import { motion, Variants, AnimatePresence } from "framer-motion"
 
-
-
-
-
-import { Calendar} from "lucide-react"
+import { Calendar, ChevronDown, ChevronUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { Badge } from "@/components/ui/badge"
 
-import {  CalendarComponent } from "@/components/ui/calendar"
+import { CalendarComponent } from "@/components/ui/calendar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  useState } from "react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 
 
 
@@ -46,6 +43,7 @@ const itemVariants:Variants = {
   const { appointments} = useAppointmentStore()
  const appointmentDates = appointments.map((apt) => new Date(apt.date))
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(true)
     
 
     
@@ -68,13 +66,34 @@ const itemVariants:Variants = {
 
         <motion.div variants={itemVariants} className="bg-white/40">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-mint-green" />
-                      Appointments Calendar
+                  <CardHeader 
+                    className="cursor-pointer select-none"
+                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  >
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-mint-green" />
+                        Appointments Calendar
+                      </div>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        {isCalendarOpen ? (
+                          <ChevronUp className="h-4 w-4 text-cool-gray" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-cool-gray" />
+                        )}
+                      </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <AnimatePresence initial={false}>
+                    {isCalendarOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <CardContent>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="w-full flex justify-center">
         <div className="w-full max-w-full overflow-x-auto">
@@ -146,6 +165,9 @@ const itemVariants:Variants = {
                       </div>
                     </div>
                   </CardContent>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Card>
               </motion.div>
             
