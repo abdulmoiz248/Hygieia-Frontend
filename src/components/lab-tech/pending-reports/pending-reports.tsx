@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3, ChevronDown, ChevronUp, MapPin, Home } from "lucide-react"
+import { Upload, FileText, Clock, AlertTriangle,  CheckCircle, Edit3, ChevronDown, ChevronUp, MapPin, Home, Phone, Calendar, Droplet, AlertCircle, Activity } from "lucide-react"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import type { PendingReport } from "@/types/lab-tech/lab-reports"
 import PendingHeader from "./PendingHeader"
@@ -25,6 +25,8 @@ export function PendingReports() {
   const [dateFilter, setDateFilter] = useState("all")
   const [sortBy, setSortBy] = useState("date-asc")
 
+
+  console.log("Pending Reports:", pendingReports) 
 const [reportValues, setReportValues] = useState({
   results: [] as { test: string; reference: string; unit: string; result: string }[],
   findings: "",
@@ -34,6 +36,7 @@ const [reportValues, setReportValues] = useState({
 })
 
   const [collapsedRows, setCollapsedRows] = useState<Set<number>>(new Set())
+  const [expandedPatientDetails, setExpandedPatientDetails] = useState<Set<string>>(new Set())
 
   const toggleRowCollapse = (index: number) => {
     setCollapsedRows(prev => {
@@ -42,6 +45,19 @@ const [reportValues, setReportValues] = useState({
         newSet.delete(index)
       } else {
         newSet.add(index)
+      }
+      return newSet
+    })
+  }
+
+  const togglePatientDetails = (reportId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpandedPatientDetails(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId)
+      } else {
+        newSet.add(reportId)
       }
       return newSet
     })
@@ -286,6 +302,83 @@ const handleValueSubmit = async(payload?: string) => {
                   <span className="text-gray-600 italic line-clamp-2" title={report.instructions.join(", ")}>
                     {report.instructions.join(", ")}
                   </span>
+                </div>
+              )}
+
+              {/* Collapsible Patient Details Section */}
+              {(report.patientPhone || report.patientGender || report.patientDateOfBirth || 
+                report.patientBloodType || report.patientAllergies || report.patientConditions) && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <Button
+                    variant="ghost"
+                    onClick={(e) => togglePatientDetails(report.id, e)}
+                    className="w-full flex items-center justify-between hover:bg-soft-blue/10 text-soft-blue font-medium py-2.5 px-3"
+                  >
+                    <span className="text-sm">Patient Details</span>
+                    {expandedPatientDetails.has(report.id) ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </Button>
+                  
+                  {expandedPatientDetails.has(report.id) && (
+                    <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
+                      {report.patientPhone && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-3.5 h-3.5 text-soft-blue flex-shrink-0" />
+                          <span className="text-gray-600">{report.patientPhone}</span>
+                        </div>
+                      )}
+                      
+                      {report.patientGender && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Activity className="w-3.5 h-3.5 text-mint-green flex-shrink-0" />
+                          <span className="text-gray-600 capitalize">{report.patientGender}</span>
+                        </div>
+                      )}
+                      
+                      {report.patientDateOfBirth && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="w-3.5 h-3.5 text-peach flex-shrink-0" />
+                          <span className="text-gray-600">
+                            {new Date(report.patientDateOfBirth).toLocaleDateString('en-GB', { 
+                              day: 'numeric', 
+                              month: 'short', 
+                              year: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {report.patientBloodType && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Droplet className="w-3.5 h-3.5 text-soft-coral flex-shrink-0" />
+                          <span className="text-gray-600 font-medium">{report.patientBloodType}</span>
+                        </div>
+                      )}
+                      
+                      {report.patientAllergies && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <AlertCircle className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs font-medium text-gray-500">Allergies:</span>
+                            <p className="text-gray-600">{report.patientAllergies}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {report.patientConditions && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <AlertCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs font-medium text-gray-500">Conditions:</span>
+                            <p className="text-gray-600">{report.patientConditions}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
