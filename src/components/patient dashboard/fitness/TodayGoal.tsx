@@ -8,16 +8,13 @@ import {
   Footprints,
   Dumbbell,
   Heart,
-  Plus,
   BedDouble,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { useSelector, useDispatch } from "react-redux"
-import { AppDispatch, RootState } from "@/store/patient/store"
-import { updateGoalProgress } from "@/types/patient/fitnessSlice"
-import { useRef, useCallback } from "react"
+import { useSelector } from "react-redux"
+import FitbitConnectButton from "./FitbitConnectButton"
+import { RootState } from "@/store/patient/store"
 
 export default function TodayGoal() {
   const itemVariants = {
@@ -27,28 +24,6 @@ export default function TodayGoal() {
 
   const goals = useSelector((state: RootState) => state.fitness.goals)
   const targets = useSelector((store: RootState) => store.profile.limit)
-  const dispatch = useDispatch<AppDispatch>()
-
-  // store pending increments until debounce triggers
-  const incrementsRef = useRef<Record<string, number>>({})
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
-
-  const incrementGoal = useCallback((type: string, amount: number) => {
-    // accumulate increments in ref
-    incrementsRef.current[type] = (incrementsRef.current[type] || 0) + amount
-
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current)
-    }
-
-    // debounce: only send after 500ms of no new clicks
-    debounceTimer.current = setTimeout(() => {
-      Object.entries(incrementsRef.current).forEach(([goalType, totalAmount]) => {
-        dispatch(updateGoalProgress({ type: goalType, amount: totalAmount }))
-      })
-      incrementsRef.current = {}
-    }, 500)
-  }, [dispatch])
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -71,9 +46,12 @@ export default function TodayGoal() {
     <motion.div variants={itemVariants} initial="hidden" animate="visible">
       <Card className="shadow-lg rounded-2xl bg-white/40">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl font-semibold text-dark-slate-gray">
-            <Target className="w-5 h-5 text-soft-coral" />
-            Today&apos;s Goals
+          <CardTitle className="flex items-center justify-between text-xl font-semibold text-dark-slate-gray">
+            <div className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-soft-coral" />
+              Today&apos;s Goals
+            </div>
+            <FitbitConnectButton />
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -85,7 +63,7 @@ export default function TodayGoal() {
               )
 
               const progress =
-                targetValue > 0 ? (goal.current / targetValue) * 100 : 0
+                targetValue > 0 ? Math.min((goal.current / targetValue) * 100, 100) : 0
 
               return (
                 <motion.div
@@ -120,43 +98,6 @@ export default function TodayGoal() {
                     value={progress}
                     className="h-2 rounded-full bg-muted"
                   />
-
-                  {(goal.type === "water" ||
-                    goal.type === "steps" ||
-                    goal.type === "sleep") && (
-                    <div className="flex gap-2 pt-1">
-                      {goal.type === "water" && (
-                        <Button
-                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                          size="sm"
-                          onClick={() => incrementGoal("water", 1)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          1 Glass
-                        </Button>
-                      )}
-                      {goal.type === "steps" && (
-                        <Button
-                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                          size="sm"
-                          onClick={() => incrementGoal("steps", 1000)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          1000 steps
-                        </Button>
-                      )}
-                      {goal.type === "sleep" && (
-                        <Button
-                          className="text-snow-white border bg-soft-blue border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                          size="sm"
-                          onClick={() => incrementGoal("sleep", 1)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          1 hr
-                        </Button>
-                      )}
-                    </div>
-                  )}
                 </motion.div>
               )
             })}

@@ -5,7 +5,7 @@ import patientApi from "@/api/patient/patientApi"
 const initialState: ProfileType = {
   id:'7191ac63-6ac5-47c3-a865-b1fe152f8f47',
   name: "Abdul Muqeet Naeem",
-  email: "fa22-bcs-0168@cuilahore.edu.pk",
+  email: "moiz20920@gmail.com",
   phone: "+92 324 7006001",
   dateOfBirth: "1990-05-15",
   address: "123 Main St, New York, NY 10001",
