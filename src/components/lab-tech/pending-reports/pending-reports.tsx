@@ -19,6 +19,10 @@ export function PendingReports() {
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isUploading, setIsUploading] = useState(false)
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [locationFilter, setLocationFilter] = useState("all")
+  const [dateFilter, setDateFilter] = useState("all")
 
 const [reportValues, setReportValues] = useState({
   results: [] as { test: string; reference: string; unit: string; result: string }[],
@@ -101,8 +105,46 @@ const handleValueSubmit = async(payload?: string) => {
         report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.testName.toLowerCase().includes(searchTerm.toLowerCase())
     
+      // Status filter
+      const matchesStatus = statusFilter === "all" || report.status === statusFilter
 
-      return matchesSearch 
+      // Type filter
+      const matchesType = typeFilter === "all" || report.type === typeFilter
+
+      // Location filter
+      const matchesLocation = 
+        locationFilter === "all" ||
+        (locationFilter === "home" && report.location?.toLowerCase().includes("home")) ||
+        (locationFilter === "lab" && !report.location?.toLowerCase().includes("home"))
+
+      // Date filter
+      let matchesDate = true
+      if (dateFilter !== "all") {
+        const reportDate = new Date(report.scheduledDate)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        
+        switch (dateFilter) {
+          case "today":
+            matchesDate = reportDate.toDateString() === today.toDateString()
+            break
+          case "tomorrow":
+            matchesDate = reportDate.toDateString() === tomorrow.toDateString()
+            break
+          case "this-week":
+            const weekEnd = new Date(today)
+            weekEnd.setDate(weekEnd.getDate() + 7)
+            matchesDate = reportDate >= today && reportDate <= weekEnd
+            break
+          case "overdue":
+            matchesDate = reportDate < today
+            break
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesType && matchesLocation && matchesDate
     })
     .sort((a, b) => {
       // Sort by date and time - earliest appointments first
@@ -142,7 +184,18 @@ const handleValueSubmit = async(payload?: string) => {
         {/* Reports List */}
         <div className="lg:col-span-2 space-y-4">
 
-     <PendingReportFilter searchQuery={searchTerm} setSearchQuery={setSearchTerm}/>
+     <PendingReportFilter 
+        searchQuery={searchTerm} 
+        setSearchQuery={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        locationFilter={locationFilter}
+        setLocationFilter={setLocationFilter}
+        dateFilter={dateFilter}
+        setDateFilter={setDateFilter}
+      />
 
          <div className="space-y-3">
   {filteredReports.length > 0 ? (
