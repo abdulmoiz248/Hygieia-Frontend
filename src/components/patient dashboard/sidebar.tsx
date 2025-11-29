@@ -30,7 +30,6 @@ const menuItems = [
   { icon: FileText, label: "Medical Records", href: "/medical-records" },
   { icon: Pill, label: "Medicine Tracker", href: "/medicine-tracker" },
   { icon: Bot, label: "Health Assistant", href: "/chatbot" },
-  { icon: MessageCircle, label: "Messages", href: "/chat" },
   { icon: Stethoscope, label: "AI Diagnosis", href: "/ai-diagnosis" },
   { icon: Activity, label: "Fitness & Diet", href: "/fitness" },
 ]

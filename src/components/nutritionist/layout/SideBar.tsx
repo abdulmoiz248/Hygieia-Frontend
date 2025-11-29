@@ -29,7 +29,7 @@ const menuItems = [
   { icon: FileText, label: "Diet Plan", href: "/diet-plan" },
   { icon: BookOpen, label: "Blogs", href: "/blogs" },
 
-  { icon: MessageCircle, label: "Messages", href: "/chat" },
+ 
 
 ]
 
