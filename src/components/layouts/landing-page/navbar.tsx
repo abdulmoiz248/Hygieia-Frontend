@@ -13,7 +13,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
 
-  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", " #1e1e22"])
+  const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", "rgb(30,30,34)"])
 
   const textColor = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"])
 
