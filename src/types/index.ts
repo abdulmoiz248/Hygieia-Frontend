@@ -26,7 +26,7 @@ export interface Doctor {
   languages: string[]
   bio: string
   consultationFee: number
-  workingHours: { day: string; start: string; end: string }[]
+  workingHours: { day: string; start: string; end: string; location: string }[]
   rating: number
 }
 

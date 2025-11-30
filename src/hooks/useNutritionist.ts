@@ -25,7 +25,12 @@ async function fetchNutritionists(): Promise<NutritionistProfile[]> {
     languages: n.languages || [],
     bio: n.bio,
     consultationFee: n.consultationFee,
-    workingHours: n.workingHours || [],
+    workingHours: (n.workingHours || []).map((wh: any) => ({
+      day: wh.day,
+      start: wh.start,
+      end: wh.end,
+      location: wh.location || "",
+    })),
     rating: n.rating,
   }))
 
