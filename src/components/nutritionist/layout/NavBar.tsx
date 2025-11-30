@@ -38,7 +38,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
   const markAllAsRead = async () => {
     if (!user?.id || unreadCount === 0) return
-    await api.patch(`/notifications/mark-read/${user.id}`)
+    api.patch(`/notifications/mark-read/${user.id}`)
     notifications?.forEach((notification) => {
           notification.is_read = true
         })
@@ -115,7 +115,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
               />
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium text-sm">{notification.title}</h4>
-                <p className="text-sm text-cool-gray line-clamp-2">
+                <p className="text-sm text-cool-gray whitespace-normal break-words">
                   {notification.notification_msg}
                 </p>
                 <p className="text-xs text-cool-gray mt-1">
