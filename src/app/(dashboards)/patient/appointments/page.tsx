@@ -257,10 +257,21 @@ const handleDownloadAppointmentSchedulePdf = async () => {
     link.click()
     document.body.removeChild(link)
   }
-  const filteredAppointments = appointments.filter((appointment) => {
-    if (statusFilter === "all") return true
-    return appointment.status === statusFilter
-  }).filter((appointment) => appointment.status!=="cancelled")
+  const filteredAppointments = appointments
+    .filter((appointment) => {
+      if (statusFilter === "all") return true
+      return appointment.status === statusFilter
+    })
+    .filter((appointment) => appointment.status !== "cancelled")
+    .sort((a, b) => {
+      // Sort upcoming appointments first, then completed
+      if (a.status === "upcoming" && b.status !== "upcoming") return -1
+      if (a.status !== "upcoming" && b.status === "upcoming") return 1
+      // Within same status, sort by date (earliest first for upcoming, latest first for completed)
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return a.status === "upcoming" ? dateA - dateB : dateB - dateA
+    })
 
   // Add appointment dates for calendar
   const appointmentDates = appointments.map((apt) => new Date(apt.date))
@@ -457,7 +468,7 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                 <div className="flex flex-wrap items-center gap-2 text-cool-gray mt-1">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4 text-mint-green" />
-                  {new Date(appointment.date).toLocaleDateString("en-CA")}
+                    {new Date(appointment.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4 text-mint-green" />
@@ -563,7 +574,7 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-cool-gray" />
                     <span className="text-sm">
-                      <strong>Date:</strong>   {new Date(selectedAppointment.date).toLocaleDateString("en-CA")}
+                      <strong>Date:</strong> {new Date(selectedAppointment.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
