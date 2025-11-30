@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, CheckCircle, Calendar, MapPin, Link, X, AlertCircle } from "lucide-react"
+import { Clock, CheckCircle, Calendar, MapPin, Link, X, AlertCircle, CalendarDays } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
@@ -66,6 +66,14 @@ export function AppointmentsList() {
   const formatTime = (time: string) => {
     const parts = time.split(":")
     return `${parts[0]}:${parts[1]}`
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+    })
   }
 
   const isTimeReached = (aptDate: string, aptTime: string) => {
@@ -193,6 +201,10 @@ export function AppointmentsList() {
                             </div>
 
                             <div className="space-y-2 mb-4">
+                              <div className="flex items-center gap-2 text-sm">
+                                <CalendarDays className="h-4 w-4 text-soft-blue flex-shrink-0" />
+                                <span className="font-medium text-dark-slate-gray">{formatDate(appointment.date)}</span>
+                              </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <Clock className="h-4 w-4 text-soft-coral flex-shrink-0" />
                                 <span className="font-medium text-dark-slate-gray">{formatTime(appointment.time)}</span>
