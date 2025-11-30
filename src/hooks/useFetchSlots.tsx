@@ -2,7 +2,21 @@
 import { useQuery } from "@tanstack/react-query"
 import api from "@/lib/axios"
 
-const fetchAvailableSlots = async (providerId: string, role: string, date: string) => {
+export interface TimeSlot {
+  time: string
+  location: string
+}
+
+export interface AvailableSlotsResponse {
+  providerId: string
+  role: string
+  date: string
+  location: string
+  availableSlots: TimeSlot[]
+  message?: string
+}
+
+const fetchAvailableSlots = async (providerId: string, role: string, date: string): Promise<AvailableSlotsResponse> => {
   console.log("👉 Calling backend with:", { providerId: providerId.trim(), role, date })
   const res = await api.get("/appointments/available-slots", {
     params: { providerId: providerId.trim(), role, date },
@@ -16,7 +30,7 @@ export const useAvailableSlots = (
   role?: string,
   date?: Date
 ) => {
-  return useQuery({
+  return useQuery<AvailableSlotsResponse>({
     queryKey: [
       "available-slots",
       providerId,

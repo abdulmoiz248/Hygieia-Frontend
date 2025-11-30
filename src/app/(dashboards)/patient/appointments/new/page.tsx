@@ -2,7 +2,7 @@
 
 import {  useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, User, FileText } from "lucide-react"
+import { Calendar, Clock, User, FileText, MapPin } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,7 +22,7 @@ import { AppDispatch, RootState } from "@/store/patient/store"
 import { Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 import { patientSuccess } from "@/toasts/PatientToast"
 import { useNutritionists } from "@/hooks/useNutritionist"
-import { useAvailableSlots } from "@/hooks/useFetchSlots"
+import { useAvailableSlots, TimeSlot } from "@/hooks/useFetchSlots"
 import NewAppointmentHeader from "@/components/patient dashboard/appointments/new/Header"
 import ShareDataCheckbox from "@/components/patient dashboard/appointments/new/Checker"
 import { Doctor } from "@/types"
@@ -119,7 +119,8 @@ const {
 )) : undefined)
 
 
-const timeSlots = slotData?.availableSlots ?? []
+const timeSlots: TimeSlot[] = slotData?.availableSlots ?? []
+const dayLocation = slotData?.location ?? ""
 
 useEffect(()=>{
         if(timeSlots.length==0) setSelectedTime("")
@@ -245,21 +246,32 @@ useEffect(()=>{
   ) : timeSlots.length === 0 ? (
     <p className="text-cool-gray text-sm">No available slots for this date</p>
   ) : (
-    <div className="grid grid-cols-3 gap-2">
-      {timeSlots.map((time: string) => (
-        <Button
-          key={time}
-          size="sm"
-          onClick={() => setSelectedTime(time)}
-          className={
-            selectedTime === time
-              ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
-              : "text-cool-gray bg-transparent border-soft-blue border hover:bg-soft-blue/70 hover:text-snow-white"
-          }
-        >
-          {time}
-        </Button>
-      ))}
+    <div className="space-y-3">
+      {/* Location for the day - only show for physical appointments */}
+      {dayLocation && appointmentMode === AppointmentMode.Physical && (
+        <div className="flex items-center gap-2 text-sm text-mint-green bg-mint-green/10 px-3 py-2 rounded-lg">
+          <MapPin className="w-4 h-4" />
+          <span>Location: <strong>{dayLocation}</strong></span>
+        </div>
+      )}
+      
+      {/* Time slots grid */}
+      <div className="grid grid-cols-3 gap-2">
+        {timeSlots.map((slot: TimeSlot) => (
+          <Button
+            key={slot.time}
+            size="sm"
+            onClick={() => setSelectedTime(slot.time)}
+            className={
+              selectedTime === slot.time
+                ? "bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
+                : "text-cool-gray bg-transparent border-soft-blue border hover:bg-soft-blue/70 hover:text-snow-white"
+            }
+          >
+            {slot.time.slice(0, 5)}
+          </Button>
+        ))}
+      </div>
     </div>
   )}
 </div>
@@ -310,8 +322,23 @@ useEffect(()=>{
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-cool-gray">Time:</span>
-                  <span className="text-sm font-medium  text-soft-blue">{selectedTime || "Not selected"}</span>
+                  <span className="text-sm font-medium  text-soft-blue">{selectedTime ? selectedTime.slice(0, 5) : "Not selected"}</span>
                 </div>
+                {appointmentMode === AppointmentMode.Physical && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-cool-gray">Location:</span>
+                    <span className="text-sm font-medium text-mint-green flex items-center gap-1">
+                      {dayLocation ? (
+                        <>
+                          <MapPin className="w-3 h-3" />
+                          {dayLocation}
+                        </>
+                      ) : (
+                        <span className="text-soft-blue">Not selected</span>
+                      )}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-sm text-cool-gray">Type:</span>
                   <span className="text-sm font-medium  text-soft-blue">{appointmentType || "Not selected"}</span>
@@ -429,15 +456,24 @@ dispatch(
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-soft-blue">Time</span>
-              <span>{selectedTime}</span>
+              <span>{selectedTime.slice(0, 5)}</span>
             </div>
+            {appointmentMode === AppointmentMode.Physical && (
+              <div className="flex justify-between">
+                <span className="font-medium text-soft-blue">Location</span>
+                <span className="flex items-center gap-1 text-mint-green">
+                  <MapPin className="w-3 h-3" />
+                  {dayLocation || "Not specified"}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="font-medium text-soft-blue">Type</span>
               <span>{appointmentType}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-soft-blue">Fee</span>
-              <span>${doctors?.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
+              <span>Rs.{doctors?.find((d) => d.id === selectedDoctor)?.consultationFee}</span>
             </div>
           </div>
       
@@ -454,7 +490,7 @@ onClick={() => {
   const endDate = new Date(startDate);
   endDate.setHours(endDate.getHours() + 1); // Add 1 hour
 
-  const appointmentLocation = appointmentType === "physical" ? "physical" : "Online";
+  const appointmentLocation = dayLocation || (appointmentMode === "physical" ? "Physical" : "Online");
 
   const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Appointment%20with%20${encodeURIComponent(
     doctorName
