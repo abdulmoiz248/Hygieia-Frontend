@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, Filter, FileText, File } from "lucide-react"
+import { Calendar, Clock, Filter, FileText, File, MapPin, Link as LinkIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +18,7 @@ import Loader from "@/components/loader/loader"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/store/patient/store"
 import { cancelAppointment, fetchAppointments } from "@/types/patient/appointmentsSlice"
-import { Appointment } from "@/types/patient/appointment"
+import { Appointment, AppointmentMode } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
 import { patientDestructive } from "@/toasts/PatientToast"
 const containerVariants = {
@@ -461,8 +461,28 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4 text-mint-green" />
-                    {appointment.time}
+                    {appointment.time.slice(0, 5)}
                   </div>
+                  {/* Location for physical appointments */}
+                  {appointment.mode === AppointmentMode.Physical && appointment.location && (
+                    <div className="flex items-center gap-1 text-mint-green">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-sm">{appointment.location}</span>
+                    </div>
+                  )}
+                  {/* Join link for online appointments */}
+                  {appointment.mode === AppointmentMode.Online && appointment.link && appointment.status === "upcoming" && (
+                    <a
+                      href={appointment.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1 text-soft-blue hover:text-soft-blue/80 transition-colors"
+                    >
+                      <LinkIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium underline">Join Meeting</span>
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -549,7 +569,7 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-cool-gray" />
                     <span className="text-sm">
-                      <strong>Time:</strong> {selectedAppointment.time}
+                      <strong>Time:</strong> {selectedAppointment.time.slice(0, 5)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -558,6 +578,32 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">{selectedAppointment.type}</Badge>
                   </div>
+                  {/* Location for physical appointments */}
+                  {selectedAppointment.mode === AppointmentMode.Physical && selectedAppointment.location && (
+                    <div className="col-span-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-mint-green" />
+                      <span className="text-sm">
+                        <strong>Location:</strong> {selectedAppointment.location}
+                      </span>
+                    </div>
+                  )}
+                  {/* Join link for online appointments */}
+                  {selectedAppointment.mode === AppointmentMode.Online && selectedAppointment.link && selectedAppointment.status === "upcoming" && (
+                    <div className="col-span-2 flex items-center gap-2">
+                      <LinkIcon className="w-4 h-4 text-soft-blue" />
+                      <span className="text-sm">
+                        <strong>Meeting Link:</strong>{" "}
+                        <a
+                          href={selectedAppointment.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-soft-blue hover:text-soft-blue/80 underline"
+                        >
+                          Join Meeting
+                        </a>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
          

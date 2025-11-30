@@ -30,10 +30,12 @@ export interface Appointment {
   status: AppointmentStatus
   type: AppointmentTypes
   notes?: string
- report?: string
- mode:AppointmentMode
- dataShared:boolean
- start_link?:string 
+  report?: string
+  mode:AppointmentMode
+  dataShared:boolean
+  start_link?:string
+  location?: string  // For physical appointments
+  link?: string      // For online appointments
 }
 
 
@@ -53,6 +55,8 @@ interface BackendAppointment {
   report?: string
   mode: AppointmentMode
   dataShared: boolean
+  location?: string  // For physical appointments
+  link?: string      // For online appointments
   createdAt: string
   updatedAt: string
 }
@@ -78,6 +82,8 @@ export function mapAppointment(raw: BackendAppointment): Appointment {
     report: raw.report,
     mode: raw.mode,
     dataShared: raw.dataShared,
+    location: raw.location,
+    link: raw.link,
   }
 }
 
