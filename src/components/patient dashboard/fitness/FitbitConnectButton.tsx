@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/patient/store'
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { ExternalLink } from 'lucide-react'
 
-export default function FitbitConnectButton() {
+function FitbitConnectButtonContent() {
   const [loading, setLoading] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const router = useRouter()
@@ -123,5 +123,18 @@ function FitbitIcon() {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
       <path d="M13.5 18c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-3-3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-9-3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-15-3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/>
     </svg>
+  )
+}
+
+export default function FitbitConnectButton() {
+  return (
+    <Suspense fallback={
+      <Button disabled className="flex items-center gap-2 px-6 py-3 bg-[#00B0B9] text-white rounded-lg opacity-50">
+        <FitbitIcon />
+        <span>Connect with Fitbit</span>
+      </Button>
+    }>
+      <FitbitConnectButtonContent />
+    </Suspense>
   )
 }

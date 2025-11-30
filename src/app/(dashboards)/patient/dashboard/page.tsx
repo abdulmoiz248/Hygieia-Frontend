@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,7 +22,7 @@ const containerVariants = {
   },
 }
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const searchParams = useSearchParams()
   const { toast } = useToast()
 
@@ -97,5 +97,18 @@ export default function DashboardPage() {
 
   
     </motion.div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6 lg:space-y-8 w-full animate-pulse">
+        <div className="h-32 bg-gray-200 rounded-lg"></div>
+        <div className="h-48 bg-gray-200 rounded-lg"></div>
+      </div>
+    }>
+      <DashboardPageContent />
+    </Suspense>
   )
 }
