@@ -33,10 +33,12 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
 
     const markAllAsRead = async () => {
         if (!profile?.id || unreadCount === 0) return
-        await api.patch(`/notifications/mark-read/${profile.id}`)
-        notifications?.forEach((notification) => {
+         notifications?.forEach((notification) => {
           notification.is_read = true
         })
+        api.patch(`/notifications/mark-read/${profile.id}`)
+
+       
       }
 
 
@@ -100,7 +102,7 @@ const userInitials = (safeProfile.name || "user")
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
-                    className="p-4 cursor-pointer focus:bg-mint-green/10"
+                    className="p-4 cursor-pointer focus:bg-mint-green/10 whitespace-normal h-auto"
                   >
                     <div className="flex gap-3 w-full">
                       <div
@@ -110,7 +112,7 @@ const userInitials = (safeProfile.name || "user")
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-sm text-cool-gray line-clamp-2">
+                        <p className="text-sm text-cool-gray break-words">
                           {notification.notification_msg}
                         </p>
                         <p className="text-xs text-cool-gray mt-1">
