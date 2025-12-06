@@ -251,15 +251,7 @@ export default function OTPVerificationPage() {
             )}
           </button>
 
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            onClick={resetForm}
-            className="mt-4 text-cool-gray hover:text-snow-white transition-colors duration-200"
-          >
-            Didn&apos;t receive a code? Resend
-          </motion.button>
+       
         </motion.div>
       </motion.div>
 
