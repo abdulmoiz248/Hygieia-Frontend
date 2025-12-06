@@ -132,12 +132,6 @@ export default function OTPVerificationPage() {
   
   }
 
-  const resetForm = () => {
-    setOtp(Array(6).fill(""))
-    setVerificationStatus("idle")
-    setErrorMessage("")
-    inputRefs.current[0]?.focus()
-  }
 
   const isVerifyButtonDisabled =
     isVerifying || verificationStatus === "success"
