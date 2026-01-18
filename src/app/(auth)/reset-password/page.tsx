@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Mail, AlertCircle,  CheckCircle, ArrowLeft, Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react'
+import { Mail, AlertCircle,  CheckCircle, ArrowLeft, Lock, Eye, EyeOff, Shield, Loader2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
@@ -23,8 +23,22 @@ export default function ResetPassword() {
   const [countdown, setCountdown] = useState(0)
   const router = useRouter()
 
+  // Password validation checks
+  const passwordChecks = useMemo(() => {
+    return {
+      length: newPassword.length >= 8,
+      uppercase: /[A-Z]/.test(newPassword),
+      lowercase: /[a-z]/.test(newPassword),
+      number: /[0-9]/.test(newPassword),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword),
+    }
+  }, [newPassword])
+
+  const allPasswordChecksMet = useMemo(() => {
+    return Object.values(passwordChecks).every(check => check) && newPassword === confirmPassword
+  }, [passwordChecks, confirmPassword, newPassword])
+
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  const validatePassword = (password: string) => password.length >= 6
 
   // Countdown timer for resend OTP
   useEffect(() => {
@@ -57,9 +71,9 @@ const handleEmailSubmit = async (e: React.FormEvent) => {
     } else {
       setError(res.data.message || 'Failed to send reset OTP')
     }
-  } catch (err) {
+  } catch (err: any) {
     console.log(err)
-    setError('Something went wrong. Try again.')
+    setError(err?.response?.data?.message || 'Something went wrong. Try again.')
   } finally {
     setIsLoading(false)
   }
@@ -84,14 +98,13 @@ const handleEmailSubmit = async (e: React.FormEvent) => {
     } else {
       setError(res.data.message || 'Invalid OTP. Please try again.')
     }
-  } catch (err) {
+  } catch (err: any) {
     console.log(err)
-    setError('Something went wrong. Try again.')
+    setError(err?.response?.data?.message || 'Something went wrong. Try again.')
   } finally {
     setIsLoading(false)
   }
 }
-
 
 const handlePasswordSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
@@ -99,12 +112,8 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
     setError('Both password fields are required.')
     return
   }
-  if (!validatePassword(newPassword)) {
-    setError('Password must be at least 6 characters long.')
-    return
-  }
-  if (newPassword !== confirmPassword) {
-    setError('Passwords do not match.')
+  if (!allPasswordChecksMet) {
+    setError('Password does not meet all requirements or passwords do not match.')
     return
   }
 
@@ -124,9 +133,9 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
     } else {
       setError(res.data.message)
     }
-  } catch (err) {
+  } catch (err: any) {
     console.log(err)
-    setError('Something went wrong. Try again.')
+    setError(err?.response?.data?.message || 'Something went wrong. Try again.')
   } finally {
     setIsLoading(false)
   }
@@ -150,7 +159,7 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
           <CardContent>
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div className="relative animate-slide-in-right delay-200">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-snow-white pointer-events-none" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -283,40 +292,122 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="relative animate-slide-in-right delay-200">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
-                <Input
-                  type={showNewPassword ? 'text' : 'password'}
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-white/5 border-cool-gray text-white placeholder:text-cool-gray focus:ring-2 focus:ring-snow-white"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-3 text-cool-gray hover:text-white"
-                >
-                  {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+              <div className="space-y-2 animate-slide-in-right delay-200">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-snow-white pointer-events-none" />
+                  <Input
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pl-10 pr-10 bg-white/5 border-cool-gray text-white placeholder:text-cool-gray focus:ring-2 focus:ring-snow-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-cool-gray hover:text-white"
+                  >
+                    {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                {/* Password Requirements */}
+                {newPassword && !allPasswordChecksMet && (
+                  <div className="bg-white/5 border border-gray-700 rounded-lg p-3 space-y-2">
+                    <p className="text-xs text-gray-300 font-medium mb-2">Password Requirements:</p>
+                    
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordChecks.length ? (
+                        <Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-400" />
+                      )}
+                      <span className={passwordChecks.length ? "text-green-400" : "text-gray-400"}>
+                        At least 8 characters
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordChecks.uppercase ? (
+                        <Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-400" />
+                      )}
+                      <span className={passwordChecks.uppercase ? "text-green-400" : "text-gray-400"}>
+                        One uppercase letter (A-Z)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordChecks.lowercase ? (
+                        <Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-400" />
+                      )}
+                      <span className={passwordChecks.lowercase ? "text-green-400" : "text-gray-400"}>
+                        One lowercase letter (a-z)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordChecks.number ? (
+                        <Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-400" />
+                      )}
+                      <span className={passwordChecks.number ? "text-green-400" : "text-gray-400"}>
+                        One number (0-9)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordChecks.special ? (
+                        <Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-400" />
+                      )}
+                      <span className={passwordChecks.special ? "text-green-400" : "text-gray-400"}>
+                        One special character (!@#$%^&*)
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="relative animate-slide-in-right delay-300">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-white/5 border-cool-gray text-white placeholder:text-cool-gray focus:ring-2 focus:ring-snow-white"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-cool-gray hover:text-white"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+              <div className="space-y-2 animate-slide-in-right delay-300">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-snow-white pointer-events-none" />
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 pr-10 bg-white/5 border-cool-gray text-white placeholder:text-cool-gray focus:ring-2 focus:ring-snow-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-cool-gray hover:text-white"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                {confirmPassword && (
+                  <div className="text-xs">
+                    {newPassword === confirmPassword ? (
+                      <div className="flex items-center gap-2 text-green-400">
+                        <Check className="h-4 w-4" />
+                        Passwords match
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-red-400">
+                        <X className="h-4 w-4" />
+                        Passwords do not match
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {error && (
@@ -326,22 +417,18 @@ const handlePasswordSubmit = async (e: React.FormEvent) => {
                 </div>
               )}
 
-              <div className="text-xs text-snow-white animate-slide-in-right delay-400">
-                Password must be at least 9 characters long
-              </div>
-
               <Button
                 type="submit"
-                className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-500 flex items-center justify-center gap-2"
-                disabled={isLoading}
+                disabled={isLoading || !allPasswordChecksMet}
+                className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-500 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
-    <>
-       <Loader2 className='h-4 w-4 animate-spin' /> Updating Password
-    </>
-  ) : (
-    "Update Password"
-  )}
+                  <>
+                    <Loader2 className='h-4 w-4 animate-spin' /> Updating Password
+                  </>
+                ) : (
+                  "Update Password"
+                )}
               </Button>
             </form>
           </CardContent>

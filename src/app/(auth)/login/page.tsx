@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,6 +22,21 @@ export default  function Login() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router=useRouter()
+
+  // Password validation checks
+  const passwordChecks = useMemo(() => {
+    return {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    }
+  }, [password])
+
+  const allChecksMet = useMemo(() => {
+    return Object.values(passwordChecks).every(check => check)
+  }, [passwordChecks])
  
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -38,13 +53,19 @@ const handleSubmit = async (e: React.FormEvent) => {
     return
   }
 
+  // Validate password requirements
+  if (!allChecksMet) {
+    setError('Invalid email or password')
+    return
+  }
+
   setError('')
   setIsLoading(true)
 
   try {
     const res = await api.post('/auth/login', { email, password })
-    const data = res.data
-
+    const data = res.data.data
+    console.log(res)
     if (!data.success) {
       throw new Error(data.message || 'Login failed')
     } else {
@@ -61,9 +82,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       router.push(`/${role}/dashboard`)
     }
 
-  } catch  {
+  } catch (err: any) {
   
-    setError('Invalid Login Credentials')
+    setError(err?.response?.data?.message || 'Invalid email or password')
   } finally {
     setIsLoading(false)
   }
@@ -86,7 +107,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative animate-slide-in-right delay-200">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-snow-white pointer-events-none" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -96,7 +117,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
               </div>
               <div className="relative animate-slide-in-right delay-300">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-snow-white" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-snow-white pointer-events-none" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
@@ -107,7 +128,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-cool-gray hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cool-gray hover:text-white"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
