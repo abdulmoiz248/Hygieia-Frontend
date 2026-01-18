@@ -8,7 +8,7 @@ export const useNutritionistProfile = (id: string, role: string) => {
       if (!id || !role) throw new Error('Missing id or role')
       const res = await api.get(`/auth/user?id=${id}&role=${role}`)
       if (!res.data.success) throw new Error('Failed to fetch profile')
-      return res.data
+      return res.data.data
     },
     enabled: !!id && !!role,
   })

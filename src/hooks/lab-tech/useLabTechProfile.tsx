@@ -10,7 +10,7 @@ export const useFetchProfile = (id?: string, role?: string) => {
       const res = await api.get(`/auth/user?id=${id}&role=${role}`)
       if (!res.data.success) throw new Error('Failed to fetch profile')
 
-      return res.data
+      return res.data.data
     },
     enabled: !!id && !!role,
   })
