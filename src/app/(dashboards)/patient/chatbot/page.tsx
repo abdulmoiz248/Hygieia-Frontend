@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-import { useSelector } from "react-redux"
-import type { RootState } from "@/store/patient/store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 interface Message {
   id: string
@@ -24,7 +23,7 @@ export default function ChatbotPage() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const user = useSelector((state: RootState) => state.profile)
+  const user = usePatientProfileStore((state) => state.profile)
   const userName = user.name
   const userDp = user.avatar
 

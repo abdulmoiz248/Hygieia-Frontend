@@ -7,9 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useSelector, useDispatch } from "react-redux"
-import { AppDispatch, RootState } from "@/store/patient/store"
-import { addCalories } from "@/types/patient/fitnessSlice"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import { Flame, Apple } from "lucide-react"
 import { AiCalorieEstimate } from './action'
 import { patientSuccess } from "@/toasts/PatientToast"
@@ -27,9 +25,7 @@ export default function Calories() {
     visible: { opacity: 1, y: 0 },
   }
 
-  const caloriesConsumed = useSelector((state: RootState) => state.fitness.caloriesConsumed)
-  const caloriesBurned = useSelector((state: RootState) => state.fitness.caloriesBurned)
-  const dispatch = useDispatch<AppDispatch>()
+  const { caloriesConsumed, caloriesBurned, addCalories } = usePatientFitnessStore()
   const [showCalorieTracker, setShowCalorieTracker] = useState(false)
 
   const [type, setType] = useState<"consumed" | "burned" | "">("")
@@ -71,13 +67,13 @@ const handleGenerateCalories = async () => {
   const handleAddCalories = () => {
     if (!type || !generatedNutrition || generatedNutrition.calories <= 0) return
 
-    dispatch(addCalories({ 
+    addCalories({ 
       type, 
       amount: generatedNutrition.calories, 
       carbs: generatedNutrition.carbs, 
       protein: generatedNutrition.protein, 
       fat: generatedNutrition.fat 
-    }))
+    })
     patientSuccess("Calories and macros added successfully")
     setType("")
     setDesc("")

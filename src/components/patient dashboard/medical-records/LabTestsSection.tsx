@@ -5,16 +5,13 @@ import {  Calendar, Clock, File, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import { cancelLabTest } from "@/types/patient/labTestsSlice"
 import type { LabTest,BookedLabTest } from "@/types/patient/lab"
 import { useEffect, useState } from "react"
 import { patientDestructive } from "@/toasts/PatientToast"
 import { useRouter } from "next/navigation"
-import { fetchLabTests, fetchBookedTests } from '@/types/patient/labTestsSlice'
 import { formatDateOnly } from "@/helpers/date"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -22,11 +19,11 @@ const itemVariants = {
 }
 
 export function LabTestsSection() {
-  const dispatch = useAppDispatch()
   const router = useRouter()
   
-  const profile=useSelector((state:RootState)=>state.profile)
-  const { availableTests, bookedTests } = useAppSelector((state) => state.labTests)
+  const profile = usePatientProfileStore((state) => state.profile)
+  const { availableTests, bookedTests, fetchLabTests, fetchBookedTests, cancelLabTest } =
+    usePatientLabTestsStore()
 
   const [selectTestModal,setSelectedTestModal]=useState<BookedLabTest | null>()
   const pendingTests = bookedTests.filter((test) => test.status === "pending")
@@ -225,13 +222,13 @@ const handleDownloadLabSchedulePdf = async () => {
 
   useEffect(() => {
   if (!availableTests || availableTests.length === 0) {
-    dispatch(fetchLabTests())
+    fetchLabTests()
   }
   if (!bookedTests || bookedTests.length === 0) {
     // if already no report it will spam fetch
-    dispatch(fetchBookedTests())
+    fetchBookedTests()
   }
-}, [dispatch, availableTests, bookedTests])
+}, [availableTests, bookedTests, fetchBookedTests, fetchLabTests])
 
 
 useEffect(()=>{
@@ -247,7 +244,7 @@ useEffect(()=>{
   }
 
   const handleCancelTest = (testId: string) => {
-    dispatch(cancelLabTest(testId))
+    cancelLabTest(testId)
   }
 
   const getStatusColor = (status: string) => {

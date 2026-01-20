@@ -3,11 +3,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import {  useSelector } from "react-redux"
-import type { RootState } from "@/store/patient/store"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
 import { useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 export default function WelcomeSection() {
 
@@ -17,9 +17,9 @@ export default function WelcomeSection() {
 }
 
 
-       const appointments = useSelector((state: RootState) => state.appointments.appointments)
+       const appointments = usePatientAppointmentsStore((state) => state.appointments)
       const upcomingAppointments = appointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
-      const user=useSelector((state: RootState) => state.profile)
+      const user = usePatientProfileStore((state) => state.profile)
     
       const [showDes,setShowDes]=useState(false)
       const handleAnimationComplete = () => {

@@ -4,8 +4,7 @@ import { useParams } from "next/navigation"
 
 import { Card, CardContent } from "@/components/ui/card"
 
-import {  useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 
 import ReviewForm from "@/components/patient dashboard/appointments/ReviewForm"
 
@@ -14,10 +13,10 @@ import ReviewForm from "@/components/patient dashboard/appointments/ReviewForm"
 export default function ReviewPage() {
   const params = useParams()
   const appointmentId = Array.isArray(params.id) ? params.id[0] : params.id || ""
-  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const { appointments } = usePatientAppointmentsStore()
  
 
-  if (!appointments) {
+  if (!appointments || appointments.length === 0) {
     return (
     <div className="min-h-screen flex items-center justify-center text-center p-6">
   <Card className="w-full max-w-md border-0 bg-white/70 backdrop-blur-xl shadow-2xl rounded-2xl transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)]">

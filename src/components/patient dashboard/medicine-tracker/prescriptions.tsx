@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button"
 import {Dialog,DialogContent,DialogTitle,DialogHeader} from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientMedicineStore } from "@/store/patient/medicine-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -23,7 +22,7 @@ const itemVariants = {
 }
 
 export default function PrescriptionsPage() {
-  const Prescriptions = useSelector((state: RootState) => state.medicine.Prescription)
+  const Prescriptions = usePatientMedicineStore((state) => state.Prescription)
 
   const [selectedPrescription, setSelectedPrescription] = useState<(typeof Prescriptions)[0] | null>(null)
   const [activeTab, setActiveTab] = useState("active")

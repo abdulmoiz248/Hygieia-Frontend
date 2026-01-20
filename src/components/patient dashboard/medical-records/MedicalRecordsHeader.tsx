@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/select"
 import type { MedicalRecord } from "@/types"
 import { patientSuccess } from "@/toasts/PatientToast"
-import { useAppDispatch } from "@/hooks/redux"
-import { addRecord } from "@/types/patient/medicalRecordsSlice"
+import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
 
 interface MedicalRecordsHeaderProps {
   showUpload: boolean
@@ -33,7 +32,7 @@ export function MedicalRecordsHeader({
   setShowUpload,
   onUploadRecord,
 }: MedicalRecordsHeaderProps) {
-  const dispatch = useAppDispatch()
+  const addRecord = usePatientMedicalRecordsStore((s) => s.addRecord)
 
   const [title, setTitle] = useState("")
   const [type, setType] = useState<MedicalRecord["type"] | "">("")
@@ -64,27 +63,17 @@ export function MedicalRecordsHeader({
     setError("")
 
     try {
-      const action = await dispatch(
-        addRecord({
-          file,
-          title,
-          type,
-        })
-      )
+      await addRecord({ file, title, type })
+      // store already updates state; keep callback for backwards compatibility
+      onUploadRecord({ file, title, type } as any)
+      patientSuccess(`${title} Report Uploaded Successfully`)
 
-      if (addRecord.fulfilled.match(action)) {
-        onUploadRecord(action.payload)
-        patientSuccess(`${title} Report Uploaded Successfully`)
-
-        // reset state
-        setTitle("")
-        setType("")
-        setDoctorName("")
-        setFile(null)
-        setShowUpload(false)
-      } else {
-        setError(action.payload as string || "Upload failed")
-      }
+      // reset state
+      setTitle("")
+      setType("")
+      setDoctorName("")
+      setFile(null)
+      setShowUpload(false)
     } catch (err: any) {
       setError(err.message || "Upload failed")
     } finally {

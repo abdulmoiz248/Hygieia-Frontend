@@ -2,8 +2,7 @@
 import { motion } from "framer-motion"
 import { Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 
 export default function Week() {
   const itemVariants = {
@@ -11,7 +10,7 @@ export default function Week() {
     visible: { opacity: 1, y: 0 },
   }
 
- const activityLog = useSelector((state: RootState) => state.fitness.activityLog)
+ const activityLog = usePatientFitnessStore((state) => state.activityLog)
   return (
     <motion.div variants={itemVariants} initial="hidden" animate="visible" className="w-full">
       <Card className="w-full bg-white/40">

@@ -1,6 +1,5 @@
-import { RootState } from "@/store/patient/store"
 import React from "react"
-import { useSelector } from "react-redux"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import {
   RadarChart,
   PolarGrid,
@@ -14,9 +13,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { ChartBarIcon } from "@heroicons/react/24/solid"
 
 const MacroGraphToday = () => {
-  const { proteinConsumed, fatConsumed, carbsConsumed } = useSelector(
-    (state: RootState) => state.fitness
-  )
+  const { proteinConsumed, fatConsumed, carbsConsumed } = usePatientFitnessStore()
 
   const data = [
     { macro: "Carbs", value: carbsConsumed },

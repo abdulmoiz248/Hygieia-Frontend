@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 import api from "@/lib/axios"
 import Loader from "@/components/loader/loader"
 
@@ -45,7 +44,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState("verifyEmail")
 
-  const user = useSelector((store: RootState) => store.profile)
+  const user = usePatientProfileStore((store) => store.profile)
 
   console.log("email valid= ",emailValid)
  const handleVerifyEmail = async () => {

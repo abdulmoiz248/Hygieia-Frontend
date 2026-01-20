@@ -25,11 +25,10 @@ import {
   Bar,
  
 } from "recharts"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 export default function HealthFocus() {
-  const user=useSelector((store:RootState)=>store.profile)
+  const user = usePatientProfileStore((store) => store.profile)
   const itemVariants = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }
   
   const medicationAdherence = [

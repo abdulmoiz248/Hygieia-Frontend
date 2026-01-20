@@ -3,14 +3,14 @@
 import {  Droplets } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ResponsiveContainer,  RadialBarChart, RadialBar, Legend, Tooltip } from "recharts"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/patient/store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 
 
 export default function Nutrition() {
 
-    const targets=useSelector((store:RootState)=>store.profile.limit)
-    const fitness=useSelector((store:RootState)=>store.fitness)
+    const targets = usePatientProfileStore((store) => store.profile.limit)
+    const fitness = usePatientFitnessStore()
 const nutritionBreakdown = [
   { nutrient: "Protein", current: fitness.proteinConsumed, target: targets.protein, unit: "g", color: "var(--color-soft-coral)" },
   { nutrient: "Carbs", current: fitness.carbsConsumed, target: targets.carbs, unit: "g", color: "var(--color-mint-green)" },

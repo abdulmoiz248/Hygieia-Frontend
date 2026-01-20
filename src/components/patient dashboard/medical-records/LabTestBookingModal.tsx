@@ -7,26 +7,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import { bookLabTest, setShowBookingModal, setSelectedTest } from "@/types/patient/labTestsSlice"
 import type { LabTest } from "@/types/patient/lab"
 import { CalendarComponent } from "@/components/ui/calendar"
 import TimeSelect from "./TimeSelect"
 import { patientSuccess } from "@/toasts/PatientToast"
+import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 interface LabTestBookingModalProps {
   test: LabTest
 }
 
 export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
-  const dispatch = useAppDispatch()
-  const { showBookingModal } = useAppSelector((state) => state.labTests)
+  const {
+    showBookingModal,
+    setShowBookingModal,
+    setSelectedTest,
+    bookLabTest,
+  } = usePatientLabTestsStore()
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() + 86400 * 1000))
   const [selectedTime, setSelectedTime] = useState("")
   const [location, setLocation] = useState("Main Lab - Floor 2")
   const [notes, setNotes] = useState("")
-  const profile = useAppSelector((state) => state.profile)
+  const profile = usePatientProfileStore((state) => state.profile)
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return
@@ -37,29 +41,27 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
   const handleBookTest = () => {
     if (!selectedDate || !selectedTime) return
 
-    dispatch(
-      bookLabTest({
-        testName: test.name,
-        testId: test.id,
-        patientId: profile.id,
-        scheduledDate: selectedDate?.toLocaleDateString(),
-        scheduledTime: selectedTime,
-        location,
-        instructions: test.preparation_instructions,
-      }),
-    )
+    bookLabTest({
+      testName: test.name,
+      testId: test.id,
+      patientId: profile.id,
+      scheduledDate: selectedDate?.toLocaleDateString(),
+      scheduledTime: selectedTime,
+      location,
+      instructions: test.preparation_instructions,
+    })
 
     patientSuccess(`${test.name} Booked Successfully`)
-    dispatch(setShowBookingModal(false))
-    dispatch(setSelectedTest(null))
+    setShowBookingModal(false)
+    setSelectedTest(null)
     setSelectedDate(new Date(Date.now() + 86400 * 1000))
     setSelectedTime("")
     setNotes("")
   }
 
   const handleClose = () => {
-    dispatch(setShowBookingModal(false))
-    dispatch(setSelectedTest(null))
+    setShowBookingModal(false)
+    setSelectedTest(null)
   }
 
   if (!showBookingModal) return null

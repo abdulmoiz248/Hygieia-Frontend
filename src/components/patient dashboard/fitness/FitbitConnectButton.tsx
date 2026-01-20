@@ -2,8 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store/patient/store'
+import { usePatientProfileStore } from '@/store/patient/profile-store'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -20,7 +19,7 @@ function FitbitConnectButtonContent() {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const user = useSelector((state: RootState) => state.profile)
+  const user = usePatientProfileStore((state) => state.profile)
 
   useEffect(() => {
     // Check if there's an error parameter in the URL

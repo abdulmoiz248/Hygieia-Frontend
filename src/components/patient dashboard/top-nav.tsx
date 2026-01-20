@@ -12,14 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
-import {  useDispatch, useSelector } from "react-redux"
-import type { RootState } from "@/store/patient/store"
-import {
- // addNotification,
-//  markAsRead,
-  markAllAsRead,
-} from "@/types/patient/notificationSlice"
 import { BellRing } from "../ui/BellRing"
+import { usePatientNotificationsStore } from "@/store/patient/notifications-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
@@ -31,10 +26,9 @@ interface TopNavProps {
 
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
-  const notifications = useSelector((state: RootState) => state.notifications.notifications)
+  const { notifications, markAllAsRead } = usePatientNotificationsStore()
   const unreadCount = notifications.filter(n => n.unread).length
-  const user = useSelector((state: RootState) => state.profile)
-  const dispatch=useDispatch()
+  const user = usePatientProfileStore((state) => state.profile)
 
   const userInitials = user.name
     .split(" ")
@@ -113,7 +107,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 ))}
               </div>
               <div className="p-2 border-t">
-                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => dispatch(markAllAsRead())}>
+                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => markAllAsRead()}>
                  Mark All As Read
                 </Button>
               </div>

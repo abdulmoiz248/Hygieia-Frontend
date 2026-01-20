@@ -15,10 +15,9 @@ import Loader from '@/components/loader/loader'
 import DoctorSelector from "@/components/patient dashboard/appointments/DoctorSelector"
 
 
-import { useDispatch, useSelector } from "react-redux"
-import  {createAppointment, updateAppointment}  from "@/types/patient/appointmentsSlice"
 import { v4 as uuidv4 } from "uuid"
-import { AppDispatch, RootState } from "@/store/patient/store"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { Appointment, AppointmentMode, AppointmentStatus, AppointmentTypes } from "@/types/patient/appointment"
 import { patientSuccess } from "@/toasts/PatientToast"
 import { useNutritionists } from "@/hooks/useNutritionist"
@@ -42,8 +41,8 @@ const itemVariants = {
 export default function NewAppointmentPage() {
 
   
-  const user=useSelector((store:RootState)=>store.profile)
-  const appointments=useSelector((store:RootState)=>store.appointments)
+  const user = usePatientProfileStore((store) => store.profile)
+  const { appointments, createAppointment, updateAppointment } = usePatientAppointmentsStore()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [appointmentMode, setAppointmentMode] = useState("")
@@ -54,7 +53,6 @@ export default function NewAppointmentPage() {
   const [reason, setReason] = useState("")
   const [reschedule,setreschedule]=useState(false)
   const [checked,setChecked]=useState(false)
-  const dispatch=useDispatch<AppDispatch>()
   
   
   const { data: nutritionists, isLoading, isError } = useNutritionists()
@@ -62,7 +60,7 @@ export default function NewAppointmentPage() {
   useEffect(()=>{
     const appointmentId=localStorage.getItem("appointment")
     if(appointmentId){
-         const app = appointments.appointments.find((a) => a.id == appointmentId)
+         const app = appointments.find((a) => a.id == appointmentId)
          if(app)
          {
           setSelectedDoctor(app.doctor.id)
@@ -79,7 +77,7 @@ export default function NewAppointmentPage() {
     const appointmentId=localStorage.getItem("reschedule")
 
     if(appointmentId){
-         const app = appointments.appointments.find((a) => a.id == appointmentId)
+         const app = appointments.find((a) => a.id == appointmentId)
          if(app)
          {
           setRescheduleApp(app.id)
@@ -373,8 +371,7 @@ const utcDate = new Date(Date.UTC(
   selectedDate.getHours(),
   selectedDate.getMinutes()
 ))
-                      dispatch(
-      updateAppointment({
+                      updateAppointment({
         patient:user,
        doctor: doctors.find((d) => d.id === selectedDoctor)!,
         id: rescheduleApp,
@@ -387,7 +384,6 @@ const utcDate = new Date(Date.UTC(
       mode:appointmentMode as AppointmentMode,
       dataShared:checked
       } as Appointment)
-    )
                   }else{
 
                       
@@ -400,8 +396,7 @@ const utcDate = new Date(Date.UTC(
   selectedDate.getMinutes()
 ))
 
-dispatch(
-  createAppointment({
+createAppointment({
     patient: user,
     doctor: doctors.find((d) => d.id === selectedDoctor)!,
     id: uuidv4(),
@@ -413,7 +408,6 @@ dispatch(
     mode: appointmentMode as AppointmentMode,
     dataShared: checked
   } as Appointment)
-)
 
      
                   }

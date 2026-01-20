@@ -9,9 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useDispatch, useSelector } from "react-redux"
-import type { RootState } from "@/store/patient/store"
-import { updateProfile as ProfileUpdate } from "@/types/patient/profileSlice"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { ProfileType } from "@/types/patient/profile"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
 import { patientSuccess } from "@/toasts/PatientToast"
@@ -32,20 +30,18 @@ const itemVariants:Variants = {
 
 
 export default function ProfilePage() {
-  const dispatch = useDispatch()
-  //const profile = useSelector((state: RootState) => state.profile)
-  const reduxProfile=useSelector((state: RootState) => state.profile)
+  const { profile: storeProfile, updateProfile } = usePatientProfileStore()
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<ProfileType>(reduxProfile)
+  const [profile, setProfile] = useState<ProfileType>(storeProfile)
 
   useEffect(() => {
-  setProfile(reduxProfile)
-}, [reduxProfile])
+    setProfile(storeProfile)
+  }, [storeProfile])
 
   const handleSave = () => {
     setIsEditing(false)
     patientSuccess(`${profile.name} profile updated successfully`)
-    dispatch(ProfileUpdate(profile))
+    updateProfile(profile)
   }
 
   

@@ -11,11 +11,10 @@ import React from 'react'
 
 
 
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store/patient/store";
+import { usePatientProfileStore } from "@/store/patient/profile-store";
 
 export default function Garden() {
-      const user = useSelector((state: RootState) => state.profile);
+      const user = usePatientProfileStore((state) => state.profile);
  
       const healthScore=user.healthscore
 

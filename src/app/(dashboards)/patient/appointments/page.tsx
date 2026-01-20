@@ -15,9 +15,8 @@ import Loader from "@/components/loader/loader"
 
 
 
-import { useDispatch, useSelector } from "react-redux"
-import { AppDispatch, RootState } from "@/store/patient/store"
-import { cancelAppointment, fetchAppointments } from "@/types/patient/appointmentsSlice"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { Appointment, AppointmentMode } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
 import { patientDestructive } from "@/toasts/PatientToast"
@@ -38,20 +37,22 @@ const itemVariants = {
 
 
 export default function AppointmentsPage() {
-  const dispatch = useDispatch<AppDispatch>()
-  const { appointments, loading, error } = useSelector((state: RootState) => state.appointments)
+  const { appointments, loading, error, fetchAppointments, cancelAppointment } =
+    usePatientAppointmentsStore()
+  const user = usePatientProfileStore((state) => state.profile)
   const router=useRouter()
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
- const user=useSelector((state:RootState)=>state.profile)
  const patientId=user.id 
 
   useEffect(() => {
    
-    if(appointments.length==0) dispatch(fetchAppointments(patientId!))
-  }, [dispatch, patientId])
+    if(appointments.length==0 && patientId) {
+      fetchAppointments(patientId)
+    }
+  }, [appointments.length, fetchAppointments, patientId])
 
   if (loading)  {
   return (
@@ -634,7 +635,7 @@ const handleDownloadAppointmentSchedulePdf = async () => {
                       <Button
                       className="bg-soft-coral hover:bg-soft-coral/90 text-snow-white border-0"
                       onClick={()=>{
-                        dispatch(cancelAppointment(selectedAppointment.id))
+                        cancelAppointment(selectedAppointment.id)
                         
                         setSelectedAppointment(null)
                         patientDestructive(`Appointment with ${selectedAppointment.doctor?.name} Cancelled Successfully`) 

@@ -11,9 +11,8 @@ import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
 import MacroGraphToday from "@/components/patient dashboard/fitness/MacroGraph"
-import { useDispatch, useSelector } from "react-redux"
-import { RootState,AppDispatch } from "@/store/patient/store"
-import { fetchFitness } from "@/types/patient/fitnessSlice"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import WorkoutDashboard from "@/components/patient dashboard/fitness/workout-dashboard"
 
 
@@ -31,12 +30,14 @@ const itemVariants = {
 export default function FitnessPage() {
   // const [showLogActivity, setShowLogActivity] = useState(false)
   const [showBMICalculator, setShowBMICalculator] = useState(false)
-   const profile=useSelector((state:RootState)=>state.profile)
-  const dispatch=useDispatch<AppDispatch>()
+  const profile = usePatientProfileStore((state) => state.profile)
+  const fitnessStore = usePatientFitnessStore()
 
   useEffect(()=>{
-      dispatch(fetchFitness(profile.id))   
-  },[])
+      if (profile.id) {
+        fitnessStore.fetchFitness(profile.id)
+      }
+  },[fitnessStore, profile.id])
 
 
   return (

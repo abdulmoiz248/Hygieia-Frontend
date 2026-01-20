@@ -1,38 +1,30 @@
-import { useSelector, useDispatch } from "react-redux"
 import {
-  setDietPlan,
-  clearDietPlan,
-  setMealSuggestions,
-  setMealPreferences,
-  setLoadingPlan,
-  setLoadingMeals,
   type DietPlan,
   type MealSuggestion,
   type MealPreferences,
-  fetchDietPlan,
 } from "@/types/patient/dietSlice"
-import { RootState, AppDispatch } from "@/store/patient/store"
+import { usePatientDietStore } from "@/store/patient/diet-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { generateAIDietPlanGrok } from "@/helpers/generateAIDietPlan"
 import { generateAIMealSuggestionsGrok } from "@/helpers/generateMeal"
 
 export const useDiet = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const dietState = useSelector((state: RootState) => state.diet)
-  const profile = useSelector((store: RootState) => store.profile)
+  const dietState = usePatientDietStore()
+  const profile = usePatientProfileStore((store) => store.profile)
 
   const generateAIDietPlan = async (preferences: string): Promise<DietPlan> => {
-    dispatch(setLoadingPlan(true))
+    dietState.setLoadingPlan(true)
     const plan = await generateAIDietPlanGrok(profile, preferences)
     // Mark as AI-generated for localStorage storage
     const aiPlan = { ...plan, isAIGenerated: true }
-    dispatch(setLoadingPlan(false))
+    dietState.setLoadingPlan(false)
     return aiPlan
   }
 
   const generateMealSuggestions = async (
     preferences: MealPreferences,
   ): Promise<MealSuggestion[]> => {
-    dispatch(setLoadingMeals(true))
+    dietState.setLoadingMeals(true)
 
     let meals: MealSuggestion[] = []
     try {
@@ -85,34 +77,34 @@ export const useDiet = () => {
       ]
     }
 
-    dispatch(setLoadingMeals(false))
+    dietState.setLoadingMeals(false)
     return meals
   }
 
   const getDietPlan = async () => {
-    return await dispatch(fetchDietPlan()).unwrap()
+    return await dietState.fetchDietPlan()
   }
 
   const saveDietPlan = (plan: DietPlan) => {
-    dispatch(setDietPlan(plan))
+    dietState.setDietPlan(plan)
   }
 
   const removeDietPlan = () => {
-    dispatch(clearDietPlan())
+    dietState.clearDietPlan()
   }
 
   const saveMealSuggestions = (meals: MealSuggestion[]) => {
-    dispatch(setMealSuggestions(meals))
+    dietState.setMealSuggestions(meals)
   }
 
   const saveMealPreferences = (preferences: MealPreferences) => {
-    dispatch(setMealPreferences(preferences))
+    dietState.setMealPreferences(preferences)
   }
 
   const deleteAIDietPlan = () => {
     // Only delete if it's an AI-generated plan
     if (dietState.currentDietPlan?.isAIGenerated) {
-      dispatch(clearDietPlan())
+      dietState.clearDietPlan()
     }
   }
 

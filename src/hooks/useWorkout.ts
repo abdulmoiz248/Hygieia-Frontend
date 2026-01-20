@@ -1,37 +1,22 @@
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/store/patient/store";
-import {
-  setPreferences,
-  type WorkoutRoutine,
-  type WorkoutPreferences,
-  loadUserSessions,
-  addWorkoutSessionAsync,
-  updateWorkoutSessionAsync,
-  deleteWorkoutSessionAsync,
-} from "@/types/patient/workoutSlice";
+import { type WorkoutRoutine, type WorkoutPreferences } from "@/types/patient/workoutSlice";
+import { usePatientWorkoutStore } from "@/store/patient/workout-store";
+import { usePatientProfileStore } from "@/store/patient/profile-store";
 
 export const useWorkout = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const patient = useSelector((store:RootState)=>store.profile)
-  const patientId=patient.id
-  const {
-    routines,
-    preferences,
-    isLoadingRoutines,
-    isLoadingSessions,
-  } = useSelector((state: RootState) => state.workout);
-
-
+  const patient = usePatientProfileStore((store) => store.profile)
+  const patientId = patient.id
+  const workoutStore = usePatientWorkoutStore()
+  const { routines, preferences, isLoadingRoutines, isLoadingSessions } = workoutStore
 
   // Load workouts from backend
   const fetchWorkouts = () => {
     if (!patientId) return;
-    dispatch(loadUserSessions(patientId));
+    workoutStore.loadUserSessions(patientId);
   };
 
   // Generate AI workout plan (mock) and save to backend
   const generateAIWorkoutPlan = async (prefs: WorkoutPreferences): Promise<WorkoutRoutine[]> => {
-    dispatch({ type: "workout/setLoadingRoutines", payload: true });
+    workoutStore.setLoadingRoutines(true);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -62,28 +47,28 @@ export const useWorkout = () => {
 
     // Save to backend
     for (const routine of aiRoutines) {
-      await dispatch(addWorkoutSessionAsync({ routine, patientId }));
+      await workoutStore.addWorkoutSession({ routine, patientId });
     }
 
-    dispatch({ type: "workout/setLoadingRoutines", payload: false });
+    workoutStore.setLoadingRoutines(false);
     return aiRoutines;
   };
 
   const saveWorkoutRoutine = async (routine: WorkoutRoutine) => {
     if (!patientId) return;
-    await dispatch(addWorkoutSessionAsync({ routine, patientId }));
+    await workoutStore.addWorkoutSession({ routine, patientId });
   };
 
   const updateWorkoutRoutine = async (routine: WorkoutRoutine) => {
-    await dispatch(updateWorkoutSessionAsync(routine));
+    await workoutStore.updateWorkoutSession(routine);
   };
 
   const deleteWorkoutRoutine = async (routineId: string) => {
-    await dispatch(deleteWorkoutSessionAsync(routineId));
+    await workoutStore.deleteWorkoutSession(routineId);
   };
 
   const updateWorkoutPreferences = (prefs: WorkoutPreferences) => {
-    dispatch(setPreferences(prefs));
+    workoutStore.setPreferences(prefs);
     localStorage.setItem("workoutPreferences", JSON.stringify(prefs));
   };
 

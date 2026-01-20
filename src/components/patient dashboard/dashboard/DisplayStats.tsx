@@ -5,10 +5,12 @@ import { Calendar, Flame, Pill, TrendingUp, HeartPulse } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store/patient/store";
 import CountUp from '@/blocks/TextAnimations/CountUp/CountUp'
 import { Calendar1 } from '../CalendarIcon'
+import { usePatientProfileStore } from '@/store/patient/profile-store'
+import { usePatientMedicineStore } from '@/store/patient/medicine-store'
+import { usePatientFitnessStore } from '@/store/patient/fitness-store'
+import { usePatientAppointmentsStore } from '@/store/patient/appointments-store'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -34,10 +36,10 @@ const iconMap = {
 }
 
 export default function DashboardStats() {
-  const user = useSelector((state: RootState) => state.profile)
-  const prescriptions = useSelector((state: RootState) => state.medicine)
-  const calories = useSelector((state: RootState) => state.fitness)
-  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const user = usePatientProfileStore((state) => state.profile)
+  const prescriptions = usePatientMedicineStore()
+  const calories = usePatientFitnessStore()
+  const appointments = usePatientAppointmentsStore((state) => state.appointments)
   const now = new Date()
   const upcomingAppointments = appointments
     .filter((apt) => new Date(apt.date) > now && apt.status === "upcoming")

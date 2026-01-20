@@ -12,9 +12,9 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { useSelector } from "react-redux"
 import FitbitConnectButton from "./FitbitConnectButton"
-import { RootState } from "@/store/patient/store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 export default function TodayGoal() {
   const itemVariants = {
@@ -22,8 +22,8 @@ export default function TodayGoal() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   }
 
-  const goals = useSelector((state: RootState) => state.fitness.goals)
-  const targets = useSelector((store: RootState) => store.profile.limit)
+  const goals = usePatientFitnessStore((state) => state.goals)
+  const targets = usePatientProfileStore((store) => store.profile.limit)
 
   const getIcon = (type: string) => {
     switch (type) {

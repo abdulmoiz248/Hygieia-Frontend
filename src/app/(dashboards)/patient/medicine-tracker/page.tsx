@@ -9,9 +9,7 @@ import TodaysScheduleCard from '@/components/patient dashboard/medicine-tracker/
 import WeeklyProgressCard from '@/components/patient dashboard/medicine-tracker/WeeklyProgressCard'
 
 
-import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "@/store/patient/store"
-import { toggleMedicineTaken } from "@/types/patient/medicineSlice"
+import { usePatientMedicineStore } from "@/store/patient/medicine-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,14 +25,11 @@ const itemVariants = {
 
 export default function MedicineTrackerPage() {
 
-  
-  const dispatch = useDispatch()
-  const todaysMeds = useSelector((state: RootState) => state.medicine.MedicineState.todaysMeds)
+  const { MedicineState, toggleMedicineTaken } = usePatientMedicineStore()
+  const todaysMeds = MedicineState.todaysMeds
 
 
-
-  const toggleTaken = (id: string) => dispatch(toggleMedicineTaken(id))
-
+  const toggleTaken = (id: string) => toggleMedicineTaken(id)
   const takenCount = todaysMeds.filter((med) => med.taken).length
   const totalCount = todaysMeds.length
   const todayProgress = (takenCount / totalCount) * 100

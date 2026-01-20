@@ -12,11 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import { bookLabTest, fetchLabTests } from "@/types/patient/labTestsSlice"
 import { CalendarComponent } from "@/components/ui/calendar"
 import TimeSelect from "@/components/patient dashboard/medical-records/TimeSelect"
 import { patientSuccess } from "@/toasts/PatientToast"
+import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,9 +33,8 @@ export default function BookLabTestPage() {
   const router = useRouter()
   const testId = Array.isArray(params.id) ? params.id[0] : params.id || ""
   
-  const dispatch = useAppDispatch()
-  const profile = useAppSelector((state) => state.profile)
-  const { availableTests } = useAppSelector((state) => state.labTests)
+  const profile = usePatientProfileStore((state) => state.profile)
+  const { availableTests, fetchLabTests, bookLabTest } = usePatientLabTestsStore()
   
 
   useEffect(() => {
@@ -46,9 +45,9 @@ export default function BookLabTestPage() {
 
   useEffect(() => {
     if (!availableTests || availableTests.length === 0) {
-      dispatch(fetchLabTests())
+      fetchLabTests()
     }
-  }, [dispatch, availableTests])
+  }, [availableTests, fetchLabTests])
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() + 86400 * 1000))
   const [selectedTime, setSelectedTime] = useState("")
@@ -284,17 +283,15 @@ export default function BookLabTestPage() {
   const handleBookTest = () => {
     if (!selectedDate || !selectedTime || !test) return
 
-    dispatch(
-      bookLabTest({
-        testName: test.name,
-        testId: test.id,
-        patientId: profile.id,
-        scheduledDate: selectedDate?.toLocaleDateString(),
-        scheduledTime: selectedTime,
-        location,
-        instructions: [notes],
-      }),
-    )
+    bookLabTest({
+      testName: test.name,
+      testId: test.id,
+      patientId: profile.id,
+      scheduledDate: selectedDate?.toLocaleDateString(),
+      scheduledTime: selectedTime,
+      location,
+      instructions: [notes],
+    })
 
     patientSuccess(`${test.name} Booked Successfully`)
     setShowConfirmation(true)

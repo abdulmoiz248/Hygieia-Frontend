@@ -16,8 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { useDiet } from "@/hooks/useDiet"
 import type { MealPreferences } from "@/types/patient/dietSlice"
-import {  useSelector } from "react-redux"
-import {  RootState } from "@/store/patient/store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -53,12 +53,12 @@ useEffect(() => {
   getDietPlan()
 }, [])
 
-  const fitness=useSelector((store:RootState)=>store.fitness)
+  const fitness = usePatientFitnessStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMealModalOpen, setIsMealModalOpen] = useState(false)
   const [showConfirmReplace, setShowConfirmReplace] = useState(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
-  const profile=useSelector((store:RootState)=>store.profile)
+  const profile = usePatientProfileStore((store) => store.profile)
  const patientName=profile?.name
 
 

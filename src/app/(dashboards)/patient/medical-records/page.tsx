@@ -1,17 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useAppDispatch, useAppSelector } from "@/hooks/redux"
-import {
-  addRecord,
-  deleteRecord,
-  setTypeFilter,
-  setSearchQuery,
-  setViewingRecord,
-  setShowUpload,
-  fetchMedicalRecords,
-  
-} from "@/types/patient/medicalRecordsSlice"
 import { MedicalRecordsHeader } from "@/components/patient dashboard/medical-records/MedicalRecordsHeader"
 import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-records/MedicalRecordsFilters"
 import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-records/MedicalRecordsGrid"
@@ -19,6 +8,7 @@ import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical
 import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
 
 import { useEffect } from "react"
+import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
 
 
 
@@ -34,23 +24,33 @@ const itemVariants = {
 }
 
 export default function MedicalRecordsPage() {
-  const dispatch = useAppDispatch()
-  const { records, typeFilter, searchQuery, viewingRecord, showUpload } = useAppSelector(
-    (state) => state.medicalRecords,
-  )
+  const {
+    records,
+    typeFilter,
+    searchQuery,
+    viewingRecord,
+    showUpload,
+    setTypeFilter,
+    setSearchQuery,
+    setViewingRecord,
+    setShowUpload,
+    fetchMedicalRecords,
+    addRecord,
+    deleteRecord,
+  } = usePatientMedicalRecordsStore()
 
 
  
   useEffect(() => {
-    dispatch(fetchMedicalRecords())
-  }, [dispatch])
+    fetchMedicalRecords()
+  }, [fetchMedicalRecords])
 
   const onUploadRecord = (record: any) => {
-    dispatch(addRecord(record))
+    addRecord(record)
   }
 
   const onDeleteRecord = (recordId: string) => {
-    dispatch(deleteRecord(recordId))
+    deleteRecord(recordId)
   }
 
   const filteredRecords = records.filter((record) => {
@@ -97,7 +97,7 @@ export default function MedicalRecordsPage() {
         <motion.div variants={itemVariants}>
           <MedicalRecordsHeader
             showUpload={showUpload}
-            setShowUpload={(show) => dispatch(setShowUpload(show))}
+            setShowUpload={(show) => setShowUpload(show)}
             onUploadRecord={onUploadRecord}
           />
         </motion.div>
@@ -105,25 +105,25 @@ export default function MedicalRecordsPage() {
         <motion.div variants={itemVariants}>
           <MedicalRecordsFilters
             searchQuery={searchQuery}
-            setSearchQuery={(query) => dispatch(setSearchQuery(query))}
+            setSearchQuery={(query) => setSearchQuery(query)}
             typeFilter={typeFilter}
-            setTypeFilter={(filter) => dispatch(setTypeFilter(filter))}
+            setTypeFilter={(filter) => setTypeFilter(filter)}
           />
         </motion.div>
 
         <motion.div variants={itemVariants}>
           <MedicalRecordsGrid
             filteredRecords={filteredRecords}
-            setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+            setViewingRecord={(record) => setViewingRecord(record)}
             getTypeIcon={getTypeIcon}
             getTypeColor={getTypeColor}
-            onShowUpload={() => dispatch(setShowUpload(true))}
+            onShowUpload={() => setShowUpload(true)}
           />
         </motion.div>
 
         <MedicalRecordViewerModal
           viewingRecord={viewingRecord}
-          setViewingRecord={(record) => dispatch(setViewingRecord(record))}
+          setViewingRecord={(record) => setViewingRecord(record)}
           getTypeIcon={getTypeIcon}
           onDeleteRecord={onDeleteRecord}
         />

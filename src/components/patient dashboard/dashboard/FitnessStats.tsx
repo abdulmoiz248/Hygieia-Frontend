@@ -4,9 +4,9 @@ import { motion } from 'framer-motion'
 import { Activity } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import GaugeComponent from 'react-gauge-component'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store/patient/store'
 import { useState, useEffect } from 'react'
+import { usePatientFitnessStore } from '@/store/patient/fitness-store'
+import { usePatientProfileStore } from '@/store/patient/profile-store'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -14,8 +14,8 @@ const itemVariants = {
 }
 
 export default function FitnessProgressGauges() {
-  const fitness = useSelector((store: RootState) => store.fitness)
-  const targets = useSelector((store: RootState) => store.profile.limit)
+  const fitness = usePatientFitnessStore()
+  const targets = usePatientProfileStore((store) => store.profile.limit)
 
   const themeColors = [
     'var(--color-soft-blue)',

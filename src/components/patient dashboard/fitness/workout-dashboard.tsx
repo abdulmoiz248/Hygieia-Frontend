@@ -11,9 +11,8 @@ import RoutineCard from "./RoutineCard"
 import RoutineForm from "./RoutineForm"
 import CompletionDialog from "./CompletionDialog"
 import AIRecommendationDialog from "./AIRecommendationDialog"
-import { addCalories } from "@/types/patient/fitnessSlice"
-import { useDispatch, useSelector } from "react-redux"
-import { AppDispatch, RootState } from "@/store/patient/store"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -33,10 +32,8 @@ export default function WorkoutDashboard() {
     updateWorkoutRoutine,
   } = useWorkout()
 
-
-
-    const dispatch = useDispatch<AppDispatch>()
-    const profile=useSelector((store:RootState)=>store.profile)
+    const profile = usePatientProfileStore((store) => store.profile)
+    const addCalories = usePatientFitnessStore((s) => s.addCalories)
   const [isAddRoutineOpen, setIsAddRoutineOpen] = useState(false)
   const [isAIRecommendationOpen, setIsAIRecommendationOpen] = useState(false)
   const [isRoutineDetailsOpen, setIsRoutineDetailsOpen] = useState(false)
@@ -289,13 +286,13 @@ const handleDownloadPdf = async () => {
   const handleCompleteRoutine = (routine: WorkoutRoutine) => {
     setSelectedRoutine(routine)
     
-         dispatch(addCalories({ 
+         addCalories({ 
         type:'burned', 
         amount: routine?.totalCalories || 0, 
         carbs: 0, 
         protein: 0, 
         fat: 0
-      }))
+      })
 
     setIsCompletionOpen(true)
   }

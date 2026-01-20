@@ -3,13 +3,11 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { Clock, FileText } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-import {  useSelector } from "react-redux"
-import type { RootState } from "@/store/patient/store"
 import Folder from "@/blocks/Components/Folder/Folder"
 import { useEffect, useState } from "react"
-import { fetchMedicalRecords } from "@/types/patient/medicalRecordsSlice"
-import { useAppDispatch } from "@/hooks/redux"
 import { formatDateOnly } from "@/helpers/date"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
+import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -17,17 +15,17 @@ const itemVariants = {
 }
 
 export default function FolderApp() {
-  const appointments = useSelector((state: RootState) => state.appointments.appointments)
+  const appointments = usePatientAppointmentsStore((state) => state.appointments)
   const upcomingAppointments = appointments.filter((apt) => apt.status === "upcoming").slice(0, 3)
-  const recentRecords = useSelector((state: RootState) => state.medicalRecords.records).slice(0, 3)
+  const { records, fetchMedicalRecords } = usePatientMedicalRecordsStore()
+  const recentRecords = records.slice(0, 3)
 
 
   const [isAppointmentsOpen, setAppointmentsOpen] = useState(false)
   const [isRecordsOpen, setRecordsOpen] = useState(false)
-  const dispatch = useAppDispatch()
   useEffect(() => {
-    dispatch(fetchMedicalRecords())
-  }, [dispatch])
+    fetchMedicalRecords()
+  }, [fetchMedicalRecords])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-13">
