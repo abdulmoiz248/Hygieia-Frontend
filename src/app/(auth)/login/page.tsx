@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,10 @@ import api from '@/lib/axios'
 
 import Cookies from 'js-cookie'
 
+// Rate limiting constants
+const MAX_ATTEMPTS = 5
+const LOCKOUT_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
+
 export default  function Login() {
   
 
@@ -21,7 +25,51 @@ export default  function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null)
+  const [remainingTime, setRemainingTime] = useState(0)
   const router=useRouter()
+
+  // Load rate limit data from localStorage on mount
+  useEffect(() => {
+    const storedAttempts = localStorage.getItem('loginAttempts')
+    const storedLockout = localStorage.getItem('lockoutUntil')
+    
+    if (storedAttempts) {
+      setAttemptCount(parseInt(storedAttempts))
+    }
+    
+    if (storedLockout) {
+      const lockoutTime = parseInt(storedLockout)
+      if (lockoutTime > Date.now()) {
+        setLockoutUntil(lockoutTime)
+      } else {
+        // Clear expired lockout
+        localStorage.removeItem('lockoutUntil')
+        localStorage.removeItem('loginAttempts')
+      }
+    }
+  }, [])
+
+  // Update remaining time countdown
+  useEffect(() => {
+    if (lockoutUntil) {
+      const timer = setInterval(() => {
+        const remaining = lockoutUntil - Date.now()
+        if (remaining <= 0) {
+          setLockoutUntil(null)
+          setAttemptCount(0)
+          setRemainingTime(0)
+          localStorage.removeItem('lockoutUntil')
+          localStorage.removeItem('loginAttempts')
+        } else {
+          setRemainingTime(remaining)
+        }
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [lockoutUntil])
 
   // Password validation checks
   const passwordChecks = useMemo(() => {
@@ -38,12 +86,25 @@ export default  function Login() {
     return Object.values(passwordChecks).every(check => check)
   }, [passwordChecks])
  
+  // Format remaining time for display
+  const formatRemainingTime = () => {
+    const minutes = Math.floor(remainingTime / 60000)
+    const seconds = Math.floor((remainingTime % 60000) / 1000)
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
  
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
+
+  // Check if user is locked out
+  if (lockoutUntil && lockoutUntil > Date.now()) {
+    setError(`Too many failed attempts. Please try again in ${formatRemainingTime()}.`)
+    return
+  }
+
   if (!email || !password) {
     setError('Email and password are required.')
     return
@@ -69,6 +130,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (!data.success) {
       throw new Error(data.message || 'Login failed')
     } else {
+      // Reset rate limiting on successful login
+      setAttemptCount(0)
+      setLockoutUntil(null)
+      localStorage.removeItem('loginAttempts')
+      localStorage.removeItem('lockoutUntil')
+      
       const role = data.role.includes('lab') ? 'pathologist' : data.role.toLowerCase()
       
       // Store in cookies
@@ -83,8 +150,23 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
   } catch (err: any) {
-  
-    setError(err?.response?.data?.message || 'Invalid email or password')
+    // Increment failed attempt count
+    const newAttemptCount = attemptCount + 1
+    setAttemptCount(newAttemptCount)
+    localStorage.setItem('loginAttempts', newAttemptCount.toString())
+
+    // Lock out after max attempts
+    if (newAttemptCount >= MAX_ATTEMPTS) {
+      const lockoutTime = Date.now() + LOCKOUT_DURATION
+      setLockoutUntil(lockoutTime)
+      localStorage.setItem('lockoutUntil', lockoutTime.toString())
+      setError(`Too many failed attempts. Account locked for 5 minutes.`)
+    } else {
+      const remainingAttempts = MAX_ATTEMPTS - newAttemptCount
+      setError(
+        `${err?.response?.data?.message || 'Invalid email or password'}. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`
+      )
+    }
   } finally {
     setIsLoading(false)
   }
@@ -144,12 +226,14 @@ const handleSubmit = async (e: React.FormEvent) => {
               <Button
                 type="submit"
                 className="w-full bg-soft-blue hover:bg-blue-600 text-white animate-slide-in-right delay-400 flex items-center justify-center gap-2"
-                disabled={isLoading}
+                disabled={isLoading || (lockoutUntil !== null && lockoutUntil > Date.now())}
               >
                 {isLoading ? (
     <>
       <Loader2 className='h-4 w-4 animate-spin' /> Logging in...
     </>
+  ) : lockoutUntil && lockoutUntil > Date.now() ? (
+    `Locked (${formatRemainingTime()})`
   ) : (
     "Login"
   )}
