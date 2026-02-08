@@ -11,6 +11,7 @@ import {
   Bot,
   Stethoscope,
   Activity,
+  BookOpen,
   ChevronLeft,
   X,
 } from "lucide-react"
@@ -28,6 +29,7 @@ const menuItems = [
   { icon: Calendar, label: "Appointments", href: "/appointments" },
   { icon: FileText, label: "Medical Records", href: "/medical-records" },
   { icon: Pill, label: "Medicine Tracker", href: "/medicine-tracker" },
+  { icon: BookOpen, label: "Health Journal", href: "/journal" },
   { icon: Bot, label: "Health Assistant", href: "/chatbot" },
   { icon: Stethoscope, label: "AI Diagnosis", href: "/ai-diagnosis" },
   { icon: Activity, label: "Fitness & Diet", href: "/fitness" },
