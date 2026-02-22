@@ -349,7 +349,7 @@ useEffect(()=>{
         </DialogTitle>
         <DialogDescription className="text-gray-700 mt-1">
           Are you sure you want to cancel this test scheduled on{" "}
-          <strong>{new Date(selectTestModal.scheduledDate).toLocaleDateString()}</strong> at{" "}
+          <strong>{new Date(selectTestModal.scheduledDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</strong> at{" "}
           <strong>{selectTestModal.scheduledTime}</strong>?
         </DialogDescription>
       </DialogHeader>
