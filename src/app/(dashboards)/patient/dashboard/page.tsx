@@ -11,6 +11,11 @@ import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSect
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
 import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
+import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
+import Loader from "@/components/loader/loader"
+import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -23,7 +28,15 @@ const containerVariants = {
 }
 
 function DashboardPageContent() {
-  const searchParams = useSearchParams()
+   const searchParams = useSearchParams()
+   const { fetchAppointments } =
+      usePatientAppointmentsStore()
+    
+   const {profile}= usePatientProfileStore()
+
+   const {fetchMedicalRecords}=usePatientMedicalRecordsStore()
+
+   const {fetchFitness}=usePatientFitnessStore()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -63,6 +76,19 @@ function DashboardPageContent() {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [searchParams, toast])
+
+  useEffect(() => {
+
+    fetchAppointments(profile?.id || "")
+    fetchMedicalRecords()
+    fetchFitness(profile?.id || "")
+  }, [])
+
+
+
+  // if (loading || medicalRecordsLoading) {
+  //   return <Loader/>
+  // }
 
   return (
     <motion.div 
