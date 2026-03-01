@@ -12,29 +12,7 @@ type NotificationState = {
   clearNotifications: () => void
 }
 
-const initialNotifications: NotificationType[] = [
-  {
-    id: "1",
-    title: "Appointment Reminder",
-    message: "Your appointment with Dr. Sarah Johnson is in 2 hours",
-    time: "2 min ago",
-    unread: true,
-  },
-  {
-    id: "2",
-    title: "Medication Reminder",
-    message: "Time to take your Lisinopril (10mg)",
-    time: "1 hour ago",
-    unread: true,
-  },
-  {
-    id: "3",
-    title: "Lab Results Ready",
-    message: "Your blood test results are now available",
-    time: "3 hours ago",
-    unread: false,
-  },
-]
+const initialNotifications: NotificationType[] =[]
 
 export const usePatientNotificationsStore = create<NotificationState>()(
   devtools(

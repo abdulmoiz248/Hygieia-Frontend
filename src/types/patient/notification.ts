@@ -1,7 +1,9 @@
 export interface NotificationType {
   id: string
+  user_id: string
+  notification_msg: string
+  action: string | null
+  created_at: string
   title: string
-  message: string
-  time: string
-  unread: boolean
+  is_read: boolean
 }

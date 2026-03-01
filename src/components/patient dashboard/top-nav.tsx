@@ -13,8 +13,11 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
 import { BellRing } from "../ui/BellRing"
-import { usePatientNotificationsStore } from "@/store/patient/notifications-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { useNotifications } from "@/hooks/patient/useNotifications"
+import { timeAgo } from "@/helpers/formatTimeAgo"
+import api from "@/lib/axios"
+import { useState } from "react"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
@@ -26,9 +29,22 @@ interface TopNavProps {
 
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
-  const { notifications, markAllAsRead } = usePatientNotificationsStore()
-  const unreadCount = notifications.filter(n => n.unread).length
+
+  
   const user = usePatientProfileStore((state) => state.profile)
+  const { notifications } = useNotifications(user.id)
+  const [unreadCount, setUnreadCount] = useState(notifications ? notifications.filter(n => !n.is_read).length : 0)
+
+
+    const markAllAsRead = async () => {
+    if (!user?.id || unreadCount === 0) return
+    api.patch(`/notifications/mark-read/${user.id}`)
+    notifications?.forEach((notification) => {
+          notification.is_read = true
+        })
+        setUnreadCount(0) 
+  }
+
 
   const userInitials = user.name
     .split(" ")
@@ -83,7 +99,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-white">
+            <DropdownMenuContent align="end" className="w-80 bg-white overflow-hidden">
               <div className="p-3 border-b">
                 <h3 className="font-semibold text-soft-blue">Notifications</h3>
                 <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
@@ -94,20 +110,20 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                     <div className="flex gap-3 w-full">
                       <div
                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                          notification.unread ? "bg-soft-coral" : "bg-transparent"
+                          !notification.is_read ? "bg-soft-coral" : "bg-transparent"
                         }`}
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-sm text-cool-gray line-clamp-2">{notification.message}</p>
-                        <p className="text-xs text-cool-gray mt-1">{notification.time}</p>
+                        <p className="text-sm text-cool-gray line-clamp-2">{notification.notification_msg}</p>
+                        <p className="text-xs text-cool-gray mt-1">{timeAgo(notification.created_at)}</p>
                       </div>
                     </div>
                   </DropdownMenuItem>
                 ))}
               </div>
               <div className="p-2 border-t">
-                <Button variant="ghost" size="sm" className="w-full bg-soft-blue text-snow-white" onClick={() => markAllAsRead()}>
+                <Button  size="sm" className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90" onClick={() => markAllAsRead()}>
                  Mark All As Read
                 </Button>
               </div>
