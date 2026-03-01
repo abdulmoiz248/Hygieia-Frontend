@@ -20,6 +20,7 @@ import { Notification } from "@/hooks/lab-tech/useLabTechNotifications"
 import useLabTechNotifications from "@/hooks/lab-tech/useLabTechNotifications"
 import { timeAgo } from "@/helpers/formatTimeAgo"
 import api from "@/lib/axios"
+import { useState } from "react"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
   const { profile } = useLabTechnicianStore()
@@ -30,6 +31,8 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
       data: notifications,
     }: UseQueryResult<Notification[]> = useLabTechNotifications(profile?.id || "")
 
+     const [unreadCount, setUnreadCount] = useState(notifications ? notifications.filter(n => !n.is_read).length : 0)
+    
 
     const markAllAsRead = async () => {
         if (!profile?.id || unreadCount === 0) return
@@ -37,14 +40,13 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
           notification.is_read = true
         })
         api.patch(`/notifications/mark-read/${profile.id}`)
-
+        setUnreadCount(0)
        
       }
 
 
-    const unreadCount = notifications
-    ? notifications.filter((n) => !n.is_read).length
-    : 0
+
+   
 
 const safeProfile = profile ?? { name: "user" }
 

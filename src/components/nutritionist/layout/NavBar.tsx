@@ -19,6 +19,7 @@ import { UseQueryResult } from "@tanstack/react-query"
 import { Notification } from "@/hooks/nutritionist/useNutritionistNotifications"
 import { timeAgo } from "@/helpers/formatTimeAgo"
 import api from "@/lib/axios"
+import { useState } from "react"
 
 
 interface TopNavProps {
@@ -28,13 +29,15 @@ interface TopNavProps {
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const user = useNutritionistStore().profile
 
+  
+
   const {
     data: notifications,
   }: UseQueryResult<Notification[]> = useNutritionistNotifications(user?.id || "")
 
-  const unreadCount = notifications
-    ? notifications.filter((n) => !n.is_read).length
-    : 0
+   const [unreadCount, setUnreadCount] = useState(notifications ? notifications.filter(n => !n.is_read).length : 0)
+  
+
 
   const markAllAsRead = async () => {
     if (!user?.id || unreadCount === 0) return
@@ -42,6 +45,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
     notifications?.forEach((notification) => {
           notification.is_read = true
         })
+        setUnreadCount(0)
   }
 
   const userInitials = (user?.name ?? "John")
