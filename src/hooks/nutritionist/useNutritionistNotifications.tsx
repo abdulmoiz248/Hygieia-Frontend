@@ -17,8 +17,8 @@ const useNutritionistNotifications = (
     queryKey: ['nutritionistNotifications', nutritionistId],
     queryFn: async () => {
       if (!nutritionistId) throw new Error('Nutritionist ID is required')
-      const res = await api.get(`/notifications/${nutritionistId}`)
-      return res.data as Notification[]
+      const res = await api.get<{ success: boolean; data: Notification[]; message: string }>(`/notifications/${nutritionistId}`)
+      return res.data.data
     },
     enabled: !!nutritionistId,
   })

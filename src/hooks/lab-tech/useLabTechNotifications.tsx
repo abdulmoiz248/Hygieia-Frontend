@@ -17,8 +17,8 @@ const useLabTechNotifications = (
     queryKey: ['labTechNotifications', labTechId],
     queryFn: async () => {
       if (!labTechId) throw new Error('Lab Tech ID is required')
-      const res = await api.get(`/notifications/${labTechId}`)
-      return res.data as Notification[]
+      const res = await api.get<{ success: boolean; data: Notification[]; message: string }>(`/notifications/${labTechId}`)
+      return res.data.data
     },
     enabled: !!labTechId,
   })
