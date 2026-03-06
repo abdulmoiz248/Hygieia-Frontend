@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react"
 import { usePatientJournalStore } from "@/store/patient/journal-store"
 import { useCreateJournalEntry, useUpdateJournalEntry } from "@/hooks/patient/usePatientJournal"
 import { patientSuccess, patientError } from "@/toasts/PatientToast"
-import type { JournalCategory, AlertLevel, JournalEntry } from "@/types/patient/journal"
+import type { JournalCategory, AlertLevel } from "@/types/patient/journal"
 
 const CATEGORIES: JournalCategory[] = [
   "medication",

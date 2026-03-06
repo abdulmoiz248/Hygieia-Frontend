@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import {
   Calendar,
-  Flag,
+  
   Trash2,
   Edit,
   ChevronLeft,
@@ -83,17 +83,7 @@ export function JournalList({ patientId }: JournalListProps) {
     })
   }
 
-  const handleFlag = (entry: JournalEntry) => {
-    if (entry.flaggedForDoctor) return
-    flagMutation.mutate(entry._id, {
-      onSuccess: () => {
-        patientSuccess("Entry flagged for doctor review")
-      },
-      onError: () => {
-        patientDestructive("Failed to flag entry")
-      },
-    })
-  }
+
 
   if (isLoading) {
     return (

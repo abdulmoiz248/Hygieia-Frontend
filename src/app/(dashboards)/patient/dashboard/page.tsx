@@ -14,7 +14,7 @@ import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsig
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
-import Loader from "@/components/loader/loader"
+
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 
 const containerVariants = {
