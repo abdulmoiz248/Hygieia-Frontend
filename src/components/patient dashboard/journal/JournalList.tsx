@@ -19,10 +19,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
-import { useJournalEntries, useDeleteJournalEntry, useFlagJournalEntry } from "@/hooks/patient/usePatientJournal"
+import { useJournalEntries, useDeleteJournalEntry } from "@/hooks/patient/usePatientJournal"
 import { usePatientJournalStore } from "@/store/patient/journal-store"
 import { JournalEntryForm } from "./JournalEntryForm"
-import { patientSuccess, patientDestructive } from "@/toasts/PatientToast"
+import {  patientDestructive } from "@/toasts/PatientToast"
 import { formatDateOnly } from "@/helpers/date"
 import type { JournalEntry } from "@/types/patient/journal"
 
@@ -61,8 +61,7 @@ export function JournalList({ patientId }: JournalListProps) {
   })
 
   const deleteMutation = useDeleteJournalEntry()
-  const flagMutation = useFlagJournalEntry()
-
+  
   const entries = data?.entries ?? []
   const totalPages = data?.pages ?? 1
 
