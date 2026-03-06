@@ -3,36 +3,10 @@
 import { motion } from "framer-motion"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Shield } from "lucide-react"
-
-const faqs = [
-  {
-    question: "How accurate is Hygieia's AI diagnosis?",
-    answer:
-      "Hygieia's AI has been trained on millions of medical records and achieves a 95% accuracy rate for common conditions. However, it's designed to be a preliminary assessment tool, not a replacement for professional medical advice.",
-  },
-  {
-    question: "Is my health data secure and private?",
-    answer:
-      "Absolutely. Hygieia is HIPAA-compliant and uses end-to-end encryption to protect your data. We never share your personal health information with third parties without your explicit consent.",
-  },
-  {
-    question: "Can Hygieia prescribe medication?",
-    answer:
-      "Hygieia can suggest over-the-counter remedies for common conditions, but prescription medications require consultation with a licensed healthcare provider through our telehealth service.",
-  },
-  {
-    question: "How does the Health Score Quiz work?",
-    answer:
-      "Our Health Score Quiz uses a proprietary algorithm that evaluates your lifestyle factors, symptoms, and health history to generate a personalized score. This score helps identify areas for improvement and tracks your progress over time.",
-  },
-  {
-    question: "Is Hygieia available worldwide?",
-    answer:
-      "Hygieia is currently available in 120+ countries. Some features may vary by region due to local healthcare regulations. Check our regional availability page for specific details about your location.",
-  },
-]
+import { useFaqs } from "@/hooks/useFaqs"
 
 export default function Faq() {
+  const { data: faqs = [], isLoading, isError } = useFaqs()
 
   return (
     <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
@@ -49,20 +23,26 @@ export default function Faq() {
         </motion.div>
 
         <div className="bg-transparent rounded-2xl shadow-lg p-8">
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="border border-gray-100 rounded-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-6 py-4 hover:bg-gray-50 transition-colors duration-300 text-[#0c2842] font-medium text-left">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 text-gray-600">{faq.answer}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          {isLoading ? (
+            <p className="text-center text-gray-600">Loading FAQs...</p>
+          ) : isError ? (
+            <p className="text-center text-gray-600">Unable to load FAQs right now.</p>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-4">
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={faq.id ?? index}
+                  value={`item-${index}`}
+                  className="border border-gray-100 rounded-lg overflow-hidden"
+                >
+                  <AccordionTrigger className="px-6 py-4 hover:bg-gray-50 transition-colors duration-300 text-[#0c2842] font-medium text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 py-4 text-gray-600">{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
 
           {/* Trust Badge */}
           <motion.div
