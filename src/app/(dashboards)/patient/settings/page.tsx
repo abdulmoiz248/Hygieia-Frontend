@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Bell, Lock, Shield } from "lucide-react"
+import { Loader,Bell, Lock, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import api from "@/lib/axios"
-import Loader from "@/components/loader/loader"
 
 
 
@@ -241,10 +240,10 @@ export default function SettingsPage() {
                       >
                         {isLoading ? (
     <>
-      <Loader /> Verifying...
+      <Loader /> Sending OTP...
     </>
   ) : (
-    "Verify OTP"
+    "Send OTP"
   )}
                       </Button>
                     </div>
@@ -308,10 +307,10 @@ export default function SettingsPage() {
                       >
                        {isLoading ? (
     <>
-      <Loader /> Verifying...
+      <Loader /> Updating Password...
     </>
   ) : (
-    "Verify OTP"
+    "Update Password"
   )}
                       </Button>
                     </form>
