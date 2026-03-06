@@ -12,7 +12,7 @@ export function useBlogs() {
       if (!res.data) throw new Error("Failed to fetch blogs")
 
      
-      const posts: BlogPost[] = Array.isArray(res.data.data) ? res.data.data : []
+      const posts: BlogPost[] = Array.isArray(res.data.data) ? res.data.data: []
 
       const categoryMap = new Map<string, BlogCategory>()
       posts.forEach((post) => {

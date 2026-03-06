@@ -7,13 +7,14 @@ import { CategoryFilter } from "@/components/blog/category-filter"
 import { BlogHero } from "@/components/blog/blog-hero"
 import { TrendingUp, Star, Clock } from "lucide-react"
 import Loader from '@/components/loader/loader'
+import { BlogPost } from "@/types/blog"
 
 export default function BlogPage() {
   const { data, isLoading, isError } = useBlogs()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   
-  const posts = data?.posts || []
+  const posts = data?.posts.filter((b: BlogPost) => b.verified)  || []
   const categories = data?.categories || []
 
   const filteredPosts = selectedCategory

@@ -10,6 +10,7 @@ export interface BlogPost {
   tags: string[]
   image: string
   featured: boolean
+  verified?: boolean
 }
 
 export interface BlogCategory {
