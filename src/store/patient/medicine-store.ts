@@ -36,7 +36,6 @@ const initialStatePrescription: Prescription[] = [
     doctorSpecialty: "Cardiologist",
     date: "2025-08-01",
     status: "active",
-    url: "/temp/test.pdf",
     medications: [
       {
         id: "1",
@@ -76,7 +75,6 @@ const initialStatePrescription: Prescription[] = [
     doctorSpecialty: "Dermatologist",
     date: "2025-08-1",
     status: "active",
-    url: "/temp/test.pdf",
     medications: [
       {
         id: "3",
@@ -96,7 +94,6 @@ const initialStatePrescription: Prescription[] = [
     doctorSpecialty: "General Practitioner",
     date: "2025-08-1",
     status: "completed",
-    url: "/temp/test.pdf",
     medications: [
       {
         id: "4",

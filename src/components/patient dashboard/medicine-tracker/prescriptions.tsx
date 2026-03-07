@@ -29,15 +29,202 @@ export default function PrescriptionsPage() {
 
 
     
-    const handleDownload = () => {
-   if(!selectedPrescription) return null
-    const link = document.createElement("a")
-    link.href = selectedPrescription?.url
-    link.download =  "prescription.pdf"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const handleDownload = async () => {
+      if (!selectedPrescription) return null
+
+      try {
+        const { default: jsPDF } = await import("jspdf")
+        const autoTable = (await import("jspdf-autotable")).default
+
+        const doc = new jsPDF({ unit: "pt", format: "a4" })
+        const pageWidth = doc.internal.pageSize.getWidth()
+        const pageHeight = doc.internal.pageSize.getHeight()
+
+        // Brand + neutrals
+        const primaryColor: [number, number, number] = [0, 131, 150]
+        const grayText: [number, number, number] = [60, 60, 60]
+
+        // Layout
+        const M = { left: 48, right: 48, top: 160, bottom: 72 }
+        const headerHeight = 120
+
+        // ===== Helper: load image as base64 =====
+        const getBase64FromUrl = async (url: string): Promise<string> => {
+          const res = await fetch(url)
+          const blob = await res.blob()
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(blob)
+          })
+        }
+
+        let logoDataUrl: string | null = null
+        try {
+          logoDataUrl = await getBase64FromUrl("/logo/logo.png")
+        } catch (err) {
+          console.warn("Logo not loaded:", err)
+        }
+
+        // Meta: date strings
+        const now = new Date()
+        const dateStr = now.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+        const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+
+        // Hospital identity
+        const hospitalName = "Hygieia"
+        const hospitalTagline = "From Past to Future of Healthcare"
+        const hospitalAddress = "www.hygieia-frontend.vercel.app"
+        const hospitalContact = "+92 80 1234 5678 • hygieia.fyp@gmail.com"
+
+        // Header/Footer helpers
+        const drawHeader = () => {
+          // Logo
+          if (logoDataUrl) {
+            doc.addImage(logoDataUrl, "PNG", M.left, 44, 56, 56)
+          }
+
+          // Hospital identity
+          doc.setTextColor(...primaryColor)
+          doc.setFont("helvetica", "bold")
+          doc.setFontSize(16)
+          doc.text(hospitalName, M.left + 70, 60)
+
+          doc.setFont("helvetica", "normal")
+          doc.setFontSize(11)
+          doc.setTextColor(...grayText)
+          doc.text(hospitalTagline, M.left + 70, 78)
+
+          doc.setFontSize(10)
+          doc.setTextColor(100)
+          doc.text(hospitalAddress, M.left + 70, 94)
+          doc.text(hospitalContact, M.left + 70, 108)
+
+          // Document title + generation time
+          doc.setFont("helvetica", "bold")
+          doc.setFontSize(18)
+          doc.setTextColor(...primaryColor)
+          doc.text("Prescription Report", pageWidth - M.right, 64, { align: "right" })
+
+          doc.setFont("helvetica", "normal")
+          doc.setFontSize(10)
+          doc.setTextColor(100)
+          doc.text(`Generated: ${dateStr} • ${timeStr}`, pageWidth - M.right, 80, { align: "right" })
+
+          doc.setDrawColor(...primaryColor)
+          doc.setLineWidth(2)
+          doc.line(M.left, headerHeight, pageWidth - M.right, headerHeight)
+        }
+
+        const drawFooter = (pageNumber: number, pageCount: number) => {
+          doc.setDrawColor(...primaryColor)
+          doc.setLineWidth(2)
+          doc.line(M.left, pageHeight - M.bottom, pageWidth - M.right, pageHeight - M.bottom)
+
+          // Disclaimer
+          const disclaimer =
+            "This document is computer-generated from the hospital information system and does not require a physical signature. " +
+            "It may contain confidential medical information. If you are not the intended recipient, please notify the sender and delete this report."
+
+          doc.setFont("helvetica", "normal")
+          doc.setFontSize(9)
+          doc.setTextColor(110, 110, 110)
+
+          const wrapped = doc.splitTextToSize(disclaimer, pageWidth - M.left - M.right - 140)
+          doc.text(wrapped, M.left, pageHeight - M.bottom + 18)
+
+          // Page number (center)
+          doc.setFontSize(9)
+          doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth / 2, pageHeight - 16, { align: "center" })
+        }
+
+        // ============ CONTENT ============
+        let cursorY = M.top
+
+        // Doctor Information
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(13)
+        doc.setTextColor(...primaryColor)
+        doc.text("Doctor Information", M.left, cursorY - 16)
+
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 11, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          margin: { left: M.left, right: M.right },
+          head: [["Field", "Details"]],
+          body: [
+            ["Doctor Name", selectedPrescription.doctorName || "-"],
+            ["Specialty", selectedPrescription.doctorSpecialty || "-"],
+            ["Prescribed Date", selectedPrescription.date || "-"],
+          ],
+        })
+        cursorY = (doc as any).lastAutoTable.finalY + 30
+
+        // Medications Table
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(13)
+        doc.setTextColor(...primaryColor)
+        doc.text("Medications", M.left, cursorY - 10)
+
+        const medicationsData = selectedPrescription.medications.map((med: any) => [
+          med.name || "-",
+          med.dosage || "-",
+          med.instructions || "-",
+          med.frequency || "-",
+          med.duration || "-",
+        ])
+
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 10, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          margin: { left: M.left, right: M.right },
+          head: [["Medicine Name", "Dosage", "Instructions", "Frequency", "Duration"]],
+          body: medicationsData,
+        })
+        cursorY = (doc as any).lastAutoTable.finalY + 30
+
+        // Prescription Details
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(13)
+        doc.setTextColor(...primaryColor)
+        doc.text("Prescription Status", M.left, cursorY - 10)
+
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 11, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          margin: { left: M.left, right: M.right },
+          head: [["Property", "Value"]],
+          body: [
+            ["Status", selectedPrescription.status?.toUpperCase() || "-"],
+            ["Total Medications", selectedPrescription.medications.length.toString()],
+          ],
+        })
+
+        // ============ HEADER / FOOTER ON EVERY PAGE ============
+        const pageCount = doc.getNumberOfPages()
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          drawHeader()
+          drawFooter(i, pageCount)
+        }
+
+        const safeName = (selectedPrescription.doctorName || "prescription").replace(/\s+/g, "_")
+        doc.save(`${safeName}_prescription.pdf`)
+      } catch (err) {
+        console.error("PDF generation error:", err)
+      }
+    }
 
   const activePrescriptions = Prescriptions.filter((p) => p.status === "active")
   const completedPrescriptions = Prescriptions.filter((p) => p.status === "completed")
