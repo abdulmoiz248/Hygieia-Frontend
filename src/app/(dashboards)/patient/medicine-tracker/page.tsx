@@ -27,22 +27,24 @@ const itemVariants = {
 
 export default function MedicineTrackerPage() {
   const profile = usePatientProfileStore((state) => state.profile)
-  const { MedicineState, toggleMedicineTaken, fetchPrescriptions } = usePatientMedicineStore()
+  const { MedicineState, toggleMedicineTaken, fetchPrescriptions, syncingMedicineIds } = usePatientMedicineStore()
+  const fallbackPatientId =
+    typeof window !== "undefined" ? localStorage.getItem("id") : null
+  const patientId = profile?.id || fallbackPatientId || ""
 
   const todaysMeds = MedicineState.todaysMeds
 
   useEffect(() => {
-    const fallbackPatientId =
-      typeof window !== "undefined" ? localStorage.getItem("id") : null
-    const patientId = profile?.id || fallbackPatientId
-
     if (patientId) {
       fetchPrescriptions(patientId)
     }
-  }, [fetchPrescriptions, profile?.id])
+  }, [fetchPrescriptions, patientId])
 
 
-  const toggleTaken = (id: string) => toggleMedicineTaken(id)
+  const toggleTaken = (id: string) => {
+    if (!patientId) return
+    toggleMedicineTaken(id, patientId)
+  }
   const takenCount = todaysMeds.filter((med) => med.taken).length
   const totalCount = todaysMeds.length
   const todayProgress = (takenCount / totalCount) * 100
@@ -81,6 +83,7 @@ export default function MedicineTrackerPage() {
           <TodaysScheduleCard
             todaysMeds={todaysMeds}
             toggleMedicineTaken={toggleTaken}
+            syncingMedicineIds={syncingMedicineIds}
           />
         </motion.div>
 

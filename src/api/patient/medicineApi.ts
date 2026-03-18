@@ -27,6 +27,16 @@ type ApiPrescriptionResponse =
       data?: ApiPrescription[]
     }
 
+export type MarkMedicationTakenPayload = {
+  patientId: string
+  prescriptionId: string
+  medicationId: string
+  taken: boolean
+  takenAt?: string
+  scheduledTime?: string
+  source?: "patient-web"
+}
+
 const normalizePrescriptionStatus = (
   status?: string
 ): Prescription["status"] => {
@@ -38,7 +48,7 @@ const normalizeMedication = (
   index: number,
   prescriptionId: string
 ): Medicine => ({
-  id: String(medication.id ?? `${prescriptionId}-${index}`),
+  id: `${prescriptionId}:${String(medication.id ?? index)}`,
   name: medication.name ?? "Medicine",
   dosage: medication.dosage ?? "-",
   frequency: medication.frequency ?? "-",
@@ -79,4 +89,29 @@ export async function getActivePrescriptionsByPatient(
   }
 
   return data.data ?? []
+}
+
+export async function markMedicationTaken(
+  payload: MarkMedicationTakenPayload
+): Promise<void> {
+  const response = await fetch("/api/patient/medications/taken", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let message = "Failed to sync medicine status"
+
+    try {
+      const errorData = await response.json()
+      message = errorData?.message || message
+    } catch {
+      // no-op
+    }
+
+    throw new Error(message)
+  }
 }

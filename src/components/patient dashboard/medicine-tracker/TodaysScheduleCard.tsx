@@ -19,11 +19,13 @@ interface Medicine {
 interface TodaysScheduleCardProps {
   todaysMeds: Medicine[]
   toggleMedicineTaken: (medicineId: string) => void
+  syncingMedicineIds?: string[]
 }
 
 const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
   todaysMeds,
-  toggleMedicineTaken
+  toggleMedicineTaken,
+  syncingMedicineIds = []
 }) => (
   <Card className="shadow-md rounded-2xl bg-white/40">
     <CardHeader>
@@ -41,7 +43,10 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
         </div>
       ) : (
         <div className={`space-y-4 ${todaysMeds.length > 3 ? "max-h-[500px] overflow-y-auto pr-2" : ""}`}>
-          {todaysMeds.map((med) => (
+          {todaysMeds.map((med) => {
+            const isSyncing = syncingMedicineIds.includes(med.id)
+
+            return (
             <div
               key={med.id}
               className={`p-4 rounded-xl  transition-all duration-300 ${
@@ -55,6 +60,7 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
                   <Checkbox
                     id={med.id}
                     checked={med.taken}
+                    disabled={isSyncing}
                     onCheckedChange={() => toggleMedicineTaken(med.id)}
                   />
                   <div
@@ -81,22 +87,26 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
                 </div>
                 <div className="flex-shrink-0">
                   {med.taken ? (
-                    <Badge className="bg-mint-green text-white px-3 py-1 rounded-full">Taken</Badge>
+                    <Badge className="bg-mint-green text-white px-3 py-1 rounded-full">
+                      {isSyncing ? "Syncing..." : "Taken"}
+                    </Badge>
                   ) : (
                     <Button
                       size="sm"
+                      disabled={isSyncing}
                       className="bg-mint-green text-snow-white hover:bg-mint-green/90 transition-all duration-200"
                       onClick={() =>{
                         patientSuccess("Medicine "+med.name+ " marked as Taken")
                          toggleMedicineTaken(med.id)}}
                     >
-                      Mark Taken
+                      {isSyncing ? "Syncing..." : "Mark Taken"}
                     </Button>
                   )}
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </CardContent>
