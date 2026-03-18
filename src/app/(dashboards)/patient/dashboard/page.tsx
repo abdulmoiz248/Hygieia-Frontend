@@ -16,6 +16,7 @@ import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
 
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
+import { usePatientMedicineStore } from "@/store/patient/medicine-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,6 +38,7 @@ function DashboardPageContent() {
    const {fetchMedicalRecords}=usePatientMedicalRecordsStore()
 
    const {fetchFitness}=usePatientFitnessStore()
+  const { fetchPrescriptions } = usePatientMedicineStore()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -82,6 +84,7 @@ function DashboardPageContent() {
     fetchAppointments(profile?.id || "")
     fetchMedicalRecords()
     fetchFitness(profile?.id || "")
+    fetchPrescriptions(profile?.id || "")
   }, [])
 
 

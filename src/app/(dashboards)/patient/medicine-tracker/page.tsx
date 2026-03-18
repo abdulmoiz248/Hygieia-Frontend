@@ -2,6 +2,7 @@
 
 //import { useState } from "react"
 import { motion } from "framer-motion"
+import { useEffect } from "react"
 import PrescriptionsPage from "@/components/patient dashboard/medicine-tracker/prescriptions"
 //import MedicineLogModal from '@/components/patient dashboard/medicine-tracker/medicine-log-modal'
 import TodaysProgressCard from '@/components/patient dashboard/medicine-tracker/TodaysProgressCard'
@@ -10,6 +11,7 @@ import WeeklyProgressCard from '@/components/patient dashboard/medicine-tracker/
 
 
 import { usePatientMedicineStore } from "@/store/patient/medicine-store"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,9 +26,20 @@ const itemVariants = {
 
 
 export default function MedicineTrackerPage() {
+  const profile = usePatientProfileStore((state) => state.profile)
+  const { MedicineState, toggleMedicineTaken, fetchPrescriptions } = usePatientMedicineStore()
 
-  const { MedicineState, toggleMedicineTaken } = usePatientMedicineStore()
   const todaysMeds = MedicineState.todaysMeds
+
+  useEffect(() => {
+    const fallbackPatientId =
+      typeof window !== "undefined" ? localStorage.getItem("id") : null
+    const patientId = profile?.id || fallbackPatientId
+
+    if (patientId) {
+      fetchPrescriptions(patientId)
+    }
+  }, [fetchPrescriptions, profile?.id])
 
 
   const toggleTaken = (id: string) => toggleMedicineTaken(id)

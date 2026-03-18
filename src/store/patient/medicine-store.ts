@@ -1,11 +1,18 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 
+import {
+  getActivePrescriptionsByPatient,
+  mapApiPrescriptionToStorePrescription,
+} from "@/api/patient/medicineApi"
 import type { Medicine, MedicineTrackerState, Prescription } from "@/types/patient/medicine"
 
 type MedicineStore = MedicineTrackerState & {
+  loading: boolean
+  error: string | null
   toggleMedicineTaken: (id: string) => void
   setPrescriptions: (items: Prescription[]) => void
+  fetchPrescriptions: (patientId: string) => Promise<void>
 }
 
 const getTodaysMeds = (prescriptions: Prescription[]): Medicine[] => {
@@ -20,6 +27,10 @@ const getTodaysMeds = (prescriptions: Prescription[]): Medicine[] => {
       )
 
       return prescription.medications.filter((med) => {
+        if (Number.isNaN(prescriptionDate.getTime()) || daysSinceStart < 0) {
+          return false
+        }
+
         const durationStr = med.duration.trim().toLowerCase()
         if (durationStr === "ongoing") return true
         const durationDays = parseInt(durationStr)
@@ -29,90 +40,10 @@ const getTodaysMeds = (prescriptions: Prescription[]): Medicine[] => {
     })
 }
 
-const initialStatePrescription: Prescription[] = [
-  {
-    id: "1",
-    doctorName: "Dr. Sarah Johnson",
-    doctorSpecialty: "Cardiologist",
-    date: "2025-08-01",
-    status: "active",
-    medications: [
-      {
-        id: "1",
-        name: "Lisinopril",
-        dosage: "10mg",
-        frequency: "Once daily",
-        duration: "30 days",
-        instructions: "Take with food in the morning",
-        time: "08:00 AM",
-        taken: false,
-      },
-      {
-        id: "2",
-        name: "Aspirin",
-        dosage: "81mg",
-        frequency: "Once daily",
-        duration: "Ongoing",
-        instructions: "Take with food to prevent stomach upset",
-        time: "08:00 PM",
-        taken: false,
-      },
-      {
-        id: "4",
-        name: "fieke",
-        dosage: "81mg",
-        frequency: "Once daily",
-        duration: "Ongoing",
-        instructions: "Take with food to prevent stomach upset",
-        time: "08:00 PM",
-        taken: false,
-      },
-    ],
-  },
-  {
-    id: "2",
-    doctorName: "Dr. Michael Chen",
-    doctorSpecialty: "Dermatologist",
-    date: "2025-08-1",
-    status: "active",
-    medications: [
-      {
-        id: "3",
-        name: "Tretinoin Cream",
-        dosage: "0.025%",
-        frequency: "Once daily",
-        duration: "60 days",
-        instructions: "Apply thin layer to affected areas at bedtime",
-        time: "10:00 PM",
-        taken: false,
-      },
-    ],
-  },
-  {
-    id: "3",
-    doctorName: "Dr. Emily Rodriguez",
-    doctorSpecialty: "General Practitioner",
-    date: "2025-08-1",
-    status: "completed",
-    medications: [
-      {
-        id: "4",
-        name: "Amoxicillin",
-        dosage: "500mg",
-        frequency: "Three times daily",
-        duration: "7 days",
-        instructions: "Take with meals",
-        time: "08:00 AM, 02:00 PM, 08:00 PM",
-        taken: false,
-      },
-    ],
-  },
-]
-
 const initialState: MedicineTrackerState = {
-  Prescription: initialStatePrescription,
+  Prescription: [],
   MedicineState: {
-    todaysMeds: getTodaysMeds(initialStatePrescription),
+    todaysMeds: [],
   },
 }
 
@@ -120,6 +51,8 @@ export const usePatientMedicineStore = create<MedicineStore>()(
   devtools(
     (set) => ({
       ...initialState,
+      loading: false,
+      error: null,
       toggleMedicineTaken: (id) =>
         set((state) => ({
           ...state,
@@ -135,6 +68,37 @@ export const usePatientMedicineStore = create<MedicineStore>()(
           Prescription: items,
           MedicineState: { todaysMeds: getTodaysMeds(items) },
         }),
+      fetchPrescriptions: async (patientId) => {
+        if (!patientId) {
+          set({
+            loading: false,
+            error: "Patient ID is required",
+            Prescription: [],
+            MedicineState: { todaysMeds: [] },
+          })
+          return
+        }
+
+        set({ loading: true, error: null })
+
+        try {
+          const apiItems = await getActivePrescriptionsByPatient(patientId)
+          const prescriptions = apiItems.map(mapApiPrescriptionToStorePrescription)
+          set({
+            loading: false,
+            error: null,
+            Prescription: prescriptions,
+            MedicineState: { todaysMeds: getTodaysMeds(prescriptions) },
+          })
+        } catch (err: any) {
+          set({
+            loading: false,
+            error: err?.response?.data?.message || err?.message || "Failed to fetch prescriptions",
+            Prescription: [],
+            MedicineState: { todaysMeds: [] },
+          })
+        }
+      },
     }),
     { name: "patient-medicine-store" }
   )
