@@ -26,6 +26,7 @@ import NewAppointmentHeader from "@/components/patient dashboard/appointments/ne
 import ShareDataCheckbox from "@/components/patient dashboard/appointments/new/Checker"
 import { Doctor } from "@/types"
 import { NutritionistProfile } from "@/store/nutritionist/userStore"
+import { useDoctors } from "@/hooks/useDoctors"
 
 
 const containerVariants = {
@@ -55,7 +56,8 @@ export default function NewAppointmentPage() {
   const [checked,setChecked]=useState(false)
   
   
-  const { data: nutritionists, isLoading, isError } = useNutritionists()
+  const { data: nutritionists=[], isLoading, isError } = useNutritionists()
+  const {data: doctorsList=[], isLoading: doctorsLoading, isError: doctorsError} = useDoctors()
 
   useEffect(()=>{
     const appointmentId=localStorage.getItem("appointment")
@@ -97,10 +99,15 @@ export default function NewAppointmentPage() {
   
   
   
-  const doctors:Doctor[] | NutritionistProfile[] =nutritionists!
+  const doctors:Doctor[] | NutritionistProfile[] =[...nutritionists, ... doctorsList]
   
 
-  const selectedDoctorRole = selectedDoctor ? "nutritionist" : undefined
+  const normalizedSelectedDoctorId = selectedDoctor.trim()
+  const selectedDoctorRole = !normalizedSelectedDoctorId
+    ? undefined
+    : doctorsList.some((doctor) => doctor.id === normalizedSelectedDoctorId)
+      ? "doctor"
+      : "nutritionist"
 
 
 
@@ -108,7 +115,7 @@ const {
   data: slotData,
   isLoading: slotsLoading,
   isError: slotsError,
-} = useAvailableSlots(selectedDoctor.trim(), selectedDoctorRole!, selectedDate ? new Date(Date.UTC(
+} = useAvailableSlots(normalizedSelectedDoctorId, selectedDoctorRole, selectedDate ? new Date(Date.UTC(
   selectedDate.getFullYear(),
   selectedDate.getMonth(),
   selectedDate.getDate(),
@@ -125,7 +132,7 @@ useEffect(()=>{
   },[selectedDate])
 
 
-    if (isLoading) {
+    if (isLoading || doctorsLoading) {
        return (
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader />
@@ -133,7 +140,7 @@ useEffect(()=>{
         )
     }
   
-    if (isError) {
+    if (isError || doctorsError) {
       return <div className="text-center py-12 text-red-500">Failed to load data</div>
     }
   
