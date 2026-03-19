@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
-import {  useState } from "react"
+import {  useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { TopNav } from "./top-nav"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
+import Loader from "../loader/loader"
 
 
 interface DashboardLayoutProps {
@@ -18,8 +20,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isChatPage = pathname?.startsWith("/patient/chat")
 
 
+   const {fetchInitialProfile,loading ,profile}= usePatientProfileStore()
 
-  
+   useEffect(() => {
+    fetchInitialProfile()
+   }, [fetchInitialProfile])
+ 
+   console.log("Profile loading state:", loading)
+   console.log("Profile data:", profile)
+  if(loading || !profile)
+    return <Loader/>
 
   return (
     <div className="flex h-screen bg-snow-white">

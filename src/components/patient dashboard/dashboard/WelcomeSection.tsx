@@ -23,7 +23,10 @@ export default function WelcomeSection() {
     
       const [showDes,setShowDes]=useState(false)
       const handleAnimationComplete = () => {
-      setShowDes(true)
+      // Delay state update to allow GSAP cleanup to complete
+      setTimeout(() => {
+        setShowDes(true)
+      }, 50)
     };
   return (
    
@@ -49,7 +52,7 @@ export default function WelcomeSection() {
  />
  
  {showDes && (
-   <div className="block mt-2 ">
+   <div key="texttype-message" className="block mt-2 ">
      <TextType
        text={[
          `📅 You have ${upcomingAppointments.length} upcoming appointments`,
