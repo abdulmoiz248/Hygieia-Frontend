@@ -1,6 +1,6 @@
 "use client"
 import Suggestions from '@/components/patient dashboard/profile/Suggestions'
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { User,  Save, Edit,  Heart, AlertTriangle, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 import useNutritionistStore, { NutritionistProfile } from '@/store/nutritionist/userStore'
 import WorkingHours from '@/components/nutritionist/profile/WorkingHours'
@@ -33,6 +41,12 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<NutritionistProfile>(reduxProfile!)
   const [isSaving, setIsSaving] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false)
+
+  const hasUnsavedChanges = useMemo(
+    () => JSON.stringify(profile) !== JSON.stringify(reduxProfile),
+    [profile, reduxProfile]
+  )
 
   useEffect(() => {
     setProfile(reduxProfile!)
@@ -62,8 +76,27 @@ export default function ProfilePage() {
       setIsGenerating(false)
     }
   }
+
+  const handleCancel = () => {
+    if (isSaving) return
+
+    if (hasUnsavedChanges) {
+      setIsDiscardModalOpen(true)
+      return
+    }
+
+    setProfile(reduxProfile!)
+    setIsEditing(false)
+  }
+
+  const confirmDiscardChanges = () => {
+    setProfile(reduxProfile!)
+    setIsEditing(false)
+    setIsDiscardModalOpen(false)
+  }
   
   return (
+    <>
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
@@ -78,27 +111,38 @@ export default function ProfilePage() {
       >
         Download Resume
       </Button> */}
-        <Button
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-          className={isEditing ? "bg-mint-green hover:bg-mint-green/90" : "bg-soft-blue hover:bg-soft-blue/90"}
-          disabled={isSaving}
-        >
-          {isEditing ? (
-            <>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-mint-green hover:bg-mint-green/90"
+              disabled={isSaving}
+            >
               {isSaving ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
               {isSaving ? "Saving..." : "Save Changes"}
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </>
-          )}
-        </Button>
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setIsEditing(true)}
+            className="bg-soft-blue hover:bg-soft-blue/90"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
@@ -364,5 +408,33 @@ export default function ProfilePage() {
         </Card>
       </motion.div>
     </motion.div>
+
+    <Dialog open={isDiscardModalOpen} onOpenChange={setIsDiscardModalOpen}>
+      <DialogContent className="bg-snow-white">
+        <DialogHeader>
+          <DialogTitle className="text-soft-coral">Discard changes?</DialogTitle>
+          <DialogDescription className="text-cool-gray">
+            You have unsaved changes. Are you sure you want to discard them?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsDiscardModalOpen(false)}
+          >
+            Keep Editing
+          </Button>
+          <Button
+            type="button"
+            className="bg-soft-coral hover:bg-soft-coral/90"
+            onClick={confirmDiscardChanges}
+          >
+            Discard
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

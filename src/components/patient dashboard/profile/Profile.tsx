@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,10 @@ const PatientProfileCard = ({
   const [avatarSrc, setAvatarSrc] = useState(profile.avatar)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  useEffect(() => {
+    setAvatarSrc(profile.avatar)
+  }, [profile.avatar])
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click()
   }
@@ -38,8 +42,8 @@ const PatientProfileCard = ({
     }
   }
 
-  const renderGenderIcon = (gender: string) => {
-    switch (gender.toLowerCase()) {
+  const renderGenderIcon = (gender?: string) => {
+    switch ((gender || "").toLowerCase()) {
       case "male":
         return <Mars className="w-5 h-5 text-soft-blue" />
       case "female":
@@ -63,7 +67,7 @@ const PatientProfileCard = ({
               <Avatar className="w-full h-full">
                 <AvatarImage src={avatarSrc} sizes="144px" />
                 <AvatarFallback className="text-3xl font-medium text-dark-slate-gray/70">
-                  {profile.name?.split(" ").map(n => n[0]).join("")}
+                  {profile.name?.split(" ").filter(Boolean).map(n => n[0]).join("") || "NA"}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -90,23 +94,23 @@ const PatientProfileCard = ({
           </div>
 
           <h2 className="text-2xl font-bold text-dark-slate-gray mb-1 break-words">
-            {profile.name}
+            {profile.name || "Not provided"}
           </h2>
 
           <div className="flex items-center justify-center gap-2 text-base text-cool-gray mb-5">
             {renderGenderIcon(profile.gender)}
-            <span className="capitalize">{profile.gender}</span>
+            <span className="capitalize">{profile.gender || "Not provided"}</span>
           </div>
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Mail className="w-4 h-4 text-soft-blue" />
-              <span>{profile.email}</span>
+              <span>{profile.email || "Not provided"}</span>
             </div>
 
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">
               <Phone className="w-4 h-4 text-soft-blue" />
-              <span>{profile.phone}</span>
+              <span>{profile.phone || "Not provided"}</span>
             </div>
 
             <div className="flex items-center justify-center gap-2 text-dark-slate-gray/70 break-words">

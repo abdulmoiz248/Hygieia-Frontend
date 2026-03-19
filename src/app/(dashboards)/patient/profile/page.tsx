@@ -1,6 +1,6 @@
 "use client"
 import Suggestions from '@/components/patient dashboard/profile/Suggestions'
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { User,  Save, Edit,  Heart, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,10 +9,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { ProfileType } from "@/types/patient/profile"
 import PatientProfileCard from "@/components/patient dashboard/profile/Profile"
-import { patientSuccess } from "@/toasts/PatientToast"
+import { patientError, patientSuccess } from "@/toasts/PatientToast"
 
 import Limits from "@/components/patient dashboard/profile/Limits"
 
@@ -30,22 +38,61 @@ const itemVariants:Variants = {
 
 
 export default function ProfilePage() {
-  const { profile: storeProfile, updateProfile } = usePatientProfileStore()
+  const {
+    profile: storeProfile,
+    loading,
+    updateProfileBackend,
+    uploadAvatar,
+  } = usePatientProfileStore()
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<ProfileType>(storeProfile)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false)
+
+  const hasUnsavedChanges = useMemo(
+    () => JSON.stringify(profile) !== JSON.stringify(storeProfile),
+    [profile, storeProfile]
+  )
 
   useEffect(() => {
     setProfile(storeProfile)
   }, [storeProfile])
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true)
+    const success = await updateProfileBackend(profile)
+    setIsSaving(false)
+
+    if (!success) {
+      patientError("Failed to update profile. Please try again.")
+      return
+    }
+
     setIsEditing(false)
-    patientSuccess(`${profile.name} profile updated successfully`)
-    updateProfile(profile)
+    patientSuccess(`${profile.name || "Patient"} profile updated successfully`)
+  }
+
+  const handleCancel = () => {
+    if (isSaving) return
+
+    if (hasUnsavedChanges) {
+      setIsDiscardModalOpen(true)
+      return
+    }
+
+    setProfile(storeProfile)
+    setIsEditing(false)
+  }
+
+  const confirmDiscardChanges = () => {
+    setProfile(storeProfile)
+    setIsEditing(false)
+    setIsDiscardModalOpen(false)
   }
 
   
   return (
+    <>
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
@@ -54,30 +101,47 @@ export default function ProfilePage() {
           <p className="text-cool-gray">Manage your personal and medical information</p>
         </div>
 
-        <Button
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-          className={isEditing ? "bg-mint-green hover:bg-mint-green/90" : "bg-soft-blue hover:bg-soft-blue/90"}
-        >
-          {isEditing ? (
-            <>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-mint-green hover:bg-mint-green/90"
+              disabled={loading || isSaving}
+            >
               <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </>
-          )}
-        </Button>
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setIsEditing(true)}
+            className="bg-soft-blue hover:bg-soft-blue/90"
+            disabled={loading}
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Picture & Basic Info */}
   <PatientProfileCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants}  
-  onAvatarChange={(file) => {
-    console.log("Selected avatar file:", file)
-    // upload to server or update profile
+  onAvatarChange={async (file) => {
+    const avatarUrl = await uploadAvatar(file)
+    if (!avatarUrl) {
+      patientError("Avatar upload failed. Please try again.")
+      return
+    }
+    setProfile((prev) => ({ ...prev, avatar: avatarUrl }))
   }} />
 
 
@@ -113,7 +177,7 @@ export default function ProfilePage() {
     </div>
      <div>
               <label className="text-sm font-medium text-soft-blue">Gender</label>
-           <Select value={profile.gender.toLowerCase()}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
+           <Select value={profile.gender?.toLowerCase() || undefined}  disabled={!isEditing}  onValueChange={(value) => setProfile((prev) => ({ ...prev, gender: value }))}>
   <SelectTrigger>
     <SelectValue placeholder="Select gender" />
   </SelectTrigger>
@@ -192,7 +256,7 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="bloodType" className="text-soft-coral">Blood Type</Label>
             <Select
-              value={profile.bloodType}
+              value={profile.bloodType || undefined}
               onValueChange={(value) => setProfile((prev) => ({ ...prev, bloodType: value }))}
               disabled={!isEditing}
             >
@@ -546,5 +610,33 @@ export default function ProfilePage() {
 <Limits profile={profile} setProfile={setProfile} isEditing={isEditing} />
 </motion.div>
     </motion.div>
+
+    <Dialog open={isDiscardModalOpen} onOpenChange={setIsDiscardModalOpen}>
+      <DialogContent className="bg-snow-white">
+        <DialogHeader>
+          <DialogTitle className="text-soft-coral">Discard changes?</DialogTitle>
+          <DialogDescription className="text-cool-gray">
+            You have unsaved changes. Are you sure you want to discard them?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsDiscardModalOpen(false)}
+          >
+            Keep Editing
+          </Button>
+          <Button
+            type="button"
+            className="bg-soft-coral hover:bg-soft-coral/90"
+            onClick={confirmDiscardChanges}
+          >
+            Discard
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

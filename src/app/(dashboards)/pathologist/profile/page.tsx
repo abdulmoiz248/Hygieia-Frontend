@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, Variants } from "framer-motion"
 import { User,  Save, Edit,  } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import {LabTechnicianProfile} from "@/store/lab-tech/userStore"
@@ -34,16 +42,45 @@ export default function ProfilePage() {
    const setactiveTab = useLabStore((state) => state.setActiveTab)
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<LabTechnicianProfile>(reduxProfile!)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false)
+
+  const hasUnsavedChanges = useMemo(
+    () => JSON.stringify(profile) !== JSON.stringify(reduxProfile),
+    [profile, reduxProfile]
+  )
 
   useEffect(() => {
   setProfile(reduxProfile!)
   setactiveTab('')
 }, [reduxProfile])
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      setIsEditing(false)
+      await saveProfile(profile)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    if (isSaving) return
+
+    if (hasUnsavedChanges) {
+      setIsDiscardModalOpen(true)
+      return
+    }
+
+    setProfile(reduxProfile!)
     setIsEditing(false)
-    saveProfile(profile)
-    
+  }
+
+  const confirmDiscardChanges = () => {
+    setProfile(reduxProfile!)
+    setIsEditing(false)
+    setIsDiscardModalOpen(false)
   }
 
 
@@ -53,6 +90,7 @@ export default function ProfilePage() {
 
   
   return (
+    <>
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 p-6 bg-snow-white">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
@@ -61,22 +99,34 @@ export default function ProfilePage() {
           <p className="text-cool-gray">Manage your personal and medical information</p>
         </div>
 
-        <Button
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-          className={isEditing ? "bg-mint-green hover:bg-mint-green/90" : "bg-soft-blue hover:bg-soft-blue/90"}
-        >
-          {isEditing ? (
-            <>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-mint-green hover:bg-mint-green/90"
+              disabled={isSaving}
+            >
               <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </>
-          )}
-        </Button>
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setIsEditing(true)}
+            className="bg-soft-blue hover:bg-soft-blue/90"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
@@ -173,5 +223,33 @@ export default function ProfilePage() {
 
 
     </motion.div>
+
+    <Dialog open={isDiscardModalOpen} onOpenChange={setIsDiscardModalOpen}>
+      <DialogContent className="bg-snow-white">
+        <DialogHeader>
+          <DialogTitle className="text-soft-coral">Discard changes?</DialogTitle>
+          <DialogDescription className="text-cool-gray">
+            You have unsaved changes. Are you sure you want to discard them?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsDiscardModalOpen(false)}
+          >
+            Keep Editing
+          </Button>
+          <Button
+            type="button"
+            className="bg-soft-coral hover:bg-soft-coral/90"
+            onClick={confirmDiscardChanges}
+          >
+            Discard
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 
 import type { ProfileType } from "@/types/patient/profile"
+import api from "@/lib/axios"
 import patientApi from "@/api/patient/patientApi"
 
 type ProfileState = {
@@ -16,45 +17,95 @@ type ProfileState = {
   deleteProfile: () => Promise<boolean>
 }
 
+const toStringValue = (value: unknown, fallback = ""): string =>
+  typeof value === "string" ? value : fallback
+
+const toNumberValue = (value: unknown, fallback = 0): number =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback
+
+const getStoredId = (): string =>
+  typeof window !== "undefined" ? localStorage.getItem("id") ?? "" : ""
+
+const getPatientHeader = (): string | null =>
+  typeof window !== "undefined"
+    ? localStorage.getItem("patient") ?? localStorage.getItem("id")
+    : null
+
 const defaultProfile: ProfileType = {
-  id: "7191ac63-6ac5-47c3-a865-b1fe152f8f47",
-  name: "Abdul Muqeet Naeem",
-  email: "moiz20920@gmail.com",
-  phone: "+92 324 7006001",
-  dateOfBirth: "1990-05-15",
-  address: "123 Main St, New York, NY 10001",
-  emergencyContact: "Jane Doe - +1 (555) 987-6543",
-  bloodType: "O+",
-  allergies: "Penicillin, Shellfish",
-  conditions: "Hypertension",
-  medications: "Lisinopril 10mg daily",
-  avatar: "/king2.jpg",
-  gender: "Female",
-  weight: 50,
-  height: 150,
-  vaccines: "COVID-19 (Pfizer, 2 doses), Hepatitis B, Tetanus",
-  ongoingMedications: "Levothyroxine 50mcg daily",
-  surgeryHistory: "Appendectomy (2012), Wisdom Tooth Extraction (2021)",
-  implants: "None",
-  pregnancyStatus: "no",
-  menstrualCycle: "Mild cramps, regular cycle",
-  mentalHealth: "Anxiety (mild, under control), Therapy once a month",
-  familyHistory: "Father - Type 2 Diabetes, Mother - Hypertension",
-  organDonor: "Yes - registered organ donor",
-  disabilities: "None",
-  lifestyle: "Non-smoker, occasional alcohol, regular morning walk, vegetarian",
-  healthscore: 80,
-  adherence: 70,
-  missed_doses: 17,
-  doses_taken: 3,
-  limit: {
-    sleep: 10,
-    water: 8,
-    steps: 10000,
-    protein: 100,
-    carbs: 45,
-    fats: 50,
-  },
+  id: "",
+  name: "",
+  email: "",
+  phone: "",
+  dateOfBirth: "",
+  address: "",
+  emergencyContact: "",
+  bloodType: "",
+  allergies: "",
+  conditions: "",
+  medications: "",
+  avatar: "",
+  gender: "",
+  weight: 0,
+  height: 0,
+  vaccines: "",
+  ongoingMedications: "",
+  surgeryHistory: "",
+  implants: "",
+  pregnancyStatus: "",
+  menstrualCycle: "",
+  mentalHealth: "",
+  familyHistory: "",
+  organDonor: "",
+  disabilities: "",
+  lifestyle: "",
+  healthscore: 0,
+  adherence: 0,
+  missed_doses: 0,
+  doses_taken: 0,
+  limit: {},
+}
+
+const normalizeProfile = (incoming?: Partial<ProfileType> | null): ProfileType => {
+  const safe = incoming ?? {}
+
+  return {
+    ...defaultProfile,
+    ...safe,
+    id: toStringValue(safe.id, getStoredId()),
+    name: toStringValue(safe.name),
+    email: toStringValue(safe.email),
+    phone: toStringValue(safe.phone),
+    dateOfBirth: toStringValue((safe as any).dateOfBirth ?? (safe as any).dateofbirth),
+    address: toStringValue(safe.address),
+    emergencyContact: toStringValue(safe.emergencyContact),
+    bloodType: toStringValue(safe.bloodType),
+    allergies: toStringValue(safe.allergies),
+    conditions: toStringValue(safe.conditions),
+    medications: toStringValue(safe.medications),
+    avatar: toStringValue((safe as any).avatar ?? (safe as any).img),
+    gender: toStringValue(safe.gender),
+    weight: toNumberValue(safe.weight, defaultProfile.weight),
+    height: toNumberValue(safe.height, defaultProfile.height),
+    vaccines: toStringValue(safe.vaccines),
+    ongoingMedications: toStringValue(safe.ongoingMedications),
+    surgeryHistory: toStringValue(safe.surgeryHistory),
+    implants: toStringValue(safe.implants),
+    pregnancyStatus: toStringValue(safe.pregnancyStatus),
+    menstrualCycle: toStringValue(safe.menstrualCycle),
+    mentalHealth: toStringValue(safe.mentalHealth),
+    familyHistory: toStringValue(safe.familyHistory),
+    organDonor: toStringValue(safe.organDonor),
+    disabilities: toStringValue(safe.disabilities),
+    lifestyle: toStringValue(safe.lifestyle),
+    healthscore: toNumberValue(safe.healthscore, defaultProfile.healthscore),
+    adherence: safe.adherence ?? defaultProfile.adherence,
+    missed_doses: safe.missed_doses ?? defaultProfile.missed_doses,
+    doses_taken: safe.doses_taken ?? defaultProfile.doses_taken,
+    limit: {
+      ...defaultProfile.limit,
+      ...(safe.limit ?? {}),
+    },
+  }
 }
 
 export const usePatientProfileStore = create<ProfileState>()(
@@ -64,81 +115,147 @@ export const usePatientProfileStore = create<ProfileState>()(
       loading: false,
       error: null,
 
-      setProfile: (profile) => set({ profile }),
+      setProfile: (profile) => set({ profile: normalizeProfile(profile) }),
 
-      updateProfile: (patch) => set((state) => ({ profile: { ...state.profile, ...patch } })),
+      updateProfile: (patch) =>
+        set((state) => ({ profile: normalizeProfile({ ...state.profile, ...patch }) })),
 
       fetchInitialProfile: async () => {
-        const patient = typeof window !== "undefined" ? localStorage.getItem("patient") : null
-        if (!patient) return
-
         set({ loading: true, error: null })
         try {
-          const res = await patientApi.get("/profile", {
-            headers: { patient },
-          })
-          if (res.data?.success && res.data.initialState) {
-            set({ profile: res.data.initialState, loading: false })
-          } else {
-            set({ loading: false })
+          const id = getStoredId()
+          if (!id) {
+            set({ profile: normalizeProfile({}), loading: false, error: "Missing patient id" })
+            return
           }
+
+          let fetchedProfile: unknown = null
+
+          try {
+            const authRes = await api.get(`/auth/user?id=${id}&role=patient`)
+            if (authRes.data?.success && authRes.data?.data) {
+              fetchedProfile = authRes.data.data
+            }
+          } catch {
+            const patient = getPatientHeader()
+            if (patient) {
+              const fallbackRes = await patientApi.get("/profile", {
+                headers: { patient },
+              })
+              if (fallbackRes.data?.success) {
+                fetchedProfile = fallbackRes.data.initialState ?? fallbackRes.data.data ?? null
+              }
+            }
+          }
+
+          set({
+            profile: normalizeProfile(fetchedProfile as Partial<ProfileType> | null),
+            loading: false,
+            error: fetchedProfile ? null : "Failed to load profile",
+          })
         } catch (err: any) {
           set({ loading: false, error: err?.message ?? "Failed to load profile" })
         }
       },
 
       updateProfileBackend: async (data) => {
-        const patient = typeof window !== "undefined" ? localStorage.getItem("patient") : null
-        if (!patient) return false
+        const id = getStoredId()
+        if (!id) return false
+
+        const normalizedData = normalizeProfile({ ...get().profile, ...data })
         try {
-          const res = await patientApi.put("/profile", data, {
-            headers: { patient },
+          const primaryRes = await api.post(`/auth/user?role=patient`, {
+            profileData: {
+              ...normalizedData,
+              id,
+            },
           })
-          if (res.data?.success) {
-            get().updateProfile(data)
+
+          if (primaryRes.data?.success) {
+            get().updateProfile(normalizedData)
             return true
           }
+
           return false
         } catch {
-          return false
+          const patient = getPatientHeader()
+          if (!patient) return false
+          try {
+            const fallbackRes = await patientApi.put("/profile", normalizedData, {
+              headers: { patient },
+            })
+            if (fallbackRes.data?.success) {
+              get().updateProfile(normalizedData)
+              return true
+            }
+            return false
+          } catch {
+            return false
+          }
         }
       },
 
       uploadAvatar: async (file: File) => {
-        const patient = typeof window !== "undefined" ? localStorage.getItem("patient") : null
-        if (!patient) return null
+        const id = getStoredId()
+        if (!id) return null
 
         const formData = new FormData()
         formData.append("avatar", file)
 
         try {
-          const res = await patientApi.post("/upload-avatar", formData, {
+          const primaryRes = await api.post(`/auth/profile-pic?role=patient&userId=${id}`, formData, {
             headers: {
-              patient,
               "Content-Type": "multipart/form-data",
             },
           })
-          const url = res.data?.avatarUrl ?? null
+
+          const url = primaryRes.data?.url ?? primaryRes.data?.avatarUrl ?? null
           if (url) {
             get().updateProfile({ avatar: url })
           }
           return url
         } catch {
-          return null
+          const patient = getPatientHeader()
+          if (!patient) return null
+          try {
+            const fallbackRes = await patientApi.post("/upload-avatar", formData, {
+              headers: {
+                patient,
+                "Content-Type": "multipart/form-data",
+              },
+            })
+            const url = fallbackRes.data?.avatarUrl ?? null
+            if (url) {
+              get().updateProfile({ avatar: url })
+            }
+            return url
+          } catch {
+            return null
+          }
         }
       },
 
       deleteProfile: async () => {
-        const patient = typeof window !== "undefined" ? localStorage.getItem("patient") : null
-        if (!patient) return false
+        const id = getStoredId()
+        if (!id) return false
+
         try {
-          const res = await patientApi.delete("/profile", {
-            headers: { patient },
-          })
-          return !!res.data?.success
+          const primaryRes = await api.delete(`/auth/user?id=${id}&role=patient`)
+          if (primaryRes.data?.success) return true
         } catch {
-          return false
+          const patient = getPatientHeader()
+          if (!patient) return false
+          try {
+            const fallbackRes = await patientApi.delete("/profile", {
+              headers: { patient },
+            })
+            return !!fallbackRes.data?.success
+          } catch {
+            return false
+          }
         }
+
+        return false
       },
     }),
     { name: "patient-profile-store" }
