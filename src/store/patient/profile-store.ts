@@ -200,38 +200,24 @@ export const usePatientProfileStore = create<ProfileState>()(
         if (!id) return null
 
         const formData = new FormData()
-        formData.append("avatar", file)
+        formData.append("file", file)
 
         try {
+          
           const primaryRes = await api.post(`/auth/profile-pic?role=patient&userId=${id}`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
           })
 
-          const url = primaryRes.data?.url ?? primaryRes.data?.avatarUrl ?? null
+       //   console.log("Primary upload response:", primaryRes.data)
+          const url = primaryRes.data?.url ?? primaryRes.data?.data.img ?? null
           if (url) {
             get().updateProfile({ avatar: url })
           }
           return url
-        } catch {
-          const patient = getPatientHeader()
-          if (!patient) return null
-          try {
-            const fallbackRes = await patientApi.post("/upload-avatar", formData, {
-              headers: {
-                patient,
-                "Content-Type": "multipart/form-data",
-              },
-            })
-            const url = fallbackRes.data?.avatarUrl ?? null
-            if (url) {
-              get().updateProfile({ avatar: url })
-            }
-            return url
-          } catch {
-            return null
-          }
+        } catch (e:any){
+console.log("Primary upload failed, attempting fallback...", e)
         }
       },
 

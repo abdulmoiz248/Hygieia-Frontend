@@ -47,6 +47,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<ProfileType>(storeProfile)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false)
 
   const hasUnsavedChanges = useMemo(
@@ -73,7 +74,7 @@ export default function ProfilePage() {
   }
 
   const handleCancel = () => {
-    if (isSaving) return
+    if (isSaving || isUploadingAvatar) return
 
     if (hasUnsavedChanges) {
       setIsDiscardModalOpen(true)
@@ -107,14 +108,14 @@ export default function ProfilePage() {
               type="button"
               variant="outline"
               onClick={handleCancel}
-              disabled={isSaving}
+              disabled={isSaving || isUploadingAvatar}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               className="bg-mint-green hover:bg-mint-green/90"
-              disabled={loading || isSaving}
+              disabled={loading || isSaving || isUploadingAvatar}
             >
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? "Saving..." : "Save Changes"}
@@ -136,12 +137,17 @@ export default function ProfilePage() {
         {/* Profile Picture & Basic Info */}
   <PatientProfileCard  profile={profile} isEditing={isEditing} itemVariants={itemVariants}  
   onAvatarChange={async (file) => {
-    const avatarUrl = await uploadAvatar(file)
-    if (!avatarUrl) {
-      patientError("Avatar upload failed. Please try again.")
-      return
+    setIsUploadingAvatar(true)
+    try {
+      const avatarUrl = await uploadAvatar(file)
+      if (!avatarUrl) {
+        patientError("Avatar upload failed. Please try again.")
+        return
+      }
+      setProfile((prev) => ({ ...prev, avatar: avatarUrl }))
+    } finally {
+      setIsUploadingAvatar(false)
     }
-    setProfile((prev) => ({ ...prev, avatar: avatarUrl }))
   }} />
 
 
