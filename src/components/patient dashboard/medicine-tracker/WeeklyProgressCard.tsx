@@ -27,7 +27,7 @@ const WeeklyProgressCard = () => {
           <div className="flex justify-between text-sm">
             <span>Doses taken</span>
             <span className="font-medium">
-              {user.doses_taken || 0}/{(user.missed_doses as number || 0) + (user.doses_taken as number || 0)}
+              {user.doses_taken || 0}fix
             </span>
           </div>
           <div className="flex justify-between text-sm">
