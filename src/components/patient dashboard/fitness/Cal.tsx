@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Calculator } from 'lucide-react'
 
 import { usePatientProfileStore } from "@/store/patient/profile-store"
-import { patientSuccess } from '@/toasts/PatientToast'
+import { patientError, patientSuccess } from '@/toasts/PatientToast'
 
 const getBMICategory = (bmi: number, gender: string) => {
   if (gender === 'female') {
@@ -30,13 +30,14 @@ export default function HealthDataModal({
   showDialog: boolean
   setShowDialog: (value: boolean) => void
 }) {
-  const { profile: user, updateProfile } = usePatientProfileStore()
+  const { profile: user, updateProfileBackend } = usePatientProfileStore()
   
 
   const [weight, setWeight] = useState<number>(user.weight || 0)
   const [height, setHeight] = useState<number>(user.height || 0)
   const [originalWeight, setOriginalWeight] = useState<number>(user.weight || 0)
   const [originalHeight, setOriginalHeight] = useState<number>(user.height || 0)
+  const [isSaving, setIsSaving] = useState(false)
   const gender = user.gender || 'male'
 
   const [bmi, setBmi] = useState<number>(0)
@@ -51,15 +52,32 @@ export default function HealthDataModal({
     }
   }, [weight, height])
 
+  useEffect(() => {
+    if (!showDialog) return
+    const latestWeight = user.weight || 0
+    const latestHeight = user.height || 0
+    setWeight(latestWeight)
+    setHeight(latestHeight)
+    setOriginalWeight(latestWeight)
+    setOriginalHeight(latestHeight)
+  }, [showDialog, user.weight, user.height])
+
   const isModified = weight !== originalWeight || height !== originalHeight
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true)
+    const success = await updateProfileBackend({ height, weight })
+    setIsSaving(false)
+
+    if (!success) {
+      patientError('Failed to update health data. Please try again.')
+      return
+    }
+
     setOriginalWeight(weight)
     setOriginalHeight(height)
-       patientSuccess(`${user.name} Data Updated Successfully`)
+    patientSuccess(`${user.name} Data Updated Successfully`)
     setShowDialog(false)
- 
-      updateProfile({height,weight})
   }
 
   return (
@@ -110,8 +128,12 @@ export default function HealthDataModal({
           </div>
           {isModified && (
             <div className="flex justify-end">
-              <Button className="bg-soft-blue text-snow-white hover:bg-soft-blue/90" onClick={handleSave}>
-                Update
+              <Button
+                className="bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Updating...' : 'Update'}
               </Button>
             </div>
           )}
