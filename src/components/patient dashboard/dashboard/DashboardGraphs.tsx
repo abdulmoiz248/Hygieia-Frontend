@@ -4,8 +4,6 @@ import { motion } from "framer-motion"
 
 import WeeklyActivity from "./WeeklyActivity"
 import HealthFocus from "./HealthFocus"
-import Nutrition from "./Nutrition"
-import MonthlyProgress from "./MonthlyProgress"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -17,10 +15,6 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-}
 
 
 export default function DashboardGraphs() {

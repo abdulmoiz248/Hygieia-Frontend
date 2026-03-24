@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import React, { useState } from "react";
+import React from "react";
 
 import { usePatientProfileStore } from "@/store/patient/profile-store";
 

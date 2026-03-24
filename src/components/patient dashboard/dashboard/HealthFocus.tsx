@@ -51,13 +51,7 @@ export default function HealthFocus() {
     setVisibleMetrics(initialMetrics)
   }, [initialMetrics])
 
-  const toggleMetric = (name: string) => {
-    setVisibleMetrics(prev =>
-      prev.some(m => m.name === name)
-        ? prev.filter(m => m.name !== name)
-        : [...prev, initialMetrics.find(m => m.name === name)!]
-    )
-  }
+  
 
   const wellnessScore = Math.round(
     visibleMetrics.length
