@@ -62,7 +62,7 @@ export default function FitnessPage() {
 
       <Garden/>
 
-      <Week/>
+      {/* <Week/> */}
       <TodayGoal/>
 
       {/* Enhanced Calorie Tracking */}
