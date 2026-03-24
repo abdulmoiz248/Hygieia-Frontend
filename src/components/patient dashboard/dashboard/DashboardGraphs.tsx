@@ -29,18 +29,8 @@ export default function DashboardGraphs() {
       <WeeklyActivity />
       <HealthFocus />
 
-      {/* Side-by-side Nutrition & Monthly Progress */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col lg:flex-row gap-6 w-full"
-      >
-        {/* Nutrition RadialBarChart Card */}
-      <Nutrition/>
-    
-        {/* Monthly Health Progress Radar Chart Card */}
-       
-     <MonthlyProgress/>
-      </motion.div>
+     
+     
     </motion.div>
   )
 }

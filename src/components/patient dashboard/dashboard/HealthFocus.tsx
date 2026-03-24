@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Target, Pill, TrendingUp } from "lucide-react"
 
@@ -26,24 +26,31 @@ import {
  
 } from "recharts"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 export default function HealthFocus() {
   const user = usePatientProfileStore((store) => store.profile)
+  const healthFocus = usePatientDashboardAnalyticsStore((state) => state.healthFocus)
+  const medicationAdherence = usePatientDashboardAnalyticsStore((state) => state.medicationAdherence)
   const itemVariants = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }
-  
-  const medicationAdherence = [
-    { week: "Week 1", adherence: 95, missed: 1, sideEffects: 0, effectiveness: 9.2 },
-    { week: "Week 2", adherence: 88, missed: 3, sideEffects: 1, effectiveness: 8.8 },
-    { week: "Week 3", adherence: 92, missed: 2, sideEffects: 0, effectiveness: 9.0 },
-    { week: "Week 4", adherence: user.adherence , missed: 1, sideEffects: 0, effectiveness: 9.5 },
-  ]
 
-  const initialMetrics = [
-    { name: "Diet", value: 25, color: "var(--color-mint-green)", icon: "🥗" },
-    { name: "Sleep", value: 20, color: "var(--color-soft-blue)", icon: "😴" },
-    { name: "Hydration", value: 20, color: "var(--color-cool-gray)", icon: "💧" },
-  ]
+  const initialMetrics = useMemo(
+    () =>
+      healthFocus.map((metric) => ({
+        name: metric.name,
+        value: metric.value,
+        color: metric.color || "var(--color-cool-gray)",
+        icon: metric.icon || "",
+      })),
+    [healthFocus]
+  )
+
   const [visibleMetrics, setVisibleMetrics] = useState(initialMetrics)
+
+  useEffect(() => {
+    setVisibleMetrics(initialMetrics)
+  }, [initialMetrics])
+
   const toggleMetric = (name: string) => {
     setVisibleMetrics(prev =>
       prev.some(m => m.name === name)
@@ -51,8 +58,11 @@ export default function HealthFocus() {
         : [...prev, initialMetrics.find(m => m.name === name)!]
     )
   }
+
   const wellnessScore = Math.round(
-    visibleMetrics.reduce((acc, m) => acc + m.value, 0) / visibleMetrics.length
+    visibleMetrics.length
+      ? visibleMetrics.reduce((acc, m) => acc + m.value, 0) / visibleMetrics.length
+      : 0
   )
 
   return (

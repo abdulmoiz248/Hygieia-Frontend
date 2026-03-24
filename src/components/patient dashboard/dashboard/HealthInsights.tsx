@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Target, Award, Lightbulb } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 import { Variants } from "framer-motion"
 
@@ -17,42 +18,6 @@ const fadeUp: Variants = {
 }
 
 
-const healthRecommendations = [
-  {
-    type: "exercise",
-    title: "Increase Cardio Sessions",
-    description: "Heart rate variability says more cardio is needed.",
-    priority: "high",
-    impact: "High",
-    timeframe: "2-4 weeks",
-    icon: Target,
-    color: "text-soft-coral",
-    bgColor: "bg-soft-coral/20",
-  },
-  {
-    type: "nutrition",
-    title: "Optimize Protein Intake",
-    description: "Protein intake is below activity needs.",
-    priority: "medium",
-    impact: "Medium",
-    timeframe: "1-2 weeks",
-    icon: Award,
-    color: "text-mint-green",
-    bgColor: "bg-mint-green/20",
-  },
-  {
-    type: "sleep",
-    title: "Improve Sleep Hygiene",
-    description: "Deep sleep duration dropped, adjust bedtime routine.",
-    priority: "medium",
-    impact: "High",
-    timeframe: "1-3 weeks",
-    icon: Lightbulb,
-    color: "text-soft-blue",
-    bgColor: "bg-soft-blue/20",
-  },
-]
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -65,6 +30,20 @@ const containerVariants = {
 
 
 export default function HealthInsights() {
+  const recommendations = usePatientDashboardAnalyticsStore((state) => state.recommendations)
+
+  const getRecommendationIcon = (type: string) => {
+    if (type === "exercise") return Target
+    if (type === "nutrition") return Award
+    return Lightbulb
+  }
+
+  const getRecommendationTheme = (type: string) => {
+    if (type === "exercise") return { color: "text-soft-coral", bgColor: "bg-soft-coral/20" }
+    if (type === "nutrition") return { color: "text-mint-green", bgColor: "bg-mint-green/20" }
+    return { color: "text-soft-blue", bgColor: "bg-soft-blue/20" }
+  }
+
   return (
   
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 lg:space-y-6 w-full">
@@ -79,15 +58,19 @@ export default function HealthInsights() {
           </CardTitle>
         </CardHeader>
         <CardContent className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {healthRecommendations.map((rec, i) => (
+          {recommendations.map((rec, i) => {
+            const Icon = getRecommendationIcon(rec.type)
+            const theme = getRecommendationTheme(rec.type)
+
+            return (
             <motion.div
-              key={rec.title}
+              key={`${rec.type}-${rec.title}-${i}`}
               custom={i}
               variants={fadeUp}
-              className={`flex flex-col gap-3 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-shadow duration-300 cursor-pointer ${rec.bgColor} backdrop-blur-sm`}
+              className={`flex flex-col gap-3 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-shadow duration-300 cursor-pointer ${theme.bgColor} backdrop-blur-sm`}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${rec.color} bg-white/15`}>
-                <rec.icon className="w-6 h-6" />
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${theme.color} bg-white/15`}>
+                <Icon className="w-6 h-6" />
               </div>
               <div className="flex flex-col gap-1 flex-grow">
                 <h3 className="text-md font-bold text-dark-slate-gray">{rec.title}</h3>
@@ -110,7 +93,7 @@ export default function HealthInsights() {
                 <span>Timeframe: <span className="font-semibold">{rec.timeframe}</span></span>
               </div>
             </motion.div>
-          ))}
+          )})}
         </CardContent>
       </Card>
 

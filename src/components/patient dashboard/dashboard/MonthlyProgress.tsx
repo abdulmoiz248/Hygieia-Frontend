@@ -4,19 +4,12 @@ import { Activity } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
-
-
-const monthlyProgress = [
-  { month: "Jan", weight: 75, bmi: 24.2, bloodPressure: 125, heartRate: 72, energy: 7.5 },
-  { month: "Feb", weight: 74.5, bmi: 24.0, bloodPressure: 122, heartRate: 70, energy: 7.8 },
-  { month: "Mar", weight: 74, bmi: 23.8, bloodPressure: 120, heartRate: 68, energy: 8.2 },
-  { month: "Apr", weight: 73.5, bmi: 23.6, bloodPressure: 118, heartRate: 69, energy: 8.5 },
-  { month: "May", weight: 73, bmi: 23.4, bloodPressure: 115, heartRate: 67, energy: 8.8 },
-  { month: "Jun", weight: 72.5, bmi: 23.2, bloodPressure: 113, heartRate: 66, energy: 9.0 },
-]
+import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 
 export default function MonthlyProgress() {
+  const monthlyProgress = usePatientDashboardAnalyticsStore((state) => state.monthlyProgress)
+
   return (
       <Card className="w-full lg:w-[60%] bg-white/50 backdrop-blur-lg shadow-md border border-white/25 rounded-2xl overflow-hidden flex-1 min-w-0">
           <CardHeader className="flex items-center justify-between pb-3 border-b border-white/20">

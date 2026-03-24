@@ -5,23 +5,16 @@ import { Activity, Droplets } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, BarChart, Bar, LineChart, Line } from "recharts"
+import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
 
-const weeklyActivity = [
-  { day: "Mon", calories: 2200, burned: 450, steps: 8500, water: 6, sleep: 7.5 },
-  { day: "Tue", calories: 2100, burned: 380, steps: 7200, water: 7, sleep: 6.8 },
-  { day: "Wed", calories: 2300, burned: 520, steps: 9800, water: 8, sleep: 8.2 },
-  { day: "Thu", calories: 1900, burned: 300, steps: 6500, water: 5, sleep: 6.5 },
-  { day: "Fri", calories: 2400, burned: 600, steps: 11200, water: 9, sleep: 7.8 },
-  { day: "Sat", calories: 2600, burned: 700, steps: 12500, water: 8, sleep: 8.5 },
-  { day: "Sun", calories: 2200, burned: 400, steps: 8900, water: 7, sleep: 7.2 },
-]
-
 export default function WeeklyActivity() {
+  const weeklyActivity = usePatientDashboardAnalyticsStore((state) => state.weeklyActivity)
+
   return (
     <motion.div
       initial="hidden"
