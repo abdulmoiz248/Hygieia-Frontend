@@ -122,39 +122,6 @@ function DashboardContent() {
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Summary Cards */}
-      <motion.div variants={itemVariants} className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-3">
-        <Card className="bg-gradient-to-br from-soft-blue/10 to-soft-blue/5 border-soft-blue/20">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-cool-gray font-medium">Blog Management</p>
-              <p className="text-3xl font-bold text-soft-blue mt-2">Review & Approve</p>
-              <p className="text-xs text-cool-gray mt-3">Keep quality content high</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-mint-green/10 to-mint-green/5 border-mint-green/20">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-cool-gray font-medium">User Management</p>
-              <p className="text-3xl font-bold text-mint-green mt-2">Monitor Users</p>
-              <p className="text-xs text-cool-gray mt-3">Track platform engagement</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-soft-coral/10 to-soft-coral/5 border-soft-coral/20">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-cool-gray font-medium">Communications</p>
-              <p className="text-3xl font-bold text-soft-coral mt-2">Handle Inquiries</p>
-              <p className="text-xs text-cool-gray mt-3">Respond to messages</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </motion.div>
   )
 }
