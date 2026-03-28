@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { NutritionistProfile as NP } from "@/store/nutritionist/userStore"
 import { useNutritionists } from "@/hooks/useNutritionist"
 import Loader from "@/components/loader/loader"
+import api from "@/lib/axios"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -19,9 +20,12 @@ import {
   QrCode,
   Share2,
   Coins,
+  Loader2,
+  MapPin,
+  MessageSquare,
 } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -31,9 +35,86 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+type ProviderReview = {
+  id: string
+  patientName: string
+  rating: number
+  review: string
+  createdAt: string
+}
+
+type ProviderReviewsResponse = {
+  items?: ProviderReview[]
+}
+
+const formatReviewDate = (date: string): string => {
+  if (!date) {
+    return ""
+  }
+
+  const parsed = new Date(date)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return ""
+  }
+
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+}
+
 export function NutritionistProfile({ id }: { id: string }) {
   const { data: nutritionists, isLoading, isError } = useNutritionists()
   const [showQR, setShowQR] = useState(false)
+  const [reviews, setReviews] = useState<ProviderReview[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
+  const [reviewsError, setReviewsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true)
+        setReviewsError(null)
+
+        const response = await api.get<ProviderReviewsResponse>("/appointments/reviews/provider", {
+          params: {
+            providerId: id,
+            role: "nutritionist",
+            limit: 10,
+            offset: 0,
+          },
+        })
+
+        if (!isMounted) {
+          return
+        }
+
+        setReviews(Array.isArray(response.data?.items) ? response.data.items : [])
+      } catch {
+        if (!isMounted) {
+          return
+        }
+
+        setReviews([])
+        setReviewsError("Failed to load reviews right now.")
+      } finally {
+        if (isMounted) {
+          setReviewsLoading(false)
+        }
+      }
+    }
+
+    fetchReviews()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id])
+
   if (isLoading) {
     return  <div className="flex items-center justify-center min-h-[400px]">
       <Loader />
@@ -208,30 +289,81 @@ export function NutritionistProfile({ id }: { id: string }) {
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="bg-gradient-to-br from-soft-blue/10 via-mint-green/5 to-cool-gray/10 backdrop-blur-lg border border-border/30 shadow-lg rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-soft-blue text-lg font-semibold">
+                  <MessageSquare className="h-6 w-6 text-soft-coral" />
+                  Patient Reviews
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {reviewsLoading ? (
+                  <div className="flex items-center gap-3 text-cool-gray">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Loading reviews...</span>
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-cool-gray/30 bg-white/60 p-4 text-sm text-cool-gray">
+                    No reviews yet.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="rounded-xl border border-border/40 bg-white/70 p-4">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <p className="font-semibold text-dark-slate-gray">{review.patientName || "Anonymous patient"}</p>
+                          <span className="text-xs text-cool-gray">{formatReviewDate(review.createdAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {Array.from({ length: 5 }, (_, index) => (
+                            <Star
+                              key={`${review.id}-star-${index}`}
+                              className={`h-4 w-4 ${index < review.rating ? "fill-yellow-400 text-yellow-500" : "text-gray-300"}`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-sm text-dark-slate-gray leading-relaxed">{review.review}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {reviewsError && !reviewsLoading && reviews.length === 0 && (
+                  <p className="mt-3 text-xs text-red-500">{reviewsError}</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-soft-blue/10 via-mint-green/5 to-cool-gray/10 border border-border/30 shadow-lg rounded-2xl">
+            <Card className="bg-gradient-to-br from-soft-blue/15 via-snow-white to-mint-green/15 border border-soft-blue/20 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-soft-blue text-lg font-semibold">Working Hours & Locations</CardTitle>
+                <CardTitle className="text-soft-blue text-lg font-semibold flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Working Hours & Locations
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {nutritionist!.workingHours.map((s, i) => (
-                    <div key={i} className="border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-dark-slate-gray">{s.day}</span>
-                        <span className="text-soft-coral">
+                    <div
+                      key={i}
+                      className="rounded-xl bg-white/70 border border-border/40 p-3 shadow-sm transition-all duration-200 hover:shadow-md hover:border-soft-blue/30"
+                    >
+                      <div className="flex items-center justify-between gap-2 text-sm">
+                        <span className="inline-flex items-center rounded-full bg-soft-blue/10 text-soft-blue px-2.5 py-1 font-semibold">
+                          {s.day}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-soft-coral font-semibold">
+                          <Clock className="h-4 w-4" />
                           {s.start} - {s.end}
                         </span>
                       </div>
                       {s.location && (
-                        <div className="flex items-center gap-1 text-xs text-mint-green mt-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint-green/15 px-2.5 py-1 text-xs font-medium text-dark-slate-gray">
+                          <MapPin className="h-3.5 w-3.5 text-mint-green" />
                           <span>{s.location}</span>
                         </div>
                       )}
