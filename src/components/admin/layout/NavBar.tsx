@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Menu, LogOut, ChevronDown } from "lucide-react"
+import { Menu, LogOut, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 import Image from "next/image"
 import { BellRing } from "@/components/ui/BellRing"
 import { useState, useEffect } from "react"
@@ -21,14 +20,11 @@ interface TopNavProps {
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const [userName, setUserName] = useState("Admin")
-  const [userId, setUserId] = useState("")
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
-    const id = localStorage.getItem("id")
     const role = localStorage.getItem("role")
 
-    if (id) setUserId(id)
     if (role === "admin") setUserName("Admin")
   }, [])
 
@@ -41,9 +37,10 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0">
       <div className="flex items-center justify-between">
-        
+
         {/* LEFT SIDE */}
         <div className="flex items-center gap-4 w-full">
+
           <Button
             variant="ghost"
             size="icon"
@@ -57,28 +54,12 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             <Image src="/logo/logo.png" alt="Hygieia Logo" width={32} height={32} />
             <span className="font-semibold text-lg">Hygieia</span>
           </div>
-
-          {/* Search (keep UI same, route can change later) */}
-          <div className="hidden md:flex w-full max-w-md">
-            <Button
-              variant="outline"
-              asChild
-              className="flex w-full justify-start items-center gap-2 bg-gray-50 hover:bg-gray-100 border-0"
-            >
-              <Link href="#">
-                <Search className="w-4 h-4 text-soft-blue" />
-                <span className="hidden sm:inline text-soft-blue">
-                  Search...
-                </span>
-              </Link>
-            </Button>
-          </div>
         </div>
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-3">
 
-          {/* Notifications (UI only for now) */}
+          {/* NOTIFICATIONS */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
@@ -111,7 +92,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* USER DROPDOWN */}
+          {/* USER */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
@@ -126,8 +107,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="bg-white">
-              
-              {/* ONLY LOGOUT */}
+
               <DropdownMenuItem
                 onClick={() => {
                   localStorage.clear()
@@ -149,6 +129,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
             </DropdownMenuContent>
           </DropdownMenu>
+
         </div>
       </div>
     </header>
