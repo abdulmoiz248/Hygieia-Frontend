@@ -25,11 +25,11 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
-  { icon: Users, label: "Manage Users", href: "/users" },
+  { icon: Users, label: "Manage Workers", href: "/users" },
   { icon: FileText, label: "Manage Blogs", href: "/blogs" },
   { icon: Mail, label: "Review Emails", href: "/emails" },
   { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
-  { icon: Search, label: "CV (RAG)", href: "/cv" },
+  { icon: Search, label: "Manage CV", href: "/cv" },
   { icon: BarChart, label: "Reports", href: "/reports" },
 ]
 
