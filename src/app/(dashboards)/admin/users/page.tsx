@@ -537,7 +537,7 @@ export default function ManageUsersPage() {
   }, [filtered, activeTab])
 
   return (
-    <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)]">
+    <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
       {/* HEADER */}
       <div className="flex justify-between items-center">

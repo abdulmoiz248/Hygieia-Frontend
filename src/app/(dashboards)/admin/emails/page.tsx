@@ -571,7 +571,7 @@ export default function NewsletterPage() {
       {/* HEADER — same classes as Manage Workers / CV Management */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-soft-blue)] via-[var(--color-mint-green)] to-[var(--color-soft-coral)] bg-clip-text text-transparent pb-1">
+          <h1  className="text-3xl font-bold bg-gradient-to-r from-[var(--color-soft-blue)] via-[var(--color-mint-green)] to-[var(--color-soft-coral)] bg-clip-text pb-1 text-transparent">
             Newsletter
           </h1>
           <p className="text-sm text-[var(--color-cool-gray)] mt-1">

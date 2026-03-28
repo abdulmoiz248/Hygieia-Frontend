@@ -21,10 +21,10 @@ export function DashboardLayout({
         onMobileToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
         <TopNav onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto transition-all duration-300 ease-in-out p-4 lg:p-6">
           <div className="max-w-full mx-auto">{children}</div>
         </main>
       </div>
