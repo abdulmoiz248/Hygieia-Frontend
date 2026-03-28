@@ -4,9 +4,9 @@ import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
 
 export const metadata: Metadata = {
-  title: "Blogs | Hygieia",
+  title: " Appointment Review | Hygieia",
   description:
-    "Explore insightful health articles, AI trends in medicine, wellness tips, and expert opinions on the Hygieia Blogs page.",
+    "Review your appointment details and provide feedback about your experience with the healthcare provider.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
