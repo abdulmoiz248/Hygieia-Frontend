@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 //import LogActivity from "@/components/patient dashboard/fitness/LogActivity"
 import HealthDataModal from "@/components/patient dashboard/fitness/Cal"
 import Garden from "@/components/patient dashboard/fitness/Garden"
-import Week from "@/components/patient dashboard/fitness/week"
+// import Week from "@/components/patient dashboard/fitness/week"
 import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
@@ -62,7 +62,7 @@ export default function FitnessPage() {
 
       <Garden/>
 
-      <Week/>
+      {/* <Week/> */}
       <TodayGoal/>
 
       {/* Enhanced Calorie Tracking */}

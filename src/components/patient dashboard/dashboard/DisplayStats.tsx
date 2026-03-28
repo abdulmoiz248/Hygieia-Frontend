@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Calendar, Flame, Pill, TrendingUp, HeartPulse } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 
 import CountUp from '@/blocks/TextAnimations/CountUp/CountUp'
 import { Calendar1 } from '../CalendarIcon'
@@ -46,8 +46,8 @@ export default function DashboardStats() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const nextAppointment = upcomingAppointments[0]
 
-  const mockGetDashboardStats = async (): Promise<StatCardData[]> => {
-    return [
+  const data = useMemo<StatCardData[]>(
+    () => [
       {
         id: "appointment",
         title: nextAppointment?.doctor?.name ?? "No Appointment 🎉",
@@ -86,16 +86,11 @@ export default function DashboardStats() {
         icon: 'score',
         color: 'cool-gray'
       },
-    ]
-  }
+    ],
+    [calories.caloriesBurned, nextAppointment, prescriptions.MedicineState.todaysMeds, prescriptions.Prescription, user.healthscore]
+  )
 
-  const [data, setData] = useState<StatCardData[] | null>(null)
-
-  useEffect(() => {
-    mockGetDashboardStats().then(setData)
-  }, [])
-
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return (
       <div className="text-center text-cool-gray py-10 text-sm">
         No dashboard data to show.

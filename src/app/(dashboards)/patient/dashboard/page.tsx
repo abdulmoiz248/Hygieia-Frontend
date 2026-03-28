@@ -17,6 +17,7 @@ import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-s
 
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import { usePatientMedicineStore } from "@/store/patient/medicine-store"
+import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,6 +40,7 @@ function DashboardPageContent() {
 
    const {fetchFitness}=usePatientFitnessStore()
   const { fetchPrescriptions } = usePatientMedicineStore()
+  const { fetchDashboardAnalytics } = usePatientDashboardAnalyticsStore()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -80,12 +82,17 @@ function DashboardPageContent() {
   }, [searchParams, toast])
 
   useEffect(() => {
+    const patientId = profile?.id || (typeof window !== "undefined" ? localStorage.getItem("id") || "" : "")
+    if (!patientId) {
+      return
+    }
 
-    fetchAppointments(profile?.id || "")
+    fetchAppointments(patientId)
     fetchMedicalRecords()
-    fetchFitness(profile?.id || "")
-    fetchPrescriptions(profile?.id || "")
-  }, [])
+    fetchFitness(patientId)
+    fetchPrescriptions(patientId)
+    fetchDashboardAnalytics(patientId)
+  }, [fetchAppointments, fetchDashboardAnalytics, fetchFitness, fetchMedicalRecords, fetchPrescriptions, profile?.id])
 
 
 
