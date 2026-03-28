@@ -17,7 +17,7 @@ import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { useNotifications } from "@/hooks/patient/useNotifications"
 import { timeAgo } from "@/helpers/formatTimeAgo"
 import api from "@/lib/axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
@@ -45,6 +45,12 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
         setUnreadCount(0) 
   }
 
+
+  
+   useEffect(() => {
+    setUnreadCount(notifications ? notifications.filter(n => !n.is_read).length : 0)
+  }, [notifications])
+  
 
   const userInitials = user.name
     .split(" ")

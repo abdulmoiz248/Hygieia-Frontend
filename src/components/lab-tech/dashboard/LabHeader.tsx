@@ -20,7 +20,7 @@ import { Notification } from "@/hooks/lab-tech/useLabTechNotifications"
 import useLabTechNotifications from "@/hooks/lab-tech/useLabTechNotifications"
 import { timeAgo } from "@/helpers/formatTimeAgo"
 import api from "@/lib/axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => void }) {
   const { profile } = useLabTechnicianStore()
@@ -33,6 +33,12 @@ export function LabHeader({ onMobileMenuClick }: { onMobileMenuClick?: () => voi
 
      const [unreadCount, setUnreadCount] = useState(notifications ? notifications.filter(n => !n.is_read).length : 0)
     
+
+     
+   useEffect(() => {
+    setUnreadCount(notifications ? notifications.filter(n => !n.is_read).length : 0)
+  }, [notifications])
+
 
     const markAllAsRead = async () => {
         if (!profile?.id || unreadCount === 0) return
