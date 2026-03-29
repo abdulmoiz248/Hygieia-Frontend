@@ -11,7 +11,6 @@ export default function WorkersPageHeader({ totalCount, onAddClick }: WorkersPag
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        {/* Matches dashboard heading: coral/pink gradient text */}
         <h1 className="text-3xl font-bold pb-1 text-soft-coral">
           Manage Workers
         </h1>
