@@ -6,6 +6,7 @@ import AdminWelcomeSection from "@/components/admin/dashboard/AdminWelcomeSectio
 import AdminStatsCards from "@/components/admin/dashboard/AdminStatsCards"
 import AdminRecentActivity from "@/components/admin/dashboard/AdminRecentActivity"
 import AdminQuickActions from "@/components/admin/dashboard/AdminQuickActions"
+import AdminChartsSection from "@/components/admin/dashboard/AdminChartsSection"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -36,7 +37,10 @@ function DashboardContent() {
       {/* Stats Cards */}
       <AdminStatsCards />
 
-      {/* Quick Actions */}
+      {/* Charts Section */}
+      <AdminChartsSection />
+
+      {/* Quick Actions + Recent Activity */}
       <motion.div variants={itemVariants} className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
 
         {/* Recent Activity */}
@@ -56,6 +60,7 @@ export default function AdminDashboardPage() {
       <div className="space-y-6 lg:space-y-8 w-full animate-pulse">
         <div className="h-32 bg-gray-200 rounded-lg"></div>
         <div className="h-48 bg-gray-200 rounded-lg"></div>
+        <div className="h-56 bg-gray-200 rounded-lg"></div>
       </div>
     }>
       <DashboardContent />
