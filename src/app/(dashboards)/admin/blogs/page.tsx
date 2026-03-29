@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import CountUp from "@/blocks/TextAnimations/CountUp/CountUp"
 import Link from "next/link"
 import {
   Clock, User, Search, BookOpen, ShieldCheck,
@@ -69,25 +72,60 @@ function getCategoryStyle(cat: string) {
   return CATEGORY_STYLES[cat] ?? { color: "var(--color-cool-gray)", bg: "oklch(0.93 0.02 180)" }
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+// ─── Stat Cards — AdminStatsCards layout ──────────────────────────────────────
 
-function StatCard({ icon: Icon, count, label, gradient, lightBg, color }: {
-  icon: React.ElementType; count: number; label: string
-  gradient: string; lightBg: string; color: string
-}) {
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
+
+interface BlogStatCard {
+  id: string
+  title: string
+  value: number
+  icon: React.ElementType
+  color: string        // CSS var string for inline styles
+  colorClass: string   // Tailwind class segment
+}
+
+function BlogStatCards({ cards }: { cards: BlogStatCard[] }) {
   return (
-    <div className="rounded-2xl bg-white border border-[var(--color-cool-gray)]/15 shadow-sm overflow-hidden">
-      <div className="h-1.5 w-full" style={{ background: gradient }} />
-      <div className="p-6 flex items-center gap-5">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: lightBg }}>
-          <Icon className="w-6 h-6" style={{ color }} />
-        </div>
-        <div className="flex-1">
-          <p className="text-3xl font-bold text-[var(--color-dark-slate-gray)] leading-none">{count}</p>
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1 font-medium">{label}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+    >
+      {cards.map((card) => {
+        const Icon = card.icon
+        return (
+          <motion.div key={card.id} variants={itemVariants} className="h-full">
+            <Card
+              className={`h-full flex flex-col justify-between bg-gradient-to-br from-${card.colorClass}/10 to-${card.colorClass}/5 border-${card.colorClass}/20`}
+            >
+              <CardContent className="p-6 flex flex-col justify-between h-full">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-cool-gray">{card.title}</p>
+                    <p className={`text-2xl font-bold text-${card.colorClass}`}>
+                      <CountUp
+                        from={0}
+                        to={card.value}
+                        separator=","
+                        direction="up"
+                        duration={1}
+                        className={`text-${card.colorClass}`}
+                      />
+                    </p>
+                  </div>
+                  <Icon className={`w-8 h-8 text-${card.colorClass}`} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )
+      })}
+    </motion.div>
   )
 }
 
@@ -101,7 +139,6 @@ function BlogCard({ post, onDelete, deleting }: {
 
   return (
     <div className="group rounded-2xl bg-white border border-[var(--color-cool-gray)]/15 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col">
-      {/* Thumbnail */}
       <Link href={`/admin/blogs/${post.id}`} className="relative h-44 w-full flex-shrink-0 block overflow-hidden" style={{ background: gradient }}>
         <div className="absolute inset-0 flex items-center justify-center opacity-20">
           <BookOpen className="w-16 h-16 text-white" />
@@ -121,7 +158,6 @@ function BlogCard({ post, onDelete, deleting }: {
         </div>
       </Link>
 
-      {/* Body */}
       <div className="p-5 flex flex-col flex-1">
         <Link href={`/admin/blogs/${post.id}`} className="flex-1 flex flex-col">
           <h3 className="font-bold text-[var(--color-dark-slate-gray)] text-sm leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-[var(--color-soft-blue)] transition-colors">
@@ -140,7 +176,6 @@ function BlogCard({ post, onDelete, deleting }: {
           <div className="flex-1" />
         </Link>
 
-        {/* Footer */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
@@ -292,15 +327,42 @@ export default function BlogReviewPage() {
     }
   }
 
-  const totalCount     = posts.filter(p => !p.isVerified).length
+  const totalCount     = posts.length
+  const pendingCount   = posts.filter(p => !p.isVerified).length
   const publishedCount = posts.filter(p =>  p.isVerified).length
-  const allCount       = posts.length
+
+  const statCards: BlogStatCard[] = [
+    {
+      id: "total",
+      title: "Total Posts",
+      value: totalCount,
+      icon: BookOpen,
+      color: "var(--color-soft-blue)",
+      colorClass: "soft-blue",
+    },
+    {
+      id: "pending",
+      title: "Pending Review",
+      value: pendingCount,
+      icon: AlertTriangle,
+      color: "oklch(0.55 0.22 55)",
+      colorClass: "cool-gray",
+    },
+    {
+      id: "published",
+      title: "Published",
+      value: publishedCount,
+      icon: ShieldCheck,
+      color: "var(--color-mint-green)",
+      colorClass: "mint-green",
+    },
+  ]
 
   const filtered = useMemo(() => posts
     .filter(p => {
       if (activeTab === "pending")   return !p.isVerified
       if (activeTab === "published") return  p.isVerified
-      return true // "all" tab
+      return true
     })
     .filter(p =>
       !search ||
@@ -311,9 +373,9 @@ export default function BlogReviewPage() {
   [posts, activeTab, search])
 
   const tabs: { key: Tab; label: string; count: number }[] = [
-    { key: "pending",   label: "Total Posts", count: totalCount     },
-    { key: "published", label: "Published",   count: publishedCount },
-    { key: "all",       label: "Pending",         count: allCount       },
+    { key: "all",       label: "All Posts",  count: totalCount     },
+    { key: "pending",   label: "Pending",    count: pendingCount   },
+    { key: "published", label: "Published",  count: publishedCount },
   ]
 
   return (
@@ -329,22 +391,11 @@ export default function BlogReviewPage() {
         </p>
       </div>
 
-      {/* STAT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard icon={BookOpen}      count={allCount}       label="Total Posts"
-          gradient="linear-gradient(135deg, var(--color-soft-blue), oklch(0.45 0.18 230))"
-          lightBg="oklch(0.95 0.05 210)" color="var(--color-soft-blue)" />
-        <StatCard icon={AlertTriangle} count={totalCount}     label="Pending Review"
-          gradient="linear-gradient(135deg, oklch(0.65 0.18 60), oklch(0.55 0.22 30))"
-          lightBg="oklch(0.96 0.06 55)" color="oklch(0.55 0.22 55)" />
-        <StatCard icon={ShieldCheck}   count={publishedCount} label="Published"
-          gradient="linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))"
-          lightBg="oklch(0.95 0.04 178)" color="var(--color-mint-green)" />
-      </div>
+      {/* STAT CARDS — AdminStatsCards layout */}
+      <BlogStatCards cards={statCards} />
 
       {/* TABS + SEARCH + VIEW TOGGLE */}
       <div className="flex flex-col gap-3">
-        {/* Tab strip */}
         <div className="flex gap-1 bg-white border border-[var(--color-cool-gray)]/20 rounded-2xl p-1 shadow-sm w-fit">
           {tabs.map(tab => (
             <button
@@ -368,7 +419,6 @@ export default function BlogReviewPage() {
           ))}
         </div>
 
-        {/* Search + view toggle */}
         <div className="flex items-center gap-3">
           <div className="relative flex-1 sm:max-w-sm">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-cool-gray)]" />
@@ -401,7 +451,13 @@ export default function BlogReviewPage() {
         <div className="rounded-2xl border border-dashed border-[var(--color-cool-gray)]/30 p-16 text-center">
           <ShieldCheck className="w-12 h-12 mx-auto mb-3 text-[var(--color-mint-green)] opacity-40" />
           <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
-            {search ? "No posts match your search." : activeTab === "pending" ? "No posts pending review." : activeTab === "published" ? "No published posts yet." : "No posts found."}
+            {search
+              ? "No posts match your search."
+              : activeTab === "pending"
+              ? "No posts pending review."
+              : activeTab === "published"
+              ? "No published posts yet."
+              : "No posts found."}
           </p>
         </div>
       ) : viewMode === "grid" ? (

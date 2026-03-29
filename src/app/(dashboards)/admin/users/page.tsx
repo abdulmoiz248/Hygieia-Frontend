@@ -1,6 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import CountUp from "@/blocks/TextAnimations/CountUp/CountUp"
 import {
   Plus, Search, Trash2, X, User, Stethoscope, FlaskConical,
   Salad, Phone, Mail, Calendar, Star, Clock, ChevronDown,
@@ -107,24 +110,28 @@ const ROLE_CONFIG: Record<Role, {
   plural: string
   icon: React.ElementType
   color: string
+  colorClass: string
   gradient: string
   lightBg: string
 }> = {
   doctor: {
     label: "Doctor", plural: "Doctors", icon: Stethoscope,
     color: "var(--color-soft-blue)",
+    colorClass: "soft-blue",
     gradient: "linear-gradient(135deg, var(--color-soft-blue), oklch(0.45 0.18 230))",
     lightBg: "oklch(0.95 0.05 210)",
   },
   nutritionist: {
     label: "Nutritionist", plural: "Nutritionists", icon: Salad,
     color: "var(--color-mint-green)",
+    colorClass: "mint-green",
     gradient: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))",
     lightBg: "oklch(0.95 0.04 178)",
   },
   pathologist: {
     label: "Pathologist", plural: "Pathologists", icon: FlaskConical,
     color: "var(--color-soft-coral)",
+    colorClass: "soft-coral",
     gradient: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))",
     lightBg: "oklch(0.96 0.06 10)",
   },
@@ -153,6 +160,55 @@ function Avatar({ name, color }: { name: string; color: string }) {
   )
 }
 
+// ─── Stat Cards — AdminStatsCards layout ──────────────────────────────────────
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
+
+function WorkerStatCards({ counts }: { counts: Record<Role, number> }) {
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+    >
+      {(Object.keys(ROLE_CONFIG) as Role[]).map((role) => {
+        const cfg = ROLE_CONFIG[role]
+        const Icon = cfg.icon
+        return (
+          <motion.div key={role} variants={itemVariants} className="h-full">
+            <Card
+              className={`h-full flex flex-col justify-between bg-gradient-to-br from-${cfg.colorClass}/10 to-${cfg.colorClass}/5 border-${cfg.colorClass}/20`}
+            >
+              <CardContent className="p-6 flex flex-col justify-between h-full">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-cool-gray">{cfg.plural}</p>
+                    <p className={`text-2xl font-bold text-${cfg.colorClass}`}>
+                      <CountUp
+                        from={0}
+                        to={counts[role]}
+                        separator=","
+                        direction="up"
+                        duration={1}
+                        className={`text-${cfg.colorClass}`}
+                      />
+                    </p>
+                  </div>
+                  <Icon className={`w-8 h-8 text-${cfg.colorClass}`} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )
+      })}
+    </motion.div>
+  )
+}
+
 // ─── Worker Card ──────────────────────────────────────────────────────────────
 
 function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: string) => void }) {
@@ -162,11 +218,9 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
 
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
-      {/* Top accent stripe */}
       <div className="h-1 w-full" style={{ background: cfg.gradient }} />
 
       <div className="p-5">
-        {/* Card Header */}
         <div className="flex items-start gap-4">
           <Avatar name={worker.name} color={cfg.color} />
 
@@ -185,7 +239,6 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
               </div>
             </div>
 
-            {/* Quick Info Pills */}
             <div className="flex flex-wrap gap-1.5 mt-2.5">
               {worker.experienceYears > 0 && (
                 <span className="text-[11px] px-2.5 py-1 rounded-full font-medium"
@@ -207,7 +260,6 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
           </div>
         </div>
 
-        {/* Contact Row */}
         <div className="flex flex-col gap-1.5 mt-4 text-xs text-[var(--color-cool-gray)]">
           {worker.personal_email && (
             <div className="flex items-center gap-2">
@@ -223,7 +275,6 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
           )}
         </div>
 
-        {/* Expandable Details */}
         {expanded && (
           <div className="mt-4 pt-4 border-t border-gray-100 space-y-3 text-xs text-[var(--color-cool-gray)]">
             {worker.bio && <p className="italic leading-relaxed">{worker.bio}</p>}
@@ -267,7 +318,6 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
           </div>
         )}
 
-        {/* Footer Actions */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <button
             onClick={() => setExpanded(!expanded)}
@@ -285,32 +335,6 @@ function WorkerCard({ worker, onDelete }: { worker: Worker; onDelete: (id: strin
             <Trash2 className="w-3.5 h-3.5" />
             Remove
           </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-
-function StatCard({ role, count }: { role: Role; count: number }) {
-  const cfg = ROLE_CONFIG[role]
-  const Icon = cfg.icon
-
-  return (
-    <div className="rounded-2xl bg-white border border-[var(--color-cool-gray)]/15 shadow-sm overflow-hidden">
-      {/* gradient top bar */}
-      <div className="h-1.5 w-full" style={{ background: cfg.gradient }} />
-      <div className="p-6 flex items-center gap-5">
-        <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-          style={{ background: cfg.lightBg }}
-        >
-          <Icon className="w-7 h-7" style={{ color: cfg.color }} />
-        </div>
-        <div className="flex-1">
-          <p className="text-3xl font-bold text-[var(--color-dark-slate-gray)] leading-none">{count}</p>
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1 font-medium">{cfg.plural}</p>
         </div>
       </div>
     </div>
@@ -499,9 +523,9 @@ export default function ManageUsersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const counts = useMemo(() => ({
-    doctor: workers.filter(w => w.role === "doctor").length,
+    doctor:       workers.filter(w => w.role === "doctor").length,
     nutritionist: workers.filter(w => w.role === "nutritionist").length,
-    pathologist: workers.filter(w => w.role === "pathologist").length,
+    pathologist:  workers.filter(w => w.role === "pathologist").length,
   }), [workers])
 
   const filtered = useMemo(() => {
@@ -560,12 +584,8 @@ export default function ManageUsersPage() {
         </button>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard role="doctor" count={counts.doctor} />
-        <StatCard role="nutritionist" count={counts.nutritionist} />
-        <StatCard role="pathologist" count={counts.pathologist} />
-      </div>
+      {/* STAT CARDS — AdminStatsCards layout */}
+      <WorkerStatCards counts={counts} />
 
       {/* SEARCH + TABS */}
       <div className="flex flex-col gap-3">
@@ -639,7 +659,6 @@ export default function ManageUsersPage() {
         )
       })}
 
-      {/* MODALS */}
       {showAddModal && (
         <AddWorkerModal
           onClose={() => setShowAddModal(false)}

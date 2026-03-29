@@ -1,6 +1,9 @@
 "use client"
 
 import { useMemo, useRef, useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import CountUp from "@/blocks/TextAnimations/CountUp/CountUp"
 import {
   FileText, Search, Trash2, X, UserPlus, ChevronDown,
   Send, Bot, User, SortAsc,
@@ -76,12 +79,13 @@ const MOCK_CVS: CV[] = [
   },
 ]
 
-// ─── Status Config — mirrors ROLE_CONFIG structure from users page ─────────────
+// ─── Status Config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<CVStatus, {
   label: string
   icon: React.ElementType
   color: string
+  colorClass: string
   gradient: string
   lightBg: string
 }> = {
@@ -89,6 +93,7 @@ const STATUS_CONFIG: Record<CVStatus, {
     label: "New",
     icon: Inbox,
     color: "var(--color-soft-blue)",
+    colorClass: "soft-blue",
     gradient: "linear-gradient(135deg, var(--color-soft-blue), oklch(0.45 0.18 230))",
     lightBg: "oklch(0.95 0.05 210)",
   },
@@ -96,6 +101,7 @@ const STATUS_CONFIG: Record<CVStatus, {
     label: "Reviewed",
     icon: Eye,
     color: "var(--color-cool-gray)",
+    colorClass: "cool-gray",
     gradient: "linear-gradient(135deg, var(--color-cool-gray), oklch(0.45 0.04 200))",
     lightBg: "oklch(0.93 0.02 180)",
   },
@@ -103,6 +109,7 @@ const STATUS_CONFIG: Record<CVStatus, {
     label: "Shortlisted",
     icon: Star,
     color: "var(--color-mint-green)",
+    colorClass: "mint-green",
     gradient: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))",
     lightBg: "oklch(0.95 0.04 178)",
   },
@@ -110,6 +117,7 @@ const STATUS_CONFIG: Record<CVStatus, {
     label: "Rejected",
     icon: Ban,
     color: "var(--color-soft-coral)",
+    colorClass: "soft-coral",
     gradient: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))",
     lightBg: "oklch(0.96 0.06 10)",
   },
@@ -141,31 +149,52 @@ function StatusBadge({ status }: { status: CVStatus }) {
   )
 }
 
-// ─── Status Stat Card — non-clickable, matches users page StatCard layout ─────
+// ─── Stat Cards — AdminStatsCards layout ──────────────────────────────────────
 
-function StatusStatCard({ status, count }: { status: CVStatus; count: number }) {
-  const cfg = STATUS_CONFIG[status]
-  const Icon = cfg.icon
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
 
+function CVStatCards({ counts }: { counts: Record<CVStatus, number> }) {
   return (
-    <div className="rounded-2xl bg-white border border-[var(--color-cool-gray)]/15 shadow-sm overflow-hidden">
-      {/* gradient top bar */}
-      <div className="h-1.5 w-full" style={{ background: cfg.gradient }} />
-
-      <div className="p-6 flex items-center gap-5">
-        <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-          style={{ background: cfg.lightBg }}
-        >
-          <Icon className="w-6 h-6" style={{ color: cfg.color }} />
-        </div>
-
-        <div className="flex-1">
-          <p className="text-3xl font-bold text-[var(--color-dark-slate-gray)] leading-none">{count}</p>
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1 font-medium">{cfg.label}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+    >
+      {(Object.keys(STATUS_CONFIG) as CVStatus[]).map((status) => {
+        const cfg = STATUS_CONFIG[status]
+        const Icon = cfg.icon
+        return (
+          <motion.div key={status} variants={itemVariants} className="h-full">
+            <Card
+              className={`h-full flex flex-col justify-between bg-gradient-to-br from-${cfg.colorClass}/10 to-${cfg.colorClass}/5 border-${cfg.colorClass}/20`}
+            >
+              <CardContent className="p-6 flex flex-col justify-between h-full">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-cool-gray">{cfg.label}</p>
+                    <p className={`text-2xl font-bold text-${cfg.colorClass}`}>
+                      <CountUp
+                        from={0}
+                        to={counts[status]}
+                        separator=","
+                        direction="up"
+                        duration={1}
+                        className={`text-${cfg.colorClass}`}
+                      />
+                    </p>
+                  </div>
+                  <Icon className={`w-8 h-8 text-${cfg.colorClass}`} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )
+      })}
+    </motion.div>
   )
 }
 
@@ -550,7 +579,7 @@ export default function CVPage() {
   return (
     <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
-      {/* HEADER — exact same classes as Manage Workers page */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-soft-blue)] via-[var(--color-mint-green)] to-[var(--color-soft-coral)] bg-clip-text text-transparent pb-1">
@@ -562,12 +591,8 @@ export default function CVPage() {
         </div>
       </div>
 
-      {/* STATUS STAT CARDS — above search bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {(Object.keys(STATUS_CONFIG) as CVStatus[]).map(s => (
-          <StatusStatCard key={s} status={s} count={counts[s]} />
-        ))}
-      </div>
+      {/* STAT CARDS — AdminStatsCards layout */}
+      <CVStatCards counts={counts} />
 
       {/* SEARCH + ROLE TABS + SORT + STATUS FILTERS */}
       <div className="flex flex-col gap-3">
@@ -585,7 +610,6 @@ export default function CVPage() {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            {/* Role tabs */}
             <div className="flex gap-1 bg-white border border-[var(--color-cool-gray)]/20 rounded-xl p-1 shadow-sm">
               {FILTER_TABS.map(tab => (
                 <button key={tab.value} onClick={() => setFilterRole(tab.value)}
@@ -600,7 +624,6 @@ export default function CVPage() {
 
             <div className="w-px h-7 bg-[var(--color-cool-gray)]/20" />
 
-            {/* Sort dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}

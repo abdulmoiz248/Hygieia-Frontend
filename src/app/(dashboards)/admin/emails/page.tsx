@@ -1,11 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Mail, Send, Sparkles, Users, CheckCircle2, XCircle,
   Loader2, Eye, EyeOff, RefreshCw, BookOpen,
   MailOpen, Rss, X, AlertCircle, Copy, Check,
 } from "lucide-react"
+import CountUp from "@/blocks/TextAnimations/CountUp/CountUp"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,8 +49,6 @@ const MOCK_USER_ID = "5e3dd75b-7c38-4bf9-8a76-bc45bab74d7c"
 const BASE_URL = "http://localhost:4000"
 
 // ─── Escape helpers ───────────────────────────────────────────────────────────
-// Backend returns HTML with escape sequences inside JSON strings.
-// We unescape on receive and re-escape on send.
 
 function unescapeHtml(raw: string): string {
   return raw
@@ -67,8 +68,6 @@ function escapeHtml(html: string): string {
     .replace(/\t/g, "\\t")
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
   const days = Math.floor(diff / 86400000)
@@ -77,37 +76,80 @@ function timeAgo(iso: string) {
   return `${days}d ago`
 }
 
-// ─── Stat Card — identical layout to users/CV page StatCards ─────────────────
+// ─── Stat Card — mirrors AdminStatsCards layout exactly ──────────────────────
 
-function StatCard({
-  icon: Icon,
-  count,
-  label,
-  gradient,
-  lightBg,
-  color,
-}: {
+type StatCardColor = "soft-blue" | "mint-green" | "soft-coral" | "cool-gray"
+
+interface StatCardData {
+  id: string
+  title: string
+  value: number | string
+  subtitle?: string
   icon: React.ElementType
-  count: number | string
-  label: string
-  gradient: string
-  lightBg: string
-  color: string
-}) {
+  color: StatCardColor
+  colorText?: string
+  trend?: string
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
+
+function NewsletterStatCards({ cards }: { cards: StatCardData[] }) {
   return (
-    <div className="rounded-2xl bg-white border border-[var(--color-cool-gray)]/15 shadow-sm overflow-hidden">
-      <div className="h-1.5 w-full" style={{ background: gradient }} />
-      <div className="p-6 flex items-center gap-5">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-          style={{ background: lightBg }}>
-          <Icon className="w-6 h-6" style={{ color }} />
-        </div>
-        <div className="flex-1">
-          <p className="text-3xl font-bold text-[var(--color-dark-slate-gray)] leading-none">{count}</p>
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1 font-medium">{label}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+    >
+      {cards.map((card) => {
+        const Icon = card.icon
+        return (
+          <motion.div key={card.id} variants={itemVariants} className="h-full">
+            <Card
+              className={`h-full flex flex-col justify-between bg-gradient-to-br from-${card.color}/10 to-${card.color}/5 border-${card.color}/20`}
+            >
+              <CardContent className="p-6 flex flex-col justify-between h-full">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-cool-gray">{card.title}</p>
+                    <p
+                      className={`text-2xl font-bold ${
+                        card.colorText ? `text-${card.colorText}` : `text-${card.color}`
+                      }`}
+                    >
+                      {typeof card.value === "number" ? (
+                        <CountUp
+                          from={0}
+                          to={card.value}
+                          separator=","
+                          direction="up"
+                          duration={1}
+                          className={
+                            card.colorText ? `text-${card.colorText}` : `text-${card.color}`
+                          }
+                        />
+                      ) : (
+                        card.value
+                      )}
+                    </p>
+                    {card.subtitle && (
+                      <p className="text-xs text-cool-gray">{card.subtitle}</p>
+                    )}
+                    {card.trend && (
+                      <p className="text-xs text-green-600 flex items-center">{card.trend}</p>
+                    )}
+                  </div>
+                  <Icon className={`w-8 h-8 text-${card.color}`} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )
+      })}
+    </motion.div>
   )
 }
 
@@ -116,28 +158,35 @@ function StatCard({
 function ResultBanner({ result, onClose }: { result: SendResult; onClose: () => void }) {
   const allSent = result.failedCount === 0
   return (
-    <div className={`flex items-start gap-4 p-4 rounded-2xl border ${
-      allSent
-        ? "bg-[oklch(0.95_0.04_178)] border-[var(--color-mint-green)]/40"
-        : "bg-[oklch(0.96_0.06_10)] border-[var(--color-soft-coral)]/40"
-    }`}>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-        allSent ? "bg-[var(--color-mint-green)]/20" : "bg-[var(--color-soft-coral)]/20"
-      }`}>
-        {allSent
-          ? <CheckCircle2 className="w-5 h-5 text-[var(--color-mint-green)]" />
-          : <AlertCircle className="w-5 h-5 text-[var(--color-soft-coral)]" />
-        }
+    <div
+      className={`flex items-start gap-4 p-4 rounded-2xl border ${
+        allSent
+          ? "bg-[oklch(0.95_0.04_178)] border-[var(--color-mint-green)]/40"
+          : "bg-[oklch(0.96_0.06_10)] border-[var(--color-soft-coral)]/40"
+      }`}
+    >
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+          allSent ? "bg-[var(--color-mint-green)]/20" : "bg-[var(--color-soft-coral)]/20"
+        }`}
+      >
+        {allSent ? (
+          <CheckCircle2 className="w-5 h-5 text-[var(--color-mint-green)]" />
+        ) : (
+          <AlertCircle className="w-5 h-5 text-[var(--color-soft-coral)]" />
+        )}
       </div>
       <div className="flex-1">
         <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">{result.message}</p>
         <div className="flex flex-wrap gap-3 mt-2">
           <span className="text-xs text-[var(--color-cool-gray)]">
-            ✉ Sent: <strong className="text-[var(--color-mint-green)]">{result.sentCount}</strong>
+            ✉ Sent:{" "}
+            <strong className="text-[var(--color-mint-green)]">{result.sentCount}</strong>
           </span>
           {result.failedCount > 0 && (
             <span className="text-xs text-[var(--color-cool-gray)]">
-              ✗ Failed: <strong className="text-[var(--color-soft-coral)]">{result.failedCount}</strong>
+              ✗ Failed:{" "}
+              <strong className="text-[var(--color-soft-coral)]">{result.failedCount}</strong>
             </span>
           )}
           <span className="text-xs text-[var(--color-cool-gray)]">
@@ -145,7 +194,10 @@ function ResultBanner({ result, onClose }: { result: SendResult; onClose: () => 
           </span>
         </div>
       </div>
-      <button onClick={onClose} className="p-1.5 hover:bg-black/5 rounded-lg transition-colors flex-shrink-0">
+      <button
+        onClick={onClose}
+        className="p-1.5 hover:bg-black/5 rounded-lg transition-colors flex-shrink-0"
+      >
         <X className="w-4 h-4 text-[var(--color-cool-gray)]" />
       </button>
     </div>
@@ -154,7 +206,15 @@ function ResultBanner({ result, onClose }: { result: SendResult; onClose: () => 
 
 // ─── HTML Preview ─────────────────────────────────────────────────────────────
 
-function HtmlPreview({ html, show, onToggle }: { html: string; show: boolean; onToggle: () => void }) {
+function HtmlPreview({
+  html,
+  show,
+  onToggle,
+}: {
+  html: string
+  show: boolean
+  onToggle: () => void
+}) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -165,7 +225,6 @@ function HtmlPreview({ html, show, onToggle }: { html: string; show: boolean; on
 
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/20 overflow-hidden bg-white shadow-sm">
-      {/* Preview header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <MailOpen className="w-4 h-4 text-[var(--color-soft-blue)]" />
@@ -178,7 +237,11 @@ function HtmlPreview({ html, show, onToggle }: { html: string; show: boolean; on
             onClick={handleCopy}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--color-cool-gray)] hover:bg-gray-200 transition-colors"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[var(--color-mint-green)]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-[var(--color-mint-green)]" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
             {copied ? "Copied" : "Copy HTML"}
           </button>
           <button
@@ -191,7 +254,7 @@ function HtmlPreview({ html, show, onToggle }: { html: string; show: boolean; on
         </div>
       </div>
 
-      {show && (
+      {show ? (
         <iframe
           srcDoc={html}
           title="Newsletter Preview"
@@ -199,9 +262,7 @@ function HtmlPreview({ html, show, onToggle }: { html: string; show: boolean; on
           style={{ height: "520px" }}
           sandbox="allow-same-origin"
         />
-      )}
-
-      {!show && (
+      ) : (
         <div className="p-8 text-center text-[var(--color-cool-gray)]">
           <Eye className="w-8 h-8 mx-auto mb-2 opacity-30" />
           <p className="text-sm">Preview hidden. Click Show to render.</p>
@@ -239,9 +300,7 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || "Generation failed")
-      // Unescape escape sequences from JSON-encoded HTML
-      const rawHtml = data.data?.html ?? ""
-      setGeneratedHtml(unescapeHtml(rawHtml))
+      setGeneratedHtml(unescapeHtml(data.data?.html ?? ""))
     } catch (e: any) {
       setGenError(e.message || "Failed to generate newsletter. Check your connection.")
     } finally {
@@ -279,12 +338,11 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
 
   return (
     <div className="space-y-5">
-
-      {/* Form card */}
       <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full" style={{
-          background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))"
-        }} />
+        <div
+          className="h-1.5 w-full"
+          style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }}
+        />
         <div className="p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4 text-[var(--color-soft-blue)]" />
@@ -293,41 +351,37 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
             </h2>
           </div>
 
-          {/* Idea */}
           <div>
             <label className="block text-xs font-semibold text-[var(--color-dark-slate-gray)] mb-1.5">
               Newsletter Idea / Topic
             </label>
             <textarea
               value={idea}
-              onChange={e => setIdea(e.target.value)}
+              onChange={(e) => setIdea(e.target.value)}
               rows={3}
               placeholder="e.g. Weekly health tips about maintaining a balanced diet and exercise routine..."
               className="w-full px-4 py-3 rounded-xl border border-[var(--color-cool-gray)]/30 focus:ring-2 focus:ring-[var(--color-soft-blue)] outline-none text-sm resize-none bg-gray-50 placeholder:text-[var(--color-cool-gray)]"
             />
           </div>
 
-          {/* Subject */}
           <div>
             <label className="block text-xs font-semibold text-[var(--color-dark-slate-gray)] mb-1.5">
               Email Subject Line
             </label>
             <input
               value={subject}
-              onChange={e => setSubject(e.target.value)}
+              onChange={(e) => setSubject(e.target.value)}
               placeholder="e.g. Hygieia Weekly Health Newsletter — March Edition"
               className="w-full px-4 py-3 rounded-xl border border-[var(--color-cool-gray)]/30 focus:ring-2 focus:ring-[var(--color-soft-blue)] outline-none text-sm bg-gray-50 placeholder:text-[var(--color-cool-gray)]"
             />
           </div>
 
-          {/* Generate error */}
           {genError && (
             <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[oklch(0.96_0.06_10)] text-xs text-[var(--color-soft-coral)]">
               <XCircle className="w-3.5 h-3.5 flex-shrink-0" /> {genError}
             </div>
           )}
 
-          {/* Generate button */}
           <div className="flex items-center gap-3">
             <button
               onClick={handleGenerate}
@@ -335,10 +389,11 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
               style={{ background: "var(--gradient-primary)" }}
             >
-              {genLoading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
-                : <><Sparkles className="w-4 h-4" /> Generate HTML</>
-              }
+              {genLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+              ) : (
+                <><Sparkles className="w-4 h-4" /> Generate HTML</>
+              )}
             </button>
 
             {generatedHtml && !genLoading && (
@@ -353,25 +408,27 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
         </div>
       </div>
 
-      {/* Preview */}
       {generatedHtml && (
         <HtmlPreview
           html={generatedHtml}
           show={showPreview}
-          onToggle={() => setShowPreview(p => !p)}
+          onToggle={() => setShowPreview((p) => !p)}
         />
       )}
 
-      {/* Send section */}
       {generatedHtml && (
         <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Send className="w-4 h-4 text-[var(--color-mint-green)]" />
-              <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">Send Newsletter</h2>
+              <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
+                Send Newsletter
+              </h2>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ background: "oklch(0.95 0.04 178)", color: "var(--color-mint-green)" }}>
+            <span
+              className="text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ background: "oklch(0.95 0.04 178)", color: "var(--color-mint-green)" }}
+            >
               {subscriberCount} recipients
             </span>
           </div>
@@ -396,12 +453,16 @@ function GenerateTab({ subscriberCount }: { subscriberCount: number }) {
               onClick={handleSend}
               disabled={!canSend}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
-              style={{ background: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))" }}
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))",
+              }}
             >
-              {sendLoading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
-                : <><Send className="w-4 h-4" /> Send to All Subscribers</>
-              }
+              {sendLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+              ) : (
+                <><Send className="w-4 h-4" /> Send to All Subscribers</>
+              )}
             </button>
           )}
         </div>
@@ -443,24 +504,33 @@ function BlogPostTab({ subscriberCount }: { subscriberCount: number }) {
   return (
     <div className="space-y-5">
       <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full" style={{
-          background: "linear-gradient(90deg, var(--color-soft-coral), oklch(0.55 0.28 15))"
-        }} />
+        <div
+          className="h-1.5 w-full"
+          style={{
+            background:
+              "linear-gradient(90deg, var(--color-soft-coral), oklch(0.55 0.28 15))",
+          }}
+        />
         <div className="p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
             <BookOpen className="w-4 h-4 text-[var(--color-soft-coral)]" />
             <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
               Send Blog Post as Newsletter
             </h2>
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium ml-auto"
-              style={{ background: "oklch(0.96 0.06 10)", color: "var(--color-soft-coral)" }}>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-medium ml-auto"
+              style={{
+                background: "oklch(0.96 0.06 10)",
+                color: "var(--color-soft-coral)",
+              }}
+            >
               AI-converted
             </span>
           </div>
 
           <p className="text-xs text-[var(--color-cool-gray)] leading-relaxed">
-            Enter a blog post ID and the AI will automatically convert it into a newsletter format
-            and send it to all {subscriberCount} subscribers.
+            Enter a blog post ID and the AI will automatically convert it into a newsletter
+            format and send it to all {subscriberCount} subscribers.
           </p>
 
           <div>
@@ -469,7 +539,7 @@ function BlogPostTab({ subscriberCount }: { subscriberCount: number }) {
             </label>
             <input
               value={blogpostId}
-              onChange={e => setBlogpostId(e.target.value)}
+              onChange={(e) => setBlogpostId(e.target.value)}
               placeholder="e.g. 9a5d2f1a-9bc7-4c52-8214-1f03e11faa01"
               className="w-full px-4 py-3 rounded-xl border border-[var(--color-cool-gray)]/30 focus:ring-2 focus:ring-[var(--color-soft-coral)] outline-none text-sm bg-gray-50 font-mono placeholder:text-[var(--color-cool-gray)] placeholder:font-sans"
             />
@@ -504,12 +574,16 @@ function BlogPostTab({ subscriberCount }: { subscriberCount: number }) {
             onClick={handleSend}
             disabled={!blogpostId.trim() || loading}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
-            style={{ background: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))" }}
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))",
+            }}
           >
-            {loading
-              ? <><Loader2 className="w-4 h-4 animate-spin" /> Converting & Sending…</>
-              : <><Rss className="w-4 h-4" /> Convert & Send Newsletter</>
-            }
+            {loading ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Converting & Sending…</>
+            ) : (
+              <><Rss className="w-4 h-4" /> Convert & Send Newsletter</>
+            )}
           </button>
         </div>
       </div>
@@ -526,20 +600,29 @@ function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[var(--color-soft-blue)]" />
-            <h2 className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">Mailing List</h2>
+            <h2 className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+              Mailing List
+            </h2>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-            style={{ background: "oklch(0.95 0.05 210)", color: "var(--color-soft-blue)" }}>
+          <span
+            className="text-xs px-2.5 py-1 rounded-full font-medium"
+            style={{ background: "oklch(0.95 0.05 210)", color: "var(--color-soft-blue)" }}
+          >
             {subscribers.length} subscribers
           </span>
         </div>
 
         <div className="divide-y divide-gray-50">
           {subscribers.map((s, i) => (
-            <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+            <div
+              key={i}
+              className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "oklch(0.95 0.05 210)" }}>
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "oklch(0.95 0.05 210)" }}
+                >
                   <Mail className="w-3.5 h-3.5 text-[var(--color-soft-blue)]" />
                 </div>
                 <span className="text-sm text-[var(--color-dark-slate-gray)]">{s.email}</span>
@@ -556,22 +639,47 @@ function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const TABS: { value: Tab; label: string; icon: React.ElementType }[] = [
-  { value: "generate",    label: "Generate & Send",        icon: Sparkles   },
-  { value: "blogpost",    label: "Blog Post Newsletter",   icon: BookOpen   },
-  { value: "subscribers", label: "Subscribers",            icon: Users      },
+  { value: "generate",    label: "Generate & Send",      icon: Sparkles  },
+  { value: "blogpost",    label: "Blog Post Newsletter", icon: BookOpen  },
+  { value: "subscribers", label: "Subscribers",          icon: Users     },
 ]
 
 export default function NewsletterPage() {
   const [tab, setTab] = useState<Tab>("generate")
   const subscribers = MOCK_SUBSCRIBERS
 
+  // Stat card definitions — same shape as AdminStatsCards
+  const statCards: StatCardData[] = [
+    {
+      id: "subscribers",
+      title: "Total Subscribers",
+      value: subscribers.length,
+      icon: Users,
+      color: "soft-blue",
+    },
+    {
+      id: "sent",
+      title: "Newsletters Sent",
+      value: "—",
+      icon: Send,
+      color: "mint-green",
+    },
+    {
+      id: "blogposts",
+      title: "Blog Posts Sent",
+      value: "—",
+      icon: Rss,
+      color: "soft-coral",
+    },
+  ]
+
   return (
     <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)]">
 
-      {/* HEADER — same classes as Manage Workers / CV Management */}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1  className="text-3xl font-bold bg-gradient-to-r from-[var(--color-soft-blue)] via-[var(--color-mint-green)] to-[var(--color-soft-coral)] bg-clip-text pb-1 text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-soft-blue)] via-[var(--color-mint-green)] to-[var(--color-soft-coral)] bg-clip-text pb-1 text-transparent">
             Newsletter
           </h1>
           <p className="text-sm text-[var(--color-cool-gray)] mt-1">
@@ -580,46 +688,22 @@ export default function NewsletterPage() {
         </div>
       </div>
 
-      {/* STAT CARDS — same layout as users & CV pages, 3 cards full width */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          icon={Users}
-          count={subscribers.length}
-          label="Total Subscribers"
-          gradient="linear-gradient(135deg, var(--color-soft-blue), oklch(0.45 0.18 230))"
-          lightBg="oklch(0.95 0.05 210)"
-          color="var(--color-soft-blue)"
-        />
-        <StatCard
-          icon={Send}
-          count="—"
-          label="Newsletters Sent"
-          gradient="linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))"
-          lightBg="oklch(0.95 0.04 178)"
-          color="var(--color-mint-green)"
-        />
-        <StatCard
-          icon={Rss}
-          count="—"
-          label="Blog Posts Sent"
-          gradient="linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))"
-          lightBg="oklch(0.96 0.06 10)"
-          color="var(--color-soft-coral)"
-        />
-      </div>
+      {/* Stat Cards — AdminStatsCards layout */}
+      <NewsletterStatCards cards={statCards} />
 
-      {/* TABS */}
+      {/* Tabs */}
       <div className="flex gap-1 bg-white border border-[var(--color-cool-gray)]/20 rounded-xl p-1 shadow-sm w-fit">
-        {TABS.map(t => {
+        {TABS.map((t) => {
           const Icon = t.icon
           return (
             <button
               key={t.value}
               onClick={() => setTab(t.value)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap"
-              style={tab === t.value
-                ? { background: "var(--gradient-primary)", color: "white" }
-                : { color: "var(--color-cool-gray)" }
+              style={
+                tab === t.value
+                  ? { background: "var(--gradient-primary)", color: "white" }
+                  : { color: "var(--color-cool-gray)" }
               }
             >
               <Icon className="w-3.5 h-3.5" />
@@ -629,7 +713,7 @@ export default function NewsletterPage() {
         })}
       </div>
 
-      {/* TAB CONTENT */}
+      {/* Tab content */}
       <div>
         {tab === "generate"    && <GenerateTab    subscriberCount={subscribers.length} />}
         {tab === "blogpost"    && <BlogPostTab    subscriberCount={subscribers.length} />}
