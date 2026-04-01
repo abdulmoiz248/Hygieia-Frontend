@@ -20,7 +20,7 @@ interface TopNavProps {
 
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
   const [userName, setUserName] = useState("Admin")
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [unreadCount] = useState(0)
 
   useEffect(() => {
     const role = localStorage.getItem("role")
