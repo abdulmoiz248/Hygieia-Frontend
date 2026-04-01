@@ -33,7 +33,7 @@ export default function AdminWelcomeSection() {
       <SplitText
         text={
           <span>
-            <span className="text-soft-coral mt-4">Welcome, </span>
+            <span className="text-soft-coral mt-4">Welcome,&nbsp;</span>
             <span className="text-dark-slate-gray"> {adminName}! 👋</span>
           </span>
         }
