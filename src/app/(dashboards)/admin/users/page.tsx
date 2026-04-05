@@ -1,48 +1,45 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Worker, Role } from "@/types/admin/workers"
-import { fetchDoctors, fetchNutritionists } from "@/api/admin/workers.api"
-import WorkersPageHeader  from "@/components/admin/workers/WorkersPageHeader"
-import WorkerStatCards    from "@/components/admin/workers/WorkerStatCards"
-import WorkersSearchTabs  from "@/components/admin/workers/WorkersSearchTabs"
-import WorkersSection     from "@/components/admin/workers/WorkersSection"
-import AddWorkerModal     from "@/components/admin/workers/AddWorkerModal"
-import DeleteModal        from "@/components/admin/workers/DeleteModal"
+import { useDoctors } from "@/hooks/admin/workers/useDoctors"
+import { useNutritionists } from "@/hooks/admin/workers/useNutritionists"
+import { usePathologists } from "@/hooks/admin/workers/usePathologists"
+import WorkersPageHeader from "@/components/admin/workers/WorkersPageHeader"
+import WorkerStatCards   from "@/components/admin/workers/WorkerStatCards"
+import WorkersSearchTabs from "@/components/admin/workers/WorkersSearchTabs"
+import WorkersSection    from "@/components/admin/workers/WorkersSection"
+import AddWorkerModal    from "@/components/admin/workers/AddWorkerModal"
+import DeleteModal       from "@/components/admin/workers/DeleteModal"
+import { AdminToastContainer } from "@/toasts/AdminToasts"
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+interface DeleteTarget {
+  workerId: string
+  email: string
+  role: Role
+}
+
+function filterWorkers(list: Worker[], search: string): Worker[] {
+  if (!search.trim()) return list
+  const q = search.toLowerCase()
+  return list.filter(
+    (w) =>
+      w.name.toLowerCase().includes(q) ||
+      w.specialization?.toLowerCase().includes(q) ||
+      w.personal_email?.toLowerCase().includes(q)
+  )
+}
 
 export default function ManageWorkersPage() {
-  // Per-role state
-  const [doctors,       setDoctors]       = useState<Worker[]>([])
-  const [nutritionists, setNutritionists] = useState<Worker[]>([])
-  const [pathologists,  setPathologists]  = useState<Worker[]>([])
+  const { data: doctors       = [], isLoading: loadingDoctors       } = useDoctors()
+  const { data: nutritionists = [], isLoading: loadingNutritionists } = useNutritionists()
+  const { data: pathologists  = [], isLoading: loadingPathologists  } = usePathologists()
 
-  const [loadingDoctors,       setLoadingDoctors]       = useState(true)
-  const [loadingNutritionists, setLoadingNutritionists] = useState(true)
-  // Pathologists not loading from API, we just show unavailable state
-  const [loadingPathologists]  = useState(false)
+  const [search,       setSearch]       = useState("")
+  const [activeTab,    setActiveTab]    = useState<Role | "all">("all")
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
 
-  // UI state
-  const [search,        setSearch]        = useState("")
-  const [activeTab,     setActiveTab]     = useState<Role | "all">("all")
-  const [showAddModal,  setShowAddModal]  = useState(false)
-  const [deleteId,      setDeleteId]      = useState<string | null>(null)
-
-  // ── Fetch on mount ──
-  useEffect(() => {
-    fetchDoctors()
-      .then(setDoctors)
-      .catch(console.error)
-      .finally(() => setLoadingDoctors(false))
-
-    fetchNutritionists()
-      .then(setNutritionists)
-      .catch(console.error)
-      .finally(() => setLoadingNutritionists(false))
-  }, [])
-
-  // ── Derived counts ──
   const counts = useMemo(() => ({
     doctor:       doctors.length,
     nutritionist: nutritionists.length,
@@ -51,68 +48,25 @@ export default function ManageWorkersPage() {
 
   const totalCount = counts.doctor + counts.nutritionist + counts.pathologist
 
-  // ── Filter helpers ──
-  function filterWorkers(list: Worker[]) {
-    if (!search) return list
-    const q = search.toLowerCase()
-    return list.filter(
-      (w) =>
-        w.name.toLowerCase().includes(q) ||
-        w.specialization?.toLowerCase().includes(q) ||
-        w.personal_email?.toLowerCase().includes(q)
-    )
-  }
+  const filteredDoctors       = useMemo(() => filterWorkers(doctors,       search), [doctors,       search])
+  const filteredNutritionists = useMemo(() => filterWorkers(nutritionists, search), [nutritionists, search])
+  const filteredPathologists  = useMemo(() => filterWorkers(pathologists,  search), [pathologists,  search])
 
-  const filteredDoctors       = useMemo(() => filterWorkers(doctors),       [doctors, search])
-  const filteredNutritionists = useMemo(() => filterWorkers(nutritionists), [nutritionists, search])
-  const filteredPathologists  = useMemo(() => filterWorkers(pathologists),  [pathologists, search])
-
-  // ── Delete handler ──
-  const handleDelete = async () => {
-    if (!deleteId) return
-    try {
-      await fetch("http://localhost:4000/auth/delete-worker", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: deleteId }),
-      })
-    } catch { /* optimistic */ }
-
-    setDoctors((p) => p.filter((w) => w._id !== deleteId))
-    setNutritionists((p) => p.filter((w) => w._id !== deleteId))
-    setPathologists((p) => p.filter((w) => w._id !== deleteId))
-    setDeleteId(null)
-  }
-
-  const triggerDelete = (id: string) => {
-    setShowAddModal(false)
-    setDeleteId(id)
-  }
-  const handleAdd = (worker: Worker) => {
-    if (worker.role === "doctor")       setDoctors((p) => [...p, worker])
-    if (worker.role === "nutritionist") setNutritionists((p) => [...p, worker])
-    if (worker.role === "pathologist")  setPathologists((p) => [...p, worker])
-  }
-
-  // ── Determine which sections to show ──
-  const showAll          = activeTab === "all"
-  const showDoctors      = showAll || activeTab === "doctor"
+  const showAll           = activeTab === "all"
+  const showDoctors       = showAll || activeTab === "doctor"
   const showNutritionists = showAll || activeTab === "nutritionist"
-  const showPathologists = showAll || activeTab === "pathologist"
+  const showPathologists  = showAll || activeTab === "pathologist"
 
   return (
     <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
-      {/* Header */}
       <WorkersPageHeader
         totalCount={totalCount}
-        onAddClick={() => { setDeleteId(null); setShowAddModal(true) }}
+        onAddClick={() => { setDeleteTarget(null); setShowAddModal(true) }}
       />
 
-      {/* Stat Cards */}
       <WorkerStatCards counts={counts} />
 
-      {/* Search + Tabs */}
       <WorkersSearchTabs
         search={search}
         activeTab={activeTab}
@@ -120,14 +74,13 @@ export default function ManageWorkersPage() {
         onTabChange={setActiveTab}
       />
 
-      {/* Worker Sections */}
       {showDoctors && (
         <WorkersSection
           role="doctor"
           workers={filteredDoctors}
           loading={loadingDoctors}
           showRoleHeading={showAll}
-          onDelete={triggerDelete}
+          onDelete={(target) => { setShowAddModal(false); setDeleteTarget(target) }}
         />
       )}
 
@@ -137,7 +90,7 @@ export default function ManageWorkersPage() {
           workers={filteredNutritionists}
           loading={loadingNutritionists}
           showRoleHeading={showAll}
-          onDelete={triggerDelete}
+          onDelete={(target) => { setShowAddModal(false); setDeleteTarget(target) }}
         />
       )}
 
@@ -146,26 +99,25 @@ export default function ManageWorkersPage() {
           role="pathologist"
           workers={filteredPathologists}
           loading={loadingPathologists}
-          unavailable={true}
           showRoleHeading={showAll}
-          onDelete={triggerDelete}
+          onDelete={(target) => { setShowAddModal(false); setDeleteTarget(target) }}
         />
       )}
 
-      {/* Modals */}
       {showAddModal && (
-        <AddWorkerModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={handleAdd}
+        <AddWorkerModal onClose={() => setShowAddModal(false)} />
+      )}
+
+      {deleteTarget && (
+        <DeleteModal
+          workerEmail={deleteTarget.email}
+          workerId={deleteTarget.workerId}
+          workerRole={deleteTarget.role}
+          onClose={() => setDeleteTarget(null)}
         />
       )}
 
-      {deleteId && (
-        <DeleteModal
-          onConfirm={handleDelete}
-          onClose={() => setDeleteId(null)}
-        />
-      )}
+      <AdminToastContainer />
     </div>
   )
 }

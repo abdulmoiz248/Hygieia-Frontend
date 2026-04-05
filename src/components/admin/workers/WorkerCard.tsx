@@ -5,7 +5,7 @@ import {
   Star, Mail, Phone, Globe, Clock, Calendar,
   BadgeCheck, ChevronDown, Trash2,
 } from "lucide-react"
-import { Worker, ROLE_CONFIG } from "@/types/admin/workers"
+import { Worker, Role, ROLE_CONFIG } from "@/types/admin/workers"
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -19,7 +19,9 @@ function Avatar({ name, color }: { name: string; color: string }) {
     .toUpperCase()
   return (
     <div
-      className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-base flex-shrink-0"
+      // Slightly smaller on mobile (48px) so the name block has more horizontal room;
+      // grows back to 56px on sm+ where cards are wider.
+      className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0"
       style={{ background: color }}
     >
       {initials}
@@ -29,7 +31,7 @@ function Avatar({ name, color }: { name: string; color: string }) {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 flex-shrink-0">
       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
       <span className="text-xs font-semibold text-[var(--color-dark-slate-gray)]">
         {rating > 0 ? rating.toFixed(1) : "N/A"}
@@ -38,116 +40,153 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
+// ─── Working-hour row ─────────────────────────────────────────────────────────
+// Two-line layout instead of a single cramped flex row:
+//   Line 1: day name (left) ─── time range (right)
+//   Line 2: location in muted small text (truncated)
+// This works cleanly at any card width without fixed pixel widths.
+
+function WorkingHourRow({ day, start, end, location }: {
+  day: string; start: string; end: string; location: string
+}) {
+  return (
+    <div className="px-3 py-2 rounded-lg bg-gray-50 text-[11px] space-y-0.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-semibold text-[var(--color-dark-slate-gray)]">{day}</span>
+        <span className="tabular-nums text-[var(--color-cool-gray)]">{start} – {end}</span>
+      </div>
+      {location && (
+        <p className="truncate text-[10px] text-[var(--color-cool-gray)]/60">{location}</p>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Card ────────────────────────────────────────────────────────────────
 
 interface WorkerCardProps {
   worker: Worker
-  onDelete: (id: string) => void
+  onDelete: (params: { workerId: string; email: string; role: Role }) => void
 }
 
 export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
   const [expanded, setExpanded] = useState(false)
   const cfg = ROLE_CONFIG[worker.role]
 
+  const handleDeleteClick = () => {
+    onDelete({ workerId: worker._id, email: worker.personal_email, role: worker.role })
+  }
+
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md flex flex-col">
-      {/* Colored top stripe */}
+
+      {/* Coloured top stripe */}
       <div className="h-1 w-full flex-shrink-0" style={{ background: cfg.gradient }} />
 
-      {/* Card body — flex-col so footer always sticks to bottom */}
-      <div className="p-5 flex flex-col flex-1">
+      {/*
+        Card body padding:
+        p-4 on mobile (cards are full-width, a little breathing room is enough)
+        p-5 on sm+ (cards are narrower in the grid, so the extra padding looks right)
+      */}
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
 
-        {/* ── Top: Avatar + Name + Rating ── */}
-        <div className="flex items-start gap-4">
+        {/* ── Header: Avatar + Name block ── */}
+        <div className="flex items-start gap-3 sm:gap-4">
           <Avatar name={worker.name} color={cfg.color} />
+
           <div className="flex-1 min-w-0">
-            {/* Name row */}
+
+            {/* Name + Rating on the same row.
+                `min-w-0` on the name keeps it from pushing the rating off the edge;
+                rating stays `flex-shrink-0` so it never gets squished. */}
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-[var(--color-dark-slate-gray)] text-base leading-tight line-clamp-1">
+              <h3 className="font-semibold text-[var(--color-dark-slate-gray)] text-sm sm:text-base leading-tight line-clamp-1 min-w-0">
                 {worker.name}
               </h3>
-              <div className="flex-shrink-0">
-                <StarRating rating={worker.rating} />
-              </div>
+              <StarRating rating={worker.rating} />
             </div>
+
             {/* Specialization */}
             <p className="text-xs mt-1 font-medium truncate" style={{ color: cfg.color }}>
               {worker.specialization || cfg.label}
             </p>
-            {/* Badges */}
-            <div className="flex flex-wrap gap-1.5 mt-2.5">
+
+            {/* Badges — already wraps, just tighten the gap on mobile */}
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-2.5">
               {worker.experienceYears > 0 && (
                 <span
-                  className="text-[11px] px-2.5 py-1 rounded-full font-medium"
+                  className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full font-medium"
                   style={{ background: cfg.lightBg, color: cfg.color }}
                 >
                   {worker.experienceYears} yrs exp
                 </span>
               )}
               {worker.consultationFee > 0 && (
-                <span className="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium">
-                  Rs. {worker.consultationFee.toLocaleString()}
+                <span className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium">
+                  Rs.&nbsp;{worker.consultationFee.toLocaleString()}
                 </span>
               )}
               {worker.certifications.slice(0, 2).map((c) => (
                 <span
                   key={c}
-                  className="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium flex items-center gap-1"
+                  className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium flex items-center gap-1"
                 >
-                  <BadgeCheck className="w-3 h-3" />
-                  {c}
+                  <BadgeCheck className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate max-w-[80px] sm:max-w-none">{c}</span>
                 </span>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── Contact Info — always same height ── */}
+        {/* ── Contact Info ── */}
         <div className="flex flex-col gap-1.5 mt-4 text-xs text-[var(--color-cool-gray)] min-h-[36px]">
-          {worker.personal_email ? (
-            <div className="flex items-center gap-2">
+          {worker.personal_email && (
+            <div className="flex items-center gap-2 min-w-0">
               <Mail className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="truncate">{worker.personal_email}</span>
             </div>
-          ) : null}
-          {worker.phone ? (
+          )}
+          {worker.phone && (
             <div className="flex items-center gap-2">
               <Phone className="w-3.5 h-3.5 flex-shrink-0" />
               <span>{worker.phone}</span>
             </div>
-          ) : null}
+          )}
         </div>
 
         {/* ── Expanded Details ── */}
         {expanded && (
           <div className="mt-4 pt-4 border-t border-gray-100 space-y-3 text-xs text-[var(--color-cool-gray)]">
+
             {worker.bio && (
-              <p className="italic leading-relaxed text-[var(--color-cool-gray)]">{worker.bio}</p>
+              <p className="italic leading-relaxed">{worker.bio}</p>
             )}
 
             {worker.languages.length > 0 && (
               <div className="flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{worker.languages.join(", ")}</span>
+                <span className="truncate">{worker.languages.join(", ")}</span>
               </div>
             )}
 
             {worker.workingHours.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="font-semibold text-[var(--color-dark-slate-gray)]">Working Hours</span>
+                  <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="font-semibold text-[var(--color-dark-slate-gray)]">
+                    Working Hours
+                  </span>
                 </div>
                 <div className="grid gap-1.5">
                   {worker.workingHours.slice(0, 3).map((wh, i) => (
-                    <div
+                    <WorkingHourRow
                       key={i}
-                      className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-gray-50 text-[11px]"
-                    >
-                      <span className="font-semibold w-20">{wh.day}</span>
-                      <span>{wh.start} – {wh.end}</span>
-                      <span className="truncate ml-2 max-w-[100px] text-right">{wh.location}</span>
-                    </div>
+                      day={wh.day}
+                      start={wh.start}
+                      end={wh.end}
+                      location={wh.location}
+                    />
                   ))}
                   {worker.workingHours.length > 3 && (
                     <p className="text-[11px] text-center text-[var(--color-cool-gray)] pt-0.5">
@@ -167,10 +206,9 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
           </div>
         )}
 
-        {/* ── Spacer pushes footer down ── */}
         <div className="flex-1" />
 
-        {/* ── Footer: always at bottom ── */}
+        {/* ── Footer ── */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <button
             onClick={() => setExpanded(!expanded)}
@@ -184,7 +222,7 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
           </button>
 
           <button
-            onClick={() => onDelete(worker._id)}
+            onClick={handleDeleteClick}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-soft-coral)] hover:bg-[var(--color-soft-coral)]/10 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
