@@ -4,7 +4,6 @@ import type { StatCardData, Subscriber, Tab } from "@/types/admin/newsletter.typ
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 export const BASE_URL = "http://localhost:4000"
-export const MOCK_USER_ID = "5e3dd75b-7c38-4bf9-8a76-bc45bab74d7c"
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 

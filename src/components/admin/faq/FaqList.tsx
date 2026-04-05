@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Pencil, Trash2, ChevronDown, HelpCircle, BookOpen, MessageCircleQuestion } from "lucide-react"
-import type { FaqItem } from "@/lib/admin/faq.api"
+import type { FaqItem } from "@/api/admin/faq.api"
 
 interface FaqListProps {
   faqs: FaqItem[]

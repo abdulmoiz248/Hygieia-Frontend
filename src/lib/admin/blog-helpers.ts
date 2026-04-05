@@ -50,7 +50,6 @@ export type Tab      = "all" | "pending" | "published"
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const BASE_URL = "http://localhost:4000"
-export const ADMIN_ID = "af30f1aa-1ec5-4fb8-99d5-8d17f31fb0c8"
 
 export const THEME_GRADIENTS = [
   "linear-gradient(135deg, var(--color-soft-blue) 0%, oklch(0.52 0.16 220) 100%)",

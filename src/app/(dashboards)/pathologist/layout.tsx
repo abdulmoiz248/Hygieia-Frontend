@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import LabLayout from "@/components/lab-tech/LabLayout"
-import ReactQueryProvider from "@/Providers/BlogsQueryProvider"
+import ReactQueryProvider from "@/Providers/ReactQueryProvider"
 
 export const metadata: Metadata = {
   title: "Pathologist | Hygieia",

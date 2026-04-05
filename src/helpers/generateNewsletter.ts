@@ -25,16 +25,3 @@ export function escapeHtml(html: string): string {
     .replace(/\t/g, "\\t")
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
-
-/**
- * Returns a human-readable relative time string from an ISO 8601 date.
- * e.g. "Today", "Yesterday", "5d ago"
- */
-export function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const days = Math.floor(diff / 86400000)
-  if (days === 0) return "Today"
-  if (days === 1) return "Yesterday"
-  return `${days}d ago`
-}

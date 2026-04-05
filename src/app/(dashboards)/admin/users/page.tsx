@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Worker, Role } from "@/types/admin/workers"
-import { fetchDoctors, fetchNutritionists } from "@/lib/admin/workers.api"
+import { fetchDoctors, fetchNutritionists } from "@/api/admin/workers.api"
 import WorkersPageHeader  from "@/components/admin/workers/WorkersPageHeader"
 import WorkerStatCards    from "@/components/admin/workers/WorkerStatCards"
 import WorkersSearchTabs  from "@/components/admin/workers/WorkersSearchTabs"

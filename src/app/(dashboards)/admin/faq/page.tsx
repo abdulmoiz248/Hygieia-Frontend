@@ -1,47 +1,49 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { fetchFaqs, createFaq, updateFaq, deleteFaq } from "@/lib/admin/faq.api"
-import type { FaqItem } from "@/types/admin/faq"
-import FaqHeader from "@/components/admin/faq/FaqHeader"
-import FaqSearch from "@/components/admin/faq/FaqSearch"
-import FaqList from "@/components/admin/faq/FaqList"
-import FaqFormModal from "@/components/admin/faq/FaqFormModal"
-import FaqDeleteModal from "@/components/admin/faq/FaqDeleteModal"
+import { useMemo, useState } from "react"
+import { useAdminStore }       from "@/store/admin/useAdminStore"
+import { useFetchFaqs }        from "@/hooks/admin/faq/useFetchFaqs"
+import { useCreateFaq }        from "@/hooks/admin/faq/useCreateFaq"
+import { useUpdateFaq }        from "@/hooks/admin/faq/useUpdateFaq"
+import { useDeleteFaq }        from "@/hooks/admin/faq/useDeleteFaq"
+import {
+  adminSuccess,
+  adminError,
+  adminDestructive,
+  AdminToastContainer,
+}                              from "@/toasts/AdminToasts"
+import type { FaqItem }        from "@/types/admin/faq"
+import FaqHeader               from "@/components/admin/faq/FaqHeader"
+import FaqSearch               from "@/components/admin/faq/FaqSearch"
+import FaqList                 from "@/components/admin/faq/FaqList"
+import FaqFormModal            from "@/components/admin/faq/FaqFormModal"
+import FaqDeleteModal          from "@/components/admin/faq/FaqDeleteModal"
 
 export default function AdminFAQPage() {
-  const [faqs, setFaqs] = useState<FaqItem[]>([])
-  const [loading, setLoading] = useState(false)
-  const [search, setSearch] = useState("")
+  const { adminId } = useAdminStore()
 
-  // Modal state
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+  // ── Server state ───────────────────────────────────────────────────────────
+  const { data: faqs = [], isLoading: loading } = useFetchFaqs()
+  const createFaqMutation = useCreateFaq()
+  const updateFaqMutation = useUpdateFaq()
+  const deleteFaqMutation = useDeleteFaq()
 
-  // Form state
-  const [form, setForm] = useState<Omit<FaqItem, "id">>({ question: "", answer: "" })
-  const [editingId, setEditingId] = useState<string | null>(null)
+  // ── UI state ───────────────────────────────────────────────────────────────
+  const [search,          setSearch]          = useState("")
+  const [isFormOpen,      setIsFormOpen]      = useState(false)
+  const [deleteId,        setDeleteId]        = useState<string | null>(null)
+  const [form,            setForm]            = useState<Omit<FaqItem, "id">>({ question: "", answer: "" })
+  const [editingId,       setEditingId]       = useState<string | null>(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
 
-  const loadFaqs = async () => {
-    setLoading(true)
-    try {
-      setFaqs(await fetchFaqs())
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { loadFaqs() }, [])
-
+  // ── Derived ────────────────────────────────────────────────────────────────
   const filteredFaqs = useMemo(() =>
     faqs.filter(f =>
       f.question.toLowerCase().includes(search.toLowerCase()) ||
       f.answer.toLowerCase().includes(search.toLowerCase())
     ), [faqs, search])
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
-
+  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleOpenCreate = () => {
     setForm({ question: "", answer: "" })
     setEditingId(null)
@@ -58,30 +60,44 @@ export default function AdminFAQPage() {
 
   const handleSubmit = async () => {
     setSubmitAttempted(true)
-    if (!form.question || !form.answer) return
+    if (!form.question || !form.answer || !adminId) return
 
     if (editingId) {
-      await updateFaq(editingId, form)
+      try {
+        await updateFaqMutation.mutateAsync({ id: editingId, faq: form, userId: adminId })
+        adminSuccess("FAQ updated successfully.")
+      } catch {
+        adminError("Failed to update FAQ. Please try again.")
+        return
+      }
     } else {
-      await createFaq(form)
+      try {
+        await createFaqMutation.mutateAsync({ faq: form, userId: adminId })
+        adminSuccess("FAQ created successfully.")
+      } catch {
+        adminError("Failed to create FAQ. Please try again.")
+        return
+      }
     }
 
     setIsFormOpen(false)
     setEditingId(null)
     setSubmitAttempted(false)
     setForm({ question: "", answer: "" })
-    loadFaqs()
   }
 
   const handleDelete = async () => {
-    if (!deleteId) return
-    await deleteFaq(deleteId)
+    if (!deleteId || !adminId) return
+    try {
+      await deleteFaqMutation.mutateAsync({ id: deleteId, userId: adminId })
+      adminDestructive("FAQ deleted successfully.")
+    } catch {
+      adminError("Failed to delete FAQ. Please try again.")
+    }
     setDeleteId(null)
-    loadFaqs()
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
       <FaqHeader totalCount={faqs.length} onCreateClick={handleOpenCreate} />
@@ -112,6 +128,8 @@ export default function AdminFAQPage() {
           onClose={() => setDeleteId(null)}
         />
       )}
+
+      <AdminToastContainer />
     </div>
   )
 }

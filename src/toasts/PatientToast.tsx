@@ -1,4 +1,5 @@
 import { toast, ToastContainer, ToastOptions, Slide } from 'react-toastify'
+// @ts-ignore
 import 'react-toastify/dist/ReactToastify.css'
 
 const baseToastOptions: ToastOptions = {

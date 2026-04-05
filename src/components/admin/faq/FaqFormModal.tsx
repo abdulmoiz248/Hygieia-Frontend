@@ -1,5 +1,5 @@
 import { X, MessageCircleQuestion } from "lucide-react"
-import type { FaqItem } from "@/lib/admin/faq.api"
+import type { FaqItem } from "@/api/admin/faq.api"
 
 interface FaqFormModalProps {
   form: Omit<FaqItem, "id">
