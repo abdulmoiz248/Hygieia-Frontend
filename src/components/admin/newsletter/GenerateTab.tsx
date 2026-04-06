@@ -1,14 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import {
-  AlertCircle, Loader2, RefreshCw, Send, Sparkles, XCircle,
-} from "lucide-react"
+import { AlertCircle, RefreshCw, Send, Sparkles } from "lucide-react"
 import { HtmlPreview } from "./HtmlPreview"
 import { ResultBanner } from "./ResultBanner"
-import { BASE_URL, MOCK_USER_ID } from "@/lib/admin/constants"
-import { escapeHtml, unescapeHtml } from "@/helpers/generateNewsletter"
-import type { SendResult } from "@/types/admin/newsletter.types"
+import { useGenerateNewsletter } from "@/hooks/admin/newsletters/useGenerateNewsletter"
+import { useSendNewsletter } from "@/hooks/admin/newsletters/useSendNewsletter"
 
 interface GenerateTabProps {
   subscriberCount: number
@@ -19,62 +16,28 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
   const [subject, setSubject] = useState("")
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(true)
-  const [genLoading, setGenLoading] = useState(false)
-  const [sendLoading, setSendLoading] = useState(false)
-  const [genError, setGenError] = useState("")
-  const [sendError, setSendError] = useState("")
-  const [sendResult, setSendResult] = useState<SendResult | null>(null)
+  const [sendResult, setSendResult] = useState<Awaited<ReturnType<typeof useSendNewsletter>>["data"]>(null)
+
+  const generateMutation = useGenerateNewsletter()
+  const sendMutation = useSendNewsletter()
+
+  // Dynamic current month for placeholder
+  const currentMonth = new Date().toLocaleString("default", { month: "long" })
 
   const handleGenerate = async () => {
     if (!idea.trim()) return
-    setGenLoading(true)
-    setGenError("")
-    setGeneratedHtml(null)
     setSendResult(null)
-
-    try {
-      const res = await fetch(`${BASE_URL}/generate-newsletter-html`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: idea.trim(), userId: MOCK_USER_ID }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Generation failed")
-      setGeneratedHtml(unescapeHtml(data.data?.html ?? ""))
-    } catch (e: any) {
-      setGenError(e.message || "Failed to generate newsletter. Check your connection.")
-    } finally {
-      setGenLoading(false)
-    }
+    const result = await generateMutation.mutateAsync({ idea: idea.trim() }).catch(() => null)
+    if (result) setGeneratedHtml(result.html)
   }
 
   const handleSend = async () => {
     if (!generatedHtml || !subject.trim()) return
-    setSendLoading(true)
-    setSendError("")
-    setSendResult(null)
-
-    try {
-      const res = await fetch(`${BASE_URL}/send-newsletter`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          html: escapeHtml(generatedHtml),
-          subject: subject.trim(),
-          userId: MOCK_USER_ID,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Send failed")
-      setSendResult(data.data)
-    } catch (e: any) {
-      setSendError(e.message || "Failed to send newsletter. Check your connection.")
-    } finally {
-      setSendLoading(false)
-    }
+    const result = await sendMutation.mutateAsync({ html: generatedHtml, subject: subject.trim() }).catch(() => null)
+    if (result) setSendResult(result)
   }
 
-  const canSend = !!generatedHtml && subject.trim().length > 0 && !sendLoading
+  const canSend = !!generatedHtml && subject.trim().length > 0 && !sendMutation.isPending
 
   return (
     <div className="space-y-5">
@@ -113,32 +76,26 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Hygieia Weekly Health Newsletter — March Edition"
+              placeholder={`e.g. Hygieia Weekly Health Newsletter — ${currentMonth} Edition`}
               className="w-full px-4 py-3 rounded-xl border border-[var(--color-cool-gray)]/30 focus:ring-2 focus:ring-[var(--color-soft-blue)] outline-none text-sm bg-gray-50 placeholder:text-[var(--color-cool-gray)]"
             />
           </div>
 
-          {genError && (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[oklch(0.96_0.06_10)] text-xs text-[var(--color-soft-coral)]">
-              <XCircle className="w-3.5 h-3.5 flex-shrink-0" /> {genError}
-            </div>
-          )}
-
           <div className="flex items-center gap-3">
             <button
               onClick={handleGenerate}
-              disabled={!idea.trim() || genLoading}
+              disabled={!idea.trim() || generateMutation.isPending}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
               style={{ background: "var(--gradient-primary)" }}
             >
-              {genLoading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+              {generateMutation.isPending ? (
+                <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Generating…</>
               ) : (
                 <><Sparkles className="w-4 h-4" /> Generate HTML</>
               )}
             </button>
 
-            {generatedHtml && !genLoading && (
+            {generatedHtml && !generateMutation.isPending && (
               <button
                 onClick={handleGenerate}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/30 text-[var(--color-cool-gray)] hover:bg-gray-50 transition-colors"
@@ -189,12 +146,6 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
               </div>
             )}
 
-            {sendError && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[oklch(0.96_0.06_10)] text-xs text-[var(--color-soft-coral)]">
-                <XCircle className="w-3.5 h-3.5 flex-shrink-0" /> {sendError}
-              </div>
-            )}
-
             {sendResult && (
               <ResultBanner result={sendResult} onClose={() => setSendResult(null)} />
             )}
@@ -204,12 +155,10 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
                 onClick={handleSend}
                 disabled={!canSend}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
-                style={{
-                  background: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))",
-                }}
+                style={{ background: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))" }}
               >
-                {sendLoading ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                {sendMutation.isPending ? (
+                  <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</>
                 ) : (
                   <><Send className="w-4 h-4" /> Send to All Subscribers</>
                 )}

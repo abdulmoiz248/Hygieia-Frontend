@@ -5,17 +5,18 @@ const BASE = "http://localhost:4000"
 // ─── Shared mapper helpers ────────────────────────────────────────────────────
 
 function mapDoctor(d: any): Worker {
-  return { ...d, _id: d._id ?? d.id, role: "doctor" as Role }
+  return { ...d, _id: d._id ?? d.id, email: d.email ?? "", role: "doctor" as Role }
 }
 
 function mapNutritionist(n: any): Worker {
-  return { ...n, _id: n._id ?? n.id, role: "nutritionist" as Role }
+  return { ...n, _id: n._id ?? n.id, email: n.email ?? "", role: "nutritionist" as Role }
 }
 
 function mapLabTechnician(t: any): Worker {
   return {
     _id: t._id ?? t.id,
     id: t.id,
+    email: t.email ?? "", 
     name: t.name ?? "",
     phone: t.phone ?? "",
     gender: t.gender ?? "",

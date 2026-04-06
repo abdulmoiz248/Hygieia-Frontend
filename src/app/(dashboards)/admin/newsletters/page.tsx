@@ -1,16 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import {BlogPostTab} from "@/components/admin/newsletter"
-import {GenerateTab} from "@/components/admin/newsletter"
-import {NewsletterStatCards} from "@/components/admin/newsletter"
-import {SubscribersTab} from "@/components/admin/newsletter"
-import { buildStatCards, MOCK_SUBSCRIBERS, TABS } from "@/lib/admin/constants"
+import { Loader2 } from "lucide-react"
+import { BlogPostTab } from "@/components/admin/newsletter/BlogPostTab"
+import { GenerateTab } from "@/components/admin/newsletter/GenerateTab"
+import { NewsletterStatCards } from "@/components/admin/newsletter/NewsletterStatCards"
+import { SubscribersTab } from "@/components/admin/newsletter/SubscribersTab"
+import { buildStatCards, TABS } from "@/lib/admin/constants"
+import { useSubscribers } from "@/hooks/admin/newsletters/useSubscribers"
+import { adminError } from "@/toasts/AdminToasts"
 import type { Tab } from "@/types/admin/newsletter.types"
 
 export default function NewsletterPage() {
   const [tab, setTab] = useState<Tab>("generate")
-  const subscribers = MOCK_SUBSCRIBERS
+
+  const { data: subscribers = [], isLoading, isError, error } = useSubscribers()
+
+  // Surface fetch error via toast (fires once when error changes)
+  if (isError && error instanceof Error) {
+    adminError(error.message || "Failed to load subscribers.")
+  }
+
   const statCards = buildStatCards(subscribers.length)
 
   return (
@@ -54,11 +64,18 @@ export default function NewsletterPage() {
       </div>
 
       {/* Tab content */}
-      <div>
-        {tab === "generate"    && <GenerateTab    subscriberCount={subscribers.length} />}
-        {tab === "blogpost"    && <BlogPostTab    subscriberCount={subscribers.length} />}
-        {tab === "subscribers" && <SubscribersTab subscribers={subscribers} />}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16 gap-3 text-[var(--color-cool-gray)]">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm">Loading subscribers…</span>
+        </div>
+      ) : (
+        <div>
+          {tab === "generate"    && <GenerateTab    subscriberCount={subscribers.length} />}
+          {tab === "blogpost"    && <BlogPostTab    subscriberCount={subscribers.length} />}
+          {tab === "subscribers" && <SubscribersTab subscribers={subscribers} />}
+        </div>
+      )}
     </div>
   )
 }

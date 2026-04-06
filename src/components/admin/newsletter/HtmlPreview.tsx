@@ -19,19 +19,26 @@ export function HtmlPreview({ html, show, onToggle }: HtmlPreviewProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--color-cool-gray)]/20 overflow-hidden bg-white shadow-sm">
+    <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 overflow-hidden bg-white shadow-sm">
+
+      {/* Accent bar — matches other cards */}
+      <div
+        className="h-1.5 w-full"
+        style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }}
+      />
+
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <MailOpen className="w-4 h-4 text-[var(--color-soft-blue)]" />
-          <span className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+          <span className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
             Email Preview
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--color-cool-gray)] hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--color-cool-gray)] hover:bg-gray-100 transition-colors"
           >
             {copied ? (
               <Check className="w-3.5 h-3.5 text-[var(--color-mint-green)]" />
@@ -42,7 +49,7 @@ export function HtmlPreview({ html, show, onToggle }: HtmlPreviewProps) {
           </button>
           <button
             onClick={onToggle}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--color-cool-gray)] hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--color-cool-gray)] hover:bg-gray-100 transition-colors"
           >
             {show ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             {show ? "Hide" : "Show"}

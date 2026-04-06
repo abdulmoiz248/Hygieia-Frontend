@@ -145,6 +145,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
             <label className="block text-xs font-medium text-[var(--color-cool-gray)] mb-1.5">Full Name</label>
             <input
               type="text"
+              id="worker-name" 
               name="worker-name"
               autoComplete="off"
               value={form.name}
@@ -162,6 +163,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
             <label className="block text-xs font-medium text-[var(--color-cool-gray)] mb-1.5">Personal Email</label>
             <input
               type="email"
+              id="worker-personal-email"
               name="worker-personal-email"
               autoComplete="off"
               value={form.personalEmail}

@@ -72,13 +72,6 @@ export default function WorkersSection({
 
       {/*
         Cards grid — breakpoints:
-          < sm  (0–639px)   : 1 column  — full-width cards on phones
-          sm–md (640–767px) : 2 columns — small tablets / large phones landscape
-          md–xl (768–1279px): 2 columns — tablets portrait & landscape
-          xl+   (1280px+)   : 3 columns — desktop
-
-        Previously jumped straight from 1→2 at md, leaving small tablets
-        on a single-column layout. Adding sm:grid-cols-2 fills that gap.
       */}
       {!loading && workers.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 items-stretch">

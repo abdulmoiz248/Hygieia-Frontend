@@ -19,8 +19,6 @@ function Avatar({ name, color }: { name: string; color: string }) {
     .toUpperCase()
   return (
     <div
-      // Slightly smaller on mobile (48px) so the name block has more horizontal room;
-      // grows back to 56px on sm+ where cards are wider.
       className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0"
       style={{ background: color }}
     >
@@ -41,11 +39,6 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 // ─── Working-hour row ─────────────────────────────────────────────────────────
-// Two-line layout instead of a single cramped flex row:
-//   Line 1: day name (left) ─── time range (right)
-//   Line 2: location in muted small text (truncated)
-// This works cleanly at any card width without fixed pixel widths.
-
 function WorkingHourRow({ day, start, end, location }: {
   day: string; start: string; end: string; location: string
 }) {
@@ -74,7 +67,7 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
   const cfg = ROLE_CONFIG[worker.role]
 
   const handleDeleteClick = () => {
-    onDelete({ workerId: worker._id, email: worker.personal_email, role: worker.role })
+    onDelete({ workerId: worker._id, email: worker.email, role: worker.role })
   }
 
   return (

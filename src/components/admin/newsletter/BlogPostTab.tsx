@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { BookOpen, Loader2, RefreshCw, Rss, Send, XCircle } from "lucide-react"
+import { BookOpen, RefreshCw, Rss, Send } from "lucide-react"
 import { HtmlPreview } from "./HtmlPreview"
 import { ResultBanner } from "./ResultBanner"
-import { BASE_URL, MOCK_USER_ID } from "@/lib/admin/constants"
-import { unescapeHtml } from "@/helpers/generateNewsletter"
+import { useGenerateBlogNewsletter } from "@/hooks/admin/newsletters/useGenerateBlogNewsletter"
+import { useSendBlogNewsletter } from "@/hooks/admin/newsletters/useSendBlogNewsletter"
 import type { BlogSendResult, SendResult } from "@/types/admin/newsletter.types"
 
 interface BlogPostTabProps {
@@ -14,62 +14,28 @@ interface BlogPostTabProps {
 
 export function BlogPostTab({ subscriberCount }: BlogPostTabProps) {
   const [blogpostId, setBlogpostId] = useState("")
-  const [genLoading, setGenLoading] = useState(false)
-  const [genError, setGenError] = useState("")
-  const [blogMeta, setBlogMeta] = useState<BlogSendResult["blogpost"] | null>(null)
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null)
+  const [blogMeta, setBlogMeta] = useState<BlogSendResult["blogpost"] | null>(null)
   const [showPreview, setShowPreview] = useState(true)
-  const [sendLoading, setSendLoading] = useState(false)
-  const [sendError, setSendError] = useState("")
   const [sendResult, setSendResult] = useState<SendResult | null>(null)
 
-  // Step 1: Generate newsletter HTML from a blog post
+  const generateMutation = useGenerateBlogNewsletter()
+  const sendMutation = useSendBlogNewsletter()
+
   const handleGenerate = async () => {
     if (!blogpostId.trim()) return
-    setGenLoading(true)
-    setGenError("")
-    setGeneratedHtml(null)
-    setBlogMeta(null)
     setSendResult(null)
-
-    try {
-      const res = await fetch(`${BASE_URL}/generate-blogpost-newsletter-html`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blogpostId: blogpostId.trim(), userId: MOCK_USER_ID }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Failed to generate")
-      setGeneratedHtml(unescapeHtml(data.data?.html ?? ""))
-      if (data.data?.blogpost) setBlogMeta(data.data.blogpost)
-    } catch (e: any) {
-      setGenError(e.message || "Failed to generate. Check your connection.")
-    } finally {
-      setGenLoading(false)
+    const result = await generateMutation.mutateAsync({ blogpostId: blogpostId.trim() }).catch(() => null)
+    if (result) {
+      setGeneratedHtml(result.html)
+      setBlogMeta(result.blogpost)
     }
   }
 
-  // Step 2: Send the generated newsletter to all subscribers
   const handleSend = async () => {
     if (!generatedHtml) return
-    setSendLoading(true)
-    setSendError("")
-    setSendResult(null)
-
-    try {
-      const res = await fetch(`${BASE_URL}/send-blogpost-newsletter`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blogpostId: blogpostId.trim(), userId: MOCK_USER_ID }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Failed to send")
-      setSendResult(data.data)
-    } catch (e: any) {
-      setSendError(e.message || "Failed to send. Check your connection.")
-    } finally {
-      setSendLoading(false)
-    }
+    const result = await sendMutation.mutateAsync({ blogpostId: blogpostId.trim() }).catch(() => null)
+    if (result) setSendResult(result)
   }
 
   return (
@@ -112,27 +78,21 @@ export function BlogPostTab({ subscriberCount }: BlogPostTabProps) {
             />
           </div>
 
-          {genError && (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[oklch(0.96_0.06_10)] text-xs text-[var(--color-soft-coral)]">
-              <XCircle className="w-3.5 h-3.5 flex-shrink-0" /> {genError}
-            </div>
-          )}
-
           <div className="flex items-center gap-3">
             <button
               onClick={handleGenerate}
-              disabled={!blogpostId.trim() || genLoading}
+              disabled={!blogpostId.trim() || generateMutation.isPending}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
               style={{ background: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))" }}
             >
-              {genLoading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+              {generateMutation.isPending ? (
+                <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Generating…</>
               ) : (
                 <><Rss className="w-4 h-4" /> Generate Newsletter</>
               )}
             </button>
 
-            {generatedHtml && !genLoading && (
+            {generatedHtml && !generateMutation.isPending && (
               <button
                 onClick={handleGenerate}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/30 text-[var(--color-cool-gray)] hover:bg-gray-50 transition-colors"
@@ -191,12 +151,6 @@ export function BlogPostTab({ subscriberCount }: BlogPostTabProps) {
               </div>
             )}
 
-            {sendError && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[oklch(0.96_0.06_10)] text-xs text-[var(--color-soft-coral)]">
-                <XCircle className="w-3.5 h-3.5 flex-shrink-0" /> {sendError}
-              </div>
-            )}
-
             {sendResult && (
               <ResultBanner result={sendResult} onClose={() => setSendResult(null)} />
             )}
@@ -204,12 +158,12 @@ export function BlogPostTab({ subscriberCount }: BlogPostTabProps) {
             {!sendResult && (
               <button
                 onClick={handleSend}
-                disabled={sendLoading}
+                disabled={sendMutation.isPending}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
                 style={{ background: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))" }}
               >
-                {sendLoading ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                {sendMutation.isPending ? (
+                  <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</>
                 ) : (
                   <><Send className="w-4 h-4" /> Send to All Subscribers</>
                 )}

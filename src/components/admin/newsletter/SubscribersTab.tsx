@@ -22,7 +22,7 @@ export function SubscribersTab({ subscribers }: SubscribersTabProps) {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[var(--color-soft-blue)]" />
-            <h2 className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+            <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
               Mailing List
             </h2>
           </div>
@@ -36,9 +36,9 @@ export function SubscribersTab({ subscribers }: SubscribersTabProps) {
 
         {/* Subscriber rows */}
         <div className="p-4 space-y-2">
-          {subscribers.map((s, i) => (
+          {subscribers.map((s) => (
             <div
-              key={i}
+              key={s.id}
               className="flex items-center justify-between px-4 py-3 rounded-xl border border-[var(--color-cool-gray)]/15 bg-gray-50 hover:bg-[oklch(0.97_0.03_210)] hover:border-[var(--color-soft-blue)]/20 transition-all"
             >
               <div className="flex items-center gap-3">
@@ -51,7 +51,7 @@ export function SubscribersTab({ subscribers }: SubscribersTabProps) {
                 <span className="text-sm text-[var(--color-dark-slate-gray)]">{s.email}</span>
               </div>
               <span className="text-xs text-[var(--color-cool-gray)] bg-white px-2.5 py-1 rounded-lg border border-[var(--color-cool-gray)]/15">
-                {timeAgo(s.subscribedAt)}
+                {timeAgo(s.created_at)}
               </span>
             </div>
           ))}

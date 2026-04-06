@@ -18,8 +18,9 @@ export interface BlogSendResult extends SendResult {
 // ─── Domain Models ────────────────────────────────────────────────────────────
 
 export interface Subscriber {
+  id: string
   email: string
-  subscribedAt: string
+  created_at: string
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────

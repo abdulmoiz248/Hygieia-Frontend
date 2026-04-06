@@ -33,7 +33,7 @@ export default function WorkersSearchTabs({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search by name, specialization or email…"
-          autoComplete="new-password"
+          autoComplete="off"
           className="w-full pl-10 pr-9 py-2.5 rounded-xl text-sm outline-none transition-all
             bg-white border border-gray-200
             shadow-[0_2px_8px_rgba(0,0,0,0.06)]
@@ -52,17 +52,7 @@ export default function WorkersSearchTabs({
       </div>
 
       {/*
-        Tab group — responsive behaviour:
-
-        Mobile  (<sm): w-full so the pill container stretches edge-to-edge.
-                       Each button is flex-1 so all four tabs share the width
-                       equally and nothing wraps or overflows.
-                       Font shrinks slightly (text-xs) to fit "Nutritionists"
-                       comfortably on a 320 px viewport.
-
-        Desktop (sm+): w-auto so the container hugs its content.
-                       flex-none on each button restores natural sizing.
-                       Font back to text-sm, padding back to px-4.
+        Tab group — responsive behaviour
       */}
       <div
         className="

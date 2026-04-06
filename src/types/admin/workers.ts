@@ -11,6 +11,7 @@ export interface WorkingHour {
 export interface Worker {
   _id: string
   id: string
+  email: string
   name: string
   phone: string
   gender: string
