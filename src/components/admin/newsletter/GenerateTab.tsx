@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, RefreshCw, Send, Sparkles } from "lucide-react"
+import { AlertCircle, CheckCircle2, RefreshCw, Send, Sparkles } from "lucide-react"
 import { HtmlPreview } from "./HtmlPreview"
 import { ResultBanner } from "./ResultBanner"
 import { useGenerateNewsletter } from "@/hooks/admin/newsletters/useGenerateNewsletter"
@@ -9,9 +9,10 @@ import { useSendNewsletter } from "@/hooks/admin/newsletters/useSendNewsletter"
 
 interface GenerateTabProps {
   subscriberCount: number
+  onSent?: () => void
 }
 
-export function GenerateTab({ subscriberCount }: GenerateTabProps) {
+export function GenerateTab({ subscriberCount, onSent }: GenerateTabProps) {
   const [idea, setIdea] = useState("")
   const [subject, setSubject] = useState("")
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null)
@@ -21,7 +22,6 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
   const generateMutation = useGenerateNewsletter()
   const sendMutation = useSendNewsletter()
 
-  // Dynamic current month for placeholder
   const currentMonth = new Date().toLocaleString("default", { month: "long" })
 
   const handleGenerate = async () => {
@@ -34,7 +34,10 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
   const handleSend = async () => {
     if (!generatedHtml || !subject.trim()) return
     const result = await sendMutation.mutateAsync({ html: generatedHtml, subject: subject.trim() }).catch(() => null)
-    if (result) setSendResult(result)
+    if (result) {
+      setSendResult(result)
+      onSent?.()
+    }
   }
 
   const canSend = !!generatedHtml && subject.trim().length > 0 && !sendMutation.isPending
@@ -48,7 +51,7 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
           className="h-1.5 w-full"
           style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }}
         />
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4 text-[var(--color-soft-blue)]" />
             <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
@@ -81,7 +84,7 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleGenerate}
               disabled={!idea.trim() || generateMutation.isPending}
@@ -116,53 +119,59 @@ export function GenerateTab({ subscriberCount }: GenerateTabProps) {
         />
       )}
 
-      {/* ── Step 3: Send ── */}
+      {/* ── Step 3: Send — compact inline footer, not a separate card ── */}
       {generatedHtml && (
         <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden">
           <div
             className="h-1.5 w-full"
             style={{ background: "linear-gradient(90deg, var(--color-mint-green), oklch(0.60 0.14 170))" }}
           />
-          <div className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Send className="w-4 h-4 text-[var(--color-mint-green)]" />
-                <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)]">
-                  Send to Subscribers
-                </h2>
-              </div>
-              <span
-                className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ background: "oklch(0.95 0.04 178)", color: "var(--color-mint-green)" }}
-              >
-                {subscriberCount} recipients
-              </span>
-            </div>
+          <div className="p-4 sm:p-5">
 
-            {!subject.trim() && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                Please add a subject line above before sending.
-              </div>
-            )}
-
-            {sendResult && (
+            {/* Success state */}
+            {sendResult ? (
               <ResultBanner result={sendResult} onClose={() => setSendResult(null)} />
-            )}
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                {/* Left: context */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "oklch(0.95 0.04 178)" }}
+                  >
+                    <Send className="w-4 h-4 text-[var(--color-mint-green)]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)] truncate">
+                      Ready to send
+                    </p>
+                    <p className="text-xs text-[var(--color-cool-gray)]">
+                      {subscriberCount} subscribers · {subject.trim() || <span className="text-amber-500">add a subject line</span>}
+                    </p>
+                  </div>
+                </div>
 
-            {!sendResult && (
-              <button
-                onClick={handleSend}
-                disabled={!canSend}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02]"
-                style={{ background: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))" }}
-              >
-                {sendMutation.isPending ? (
-                  <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</>
+                {/* Right: warning or send button */}
+                {!subject.trim() ? (
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700 flex-shrink-0">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    Subject required
+                  </div>
                 ) : (
-                  <><Send className="w-4 h-4" /> Send to All Subscribers</>
+                  <button
+                    onClick={handleSend}
+                    disabled={!canSend}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md disabled:opacity-50 transition-all hover:scale-[1.02] flex-shrink-0 w-full sm:w-auto"
+                    style={{ background: "linear-gradient(135deg, var(--color-mint-green), oklch(0.60 0.14 170))" }}
+                  >
+                    {sendMutation.isPending ? (
+                      <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</>
+                    ) : (
+                      <><Send className="w-4 h-4" /> Send to {subscriberCount} Subscribers</>
+                    )}
+                  </button>
                 )}
-              </button>
+              </div>
             )}
           </div>
         </div>

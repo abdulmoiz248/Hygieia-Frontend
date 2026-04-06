@@ -1,10 +1,11 @@
 import Link from "next/link"
 import {
-  Clock, ShieldCheck, Star, StarOff,
-  Trash2, Loader2, CheckCircle2,
+  Clock, Loader2, CheckCircle2, Rss,
+  ShieldCheck, Star, StarOff, Trash2,
 } from "lucide-react"
 import { BlogPost, getThemeGradient, getInitials } from "@/lib/admin/blog-helpers"
 import { Thumbnail } from "@/components/admin/blogs/Thumbnail"
+import { useSendBlogNewsletter } from "@/hooks/admin/newsletters/useSendBlogNewsletter"
 
 interface BlogCardProps {
   post:            BlogPost
@@ -20,6 +21,14 @@ export function BlogCard({
 }: BlogCardProps) {
   const isPending = !post.isVerified
   const busy      = deleting || actioning
+
+  const sendMutation = useSendBlogNewsletter()
+
+  const handleSendNewsletter = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    sendMutation.mutate({ blogpostId: post.id })
+  }
 
   return (
     <div
@@ -97,24 +106,44 @@ export function BlogCard({
           </div>
         )}
 
-        {/* Published Status Badges */}
+        {/* Published: status badges + send as newsletter */}
         {!isPending && (
-          <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-            <span
-              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg"
-              style={{ background: "oklch(0.95 0.04 178)", color: "var(--color-mint-green)" }}
-            >
-              <ShieldCheck className="w-3 h-3" /> Verified & Published
-            </span>
-            {post.isFeatured && (
+          <>
+            <div className="flex items-center gap-1.5 pt-1 flex-wrap">
               <span
-                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg"
-                style={{ background: "oklch(0.95 0.05 210)", color: "var(--color-soft-blue)" }}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+                style={{ background: "oklch(0.95 0.04 178)", color: "var(--color-mint-green)" }}
               >
-                <Star className="w-3 h-3 fill-current" /> Featured
+                <ShieldCheck className="w-3 h-3" /> Verified & Published
               </span>
-            )}
-          </div>
+              {post.isFeatured && (
+                <span
+                  className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg"
+                  style={{ background: "oklch(0.95 0.05 210)", color: "var(--color-soft-blue)" }}
+                >
+                  <Star className="w-3 h-3 fill-current" /> Featured
+                </span>
+              )}
+            </div>
+
+            {/* Send as Newsletter */}
+            <button
+              onClick={handleSendNewsletter}
+              disabled={sendMutation.isPending}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))",
+                color: "white",
+                fontSize: "0.72rem",
+                letterSpacing: "0.03em",
+              }}
+            >
+              {sendMutation.isPending
+                ? <><Loader2 className="w-3 h-3 animate-spin" /> Sending…</>
+                : <><Rss className="w-3 h-3" /> Send as Newsletter</>
+              }
+            </button>
+          </>
         )}
 
         {/* Footer: Author + Read Time + Delete */}

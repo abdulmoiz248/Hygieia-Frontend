@@ -15,7 +15,11 @@ export const TABS: { value: Tab; label: string; icon: React.ElementType }[] = [
 
 // ─── Stat card builder ────────────────────────────────────────────────────────
 
-export function buildStatCards(subscriberCount: number): StatCardData[] {
+export function buildStatCards(
+  subscriberCount: number,
+  newslettersSent: number,
+  blogpostsSent: number,
+): StatCardData[] {
   return [
     {
       id: "subscribers",
@@ -27,14 +31,14 @@ export function buildStatCards(subscriberCount: number): StatCardData[] {
     {
       id: "sent",
       title: "Newsletters Sent",
-      value: "—",
+      value: newslettersSent,
       icon: Send,
       color: "mint-green",
     },
     {
       id: "blogposts",
       title: "Blog Posts Sent",
-      value: "—",
+      value: blogpostsSent,
       icon: Rss,
       color: "soft-coral",
     },
