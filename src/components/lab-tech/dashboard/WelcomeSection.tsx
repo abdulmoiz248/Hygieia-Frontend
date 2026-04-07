@@ -4,32 +4,60 @@
 
 import { motion } from "framer-motion"
 import SplitText from '@/blocks/TextAnimations/SplitText/SplitText'
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import TextType from "@/blocks/TextAnimations/TextType/TextType"
 import useLabTechnicianStore from "@/store/lab-tech/userStore"
 import { useLabStore } from "@/store/lab-tech/labTech"
 
-export default function WelcomeSection() {
-
-    const itemVariants = {
+const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
 
+const splitFrom = { opacity: 0, y: 40 }
+const splitTo = { opacity: 1, y: 0 }
 
-   const user=useLabTechnicianStore().profile
-   const {getPendingCount}=useLabStore()
+export default function WelcomeSection() {
+  const userName = useLabTechnicianStore((state) => state.profile?.name)
+  const pendingCount = useLabStore((state) => state.pendingReports.length)
    
-    
-      const [showDes,setShowDes]=useState(false)
-      const handleAnimationComplete = () => {
-      setShowDes(true)
-    };
+  const [showDes, setShowDes] = useState(false)
+  const showDesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    useEffect(() => {
-  const timer = setTimeout(() => setShowDes(true), 500); // fallback
-  return () => clearTimeout(timer);
-}, []);
+  const welcomeText = useMemo(
+    () => (
+      <span>
+        <span className="text-soft-coral">Welcome, </span>
+        <span className="text-dark-slate-gray">{userName || 'user'}! 👋</span>
+      </span>
+    ),
+    [userName]
+  )
+
+  const rotatingText = useMemo(
+    () => [
+      pendingCount === 0
+        ? "🎉 Great job! No pending reports."
+        : `🧪 You have ${pendingCount} sample${pendingCount > 1 ? 's' : ''} pending for processing.`,
+      "📋 Review and validate today's test reports before submission.",
+      "⚠️ Double-check patient details to avoid labeling errors.",
+      "🧼 Maintain lab hygiene — disinfect equipment regularly.",
+    ],
+    [pendingCount]
+  )
+
+  const handleAnimationComplete = useCallback(() => {
+    setShowDes((previous) => (previous ? previous : true))
+  }, [])
+
+  useEffect(() => {
+    showDesTimerRef.current = setTimeout(() => setShowDes(true), 500)
+    return () => {
+      if (showDesTimerRef.current) {
+        clearTimeout(showDesTimerRef.current)
+      }
+    }
+  }, [])
 
   return (
    
@@ -38,18 +66,14 @@ export default function WelcomeSection() {
 {
   showDes &&
    <SplitText
-   text={   <span>
-       <span className="text-soft-coral">Welcome, </span>
-       <span className="text-dark-slate-gray">{user?.name || 'user'}! 👋</span>
-     </span>
-     }
+   text={welcomeText}
    className="text-3xl font-bold mb-2"
    delay={100}
    duration={0.4}
    ease="power3.out"
    splitType="chars"
-   from={{ opacity: 0, y: 40 }}
-   to={{ opacity: 1, y: 0 }}
+   from={splitFrom}
+   to={splitTo}
    threshold={0.1}
    rootMargin="-100px"
    textAlign="center"
@@ -60,14 +84,7 @@ export default function WelcomeSection() {
  {showDes && (
    <div className="block mt-2 ">
      <TextType
-       text={ [
-  getPendingCount() === 0 
-  ? "🎉 Great job! No pending reports." 
-  : `🧪 You have ${getPendingCount()} sample${getPendingCount() > 1 ? 's' : ''} pending for processing.`
-,"📋 Review and validate today's test reports before submission.",
-  "⚠️ Double-check patient details to avoid labeling errors.",
-  "🧼 Maintain lab hygiene — disinfect equipment regularly."
-]}
+       text={rotatingText}
 
        typingSpeed={75}
        pauseDuration={1500}
