@@ -27,12 +27,18 @@ import {
 } from "recharts"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
+import { reorderWeekDataFromToday } from "@/helpers/reorderWeekFromToday"
 
 export default function HealthFocus() {
   const user = usePatientProfileStore((store) => store.profile)
   const healthFocus = usePatientDashboardAnalyticsStore((state) => state.healthFocus)
   const medicationAdherence = usePatientDashboardAnalyticsStore((state) => state.medicationAdherence)
   const itemVariants = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }
+
+  const orderedMedicationAdherence = useMemo(
+    () => reorderWeekDataFromToday(medicationAdherence, (entry) => entry.week),
+    [medicationAdherence]
+  )
 
   const initialMetrics = useMemo(
     () =>
@@ -129,7 +135,7 @@ export default function HealthFocus() {
                 className="h-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={medicationAdherence}>
+                  <ComposedChart data={orderedMedicationAdherence}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
                     <XAxis dataKey="week" stroke="var(--color-dark-slate-gray)" fontSize={12} />
                     <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />

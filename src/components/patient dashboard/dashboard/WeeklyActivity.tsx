@@ -1,11 +1,13 @@
 "use client"
 
+import { useMemo } from "react"
 import { motion } from "framer-motion"
 import { Activity, Droplets } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, BarChart, Bar, LineChart, Line } from "recharts"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
+import { reorderWeekDataFromToday } from "@/helpers/reorderWeekFromToday"
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -14,6 +16,10 @@ const itemVariants = {
 
 export default function WeeklyActivity() {
   const weeklyActivity = usePatientDashboardAnalyticsStore((state) => state.weeklyActivity)
+  const orderedWeeklyActivity = useMemo(
+    () => reorderWeekDataFromToday(weeklyActivity, (entry) => entry.day),
+    [weeklyActivity]
+  )
 
   return (
     <motion.div
@@ -40,7 +46,7 @@ export default function WeeklyActivity() {
               className="w-full h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyActivity}>
+                <BarChart data={orderedWeeklyActivity}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
                   <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
                   <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
@@ -67,7 +73,7 @@ export default function WeeklyActivity() {
               className="w-full h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyActivity}>
+                <LineChart data={orderedWeeklyActivity}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
                   <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
                   <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
