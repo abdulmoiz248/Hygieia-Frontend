@@ -29,7 +29,9 @@ export default function MedicineTrackerPage() {
   const profile = usePatientProfileStore((state) => state.profile)
   const { MedicineState, toggleMedicineTaken, fetchPrescriptions, syncingMedicineIds } = usePatientMedicineStore()
   const fallbackPatientId =
-    typeof window !== "undefined" ? localStorage.getItem("id") : null
+    typeof window !== "undefined"
+      ? localStorage.getItem("patient") || localStorage.getItem("id")
+      : null
   const patientId = profile?.id || fallbackPatientId || ""
 
   const todaysMeds = MedicineState.todaysMeds
@@ -41,9 +43,9 @@ export default function MedicineTrackerPage() {
   }, [fetchPrescriptions, patientId])
 
 
-  const toggleTaken = (id: string) => {
-    if (!patientId) return
-    toggleMedicineTaken(id, patientId)
+  const toggleTaken = async (id: string) => {
+    if (!patientId) return false
+    return toggleMedicineTaken(id, patientId)
   }
   const takenCount = todaysMeds.filter((med) => med.taken).length
   const totalCount = todaysMeds.length

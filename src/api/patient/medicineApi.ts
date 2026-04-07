@@ -3,6 +3,8 @@ import type { Medicine, Prescription } from "@/types/patient/medicine"
 
 type ApiMedication = {
   id?: string | number
+  medicationId?: string | number
+  medication_id?: string | number
   name?: string
   dosage?: string
   frequency?: string
@@ -47,19 +49,28 @@ const normalizeMedication = (
   medication: ApiMedication,
   index: number,
   prescriptionId: string
-): Medicine => ({
-  id: `${prescriptionId}:${String(medication.id ?? index)}`,
-  name: medication.name ?? "Medicine",
-  dosage: medication.dosage ?? "-",
-  frequency: medication.frequency ?? "-",
-  instructions: medication.instructions,
-  duration:
-    typeof medication.duration === "number"
-      ? `${medication.duration} days`
-      : medication.duration ?? "Ongoing",
-  time: medication.time ?? "-",
-  taken: Boolean(medication.taken),
-})
+): Medicine => {
+  const backendMedicationId =
+    medication.medicationId ?? medication.medication_id ?? medication.id
+
+  return {
+    id: `${prescriptionId}:${String(backendMedicationId ?? index)}`,
+    backendMedicationId:
+      backendMedicationId !== undefined && backendMedicationId !== null
+        ? String(backendMedicationId)
+        : undefined,
+    name: medication.name ?? "Medicine",
+    dosage: medication.dosage ?? "-",
+    frequency: medication.frequency ?? "-",
+    instructions: medication.instructions,
+    duration:
+      typeof medication.duration === "number"
+        ? `${medication.duration} days`
+        : medication.duration ?? "Ongoing",
+    time: medication.time ?? "-",
+    taken: Boolean(medication.taken),
+  }
+}
 
 export const mapApiPrescriptionToStorePrescription = (
   prescription: ApiPrescription
@@ -94,23 +105,13 @@ export async function getActivePrescriptionsByPatient(
 export async function markMedicationTaken(
   payload: MarkMedicationTakenPayload
 ): Promise<void> {
-  const response = await fetch("/api/patient/medications/taken", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    let message = "Failed to sync medicine status"
-
-    try {
-      const errorData = await response.json()
-      message = errorData?.message || message
-    } catch {
-      // no-op
-    }
+  try {
+    await api.post("/appointments/prescriptions/medications/taken", payload)
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Failed to sync medicine status"
 
     throw new Error(message)
   }

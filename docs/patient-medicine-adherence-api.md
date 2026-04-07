@@ -45,8 +45,8 @@ Frontend now sends an event whenever a patient marks/unmarks a medicine:
 ### Suggested Behavior
 
 - Upsert by unique key: `(patientId, prescriptionId, medicationId, date(takenAt))`
-- If same key exists, update `taken` and `takenAt`
-- Preserve latest action so toggle back from taken->not taken is supported
+- If the same key exists, return the existing record or update `takenAt`
+- Frontend only sends `taken: true` for this flow
 
 ### Success Response (example)
 
@@ -71,7 +71,7 @@ Frontend now sends an event whenever a patient marks/unmarks a medicine:
 
 - `400` invalid payload / missing IDs
 - `404` prescription or medication not found for patient
-- `409` invalid state transition (optional)
+- `409` duplicate or invalid state transition (optional)
 - `500` server error
 
 ---

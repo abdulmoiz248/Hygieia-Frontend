@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, Pill, CheckCircle } from "lucide-react"
 import React from "react"
-import { patientSuccess } from "@/toasts/PatientToast"
+import { patientError, patientSuccess } from "@/toasts/PatientToast"
 
 interface Medicine {
   id: string
@@ -18,7 +18,7 @@ interface Medicine {
 
 interface TodaysScheduleCardProps {
   todaysMeds: Medicine[]
-  toggleMedicineTaken: (medicineId: string) => void
+  toggleMedicineTaken: (medicineId: string) => Promise<boolean>
   syncingMedicineIds?: string[]
 }
 
@@ -26,7 +26,10 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
   todaysMeds,
   toggleMedicineTaken,
   syncingMedicineIds = []
-}) => (
+}) => {
+  const pendingMeds = todaysMeds.filter((med) => !med.taken)
+
+  return (
   <Card className="shadow-md rounded-2xl bg-white/40">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
@@ -35,15 +38,15 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
       </CardTitle>
     </CardHeader>
     <CardContent>
-      {todaysMeds.length === 0 ? (
+      {pendingMeds.length === 0 ? (
         <div className="text-center py-12 flex flex-col items-center justify-center text-cool-gray gap-2">
           <CheckCircle className="w-10 h-10 text-mint-green" />
           <p className="text-base font-medium">No medicines to take today</p>
-          <p className="text-sm text-muted">You’re all set 🎉</p>
+          <p className="text-sm text-black">You’re all set 🎉</p>
         </div>
       ) : (
-        <div className={`space-y-4 ${todaysMeds.length > 3 ? "max-h-[500px] overflow-y-auto pr-2" : ""}`}>
-          {todaysMeds.map((med) => {
+        <div className={`space-y-4 ${pendingMeds.length > 3 ? "max-h-[500px] overflow-y-auto pr-2" : ""}`}>
+          {pendingMeds.map((med) => {
             const isSyncing = syncingMedicineIds.includes(med.id)
 
             return (
@@ -86,22 +89,21 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  {med.taken ? (
-                    <Badge className="bg-mint-green text-white px-3 py-1 rounded-full">
-                      {isSyncing ? "Syncing..." : "Taken"}
-                    </Badge>
-                  ) : (
-                    <Button
-                      size="sm"
-                      disabled={isSyncing}
-                      className="bg-mint-green text-snow-white hover:bg-mint-green/90 transition-all duration-200"
-                      onClick={() =>{
-                        patientSuccess("Medicine "+med.name+ " marked as Taken")
-                         toggleMedicineTaken(med.id)}}
-                    >
-                      {isSyncing ? "Syncing..." : "Mark Taken"}
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    disabled={isSyncing}
+                    className="bg-mint-green text-snow-white hover:bg-mint-green/90 transition-all duration-200"
+                    onClick={async () => {
+                      const saved = await toggleMedicineTaken(med.id)
+                      if (saved) {
+                        patientSuccess(`Medicine ${med.name} marked as taken`)
+                      } else {
+                        patientError(`Unable to mark ${med.name} as taken`)
+                      }
+                    }}
+                  >
+                    {isSyncing ? "Syncing..." : "Mark Taken"}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -111,6 +113,7 @@ const TodaysScheduleCard: React.FC<TodaysScheduleCardProps> = ({
       )}
     </CardContent>
   </Card>
-)
+  )
+}
 
 export default TodaysScheduleCard

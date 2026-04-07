@@ -12,12 +12,10 @@ type MedicineStore = MedicineTrackerState & {
   loading: boolean
   error: string | null
   syncingMedicineIds: string[]
-  toggleMedicineTaken: (id: string, patientId: string) => Promise<void>
+  toggleMedicineTaken: (id: string, patientId: string) => Promise<boolean>
   setPrescriptions: (items: Prescription[]) => void
   fetchPrescriptions: (patientId: string) => Promise<void>
 }
-
-type LocalTakenState = Record<string, boolean>
 
 const updateMedicineTakenInPrescriptions = (
   prescriptions: Prescription[],
@@ -31,57 +29,10 @@ const updateMedicineTakenInPrescriptions = (
     ),
   }))
 
-const extractMedicationId = (medicineId: string): string => {
-  const parts = medicineId.split(":")
-  if (parts.length < 2) {
-    return medicineId
-  }
-  return parts.slice(1).join(":")
-}
-
-const getTodayKey = () => new Date().toISOString().slice(0, 10)
-
-const getLocalTakenKey = (patientId: string) =>
-  `patient-medicine-taken:${patientId}:${getTodayKey()}`
-
-const getLocalTakenState = (patientId: string): LocalTakenState => {
-  if (typeof window === "undefined" || !patientId) {
-    return {}
-  }
-
-  try {
-    const raw = window.localStorage.getItem(getLocalTakenKey(patientId))
-    if (!raw) {
-      return {}
-    }
-    const parsed = JSON.parse(raw) as LocalTakenState
-    return parsed && typeof parsed === "object" ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-const saveLocalTakenState = (patientId: string, state: LocalTakenState) => {
-  if (typeof window === "undefined" || !patientId) {
-    return
-  }
-
-  window.localStorage.setItem(getLocalTakenKey(patientId), JSON.stringify(state))
-}
-
-const mergeTakenFromLocal = (
-  prescriptions: Prescription[],
-  localTakenState: LocalTakenState
-): Prescription[] =>
-  prescriptions.map((prescription) => ({
-    ...prescription,
-    medications: prescription.medications.map((medication) => {
-      if (Object.prototype.hasOwnProperty.call(localTakenState, medication.id)) {
-        return { ...medication, taken: localTakenState[medication.id] }
-      }
-      return medication
-    }),
-  }))
+const isLikelyUuid = (value: string): boolean =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  )
 
 const getTodaysMeds = (prescriptions: Prescription[]): Medicine[] => {
   const today = new Date()
@@ -129,15 +80,41 @@ export const usePatientMedicineStore = create<MedicineStore>()(
           item.medications.some((medication) => medication.id === id)
         )
 
-        if (!medicine || !prescription || !patientId) {
-          return
+        if (
+          !medicine ||
+          !prescription ||
+          !patientId ||
+          medicine.taken ||
+          state.syncingMedicineIds.includes(id)
+        ) {
+          return false
         }
 
-        const nextTaken = !medicine.taken
+        const medicationId = medicine.backendMedicationId || medicine.name
+
+        if (!isLikelyUuid(patientId) || !isLikelyUuid(prescription.id)) {
+          set({
+            error:
+              "Cannot mark medicine as taken because patient or prescription ID is invalid.",
+          })
+          return false
+        }
+
+        if (!medicationId) {
+          set({
+            error:
+              "Cannot mark this medicine as taken because medication ID is missing in prescription data.",
+          })
+          return false
+        }
+
+        const nextTaken = true
 
         set((currentState) => ({
           error: null,
-          syncingMedicineIds: [...currentState.syncingMedicineIds, id],
+          syncingMedicineIds: currentState.syncingMedicineIds.includes(id)
+            ? currentState.syncingMedicineIds
+            : [...currentState.syncingMedicineIds, id],
           Prescription: updateMedicineTakenInPrescriptions(
             currentState.Prescription,
             id,
@@ -153,28 +130,33 @@ export const usePatientMedicineStore = create<MedicineStore>()(
           },
         }))
 
-        const localTakenState = getLocalTakenState(patientId)
-        saveLocalTakenState(patientId, {
-          ...localTakenState,
-          [id]: nextTaken,
-        })
-
         try {
           await markMedicationTaken({
             patientId,
             prescriptionId: prescription.id,
-            medicationId: extractMedicationId(id),
+            medicationId,
             taken: nextTaken,
             takenAt: new Date().toISOString(),
             scheduledTime: medicine.time,
             source: "patient-web",
           })
+          return true
         } catch (err: any) {
-          set({
-            error:
-              err?.message ||
-              "Medicine status saved locally. Sync will complete when backend endpoint is available.",
-          })
+          set((currentState) => ({
+            error: err?.message || "Failed to sync medicine status",
+            Prescription: updateMedicineTakenInPrescriptions(
+              currentState.Prescription,
+              id,
+              false
+            ),
+            MedicineState: {
+              ...currentState.MedicineState,
+              todaysMeds: currentState.MedicineState.todaysMeds.map((medication) =>
+                medication.id === id ? { ...medication, taken: false } : medication
+              ),
+            },
+          }))
+          return false
         } finally {
           set((currentState) => ({
             syncingMedicineIds: currentState.syncingMedicineIds.filter(
@@ -204,16 +186,11 @@ export const usePatientMedicineStore = create<MedicineStore>()(
         try {
           const apiItems = await getActivePrescriptionsByPatient(patientId)
           const mappedPrescriptions = apiItems.map(mapApiPrescriptionToStorePrescription)
-          const localTakenState = getLocalTakenState(patientId)
-          const prescriptions = mergeTakenFromLocal(
-            mappedPrescriptions,
-            localTakenState
-          )
           set({
             loading: false,
             error: null,
-            Prescription: prescriptions,
-            MedicineState: { todaysMeds: getTodaysMeds(prescriptions) },
+            Prescription: mappedPrescriptions,
+            MedicineState: { todaysMeds: getTodaysMeds(mappedPrescriptions) },
           })
         } catch (err: any) {
           set({

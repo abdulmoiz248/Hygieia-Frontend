@@ -1,5 +1,6 @@
 export interface Medicine {
   id: string
+  backendMedicationId?: string
   name: string
   dosage: string
   time: string
