@@ -8,6 +8,7 @@ import patientApi from "@/api/patient/patientApi"
 type ProfileState = {
   profile: ProfileType
   loading: boolean
+  hasFetchedProfile: boolean
   error: string | null
   setProfile: (profile: ProfileType) => void
   updateProfile: (patch: Partial<ProfileType>) => void
@@ -113,6 +114,7 @@ export const usePatientProfileStore = create<ProfileState>()(
     (set, get) => ({
       profile: defaultProfile,
       loading: false,
+      hasFetchedProfile: false,
       error: null,
 
       setProfile: (profile) => set({ profile: normalizeProfile(profile) }),
@@ -121,11 +123,15 @@ export const usePatientProfileStore = create<ProfileState>()(
         set((state) => ({ profile: normalizeProfile({ ...state.profile, ...patch }) })),
 
       fetchInitialProfile: async () => {
+        if (get().loading || get().hasFetchedProfile) {
+          return
+        }
+
         set({ loading: true, error: null })
         try {
           const id = getStoredId()
           if (!id) {
-            set({ profile: normalizeProfile({}), loading: false, error: "Missing patient id" })
+            set({ profile: normalizeProfile({}), loading: false, hasFetchedProfile: true, error: "Missing patient id" })
             return
           }
 
@@ -151,10 +157,11 @@ export const usePatientProfileStore = create<ProfileState>()(
           set({
             profile: normalizeProfile(fetchedProfile as Partial<ProfileType> | null),
             loading: false,
+            hasFetchedProfile: true,
             error: fetchedProfile ? null : "Failed to load profile",
           })
         } catch (err: any) {
-          set({ loading: false, error: err?.message ?? "Failed to load profile" })
+          set({ loading: false, hasFetchedProfile: true, error: err?.message ?? "Failed to load profile" })
         }
       },
 

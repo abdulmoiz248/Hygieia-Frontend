@@ -1,8 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useEffect, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
@@ -30,7 +29,6 @@ const containerVariants = {
 }
 
 function DashboardPageContent() {
-   const searchParams = useSearchParams()
    const { fetchAppointments } =
       usePatientAppointmentsStore()
     
@@ -44,8 +42,9 @@ function DashboardPageContent() {
   const { toast } = useToast()
 
   useEffect(() => {
-    const fitbitStatus = searchParams.get('fitbit')
-    const error = searchParams.get('error')
+    const searchParams = new URLSearchParams(window.location.search)
+    const fitbitStatus = searchParams.get("fitbit")
+    const error = searchParams.get("error")
     
     if (fitbitStatus === 'connected') {
       toast({
@@ -79,7 +78,7 @@ function DashboardPageContent() {
     if (error) {
       window.history.replaceState({}, '', window.location.pathname)
     }
-  }, [searchParams, toast])
+  }, [toast])
 
   useEffect(() => {
     const patientId = profile?.id || (typeof window !== "undefined" ? localStorage.getItem("id") || "" : "")
@@ -137,14 +136,5 @@ function DashboardPageContent() {
 }
 
 export default function DashboardPage() {
-  return (
-    <Suspense fallback={
-      <div className="space-y-6 lg:space-y-8 w-full animate-pulse">
-        <div className="h-32 bg-gray-200 rounded-lg"></div>
-        <div className="h-48 bg-gray-200 rounded-lg"></div>
-      </div>
-    }>
-      <DashboardPageContent />
-    </Suspense>
-  )
+  return <DashboardPageContent />
 }
