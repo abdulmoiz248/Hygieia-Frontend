@@ -1,10 +1,18 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Target, Award, Lightbulb } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { Award, Dumbbell, FlaskConical, HeartPulse, Lightbulb, Moon, Pill, RefreshCw, Stethoscope } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
+import { usePatientProfileStore } from "@/store/patient/profile-store"
+import {
+  getLatestPatientRecommendations,
+  refreshPatientRecommendations,
+  type PatientRecommendation,
+} from "@/api/patient/recommendationsApi"
 
 import { Variants } from "framer-motion"
 
@@ -29,71 +37,199 @@ const containerVariants = {
 }
 
 
+const MAX_RECOMMENDATIONS = 3
+
+const getStoredPatientId = () =>
+  typeof window !== "undefined" ? localStorage.getItem("id") || "" : ""
+
 export default function HealthInsights() {
-  const recommendations = usePatientDashboardAnalyticsStore((state) => state.recommendations)
+  const profileId = usePatientProfileStore((state) => state.profile.id)
+  const { toast } = useToast()
+  const [recommendations, setRecommendations] = useState<PatientRecommendation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const patientId = profileId || getStoredPatientId()
+
+  const visibleRecommendations = useMemo(
+    () => recommendations.slice(0, MAX_RECOMMENDATIONS),
+    [recommendations]
+  )
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!patientId) {
+        setLoading(false)
+        setError("Patient ID is required")
+        setRecommendations([])
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const record = await getLatestPatientRecommendations(patientId)
+        setRecommendations((record.recommendations ?? []).slice(0, MAX_RECOMMENDATIONS))
+      } catch (err: any) {
+        const status = err?.response?.status
+
+        if (status === 404) {
+          setRecommendations([])
+          setError("No recommendations found yet.")
+        } else {
+          setRecommendations([])
+          setError(
+            err?.response?.data?.message || err?.message || "Failed to load recommendations"
+          )
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRecommendations()
+  }, [patientId])
+
+  const handleGenerateRecommendations = async () => {
+    if (!patientId) return
+
+    setRefreshing(true)
+
+    try {
+      await refreshPatientRecommendations(patientId)
+      const record = await getLatestPatientRecommendations(patientId)
+      setRecommendations((record.recommendations ?? []).slice(0, MAX_RECOMMENDATIONS))
+      setError(null)
+      toast({
+        title: "Recommendations updated",
+        description: "Latest patient recommendations were generated successfully.",
+      })
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.message || "Failed to generate recommendations"
+      setError(message)
+      toast({
+        title: "Unable to generate recommendations",
+        description: message,
+      })
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   const getRecommendationIcon = (type: string) => {
-    if (type === "exercise") return Target
+    if (type === "fitness" || type === "exercise") return Dumbbell
+    if (type === "sleep") return Moon
     if (type === "nutrition") return Award
+    if (type === "medication") return Pill
+    if (type === "doctor") return Stethoscope
+    if (type === "disease_risk") return HeartPulse
+    if (type === "lab_test") return FlaskConical
     return Lightbulb
   }
 
   const getRecommendationTheme = (type: string) => {
-    if (type === "exercise") return { color: "text-soft-coral", bgColor: "bg-soft-coral/20" }
+    if (type === "fitness" || type === "exercise") return { color: "text-soft-coral", bgColor: "bg-soft-coral/20" }
+    if (type === "sleep") return { color: "text-soft-blue", bgColor: "bg-soft-blue/20" }
     if (type === "nutrition") return { color: "text-mint-green", bgColor: "bg-mint-green/20" }
+    if (type === "medication") return { color: "text-soft-coral", bgColor: "bg-soft-coral/20" }
+    if (type === "doctor") return { color: "text-soft-blue", bgColor: "bg-soft-blue/20" }
+    if (type === "disease_risk") return { color: "text-soft-coral", bgColor: "bg-soft-coral/20" }
+    if (type === "lab_test") return { color: "text-mint-green", bgColor: "bg-mint-green/20" }
     return { color: "text-soft-blue", bgColor: "bg-soft-blue/20" }
   }
+
+  const showEmptyState = !loading && visibleRecommendations.length === 0
 
   return (
   
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 lg:space-y-6 w-full">
       {/* Recommendations Section */}
       <Card className="bg-white/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-md max-w-full">
-        <CardHeader className="border-b border-white/20 px-6 ">
-          <CardTitle className="flex items-center gap-2 text-xl font-semibold text-dark-slate-gray">
-         
+        <CardHeader className="border-b border-white/20 px-6">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-xl font-semibold text-dark-slate-gray">
               <Lightbulb className="w-5 h-5 text-soft-coral" />
-          
-            Personalized Recommendations
-          </CardTitle>
-        </CardHeader>
-        <CardContent className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {recommendations.map((rec, i) => {
-            const Icon = getRecommendationIcon(rec.type)
-            const theme = getRecommendationTheme(rec.type)
-
-            return (
-            <motion.div
-              key={`${rec.type}-${rec.title}-${i}`}
-              custom={i}
-              variants={fadeUp}
-              className={`flex flex-col gap-3 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-shadow duration-300 cursor-pointer ${theme.bgColor} backdrop-blur-sm`}
+              Personalized Recommendations
+            </CardTitle>
+            <Button
+              type="button"
+              onClick={handleGenerateRecommendations}
+              disabled={refreshing || loading || !patientId}
+              variant="outline"
+              className="rounded-full border-white/30 bg-white/40 text-dark-slate-gray hover:bg-white/60"
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${theme.color} bg-white/15`}>
-                <Icon className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col gap-1 flex-grow">
-                <h3 className="text-md font-bold text-dark-slate-gray">{rec.title}</h3>
-                <p className="text-xs text-dark-slate-gray/75 flex-grow">{rec.description}</p>
-              </div>
-              <div className="flex justify-between items-center mt-2 text-xs font-semibold text-dark-slate-gray/60">
-                <Badge
-                  variant="secondary"
-                  className={`capitalize rounded-full px-2 py-0.5 font-semibold ${
-                    rec.priority === "high"
-                      ? "bg-soft-coral/30 text-soft-coral border-soft-coral/40"
-                      : rec.priority === "medium"
-                      ? "bg-mint-green/30 text-mint-green border-mint-green/40"
-                      : "bg-soft-blue/30 text-soft-blue border-soft-blue/40"
-                  }`}
+              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {loading ? (
+            <div className="col-span-full rounded-xl border border-white/20 bg-white/20 p-5 text-sm text-dark-slate-gray/75">
+              Loading recommendations...
+            </div>
+          ) : showEmptyState ? (
+            <div className="col-span-full flex flex-col gap-3 rounded-xl border border-white/20 bg-white/20 p-5">
+              <p className="text-sm font-medium text-dark-slate-gray">
+                {error ?? "No recommendations are available yet."}
+              </p>
+              <p className="text-xs text-dark-slate-gray/70">
+                Generate fresh recommendations for this patient to populate the dashboard.
+              </p>
+              <div>
+                <Button
+                  type="button"
+                  onClick={handleGenerateRecommendations}
+                  disabled={refreshing || !patientId}
+                  className="rounded-full bg-soft-coral text-white hover:bg-soft-coral/90"
                 >
-                  {rec.priority}
-                </Badge>
-             
-                <span>Timeframe: <span className="font-semibold">{rec.timeframe}</span></span>
+                  {refreshing ? "Generating..." : "Generate Recommendations"}
+                </Button>
               </div>
-            </motion.div>
-          )})}
+            </div>
+          ) : (
+            visibleRecommendations.map((rec, i) => {
+              const Icon = getRecommendationIcon(rec.type)
+              const theme = getRecommendationTheme(rec.type)
+
+              return (
+                <motion.div
+                  key={`${rec.type}-${rec.title}-${i}`}
+                  custom={i}
+                  variants={fadeUp}
+                  className={`flex flex-col gap-3 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-shadow duration-300 cursor-pointer ${theme.bgColor} backdrop-blur-sm`}
+                >
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${theme.color} bg-white/15`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="flex flex-col gap-1 flex-grow">
+                    <h3 className="text-md font-bold text-dark-slate-gray">{rec.title}</h3>
+                    <p className="text-xs text-dark-slate-gray/75 flex-grow">{rec.description}</p>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 text-xs font-semibold text-dark-slate-gray/60">
+                    <Badge
+                      variant="secondary"
+                      className={`capitalize rounded-full px-2 py-0.5 font-semibold ${
+                        rec.priority === "high"
+                          ? "bg-soft-coral/30 text-soft-coral border-soft-coral/40"
+                          : rec.priority === "medium"
+                          ? "bg-mint-green/30 text-mint-green border-mint-green/40"
+                          : "bg-soft-blue/30 text-soft-blue border-soft-blue/40"
+                      }`}
+                    >
+                      {rec.priority}
+                    </Badge>
+
+                    <span>
+                      Timeframe: <span className="font-semibold">{rec.timeframe}</span>
+                    </span>
+                  </div>
+                </motion.div>
+              )
+            })
+          )}
         </CardContent>
       </Card>
 
