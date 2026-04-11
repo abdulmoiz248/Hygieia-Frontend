@@ -1,4 +1,4 @@
-import { BookOpen, Rss, Send, Sparkles, Users } from "lucide-react"
+import { BookOpen, Clock, Rss, Send, Sparkles, Users } from "lucide-react"
 import type { StatCardData, Tab } from "@/types/admin/newsletter.types"
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -11,6 +11,7 @@ export const TABS: { value: Tab; label: string; icon: React.ElementType }[] = [
   { value: "generate",    label: "Generate & Send",      icon: Sparkles },
   { value: "blogpost",    label: "Blog Post Newsletter", icon: BookOpen },
   { value: "subscribers", label: "Subscribers",          icon: Users    },
+  { value: "history",     label: "Sent History",         icon: Clock    },
 ]
 
 // ─── Stat card builder ────────────────────────────────────────────────────────

@@ -2,26 +2,29 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
-import { BlogPostTab } from "@/components/admin/newsletter/BlogPostTab"
-import { GenerateTab } from "@/components/admin/newsletter/GenerateTab"
+import { BlogPostTab }         from "@/components/admin/newsletter/BlogPostTab"
+import { GenerateTab }         from "@/components/admin/newsletter/GenerateTab"
 import { NewsletterStatCards } from "@/components/admin/newsletter/NewsletterStatCards"
-import { SubscribersTab } from "@/components/admin/newsletter/SubscribersTab"
+import { SubscribersTab }      from "@/components/admin/newsletter/SubscribersTab"
+import { SentHistoryTab }      from "@/components/admin/newsletter/SentHistoryTab"
 import { buildStatCards, TABS } from "@/lib/admin/constants"
-import { useSubscribers } from "@/hooks/admin/newsletters/useSubscribers"
-import { useNewsletterStore } from "@/store/admin/useNewsletterStore"
-import { adminError } from "@/toasts/AdminToasts"
+import { useSubscribers }       from "@/hooks/admin/newsletters/useSubscribers"
+import { useSentNewsletters }   from "@/hooks/admin/newsletters/useSentNewsletters"
+import { adminError }           from "@/toasts/AdminToasts"
 import type { Tab } from "@/types/admin/newsletter.types"
 
 export default function NewsletterPage() {
   const [tab, setTab] = useState<Tab>("generate")
 
   const { data: subscribers = [], isLoading, isError, error } = useSubscribers()
-  const newslettersSent = useNewsletterStore((s) => s.newslettersSent)
-  const blogpostsSent   = useNewsletterStore((s) => s.blogpostsSent)
+  const { data: sentData } = useSentNewsletters()
 
   if (isError && error instanceof Error) {
     adminError(error.message || "Failed to load subscribers.")
   }
+
+  const newslettersSent = sentData?.newslettersSent ?? 0
+  const blogpostsSent   = sentData?.blogpostsSent   ?? 0
 
   const statCards = buildStatCards(subscribers.length, newslettersSent, blogpostsSent)
 
@@ -41,7 +44,7 @@ export default function NewsletterPage() {
       {/* Stat Cards */}
       <NewsletterStatCards cards={statCards} />
 
-      {/* Tabs — scrollable on mobile */}
+      {/* Tabs */}
       <div className="overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="flex gap-1 bg-white border border-[var(--color-cool-gray)]/20 rounded-xl p-1 shadow-sm w-max sm:w-fit">
           {TABS.map((t) => {
@@ -76,6 +79,7 @@ export default function NewsletterPage() {
           {tab === "generate"    && <GenerateTab    subscriberCount={subscribers.length} />}
           {tab === "blogpost"    && <BlogPostTab    subscriberCount={subscribers.length} />}
           {tab === "subscribers" && <SubscribersTab subscribers={subscribers} />}
+          {tab === "history"     && <SentHistoryTab />}
         </div>
       )}
     </div>

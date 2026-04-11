@@ -1,42 +1,38 @@
 import { useQuery } from "@tanstack/react-query"
-import { BASE_URL } from "@/lib/admin/constants"
-import { useAdminStore } from "@/store/admin/useAdminStore"
+import { BASE_URL, normalizePost } from "@/lib/admin/blog-helpers"
 import { adminError } from "@/toasts/AdminToasts"
+import type { BlogPost, RawBlogPost } from "@/lib/admin/blog-helpers"
 
-export interface BlogPostSummary {
-  id: string
-  title: string
-  category: string
-  author: string
-  excerpt?: string
-  isVerified: boolean
-}
+async function fetchBlogPosts(): Promise<BlogPost[]> {
+  const res = await fetch(`${BASE_URL}/blogPost`)
 
-async function fetchBlogPosts(adminId: string): Promise<BlogPostSummary[]> {
-  const res = await fetch(`${BASE_URL}/blogPost`, {
-    headers: {
-      "Content-Type": "application/json",
-      "x-admin-id": adminId,
-    },
-  })
   const json = await res.json()
-  if (!res.ok) throw new Error(json.message || "Failed to fetch blog posts")
-  // Return only verified/published posts — no point sending a draft as a newsletter
-  const posts: BlogPostSummary[] = Array.isArray(json) ? json : (json.data ?? [])
-  return posts.filter((p) => p.isVerified)
+
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to fetch blog posts")
+  }
+
+  // ✅ match all response shapes the blogs page handles
+  const raw: RawBlogPost[] = Array.isArray(json)      ? json
+    : Array.isArray(json.data)  ? json.data
+    : json.posts                ? json.posts
+    : json.items                ? json.items
+    : []
+
+  // ✅ reuse normalizePost from blog-helpers — same logic as the blogs page
+  //    it correctly checks isVerified, verified, isverified, and status === "published"
+  return raw.map(normalizePost).filter((p) => p.isVerified)
 }
 
 export function useBlogPosts() {
-  const adminId = useAdminStore((s) => s.adminId)
-
   return useQuery({
-    queryKey: ["admin-blog-posts", adminId],
-    queryFn: () => fetchBlogPosts(adminId!),
-    enabled: !!adminId,
+    queryKey: ["admin-blog-posts"],
+    queryFn:  fetchBlogPosts,
     staleTime: 1000 * 60 * 5,
     throwOnError: false,
     meta: {
-      onError: (err: Error) => adminError(err.message || "Failed to load blog posts."),
+      onError: (err: Error) =>
+        adminError(err.message || "Failed to load blog posts."),
     },
   })
 }

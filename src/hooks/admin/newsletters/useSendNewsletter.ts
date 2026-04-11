@@ -1,7 +1,6 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { BASE_URL } from "@/lib/admin/constants"
 import { useAdminStore } from "@/store/admin/useAdminStore"
-import { useNewsletterStore } from "@/store/admin/useNewsletterStore"
 import { adminSuccess, adminError } from "@/toasts/AdminToasts"
 import type { SendResult } from "@/types/admin/newsletter.types"
 
@@ -28,13 +27,14 @@ async function sendNewsletter(
 
 export function useSendNewsletter() {
   const adminId = useAdminStore((s) => s.adminId)
-  const incrementNewsletters = useNewsletterStore((s) => s.incrementNewsletters)
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: ({ html, subject }: SendNewsletterPayload) =>
       sendNewsletter(html, subject, adminId!),
     onSuccess: (data) => {
-      incrementNewsletters()
+      console.log("Newsletter sent response:", data) 
+      queryClient.invalidateQueries({ queryKey: ["sent-newsletters", adminId] })
       adminSuccess(data.message || `Newsletter sent to ${data.sentCount} subscribers.`)
     },
     onError: (err: Error) => {

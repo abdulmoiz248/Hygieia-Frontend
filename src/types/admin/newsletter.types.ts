@@ -1,6 +1,6 @@
 // ─── Tab ──────────────────────────────────────────────────────────────────────
 
-export type Tab = "generate" | "blogpost" | "subscribers"
+export type Tab = "generate" | "blogpost" | "subscribers" | "history"
 
 // ─── API Response Shapes ──────────────────────────────────────────────────────
 
