@@ -1,20 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { Loader2 } from "lucide-react"
-import { BlogPostTab }         from "@/components/admin/newsletter/BlogPostTab"
-import { GenerateTab }         from "@/components/admin/newsletter/GenerateTab"
-import { NewsletterStatCards } from "@/components/admin/newsletter/NewsletterStatCards"
-import { SubscribersTab }      from "@/components/admin/newsletter/SubscribersTab"
-import { SentHistoryTab }      from "@/components/admin/newsletter/SentHistoryTab"
+import { Loader2, Megaphone } from "lucide-react"
+import { BlogPostTab }          from "@/components/admin/newsletter/BlogPostTab"
+import { GenerateTab }          from "@/components/admin/newsletter/GenerateTab"
+import { NewsletterStatCards }  from "@/components/admin/newsletter/NewsletterStatCards"
+import { SubscribersTab }       from "@/components/admin/newsletter/SubscribersTab"
+import { SentHistoryTab }       from "@/components/admin/newsletter/SentHistoryTab"
+import AnnouncementModal        from "@/components/admin/newsletter/AnnouncementModal"
 import { buildStatCards, TABS } from "@/lib/admin/constants"
 import { useSubscribers }       from "@/hooks/admin/newsletters/useSubscribers"
 import { useSentNewsletters }   from "@/hooks/admin/newsletters/useSentNewsletters"
 import { adminError }           from "@/toasts/AdminToasts"
-import type { Tab } from "@/types/admin/newsletter.types"
+import type { Tab }             from "@/types/admin/newsletter.types"
 
 export default function NewsletterPage() {
-  const [tab, setTab] = useState<Tab>("generate")
+  const [tab,              setTab]              = useState<Tab>("generate")
+  const [announcementOpen, setAnnouncementOpen] = useState(false)
 
   const { data: subscribers = [], isLoading, isError, error } = useSubscribers()
   const { data: sentData } = useSentNewsletters()
@@ -25,20 +27,32 @@ export default function NewsletterPage() {
 
   const newslettersSent = sentData?.newslettersSent ?? 0
   const blogpostsSent   = sentData?.blogpostsSent   ?? 0
-
-  const statCards = buildStatCards(subscribers.length, newslettersSent, blogpostsSent)
+  const statCards       = buildStatCards(subscribers.length, newslettersSent, blogpostsSent)
 
   return (
     <div className="min-h-screen p-4 sm:p-6 space-y-5 sm:space-y-6 bg-[var(--color-snow-white)]">
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-soft-coral bg-clip-text pb-1">
-          Newsletter
-        </h1>
-        <p className="text-xs sm:text-sm text-[var(--color-cool-gray)] mt-1">
-          Generate, preview, and send newsletters to your subscribers
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-soft-coral bg-clip-text pb-1">
+            Newsletter
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--color-cool-gray)] mt-1">
+            Generate, preview, and send newsletters to your subscribers
+          </p>
+        </div>
+
+        {/* Send Announcement button — matches Create FAQ blue→green style */}
+        <button
+          onClick={() => setAnnouncementOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md transition-all hover:scale-[1.02] flex-shrink-0"
+          style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }}
+        >
+          <Megaphone className="w-4 h-4" />
+          <span className="hidden sm:inline">Send Announcement</span>
+          <span className="sm:hidden">Announce</span>
+        </button>
       </div>
 
       {/* Stat Cards */}
@@ -81,6 +95,11 @@ export default function NewsletterPage() {
           {tab === "subscribers" && <SubscribersTab subscribers={subscribers} />}
           {tab === "history"     && <SentHistoryTab />}
         </div>
+      )}
+
+      {/* Announcement modal */}
+      {announcementOpen && (
+        <AnnouncementModal onClose={() => setAnnouncementOpen(false)} />
       )}
     </div>
   )
