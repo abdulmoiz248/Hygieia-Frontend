@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
-import {
-  BlogPostDetail, RawBlogPost,
-  BASE_URL, ADMIN_ID, normalizeDetailPost,
-} from "@/lib/admin/blog-helpers"
+import { useBlogPostDetail }        from "@/hooks/admin/blogs/blogs-details/useBlogPostDetail"
+import { useVerifyBlogPostDetail }  from "@/hooks/admin/blogs/blogs-details/useVerifyBlogPostDetail"
+import { useDeleteBlogPostDetail }  from "@/hooks/admin/blogs/blogs-details/useDeleteBlogPostDetail"
 
 import { BlogDetailTopBar }      from "@/components/admin/blogs/blogs-details/BlogDetailTopBar"
 import { BlogDetailHero }        from "@/components/admin/blogs/blogs-details/BlogDetailHero"
@@ -15,7 +14,7 @@ import { BlogDetailBody }        from "@/components/admin/blogs/blogs-details/Bl
 import { BlogDetailActionPanel } from "@/components/admin/blogs/blogs-details/BlogDetailActionPanel"
 import { BlogDetailLoadingState, BlogDetailNotFound } from "@/components/admin/blogs/blogs-details/BlogDetailStates"
 import { ConfirmModal }          from "@/components/admin/blogs/ConfirmModal"
-import { ToastBanner }           from "@/components/admin/blogs/ToastBanner"
+import { AdminToastContainer }   from "@/toasts/AdminToasts"
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -24,82 +23,33 @@ export default function BlogDetailPage() {
   const router = useRouter()
   const id     = params?.id as string
 
-  const [post,          setPost]          = useState<BlogPostDetail | null>(null)
-  const [loading,       setLoading]       = useState(true)
-  const [verifying,     setVerifying]     = useState(false)
-  const [deleting,      setDeleting]      = useState(false)
-  const [toast,         setToast]         = useState<{ msg: string; type: "success" | "error" } | null>(null)
   const [confirmVerify, setConfirmVerify] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  // ── Toast ─────────────────────────────────────────────────────────────────
+  const { data: post, isLoading } = useBlogPostDetail(id)
 
-  const showToast = (msg: string, type: "success" | "error") => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3500)
-  }
-
-  // ── Fetch ─────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!id) return
-    const load = async () => {
-      setLoading(true)
-      try {
-        const res  = await fetch(`${BASE_URL}/blogPost/${id}`)
-        const json = await res.json()
-        const raw: RawBlogPost = json.data ?? json
-        setPost(normalizeDetailPost(raw))
-      } catch {
-        showToast("Failed to load post.", "error")
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [id])
-
-  // ── Actions ───────────────────────────────────────────────────────────────
+  const verifyMutation = useVerifyBlogPostDetail(id)
+  const deleteMutation = useDeleteBlogPostDetail(id)
 
   const handleVerify = async () => {
-    if (!post) return
-    setVerifying(true)
-    try {
-      await fetch(`${BASE_URL}/blogPost/${post.id}/verify`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ adminUserId: ADMIN_ID }),
-      })
-      setPost(prev => prev ? { ...prev, isVerified: true } : prev)
-      setConfirmVerify(false)
-      showToast("Post approved and published!", "success")
-    } catch {
-      showToast("Failed to approve post.", "error")
-    } finally {
-      setVerifying(false)
-    }
+    await verifyMutation.mutateAsync()
+    setConfirmVerify(false)
   }
 
   const handleDelete = async () => {
-    if (!post) return
-    setDeleting(true)
-    try {
-      await fetch(`${BASE_URL}/blogPost/${post.id}`, { method: "DELETE" })
-      setConfirmDelete(false)
-      showToast("Post deleted.", "error")
-      setTimeout(() => router.push("/admin/blogs"), 1200)
-    } catch {
-      showToast("Failed to delete post.", "error")
-      setDeleting(false)
-    }
+    await deleteMutation.mutateAsync()
+    setConfirmDelete(false)
+    setTimeout(() => router.push("/admin/blogs"), 1200)
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  if (loading) return <BlogDetailLoadingState />
-  if (!post)   return <BlogDetailNotFound />
+  if (isLoading) return <BlogDetailLoadingState />
+  if (!post)     return <BlogDetailNotFound />
 
-  const isPending = !post.isVerified
+  const isPending  = !post.isVerified
+  const verifying  = verifyMutation.isPending
+  const deleting   = deleteMutation.isPending
 
   return (
     <div className="min-h-screen bg-[var(--color-snow-white)]">
@@ -161,8 +111,7 @@ export default function BlogDetailPage() {
         />
       )}
 
-      {/* Toast */}
-      {toast && <ToastBanner toast={toast} />}
+      <AdminToastContainer />
 
     </div>
   )

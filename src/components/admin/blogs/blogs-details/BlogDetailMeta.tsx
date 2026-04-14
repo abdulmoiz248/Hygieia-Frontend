@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { Calendar, Clock, Tag } from "lucide-react"
-import { BlogPostDetail, getThemeGradient, getInitials, formatDate } from "@/lib/blog-helpers"
+import { BlogPostDetail, getThemeGradient, getInitials, formatDate } from "@/lib/admin/blog-helpers"
 
 interface BlogDetailMetaProps {
   post: BlogPostDetail

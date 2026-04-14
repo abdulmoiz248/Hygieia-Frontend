@@ -68,7 +68,7 @@ export function BlogRow({
           </div>
         </div>
 
-        {/* Meta: Category, Author, Read Time, Date */}
+        {/* Meta */}
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           <span
             className="text-[11px] font-medium px-1.5 py-0.5 rounded-full"
@@ -91,7 +91,7 @@ export function BlogRow({
 
       </Link>
 
-      {/* Pending-only Action Buttons */}
+      {/* ── PENDING: Verify only ── */}
       {isPending && (
         <div className="flex gap-1.5 flex-shrink-0">
           <button
@@ -100,16 +100,22 @@ export function BlogRow({
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
             style={{
               background: "var(--color-mint-green)",
-              color: "var(--color-dark-slate-gray)",
-              fontSize: "0.72rem",
+              color:      "var(--color-dark-slate-gray)",
+              fontSize:   "0.72rem",
               letterSpacing: "0.03em",
             }}
           >
             {actioning
-              ? <Loader2 className="w-3 h-3 animate-spin" />
+              ? <Loader2     className="w-3 h-3 animate-spin" />
               : <CheckCircle2 className="w-3 h-3" />}
             Verify
           </button>
+        </div>
+      )}
+
+      {/* ── PUBLISHED: Feature / Unfeature only ── */}
+      {!isPending && (
+        <div className="flex gap-1.5 flex-shrink-0">
           <button
             onClick={onToggleFeature}
             disabled={busy}
@@ -118,9 +124,11 @@ export function BlogRow({
               ? { background: "var(--color-soft-coral)", color: "white", fontSize: "0.72rem", letterSpacing: "0.03em" }
               : { background: "var(--color-soft-blue)",  color: "white", fontSize: "0.72rem", letterSpacing: "0.03em" }}
           >
-            {post.isFeatured
-              ? <><StarOff className="w-3 h-3" /> Unfeature</>
-              : <><Star    className="w-3 h-3" /> Feature</>}
+            {actioning
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : post.isFeatured
+                ? <><StarOff className="w-3 h-3" /> Unfeature</>
+                : <><Star    className="w-3 h-3" /> Feature</>}
           </button>
         </div>
       )}

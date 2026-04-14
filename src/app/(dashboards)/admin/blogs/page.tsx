@@ -1,118 +1,34 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { Loader2 } from "lucide-react"
 
-import {
-  BlogPost, RawBlogPost, Tab, ViewMode,
-  BASE_URL, normalizePost,
-} from "@/lib/admin/blog-helpers"
+import { Tab, ViewMode } from "@/lib/admin/blog-helpers"
+
+import { useBlogPosts }            from "@/hooks/admin/blogs/useAdminBlogPosts"
+import { useDeleteBlogPost }       from "@/hooks/admin/blogs/useDeleteBlogPost"
+import { useVerifyBlogPost }       from "@/hooks/admin/blogs/useVerifyBlogPost"
+import { useToggleFeatureBlogPost } from "@/hooks/admin/blogs/useToggleFeatureBlogPost"
 
 import { BlogStatCards, buildStatCards } from "@/components/admin/blogs/BlogStatCards"
 import { BlogFilters }                   from "@/components/admin/blogs/BlogFilters"
 import { BlogCard }                      from "@/components/admin/blogs/BlogCard"
 import { BlogRow }                       from "@/components/admin/blogs/BlogRow"
 import { BlogEmptyState }                from "@/components/admin/blogs/BlogEmptyState"
-import { ToastBanner }                   from "@/components/admin/blogs/ToastBanner"
-
-// ─── Admin ID ─────────────────────────────────────────────────────────────────
-
-const ADMIN_ID = "af30f1aa-1ec5-4fb8-99d5-8d17f31fb0c8"
+import { AdminToastContainer }           from "@/toasts/AdminToasts"
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BlogReviewPage() {
-  const [posts,       setPosts]       = useState<BlogPost[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [search,      setSearch]      = useState("")
-  const [viewMode,    setViewMode]    = useState<ViewMode>("grid")
-  const [activeTab,   setActiveTab]   = useState<Tab>("all")
-  const [deletingId,  setDeletingId]  = useState<string | null>(null)
-  const [actioningId, setActioningId] = useState<string | null>(null)
-  const [toast,       setToast]       = useState<{ msg: string; type: "success" | "error" } | null>(null)
+  const [search,    setSearch]    = useState("")
+  const [viewMode,  setViewMode]  = useState<ViewMode>("grid")
+  const [activeTab, setActiveTab] = useState<Tab>("all")
 
-  // ── Toast ────────────────────────────────────────────────────────────────
+  const { data: posts = [], isLoading } = useBlogPosts()
 
-  const showToast = (msg: string, type: "success" | "error") => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3500)
-  }
-
-  // ── Fetch ────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true)
-      try {
-        const res  = await fetch(`${BASE_URL}/blogPost`)
-        const json = await res.json()
-        const raw: RawBlogPost[] = Array.isArray(json) ? json
-          : Array.isArray(json.data) ? json.data
-          : json.posts ?? json.items ?? []
-        setPosts(raw.map(normalizePost))
-      } catch {
-        showToast("Failed to load posts.", "error")
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [])
-
-  // ── Actions ──────────────────────────────────────────────────────────────
-
-  const handleDelete = async (post: BlogPost) => {
-    setDeletingId(post.id)
-    try {
-      await fetch(`${BASE_URL}/blogPost/${post.id}`, { method: "DELETE" })
-      setPosts(prev => prev.filter(p => p.id !== post.id))
-      showToast(`"${post.title}" deleted.`, "error")
-    } catch {
-      showToast("Failed to delete post.", "error")
-    } finally {
-      setDeletingId(null)
-    }
-  }
-
-  const handleVerify = async (post: BlogPost) => {
-    setActioningId(post.id)
-    try {
-      await fetch(`${BASE_URL}/blogPost/${post.id}/verify`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ adminUserId: ADMIN_ID }),
-      })
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, isVerified: true } : p))
-      showToast(`"${post.title}" verified and published.`, "success")
-    } catch {
-      showToast("Failed to verify post.", "error")
-    } finally {
-      setActioningId(null)
-    }
-  }
-
-  const handleToggleFeature = async (post: BlogPost) => {
-    setActioningId(post.id)
-    const endpoint = post.isFeatured ? "unfeature" : "feature"
-    try {
-      await fetch(`${BASE_URL}/blogPost/${post.id}/${endpoint}`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ adminUserId: ADMIN_ID }),
-      })
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, isFeatured: !p.isFeatured } : p))
-      showToast(
-        post.isFeatured
-          ? `"${post.title}" removed from featured.`
-          : `"${post.title}" marked as featured.`,
-        "success",
-      )
-    } catch {
-      showToast(`Failed to ${endpoint} post.`, "error")
-    } finally {
-      setActioningId(null)
-    }
-  }
+  const deleteMutation       = useDeleteBlogPost()
+  const verifyMutation       = useVerifyBlogPost()
+  const toggleFeatureMutation = useToggleFeatureBlogPost()
 
   // ── Derived State ────────────────────────────────────────────────────────
 
@@ -167,7 +83,7 @@ export default function BlogReviewPage() {
       />
 
       {/* Content */}
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--color-soft-blue)] opacity-60" />
         </div>
@@ -179,11 +95,14 @@ export default function BlogReviewPage() {
             <BlogCard
               key={post.id}
               post={post}
-              onDelete={()        => handleDelete(post)}
-              deleting={deletingId  === post.id}
-              onVerify={()        => handleVerify(post)}
-              onToggleFeature={() => handleToggleFeature(post)}
-              actioning={actioningId === post.id}
+              onDelete={()        => deleteMutation.mutate(post)}
+              deleting={deleteMutation.isPending && deleteMutation.variables?.id === post.id}
+              onVerify={()        => verifyMutation.mutate(post)}
+              onToggleFeature={() => toggleFeatureMutation.mutate(post)}
+              actioning={
+                (verifyMutation.isPending        && verifyMutation.variables?.id === post.id) ||
+                (toggleFeatureMutation.isPending && toggleFeatureMutation.variables?.id === post.id)
+              }
             />
           ))}
         </div>
@@ -193,18 +112,20 @@ export default function BlogReviewPage() {
             <BlogRow
               key={post.id}
               post={post}
-              onDelete={()        => handleDelete(post)}
-              deleting={deletingId  === post.id}
-              onVerify={()        => handleVerify(post)}
-              onToggleFeature={() => handleToggleFeature(post)}
-              actioning={actioningId === post.id}
+              onDelete={()        => deleteMutation.mutate(post)}
+              deleting={deleteMutation.isPending && deleteMutation.variables?.id === post.id}
+              onVerify={()        => verifyMutation.mutate(post)}
+              onToggleFeature={() => toggleFeatureMutation.mutate(post)}
+              actioning={
+                (verifyMutation.isPending        && verifyMutation.variables?.id === post.id) ||
+                (toggleFeatureMutation.isPending && toggleFeatureMutation.variables?.id === post.id)
+              }
             />
           ))}
         </div>
       )}
 
-      {/* Toast */}
-      {toast && <ToastBanner toast={toast} />}
+      <AdminToastContainer />
 
     </div>
   )
