@@ -12,14 +12,12 @@ import { adminError } from "@/toasts/AdminToasts"
 // ─── Target config ────────────────────────────────────────────────────────────
 
 interface TargetOption {
-  value:         AnnouncementTarget
-  label:         string
-  description:   string
-  icon:          React.ElementType
-  color:         string
-  bg:            string
-  disabled?:     boolean
-  disabledNote?: string
+  value:       AnnouncementTarget
+  label:       string
+  description: string
+  icon:        React.ElementType
+  color:       string
+  bg:          string
 }
 
 const TARGET_OPTIONS: TargetOption[] = [
@@ -56,24 +54,20 @@ const TARGET_OPTIONS: TargetOption[] = [
     bg:          "oklch(0.96 0.06 10)",
   },
   {
-    value:        "patient",
-    label:        "Patients",
-    description:  "All registered patients",
-    icon:         UserCircle,
-    color:        "var(--color-cool-gray)",
-    bg:           "oklch(0.95 0.01 210)",
-    disabled:     true,
-    disabledNote: "Requires /patients endpoint",
+    value:       "patient",
+    label:       "Patients",
+    description: "All registered patients",
+    icon:        UserCircle,
+    color:       "oklch(0.50 0.14 300)",
+    bg:          "oklch(0.96 0.04 300)",
   },
   {
-    value:        "all_users",
-    label:        "All Users",
-    description:  "Every user on the platform",
-    icon:         Globe,
-    color:        "var(--color-cool-gray)",
-    bg:           "oklch(0.95 0.01 210)",
-    disabled:     true,
-    disabledNote: "Requires /patients endpoint",
+    value:       "all_users",
+    label:       "All Users",
+    description: "Every user on the platform",
+    icon:        Globe,
+    color:       "oklch(0.45 0.12 240)",
+    bg:          "oklch(0.95 0.04 240)",
   },
 ]
 
@@ -160,10 +154,9 @@ export default function AnnouncementModal({ onClose }: AnnouncementModalProps) {
         {/* Body */}
         <div className="p-6 space-y-5 overflow-y-auto">
 
-          {/* ── Success state — mirrors CVAddWorkerModal ── */}
+          {/* ── Success state ── */}
           {result ? (
             <>
-              {/* Body */}
               <div className="px-0 py-1">
                 <div
                   className="flex gap-3 p-3.5 rounded-xl border border-[var(--color-mint-green)]/20"
@@ -184,7 +177,6 @@ export default function AnnouncementModal({ onClose }: AnnouncementModalProps) {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex justify-end">
                 <button
                   onClick={onClose}
@@ -242,35 +234,32 @@ export default function AnnouncementModal({ onClose }: AnnouncementModalProps) {
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => !opt.disabled && setTarget(opt.value)}
-                        disabled={opt.disabled}
+                        onClick={() => setTarget(opt.value)}
                         className="relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all border"
                         style={
-                          opt.disabled
-                            ? { background: "white", borderColor: "#e5e7eb", opacity: 0.45, cursor: "not-allowed" }
-                            : isSelected
-                              ? { background: opt.bg, borderColor: opt.color }
-                              : { background: "white", borderColor: "#e5e7eb" }
+                          isSelected
+                            ? { background: opt.bg, borderColor: opt.color }
+                            : { background: "white", borderColor: "#e5e7eb" }
                         }
                       >
                         <div
                           className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: isSelected && !opt.disabled ? opt.color : opt.bg }}
+                          style={{ background: isSelected ? opt.color : opt.bg }}
                         >
                           <Icon
                             className="w-3.5 h-3.5"
-                            style={{ color: isSelected && !opt.disabled ? "white" : opt.color }}
+                            style={{ color: isSelected ? "white" : opt.color }}
                           />
                         </div>
                         <div className="min-w-0">
                           <p
                             className="text-xs font-semibold leading-tight truncate"
-                            style={{ color: isSelected && !opt.disabled ? opt.color : "var(--color-dark-slate-gray)" }}
+                            style={{ color: isSelected ? opt.color : "var(--color-dark-slate-gray)" }}
                           >
                             {opt.label}
                           </p>
                           <p className="text-[10px] text-[var(--color-cool-gray)] leading-tight mt-0.5 truncate">
-                            {opt.disabled ? opt.disabledNote : opt.description}
+                            {opt.description}
                           </p>
                         </div>
                       </button>
