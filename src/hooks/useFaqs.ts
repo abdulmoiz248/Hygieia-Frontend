@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import api from "@/lib/axios"
-import type { FaqItem, FaqResponse } from "@/types/faq"
+import type { FaqItem, FaqResponse } from "@/types/admin/faq"
 
 export function useFaqs() {
   return useQuery<FaqItem[]>({

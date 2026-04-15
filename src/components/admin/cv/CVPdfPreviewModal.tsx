@@ -1,0 +1,52 @@
+import { X, ExternalLink } from "lucide-react"
+
+interface CVPdfPreviewModalProps {
+  cvLink: string
+  name: string
+  onClose: () => void
+}
+
+export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPreviewModalProps) {
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="relative bg-white w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
+
+        {/* Top stripe */}
+        <div className="h-1 w-full flex-shrink-0"
+          style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }} />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)] leading-tight">{name}</h2>
+            <p className="text-xs text-[var(--color-cool-gray)] mt-0.5">CV Preview</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={cvLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/20 text-[var(--color-cool-gray)] hover:text-[var(--color-dark-slate-gray)] hover:bg-gray-50 transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Open in new tab
+            </a>
+            <button onClick={onClose}
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+              <X className="w-4 h-4 text-[var(--color-cool-gray)]" />
+            </button>
+          </div>
+        </div>
+
+        {/* PDF iframe */}
+        <div className="flex-1 min-h-0">
+          <iframe
+            src={cvLink}
+            className="w-full h-full"
+            title={`${name} CV`}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}

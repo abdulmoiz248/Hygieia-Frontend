@@ -1,21 +1,37 @@
-// middleware.ts (at project root, same level as package.json)
+// middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
-  
   const url = req.nextUrl.clone()
   const token = req.cookies.get('token')?.value
   const role = req.cookies.get('role')?.value
 
-  // Protect dashboard routes
-  if ((url.pathname.startsWith('/pathologist') || url.pathname.startsWith('/nutritionist')) && !token) {
+  // ── Protect role-specific routes ──────────────────────────────────────────
 
-   url.pathname = '/login'
+  // Admin routes → must be logged in AND role === "admin"
+  if (url.pathname.startsWith('/admin')) {
+    if (!token) {
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    if (role !== 'admin') {
+      // Logged in but wrong role → send to their own dashboard
+      url.pathname = `/${role}/dashboard`
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Pathologist / Nutritionist routes → must be logged in
+  if (
+    (url.pathname.startsWith('/pathologist') || url.pathname.startsWith('/nutritionist')) &&
+    !token
+  ) {
+    url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Redirect logged-in users away from login/signup
+  // ── Redirect logged-in users away from login/signup ───────────────────────
   if ((url.pathname === '/login' || url.pathname === '/signup') && token && role) {
     url.pathname = `/${role}/dashboard`
     return NextResponse.redirect(url)
@@ -24,7 +40,12 @@ export function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 
-// Apply to these paths only
 export const config = {
-  matcher: ['/login', '/signup',  '/pathologist/:path*','/nutritionist/:path*'],
+  matcher: [
+    '/login',
+    '/signup',
+    '/admin/:path*',
+    '/pathologist/:path*',
+    '/nutritionist/:path*',
+  ],
 }

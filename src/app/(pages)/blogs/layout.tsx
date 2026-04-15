@@ -2,7 +2,7 @@
 import type { Metadata } from "next"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "@/components/layouts/landing-page/Footer"
-import ReactQueryProvider from "@/Providers/BlogsQueryProvider"
+import ReactQueryProvider from "@/Providers/ReactQueryProvider"
 
 export const metadata: Metadata = {
   title: "Blogs | Hygieia",

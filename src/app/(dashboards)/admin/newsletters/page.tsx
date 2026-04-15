@@ -1,0 +1,106 @@
+"use client"
+
+import { useState } from "react"
+import { Loader2, Megaphone } from "lucide-react"
+import { BlogPostTab }          from "@/components/admin/newsletter/BlogPostTab"
+import { GenerateTab }          from "@/components/admin/newsletter/GenerateTab"
+import { NewsletterStatCards }  from "@/components/admin/newsletter/NewsletterStatCards"
+import { SubscribersTab }       from "@/components/admin/newsletter/SubscribersTab"
+import { SentHistoryTab }       from "@/components/admin/newsletter/SentHistoryTab"
+import AnnouncementModal        from "@/components/admin/newsletter/AnnouncementModal"
+import { buildStatCards, TABS } from "@/lib/admin/constants"
+import { useSubscribers }       from "@/hooks/admin/newsletters/useSubscribers"
+import { useSentNewsletters }   from "@/hooks/admin/newsletters/useSentNewsletters"
+import { adminError }           from "@/toasts/AdminToasts"
+import type { Tab }             from "@/types/admin/newsletter.types"
+
+export default function NewsletterPage() {
+  const [tab,              setTab]              = useState<Tab>("generate")
+  const [announcementOpen, setAnnouncementOpen] = useState(false)
+
+  const { data: subscribers = [], isLoading, isError, error } = useSubscribers()
+  const { data: sentData } = useSentNewsletters()
+
+  if (isError && error instanceof Error) {
+    adminError(error.message || "Failed to load subscribers.")
+  }
+
+  const newslettersSent = sentData?.newslettersSent ?? 0
+  const blogpostsSent   = sentData?.blogpostsSent   ?? 0
+  const statCards       = buildStatCards(subscribers.length, newslettersSent, blogpostsSent)
+
+  return (
+    <div className="min-h-screen p-4 sm:p-6 space-y-5 sm:space-y-6 bg-[var(--color-snow-white)]">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-soft-coral bg-clip-text pb-1">
+            Newsletter
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--color-cool-gray)] mt-1">
+            Generate, preview, and send newsletters to your subscribers
+          </p>
+        </div>
+
+        {/* Send Announcement button — matches Create FAQ blue→green style */}
+        <button
+          onClick={() => setAnnouncementOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md transition-all hover:scale-[1.02] flex-shrink-0"
+          style={{ background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green))" }}
+        >
+          <Megaphone className="w-4 h-4" />
+          <span className="hidden sm:inline">Send Announcement</span>
+          <span className="sm:hidden">Announce</span>
+        </button>
+      </div>
+
+      {/* Stat Cards */}
+      <NewsletterStatCards cards={statCards} />
+
+      {/* Tabs */}
+      <div className="overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-1 bg-white border border-[var(--color-cool-gray)]/20 rounded-xl p-1 shadow-sm w-max sm:w-fit">
+          {TABS.map((t) => {
+            const Icon = t.icon
+            return (
+              <button
+                key={t.value}
+                onClick={() => setTab(t.value)}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                style={
+                  tab === t.value
+                    ? { background: "var(--gradient-primary)", color: "white" }
+                    : { color: "var(--color-cool-gray)" }
+                }
+              >
+                <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                {t.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16 gap-3 text-[var(--color-cool-gray)]">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm">Loading subscribers…</span>
+        </div>
+      ) : (
+        <div>
+          {tab === "generate"    && <GenerateTab    subscriberCount={subscribers.length} />}
+          {tab === "blogpost"    && <BlogPostTab    subscriberCount={subscribers.length} />}
+          {tab === "subscribers" && <SubscribersTab subscribers={subscribers} />}
+          {tab === "history"     && <SentHistoryTab />}
+        </div>
+      )}
+
+      {/* Announcement modal */}
+      {announcementOpen && (
+        <AnnouncementModal onClose={() => setAnnouncementOpen(false)} />
+      )}
+    </div>
+  )
+}

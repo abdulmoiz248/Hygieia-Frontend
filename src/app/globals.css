@@ -167,6 +167,9 @@ html {
   --color-snow-white: oklch(0.98 0.02 100);
   --color-dark-slate-gray: oklch(0.15 0.05 210);
   --color-cool-gray: oklch(0.35 0.05 180);
+  --color-amber: oklch(0.72 0.15 75);
+  --color-amber-dark: oklch(0.60 0.18 60);
+  --color-amber-light: oklch(0.97 0.06 90);
 }
 
 .dark {

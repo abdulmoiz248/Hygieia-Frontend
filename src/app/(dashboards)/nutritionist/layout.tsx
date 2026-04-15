@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/nutritionist/layout/DashboardLayout";
-import ReactQueryProvider from "@/Providers/BlogsQueryProvider";
+import ReactQueryProvider from "@/Providers/ReactQueryProvider";
 import type { Metadata } from "next";
 
 
