@@ -12,27 +12,47 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { BellRing } from "@/components/ui/BellRing"
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useAdminProfile } from "@/hooks/admin/dashboard/useAdminProfile"
+import { useAdminStore }   from "@/store/admin/useAdminStore"
 
 interface TopNavProps {
   onMobileMenuToggle: () => void
 }
 
-export function TopNav({ onMobileMenuToggle }: TopNavProps) {
-  const [userName, setUserName] = useState("Admin")
-  const [unreadCount] = useState(0)
+/** Returns true if the string looks like an email address */
+function looksLikeEmail(str: string): boolean {
+  return str.includes("@")
+}
 
-  useEffect(() => {
-    const role = localStorage.getItem("role")
-
-    if (role === "admin") setUserName("Admin")
-  }, [])
-
-  const userInitials = userName
-    .split(" ")
+/** Derive up-to-2-character initials from a display name */
+function getInitials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
+    .slice(0, 2)
+}
+
+export function TopNav({ onMobileMenuToggle }: TopNavProps) {
+  const [unreadCount] = useState(0)
+
+  const { data: profile } = useAdminProfile()
+  const clearAuth         = useAdminStore((s) => s.clearAuth)
+
+  // Prefer profile.name; if the backend returned the email instead, fall back to "Admin"
+  const rawName    = profile?.name?.trim() ?? ""
+  const userName   = rawName && !looksLikeEmail(rawName) ? rawName : "Admin"
+  const userInitials = getInitials(userName)
+
+  const handleLogout = () => {
+    clearAuth()                // clears cookies + zustand state
+    localStorage.clear()
+    sessionStorage.clear()
+    window.location.href = "/login"
+  }
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0">
@@ -40,7 +60,6 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
         {/* LEFT SIDE */}
         <div className="flex items-center gap-4 w-full">
-
           <Button
             variant="ghost"
             size="icon"
@@ -107,26 +126,13 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="bg-white">
-
               <DropdownMenuItem
-                onClick={() => {
-                  localStorage.clear()
-                  sessionStorage.clear()
-
-                  document.cookie.split(";").forEach((c) => {
-                    document.cookie = c
-                      .replace(/^ +/, "")
-                      .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
-                  })
-
-                  window.location.href = "/login"
-                }}
+                onClick={handleLogout}
                 className="text-soft-coral hover:text-snow-white hover:bg-soft-coral"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </DropdownMenuItem>
-
             </DropdownMenuContent>
           </DropdownMenu>
 
