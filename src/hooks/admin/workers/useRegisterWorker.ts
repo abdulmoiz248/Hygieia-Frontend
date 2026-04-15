@@ -43,6 +43,7 @@ export function useRegisterWorker({ onSuccess, onError }: Options = {}) {
         _id:             data.id,
         id:              data.id,
         name:            variables.name,
+        email: variables.personalEmail,
         personal_email:  variables.personalEmail,
         phone:           "",
         specialization:  "",

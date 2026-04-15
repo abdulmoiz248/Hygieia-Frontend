@@ -17,8 +17,6 @@ import { useUserRoleCounts } from "@/hooks/admin/dashboard/useUserRoleCounts"
 import { useNutritionists }  from "@/hooks/admin/workers/useNutritionists"
 import { useDoctors }        from "@/hooks/admin/workers/useDoctors"
 import { usePathologists }   from "@/hooks/admin/workers/usePathologists"
-import { useBlogPosts }      from "@/hooks/admin/blogs/useBlogPosts"
-import { useCVs }            from "@/hooks/admin/cv/useCVs"
 
 // ─── Static weekly activity data ──────────────────────────────────────────────
 // Reflects real platform actions: tests ordered, consultations held, blogs published

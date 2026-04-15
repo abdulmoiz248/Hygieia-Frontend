@@ -11,7 +11,7 @@ interface BlogDetailActionPanelProps {
 }
 
 export function BlogDetailActionPanel({
-  isPending, title, verifying, deleting, onApprove, onDeleteRequest,
+  isPending, verifying, deleting, onApprove, onDeleteRequest,
 }: BlogDetailActionPanelProps) {
   const busy = verifying || deleting
 

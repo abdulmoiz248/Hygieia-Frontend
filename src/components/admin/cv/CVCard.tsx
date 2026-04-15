@@ -27,9 +27,6 @@ interface CVCardProps {
   onPreview:        (cvLink: string, name: string) => void
 }
 
-// Statuses that send a candidate email — shown with a small hint in the UI
-const EMAIL_STATUSES: CVStatus[] = ["shortlisted", "rejected"]
-
 export default function CVCard({
   cv,
   isUpdatingStatus,

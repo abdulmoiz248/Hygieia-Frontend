@@ -3,10 +3,6 @@ import { BASE_URL } from "@/lib/admin/constants"
 import { useAdminStore } from "@/store/admin/useAdminStore"
 import type { Subscriber } from "@/types/admin/newsletter.types"
 
-interface GetSubscribersResponse {
-  data: Subscriber[]
-  message?: string
-}
 
 async function fetchSubscribers(adminId: string): Promise<Subscriber[]> {
   const res = await fetch(`${BASE_URL}/subscribers`, {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, CheckCircle2, RefreshCw, Send, Sparkles } from "lucide-react"
+import { AlertCircle, RefreshCw, Send, Sparkles } from "lucide-react"
 import { HtmlPreview } from "./HtmlPreview"
 import { ResultBanner } from "./ResultBanner"
 import { useGenerateNewsletter } from "@/hooks/admin/newsletters/useGenerateNewsletter"
@@ -17,7 +17,7 @@ export function GenerateTab({ subscriberCount, onSent }: GenerateTabProps) {
   const [subject, setSubject] = useState("")
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(true)
-  const [sendResult, setSendResult] = useState<Awaited<ReturnType<typeof useSendNewsletter>>["data"]>(null)
+  const [sendResult, setSendResult] = useState<Awaited<ReturnType<typeof useSendNewsletter>>["data"]  | null>(null)
 
   const generateMutation = useGenerateNewsletter()
   const sendMutation = useSendNewsletter()

@@ -1,5 +1,5 @@
 import { toast, ToastContainer, ToastOptions, Slide } from 'react-toastify'
-// @ts-ignore
+// "@ts-expect-error"
 import 'react-toastify/dist/ReactToastify.css'
 
 const baseToastOptions: ToastOptions = {
