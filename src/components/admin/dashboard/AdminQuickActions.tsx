@@ -32,7 +32,7 @@ export default function AdminQuickActions() {
 
         {/* Workers */}
         <Link
-          href="/admin/users"
+          href="/admin/workers"
           className="block p-3 rounded-xl bg-gradient-to-br from-mint-green/10 to-mint-green/5 hover:from-mint-green/20 hover:to-mint-green/10 transition-all duration-200"
         >
           <p className="font-semibold text-mint-green flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function AdminQuickActions() {
 
         {/* CVs */}
         <Link
-          href="/admin/cvs"
+          href="/admin/cv"
           className="block p-3 rounded-xl bg-gradient-to-br from-soft-coral/10 to-soft-coral/5 hover:from-soft-coral/20 hover:to-soft-coral/10 transition-all duration-200"
         >
           <p className="font-semibold text-soft-coral flex items-center gap-2">
