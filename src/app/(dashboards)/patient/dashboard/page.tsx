@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
-import FolderApp from "@/components/patient dashboard/dashboard/FolderApp"
+// import FolderApp from "@/components/patient dashboard/dashboard/FolderApp"
 import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSection"
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
@@ -115,7 +115,7 @@ function DashboardPageContent() {
       {/* Fitness and Progress Section */}
       <div className="space-y-4 lg:space-y-6">
         <FitnessProgressGauges />
-        <FolderApp />
+        {/* <FolderApp /> */}
       </div>
 
        <HealthInsights />
