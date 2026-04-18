@@ -83,7 +83,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
   const selectedRoleCfg = ROLE_OPTIONS.find((r) => r.value === form.role)!
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col border border-gray-100 overflow-hidden">
 
         {/* Role-coloured top stripe */}
