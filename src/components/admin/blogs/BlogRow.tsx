@@ -4,7 +4,9 @@ import {
   Star, StarOff, AlertTriangle, CheckCircle2,
   Trash2, Loader2,
 } from "lucide-react"
-import { BlogPost, getThemeGradient, getCategoryStyle, formatDate } from "@/lib/admin/blog-helpers"
+import { BlogPost, getThemeGradient, getCategoryStyle } from "@/lib/admin/blog-helpers"
+import { formatDateOnly } from "@/helpers/date"
+import { timeAgo } from "@/helpers/formatTimeAgo"
 
 interface BlogRowProps {
   post:            BlogPost
@@ -30,7 +32,7 @@ export function BlogRow({
       {/* Thumbnail */}
       <Link
         href={`/admin/blogs/${post.id}`}
-        className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center"
+        className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center transition-opacity hover:opacity-80"
         style={!post.image ? { background: getThemeGradient(post.id) } : undefined}
       >
         {post.image
@@ -84,8 +86,11 @@ export function BlogRow({
               <Clock className="w-3 h-3" />{post.readTime}m
             </span>
           )}
-          <span className="text-[11px] text-[var(--color-cool-gray)] flex items-center gap-1 ml-auto">
-            <Calendar className="w-3 h-3" />{formatDate(post.createdAt)}
+          <span
+            className="text-[11px] text-[var(--color-cool-gray)] flex items-center gap-1 ml-auto"
+            title={formatDateOnly(post.createdAt)}
+          >
+            <Calendar className="w-3 h-3" />{timeAgo(post.createdAt)}
           </span>
         </div>
 
@@ -97,7 +102,7 @@ export function BlogRow({
           <button
             onClick={onVerify}
             disabled={busy}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:brightness-110 hover:scale-[1.03] active:scale-95"
             style={{
               background: "var(--color-mint-green)",
               color:      "var(--color-dark-slate-gray)",
@@ -119,7 +124,7 @@ export function BlogRow({
           <button
             onClick={onToggleFeature}
             disabled={busy}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 hover:brightness-110 hover:scale-[1.03] active:scale-95"
             style={post.isFeatured
               ? { background: "var(--color-soft-coral)", color: "white", fontSize: "0.72rem", letterSpacing: "0.03em" }
               : { background: "var(--color-soft-blue)",  color: "white", fontSize: "0.72rem", letterSpacing: "0.03em" }}
@@ -137,7 +142,7 @@ export function BlogRow({
       <button
         onClick={onDelete}
         disabled={busy}
-        className="p-2 rounded-xl text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] transition-colors disabled:opacity-40 flex-shrink-0"
+        className="p-2 rounded-xl text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] hover:scale-110 transition-all duration-150 disabled:opacity-40 flex-shrink-0 active:scale-90"
       >
         {deleting
           ? <Loader2 className="w-4 h-4 animate-spin" />
