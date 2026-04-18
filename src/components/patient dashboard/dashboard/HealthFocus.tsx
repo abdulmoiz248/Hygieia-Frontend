@@ -14,7 +14,6 @@ import {
   ChartTooltipContent
 } from "@/components/ui/chart"
 import {
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
@@ -82,33 +81,31 @@ export default function HealthFocus() {
                 )}
                 className="h-full w-full p-0"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={visibleMetrics}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      innerRadius={78}
-                      dataKey="value"
-                      labelLine={false}
-                    >
-                      {visibleMetrics.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color}
-                          style={{ filter: "drop-shadow(0px 0px 3px rgba(0,0,0,0.15))" }}
-                          className="cursor-pointer transition-transform duration-300 hover:scale-105"
-                        />
-                      ))}
-                    </Pie>
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent className="bg-white border border-gray-200 text-dark-slate-gray shadow-md rounded-lg text-xs" />
-                      }
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={visibleMetrics}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    innerRadius={78}
+                    dataKey="value"
+                    labelLine={false}
+                  >
+                    {visibleMetrics.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        style={{ filter: "drop-shadow(0px 0px 3px rgba(0,0,0,0.15))" }}
+                        className="cursor-pointer transition-transform duration-300 hover:scale-105"
+                      />
+                    ))}
+                  </Pie>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent className="bg-white border border-gray-200 text-dark-slate-gray shadow-md rounded-lg text-xs" />
+                    }
+                  />
+                </PieChart>
               </ChartContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <p className="text-xs text-dark-slate-gray/60">Avg</p>
@@ -134,16 +131,13 @@ export default function HealthFocus() {
                 }}
                 className="h-full"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={orderedMedicationAdherence}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
-                    <XAxis dataKey="week" stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                    <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="adherence" fill="var(--color-mint-green)" radius={[4, 4, 0, 0]} />
-                    
-                  </ComposedChart>
-                </ResponsiveContainer>
+                <ComposedChart data={orderedMedicationAdherence}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
+                  <XAxis dataKey="week" stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                  <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="adherence" fill="var(--color-mint-green)" radius={[4, 4, 0, 0]} />
+                </ComposedChart>
               </ChartContainer>
             </div>
 

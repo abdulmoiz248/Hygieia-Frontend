@@ -12,7 +12,8 @@ const Loader = () => {
           alt="Loading..."
           width={300}
           height={300}
-          className="opacity-90 max-w-[80vw] max-h-[80vh] object-contain"
+          priority
+          className="opacity-90 max-w-[80vw] max-h-[80vh] object-contain h-auto w-auto"
         />
       </div>
     </div>

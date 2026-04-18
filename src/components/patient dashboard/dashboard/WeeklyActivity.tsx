@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { Activity, Droplets } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, BarChart, Bar, LineChart, Line } from "recharts"
+import { CartesianGrid, XAxis, YAxis, BarChart, Bar, LineChart, Line } from "recharts"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 import { reorderWeekDataFromToday } from "@/helpers/reorderWeekFromToday"
 
@@ -21,6 +21,8 @@ export default function WeeklyActivity() {
     [weeklyActivity]
   )
 
+  console.log("Original Weekly Activity:", weeklyActivity)
+  console.log("Ordered Weekly Activity:", orderedWeeklyActivity)
   return (
     <motion.div
       initial="hidden"
@@ -36,7 +38,7 @@ export default function WeeklyActivity() {
         <Card className="bg-white/40 backdrop-blur-lg border border-white/20 shadow-sm rounded-2xl">
           <CardContent className="p-4">
             <h3 className="flex items-center gap-2 text-dark-slate-gray font-semibold mb-4">
-              <Activity className="w-5 h-5 text-soft-blue" /> Calories & Burn
+              <Activity className="w-5 h-5 text-soft-blue" /> Calories Consumed vs Burned
             </h3>
             <ChartContainer
               config={{
@@ -45,16 +47,14 @@ export default function WeeklyActivity() {
               }}
               className="w-full h-[300px]"
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={orderedWeeklyActivity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
-                  <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                  <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                  <ChartTooltip content={<ChartTooltipContent  className="bg-snow-white/50" />}  />
-                  <Bar dataKey="calories" fill="var(--color-soft-blue)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="burned" fill="var(--color-soft-coral)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <BarChart data={orderedWeeklyActivity}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
+                <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                <ChartTooltip content={<ChartTooltipContent className="bg-snow-white/50" />} />
+                <Bar dataKey="calories" fill="var(--color-soft-blue)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="burned" fill="var(--color-soft-coral)" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -72,30 +72,28 @@ export default function WeeklyActivity() {
               }}
               className="w-full h-[300px]"
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={orderedWeeklyActivity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
-                  <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                  <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
-                  <ChartTooltip content={<ChartTooltipContent className="bg-snow-white/50"/>} />
-                  <Line
-                    type="monotone"
-                    dataKey="water"
-                    stroke="var(--color-soft-blue)"
-                    strokeWidth={3}
-                    dot={{ fill: "var(--color-soft-blue)", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "var(--color-soft-blue)", strokeWidth: 2 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="sleep"
-                    stroke="var(--color-mint-green)"
-                    strokeWidth={3}
-                    dot={{ fill: "var(--color-mint-green)", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "var(--color-mint-green)", strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <LineChart data={orderedWeeklyActivity}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cool-gray)" opacity={0.3} />
+                <XAxis dataKey="day" stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                <YAxis stroke="var(--color-dark-slate-gray)" fontSize={12} />
+                <ChartTooltip content={<ChartTooltipContent className="bg-snow-white/50" />} />
+                <Line
+                  type="monotone"
+                  dataKey="water"
+                  stroke="var(--color-soft-blue)"
+                  strokeWidth={3}
+                  dot={{ fill: "var(--color-soft-blue)", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "var(--color-soft-blue)", strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="sleep"
+                  stroke="var(--color-mint-green)"
+                  strokeWidth={3}
+                  dot={{ fill: "var(--color-mint-green)", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "var(--color-mint-green)", strokeWidth: 2 }}
+                />
+              </LineChart>
             </ChartContainer>
           </CardContent>
         </Card>

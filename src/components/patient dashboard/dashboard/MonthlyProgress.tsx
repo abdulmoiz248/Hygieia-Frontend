@@ -3,7 +3,7 @@
 import { Activity } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
 
 
@@ -31,64 +31,62 @@ export default function MonthlyProgress() {
                 }}
                 className="h-full mt-0"
               >
-                <ResponsiveContainer width="100%" height="100%" minHeight={220}>
-                  <RadarChart data={monthlyProgress}>
-                    <defs>
-                      <radialGradient id="weightGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.15} />
-                      </radialGradient>
-                      <radialGradient id="bmiGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity={0.15} />
-                      </radialGradient>
-                      <radialGradient id="bpGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#f87171" stopOpacity={0.15} />
-                      </radialGradient>
-                      <radialGradient id="hrGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#6b7280" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#6b7280" stopOpacity={0.15} />
-                      </radialGradient>
-                    </defs>
-                    <PolarGrid stroke="#d1d5db" opacity={0.3} />
-                    <PolarAngleAxis dataKey="month" stroke="#374151" fontSize={11} />
-                    <PolarRadiusAxis stroke="#374151" fontSize={11} />
-                    <Radar
-                      name="Weight"
-                      dataKey="weight"
-                      stroke="#3b82f6"
-                      fill="url(#weightGrad)"
-                      fillOpacity={0.7}
-                      strokeWidth={2}
-                    />
-                    <Radar
-                      name="BMI"
-                      dataKey="bmi"
-                      stroke="#10b981"
-                      fill="url(#bmiGrad)"
-                      fillOpacity={0.7}
-                      strokeWidth={2}
-                    />
-                    <Radar
-                      name="Blood Pressure"
-                      dataKey="bloodPressure"
-                      stroke="#f87171"
-                      fill="url(#bpGrad)"
-                      fillOpacity={0.7}
-                      strokeWidth={2}
-                    />
-                    <Radar
-                      name="Heart Rate"
-                      dataKey="heartRate"
-                      stroke="#6b7280"
-                      fill="url(#hrGrad)"
-                      fillOpacity={0.7}
-                      strokeWidth={2}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                  </RadarChart>
-                </ResponsiveContainer>
+                <RadarChart data={monthlyProgress}>
+                  <defs>
+                    <radialGradient id="weightGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.15} />
+                    </radialGradient>
+                    <radialGradient id="bmiGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.15} />
+                    </radialGradient>
+                    <radialGradient id="bpGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#f87171" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="#f87171" stopOpacity={0.15} />
+                    </radialGradient>
+                    <radialGradient id="hrGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#6b7280" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="#6b7280" stopOpacity={0.15} />
+                    </radialGradient>
+                  </defs>
+                  <PolarGrid stroke="#d1d5db" opacity={0.3} />
+                  <PolarAngleAxis dataKey="month" stroke="#374151" fontSize={11} />
+                  <PolarRadiusAxis stroke="#374151" fontSize={11} />
+                  <Radar
+                    name="Weight"
+                    dataKey="weight"
+                    stroke="#3b82f6"
+                    fill="url(#weightGrad)"
+                    fillOpacity={0.7}
+                    strokeWidth={2}
+                  />
+                  <Radar
+                    name="BMI"
+                    dataKey="bmi"
+                    stroke="#10b981"
+                    fill="url(#bmiGrad)"
+                    fillOpacity={0.7}
+                    strokeWidth={2}
+                  />
+                  <Radar
+                    name="Blood Pressure"
+                    dataKey="bloodPressure"
+                    stroke="#f87171"
+                    fill="url(#bpGrad)"
+                    fillOpacity={0.7}
+                    strokeWidth={2}
+                  />
+                  <Radar
+                    name="Heart Rate"
+                    dataKey="heartRate"
+                    stroke="#6b7280"
+                    fill="url(#hrGrad)"
+                    fillOpacity={0.7}
+                    strokeWidth={2}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </RadarChart>
               </ChartContainer>
             </div>
           </CardContent>
