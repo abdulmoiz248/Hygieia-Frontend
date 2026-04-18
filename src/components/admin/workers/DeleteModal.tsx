@@ -1,12 +1,12 @@
 "use client"
 
+import { createPortal } from "react-dom"
 import { X, Trash2, AlertTriangle } from "lucide-react"
 import { Role } from "@/types/admin/workers"
 import { useDeleteWorker } from "@/hooks/admin/workers/useDeleteWorker"
 import { adminDestructive, adminError } from "@/toasts/AdminToasts"
 
 interface DeleteModalProps {
-  /** The worker's work email — used as the API identifier */
   workerEmail: string
   workerId: string
   workerRole: Role
@@ -33,8 +33,12 @@ export default function DeleteModal({
     remove({ email: workerEmail, workerId, role: workerRole })
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
 
         {/* Coral top stripe */}
@@ -104,4 +108,7 @@ export default function DeleteModal({
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(modal, document.body)
 }
