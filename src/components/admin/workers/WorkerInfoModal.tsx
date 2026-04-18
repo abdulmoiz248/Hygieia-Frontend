@@ -15,16 +15,16 @@ interface WorkerInfoModalProps {
 }
 
 const IC = {
-  about:      "#8B5CF6",
-  mail:       "#3B82F6",
-  phone:      "#10B981",
-  globe:      "#F59E0B",
-  clock:      "#F97316",
-  calendar:   "#06B6D4",
-  badge:      "#10B981",
-  graduation: "#6366F1",
-  banknote:   "#16A34A",
-  briefcase:  "#0EA5E9",
+  about:      "var(--color-soft-blue)",
+  mail:       "var(--color-soft-blue)",
+  phone:      "var(--color-mint-green)",
+  globe:      "var(--color-soft-coral)",
+  clock:      "var(--color-soft-coral)",
+  calendar:   "var(--color-soft-blue)",
+  badge:      "var(--color-mint-green)",
+  graduation: "var(--color-soft-blue)",
+  banknote:   "var(--color-mint-green)",
+  briefcase:  "var(--color-soft-blue)",
 }
 
 // ─── Section wrapper — heading + ruled line + indented content ────────────────
@@ -46,7 +46,7 @@ function Section({
       <div className="flex items-center gap-2 mb-3">
         <div
           className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: `${color}18` }}
+          style={{ background: "oklch(0.95 0.03 210)" }}
         >
           <Icon className="w-3.5 h-3.5" style={{ color }} />
         </div>
@@ -54,7 +54,7 @@ function Section({
           {label}
         </span>
         {/* ruled line to fill remaining width */}
-        <div className="flex-1 h-px ml-1" style={{ background: `${color}25` }} />
+        <div className="flex-1 h-px ml-1" style={{ background: "oklch(0.90 0.02 210)" }} />
       </div>
 
       {/* Content — indented to align under the heading text */}
@@ -78,9 +78,9 @@ function Pill({
     <span
       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
       style={{
-        background: bg ?? "#F8FAFC",
+        background: bg ?? "oklch(0.97 0.01 210)",
         color: color ?? "var(--color-cool-gray)",
-        border: "1px solid rgba(0,0,0,0.06)",
+        border: "1px solid oklch(0.90 0.02 210)",
       }}
     >
       {children}
@@ -103,7 +103,7 @@ function InfoRow({
   return (
     <div
       className="flex items-start gap-3 px-3.5 py-2.5 rounded-xl"
-      style={{ background: "#F8FAFC", borderLeft: `3px solid ${iconColor}30` }}
+      style={{ background: "oklch(0.97 0.01 210)", borderLeft: "3px solid oklch(0.88 0.04 210)" }}
     >
       <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: iconColor }} />
       <div className="min-w-0">
@@ -247,7 +247,7 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                   <div
                     key={i}
                     className="px-3.5 py-2.5 rounded-xl flex items-start justify-between gap-3"
-                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.clock}30` }}
+                    style={{ background: "oklch(0.97 0.01 210)", borderLeft: "3px solid oklch(0.88 0.04 210)" }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: IC.clock }} />
@@ -274,7 +274,7 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
             <Section icon={BadgeCheck} label="Certifications" color={IC.badge}>
               <div className="flex flex-wrap gap-1.5">
                 {worker.certifications.map((c) => (
-                  <Pill key={c} color={IC.badge} bg="#F0FDF4">
+                  <Pill key={c} color={IC.badge} bg="oklch(0.96 0.03 178)">
                     <BadgeCheck className="w-3 h-3" style={{ color: IC.badge }} />
                     {c}
                   </Pill>
@@ -303,7 +303,7 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                 {worker.dateofbirth && (
                   <div
                     className="px-3.5 py-2.5 rounded-xl"
-                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                    style={{ background: "oklch(0.97 0.01 210)", borderLeft: "3px solid oklch(0.88 0.04 210)" }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Date of Birth
@@ -316,7 +316,7 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                 {worker.gender && (
                   <div
                     className="px-3.5 py-2.5 rounded-xl"
-                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                    style={{ background: "oklch(0.97 0.01 210)", borderLeft: "3px solid oklch(0.88 0.04 210)" }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Gender
@@ -329,7 +329,7 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                 {worker.createdAt && (
                   <div
                     className="px-3.5 py-2.5 rounded-xl col-span-2"
-                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                    style={{ background: "oklch(0.97 0.01 210)", borderLeft: "3px solid oklch(0.88 0.04 210)" }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Joined
