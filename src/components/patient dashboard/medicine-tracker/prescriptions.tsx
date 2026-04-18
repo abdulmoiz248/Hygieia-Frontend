@@ -10,6 +10,7 @@ import {Dialog,DialogContent,DialogTitle,DialogHeader} from '@/components/ui/dia
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { usePatientMedicineStore } from "@/store/patient/medicine-store"
+import { formatDateOnly } from "@/helpers/date"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -280,7 +281,7 @@ export default function PrescriptionsPage() {
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm text-cool-gray">
                               <Calendar className="w-4 h-4 text-mint-green" />
-                              Prescribed on {prescription.date}
+                              Prescribed on {formatDateOnly(prescription.date)}
                             </div>
                             <div className="space-y-2">
                               <p className="text-sm font-medium">Medications <span className="text-soft-blue"> ({prescription.medications.length}) </span></p>
@@ -333,7 +334,7 @@ export default function PrescriptionsPage() {
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm text-cool-gray">
                               <Calendar className="w-4 h-4 text-mint-green" />
-                              Prescribed on {prescription.date}
+                              Prescribed on {formatDateOnly(prescription.date)}
                             </div>
                             <div className="space-y-2">
                               <p className="text-sm font-medium">Medications <span className="text-soft-blue"> ({prescription.medications.length}) </span></p>
@@ -388,7 +389,7 @@ export default function PrescriptionsPage() {
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-mint-green flex-shrink-0" />
               <span className="text-sm text-soft-blue">
-                <strong className="text-cool-gray">Prescribed:</strong> {selectedPrescription.date}
+                <strong className="text-cool-gray">Prescribed:</strong> {formatDateOnly(selectedPrescription.date)}
               </span>
             </div>
           </div>
