@@ -14,7 +14,6 @@ interface WorkerInfoModalProps {
   onClose: () => void
 }
 
-// Distinct colours per info category
 const IC = {
   about:      "#8B5CF6",
   mail:       "#3B82F6",
@@ -28,26 +27,40 @@ const IC = {
   briefcase:  "#0EA5E9",
 }
 
-function SectionHeading({
+// ─── Section wrapper — heading + ruled line + indented content ────────────────
+
+function Section({
   icon: Icon,
   label,
   color,
+  children,
 }: {
   icon: React.ElementType
   label: string
   color: string
+  children: React.ReactNode
 }) {
   return (
-    <div className="flex items-center gap-2 mb-2.5">
-      <div
-        className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: `${color}18` }}
-      >
-        <Icon className="w-3.5 h-3.5" style={{ color }} />
+    <div>
+      {/* Heading row with full-width divider */}
+      <div className="flex items-center gap-2 mb-3">
+        <div
+          className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${color}18` }}
+        >
+          <Icon className="w-3.5 h-3.5" style={{ color }} />
+        </div>
+        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>
+          {label}
+        </span>
+        {/* ruled line to fill remaining width */}
+        <div className="flex-1 h-px ml-1" style={{ background: `${color}25` }} />
       </div>
-      <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-cool-gray)]">
-        {label}
-      </span>
+
+      {/* Content — indented to align under the heading text */}
+      <div className="pl-8">
+        {children}
+      </div>
     </div>
   )
 }
@@ -72,6 +85,32 @@ function Pill({
     >
       {children}
     </span>
+  )
+}
+
+// A row item used in Contact / Education / Working Hours
+function InfoRow({
+  icon: Icon,
+  iconColor,
+  children,
+  sub,
+}: {
+  icon: React.ElementType
+  iconColor: string
+  children: React.ReactNode
+  sub?: React.ReactNode
+}) {
+  return (
+    <div
+      className="flex items-start gap-3 px-3.5 py-2.5 rounded-xl"
+      style={{ background: "#F8FAFC", borderLeft: `3px solid ${iconColor}30` }}
+    >
+      <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: iconColor }} />
+      <div className="min-w-0">
+        <div className="text-sm text-[var(--color-dark-slate-gray)] font-medium">{children}</div>
+        {sub && <div className="text-[10px] text-[var(--color-cool-gray)] mt-0.5">{sub}</div>}
+      </div>
+    </div>
   )
 }
 
@@ -156,54 +195,39 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
 
           {/* Bio */}
           {worker.bio && (
-            <div>
-              <SectionHeading icon={UserCircle2} label="About" color={IC.about} />
+            <Section icon={UserCircle2} label="About" color={IC.about}>
               <p className="text-sm text-[var(--color-cool-gray)] leading-relaxed italic">
                 {worker.bio}
               </p>
-            </div>
+            </Section>
           )}
 
           {/* Contact */}
           {(worker.personal_email || worker.email || worker.phone) && (
-            <div>
-              <SectionHeading icon={Mail} label="Contact" color={IC.mail} />
+            <Section icon={Mail} label="Contact" color={IC.mail}>
               <div className="space-y-2">
                 {(worker.personal_email || worker.email) && (
-                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-gray-50">
-                    <Mail className="w-4 h-4 flex-shrink-0" style={{ color: IC.mail }} />
-                    <span className="text-sm text-[var(--color-dark-slate-gray)] truncate font-medium">
-                      {worker.personal_email || worker.email}
-                    </span>
-                  </div>
+                  <InfoRow icon={Mail} iconColor={IC.mail}>
+                    {worker.personal_email || worker.email}
+                  </InfoRow>
                 )}
                 {worker.email && worker.personal_email && worker.email !== worker.personal_email && (
-                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-gray-50">
-                    <Mail className="w-4 h-4 flex-shrink-0" style={{ color: IC.mail }} />
-                    <div className="min-w-0">
-                      <span className="text-sm text-[var(--color-dark-slate-gray)] truncate block font-medium">
-                        {worker.email}
-                      </span>
-                      <span className="text-[10px] text-[var(--color-cool-gray)]">Work email</span>
-                    </div>
-                  </div>
+                  <InfoRow icon={Mail} iconColor={IC.mail} sub="Work email">
+                    {worker.email}
+                  </InfoRow>
                 )}
                 {worker.phone && (
-                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-gray-50">
-                    <Phone className="w-4 h-4 flex-shrink-0" style={{ color: IC.phone }} />
-                    <span className="text-sm text-[var(--color-dark-slate-gray)] font-medium">
-                      {worker.phone}
-                    </span>
-                  </div>
+                  <InfoRow icon={Phone} iconColor={IC.phone}>
+                    {worker.phone}
+                  </InfoRow>
                 )}
               </div>
-            </div>
+            </Section>
           )}
 
           {/* Languages */}
           {worker.languages.length > 0 && (
-            <div>
-              <SectionHeading icon={Globe} label="Languages" color={IC.globe} />
+            <Section icon={Globe} label="Languages" color={IC.globe}>
               <div className="flex flex-wrap gap-1.5">
                 {worker.languages.map((lang) => (
                   <Pill key={lang}>
@@ -212,18 +236,18 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                   </Pill>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
-          {/* Working Hours — ALL */}
+          {/* Working Hours */}
           {worker.workingHours.length > 0 && (
-            <div>
-              <SectionHeading icon={Clock} label="Working Hours" color={IC.clock} />
+            <Section icon={Clock} label="Working Hours" color={IC.clock}>
               <div className="grid gap-2">
                 {worker.workingHours.map((wh, i) => (
                   <div
                     key={i}
-                    className="px-3.5 py-2.5 rounded-xl flex items-start justify-between gap-3 bg-gray-50"
+                    className="px-3.5 py-2.5 rounded-xl flex items-start justify-between gap-3"
+                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.clock}30` }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: IC.clock }} />
@@ -236,22 +260,18 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                         )}
                       </div>
                     </div>
-                    <span
-                      className="text-xs font-semibold tabular-nums flex-shrink-0 mt-0.5"
-                      style={{ color: IC.clock }}
-                    >
+                    <span className="text-xs font-semibold tabular-nums flex-shrink-0 mt-0.5" style={{ color: IC.clock }}>
                       {wh.start} – {wh.end}
                     </span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
           {/* Certifications */}
           {worker.certifications.length > 0 && (
-            <div>
-              <SectionHeading icon={BadgeCheck} label="Certifications" color={IC.badge} />
+            <Section icon={BadgeCheck} label="Certifications" color={IC.badge}>
               <div className="flex flex-wrap gap-1.5">
                 {worker.certifications.map((c) => (
                   <Pill key={c} color={IC.badge} bg="#F0FDF4">
@@ -260,35 +280,32 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                   </Pill>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
           {/* Education */}
           {worker.education.length > 0 && (
-            <div>
-              <SectionHeading icon={GraduationCap} label="Education" color={IC.graduation} />
+            <Section icon={GraduationCap} label="Education" color={IC.graduation}>
               <div className="space-y-1.5">
                 {worker.education.map((edu) => (
-                  <div
-                    key={edu}
-                    className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gray-50"
-                  >
-                    <GraduationCap className="w-4 h-4 flex-shrink-0" style={{ color: IC.graduation }} />
-                    <span className="text-sm text-[var(--color-dark-slate-gray)] font-medium">{edu}</span>
-                  </div>
+                  <InfoRow key={edu} icon={GraduationCap} iconColor={IC.graduation}>
+                    {edu}
+                  </InfoRow>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
           {/* Personal Details */}
           {(worker.dateofbirth || worker.gender || worker.createdAt) && (
-            <div>
-              <SectionHeading icon={Calendar} label="Personal Details" color={IC.calendar} />
+            <Section icon={Calendar} label="Personal Details" color={IC.calendar}>
               <div className="grid grid-cols-2 gap-2">
                 {worker.dateofbirth && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-gray-50">
-                    <p className="text-[10px] text-[var(--color-cool-gray)] uppercase tracking-wider mb-0.5">
+                  <div
+                    className="px-3.5 py-2.5 rounded-xl"
+                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Date of Birth
                     </p>
                     <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
@@ -297,8 +314,11 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                   </div>
                 )}
                 {worker.gender && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-gray-50">
-                    <p className="text-[10px] text-[var(--color-cool-gray)] uppercase tracking-wider mb-0.5">
+                  <div
+                    className="px-3.5 py-2.5 rounded-xl"
+                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Gender
                     </p>
                     <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)] capitalize">
@@ -307,21 +327,25 @@ export default function WorkerInfoModal({ worker, onClose }: WorkerInfoModalProp
                   </div>
                 )}
                 {worker.createdAt && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-gray-50 col-span-2">
-                    <p className="text-[10px] text-[var(--color-cool-gray)] uppercase tracking-wider mb-0.5">
+                  <div
+                    className="px-3.5 py-2.5 rounded-xl col-span-2"
+                    style={{ background: "#F8FAFC", borderLeft: `3px solid ${IC.calendar}30` }}
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: IC.calendar }}>
                       Joined
                     </p>
                     <p className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">
-                      {formatDateOnly(worker.createdAt)}{" "}
-                      <span className="font-normal text-[var(--color-cool-gray)]">
+                      {formatDateOnly(worker.createdAt)}
+                      <span className="font-normal text-[var(--color-cool-gray)] ml-1.5">
                         · {timeAgo(worker.createdAt)}
                       </span>
                     </p>
                   </div>
                 )}
               </div>
-            </div>
+            </Section>
           )}
+
         </div>
       </div>
     </div>

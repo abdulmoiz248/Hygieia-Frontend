@@ -37,6 +37,7 @@ export default function WorkersSearchTabs({
           className="w-full pl-10 pr-9 py-2.5 rounded-xl text-sm outline-none transition-all
             bg-white border border-gray-200
             shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+            hover:border-[var(--color-soft-blue)]/40 hover:shadow-[0_4px_12px_rgba(91,168,196,0.1)]
             focus:border-[var(--color-soft-blue)] focus:ring-2 focus:ring-[var(--color-soft-blue)]/15
             focus:shadow-[0_4px_16px_rgba(91,168,196,0.15)]
             placeholder:text-gray-400"
@@ -77,8 +78,6 @@ export default function WorkersSearchTabs({
                     }
                   : {
                       color: "var(--color-cool-gray)",
-                      // subtle hover handled via group/peer or onMouseEnter if needed,
-                      // but scale + opacity transition is clean with just CSS
                     }
               }
               onMouseEnter={(e) => {
