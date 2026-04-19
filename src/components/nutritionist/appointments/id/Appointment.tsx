@@ -32,7 +32,6 @@ import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/ap
 import { MedicalRecord } from "@/types"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
 import { DietPlanDialog } from "@/components/nutritionist/appointments/id/diet-plan-dialog"
-import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
 import api from "@/lib/axios"
 import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
@@ -41,11 +40,45 @@ import PreviousAppointmentsCard from "./PreviousAppointment"
 import useNutritionistStore from "@/store/nutritionist/userStore"
 
 
+type PrescriptionMedication = {
+  name: string
+  time?: string
+  dosage?: string
+  duration?: string
+  frequency?: string
+  instructions?: string
+}
+
+type PatientPrescription = {
+  id: string
+  notes?: string | null
+  start_date?: string | null
+  end_date?: string | null
+  status?: string | null
+  medications?: PrescriptionMedication[]
+}
+
+type PatientJournalEntry = {
+  _id: string
+  message: string
+  alertLevel?: string | null
+  categories?: string[]
+  tags?: string[]
+  entryDate?: string
+}
+
+type PatientAnalyticsResponse = {
+  fitness?: FitnessData[]
+  medicalRecords?: (MedicalRecord & { doctor_name?: string | null; doctorName?: string | null })[]
+  prescriptions?: PatientPrescription[]
+  journal?: PatientJournalEntry[]
+}
 
 
-export const fetchPatientAnalytics = async (patientId: string) => {
+
+
+export const fetchPatientAnalytics = async (patientId: string): Promise<PatientAnalyticsResponse> => {
   const res = await api.get(`/analytics/${patientId}`)
-  console.log(res)
   if (!res.data) throw new Error("Failed to fetch analytics")
   return res.data
 }
@@ -90,6 +123,8 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
+  const [prescriptions, setPrescriptions] = useState<PatientPrescription[]>([])
+  const [journalEntries, setJournalEntries] = useState<PatientJournalEntry[]>([])
   const [assignedDietPlan, setAssignedDietPlan] = useState<any | null>(null)
   const [referredTests, setReferredTests] = useState<any[]>([])
   const [doctorReport, setDoctorReport] = useState("")
@@ -106,8 +141,15 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
     const getData = async () => {
       if (!appointment?.patient?.id) return
       const data = await fetchPatientAnalytics(appointment.patient.id)
-      setFitnessData(data.fitness)
-      setMedicalRecords(data.medicalRecords)
+      setFitnessData(data.fitness ?? [])
+      setMedicalRecords(
+        (data.medicalRecords ?? []).map((record) => ({
+          ...record,
+          doctorName: record.doctorName ?? record.doctor_name ?? undefined,
+        }))
+      )
+      setPrescriptions(data.prescriptions ?? [])
+      setJournalEntries(data.journal ?? [])
     }
     if (appointment?.dataShared) getData()
   }, [appointment])
@@ -121,7 +163,13 @@ export default function Appointment({appointmentId}:{appointmentId:string}) {
     setIsGeneratingAIReport(true)
     setIsDownloadingReport(true)
     try {
-      const report = await generateAIReport(appointment.patient, fitnessData, medicalRecords)
+      const report = await generateAIReport(
+        appointment.patient,
+        fitnessData,
+        medicalRecords,
+        prescriptions,
+        journalEntries
+      )
       await generateHealthReportPDF(report, appointment.patient.name)
     } catch (error) {
       console.error("Error generating AI report:", error)
@@ -243,7 +291,16 @@ if (assignedDietPlan) {
       doc.setFontSize(11)
       doc.setTextColor(80, 80, 80)
       doc.text(`Patient: ${patientName}`, 40, 95)
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 40, 95, { align: "right" })
+      doc.text(
+        `Generated: ${new Intl.DateTimeFormat("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "2-digit",
+        }).format(new Date())}`,
+        pageWidth - 40,
+        95,
+        { align: "right" }
+      )
 
       // Thin line under header
       doc.setDrawColor(...primaryColor)
@@ -623,6 +680,43 @@ if (assignedDietPlan) {
     })
   }
 
+  const formatDisplayDate = (dateString?: string | null) => {
+    if (!dateString) return "N/A"
+    const parsed = new Date(dateString)
+    if (Number.isNaN(parsed.getTime())) return "N/A"
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "2-digit",
+    }).format(parsed)
+  }
+
+  const formatDisplayDateTime = (dateString?: string | null) => {
+    if (!dateString) return "No date provided"
+    const parsed = new Date(dateString)
+    if (Number.isNaN(parsed.getTime())) return "No date provided"
+    const date = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "2-digit",
+    }).format(parsed)
+    const time = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(parsed)
+    return `${date} • ${time}`
+  }
+
+  const getPrescriptionStatusStyle = (status?: string | null) => {
+    if (!status) return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
+    const normalized = status.toLowerCase()
+    if (normalized === "completed") return "bg-mint-green/20 text-mint-green border border-mint-green/30"
+    if (normalized === "active") return "bg-soft-coral/15 text-soft-coral border border-soft-coral/30"
+    if (normalized === "cancelled") return "bg-red-100 text-red-600 border border-red-200"
+    return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
+  }
+
   if (isLoading) { return (
     <div className="flex items-center justify-center min-h-[400px]">
       <Loader />
@@ -977,9 +1071,7 @@ if (assignedDietPlan) {
           </p>
           <p className="text-xs text-muted-foreground">
             {assignedDietPlan.startDate && assignedDietPlan.endDate
-              ? `${new Date(assignedDietPlan.startDate).toLocaleDateString()} → ${new Date(
-                  assignedDietPlan.endDate
-                ).toLocaleDateString()}`
+              ? `${formatDisplayDate(assignedDietPlan.startDate)} → ${formatDisplayDate(assignedDietPlan.endDate)}`
               : "No date range specified"}
           </p>
           {assignedDietPlan.notes && (
@@ -1131,7 +1223,7 @@ if (assignedDietPlan) {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  {formatDateOnly(new Date(record.date))}
+                  {formatDisplayDate(record.date)}
                 </span>
                 {record.doctorName && (
                   <span className="flex items-center gap-1">
@@ -1158,6 +1250,137 @@ if (assignedDietPlan) {
 
             </Card>
             }
+
+            {dataShared && (
+              <Card className="hover-lift border-secondary/20 overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-secondary/5 via-soft-blue/5 to-secondary/10">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                        <FileText className="w-6 h-6" />
+                        Prescriptions
+                      </CardTitle>
+                      <CardDescription className="text-base">Medication plans and instructions</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-secondary text-mint-green">
+                      {prescriptions.length} Prescriptions
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  {prescriptions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                      <FileText className="w-10 h-10 mb-3 text-soft-blue/70" />
+                      <p className="text-sm">No prescriptions available yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {prescriptions.map((prescription) => (
+                        <div
+                          key={prescription.id}
+                          className="group p-5 border border-secondary/20 rounded-2xl bg-gradient-to-br from-white to-cool-gray/10 shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <div>
+                              <p className="font-semibold text-soft-coral">Prescription #{prescription.id.slice(0, 8)}</p>
+                              <p className="text-xs text-muted-foreground">Treatment window</p>
+                            </div>
+                            <Badge className={getPrescriptionStatusStyle(prescription.status)}>
+                              {prescription.status || "active"}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-soft-blue mb-4">
+                            {formatDisplayDate(prescription.start_date)} - {formatDisplayDate(prescription.end_date)}
+                          </p>
+                          <div className="grid gap-2">
+                            {(prescription.medications ?? []).length === 0 ? (
+                              <p className="text-sm text-muted-foreground">No medication items listed.</p>
+                            ) : (
+                              (prescription.medications ?? []).map((medication, idx) => (
+                                <div
+                                  key={`${prescription.id}-${medication.name}-${idx}`}
+                                  className="rounded-xl border border-soft-blue/20 bg-soft-blue/5 px-3 py-2"
+                                >
+                                  <p className="text-sm font-semibold text-soft-blue">
+                                    {medication.name}
+                                    {medication.dosage ? ` (${medication.dosage})` : ""}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {[medication.frequency, medication.time, medication.duration].filter(Boolean).join(" • ") || "No schedule details"}
+                                  </p>
+                                  {medication.instructions && (
+                                    <p className="text-xs text-cool-gray mt-1">{medication.instructions}</p>
+                                  )}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          {prescription.notes && (
+                            <p className="text-sm text-cool-gray mt-4 border-l-2 border-soft-coral/30 pl-3">{prescription.notes}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {dataShared && (
+              <Card className="hover-lift border-secondary/20 overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-secondary/5 via-soft-coral/5 to-secondary/10">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                        <FileText className="w-6 h-6" />
+                        Journal Entries
+                      </CardTitle>
+                      <CardDescription className="text-base">Patient-reported symptoms and notes</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-secondary text-mint-green">
+                      {journalEntries.length} Entries
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  {journalEntries.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                      <FileText className="w-10 h-10 mb-3 text-soft-blue/70" />
+                      <p className="text-sm">No journal entries available yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {journalEntries.map((entry) => (
+                        <div
+                          key={entry._id}
+                          className="group p-5 border border-secondary/20 rounded-2xl bg-gradient-to-br from-white to-cool-gray/10 shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            {entry.alertLevel && (
+                              <Badge className="bg-soft-coral/20 text-soft-coral border border-soft-coral/30">{entry.alertLevel}</Badge>
+                            )}
+                            {(entry.categories ?? []).map((category) => (
+                              <Badge key={`${entry._id}-${category}`} variant="outline" className="text-xs border-soft-blue/25 text-soft-blue">
+                                {category}
+                              </Badge>
+                            ))}
+                            {(entry.tags ?? []).map((tag) => (
+                              <Badge key={`${entry._id}-${tag}`} className="text-xs bg-soft-blue/15 text-soft-blue border border-soft-blue/25">
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm text-cool-gray leading-relaxed mb-3">{entry.message}</p>
+                          <div className="text-xs text-muted-foreground border-t border-secondary/20 pt-2">
+                            {formatDisplayDateTime(entry.entryDate)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <div ref={labTestsRef}>
   <LabTests onReferTest={handleTestReferral} />

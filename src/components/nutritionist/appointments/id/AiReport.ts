@@ -49,7 +49,24 @@ Answer:
   return rawOutput
 }
 
-export async function generateAIReport(patientData: any, fitnessData: any[], medicalRecords: any[]): Promise<string> {
+export async function generateAIReport(
+  patientData: any,
+  fitnessData: any[],
+  medicalRecords: any[],
+  prescriptions: any[] = [],
+  journalEntries: any[] = []
+): Promise<string> {
+  const displayDate = (value?: string | null) => {
+    if (!value) return "N/A"
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) return "N/A"
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "2-digit",
+    }).format(parsed)
+  }
+
   const prompt = `
 You are an expert nutritionist AI assistant analyzing 30 days of patient data to provide actionable insights for nutrition consultation. 
 Generate a comprehensive nutritionist-focused report that helps the nutritionist make informed decisions quickly.
@@ -104,7 +121,7 @@ ${fitnessData.length > 0 ? (() => {
 
 DETAILED DAILY DATA:
 ${fitnessData.map((f, index) => {
-  const date = new Date(f.created_at).toLocaleDateString()
+  const date = displayDate(f.created_at)
   return `Day ${index + 1} (${date}):
   - Steps: ${f.steps || 0}
   - Water: ${f.water || 0} glasses
@@ -117,6 +134,15 @@ ${fitnessData.map((f, index) => {
 
 MEDICAL RECORDS:
 ${medicalRecords.length > 0 ? medicalRecords.map(r => `- ${r.title} (${r.record_type}) - ${r.date}`).join('\n') : 'No recent medical records'}
+
+PRESCRIPTIONS:
+${prescriptions.length > 0 ? prescriptions.map((p, idx) => {
+  const meds = (p.medications || []).map((m: any) => `${m.name}${m.dosage ? ` (${m.dosage})` : ""}${m.frequency ? `, ${m.frequency}` : ""}`).join("; ")
+  return `${idx + 1}. Status: ${p.status || "active"}, Start: ${displayDate(p.start_date)}, End: ${displayDate(p.end_date)}, Medications: ${meds || "No medications listed"}, Notes: ${p.notes || "None"}`
+}).join('\n') : 'No prescriptions available'}
+
+PATIENT JOURNAL ENTRIES:
+${journalEntries.length > 0 ? journalEntries.map((j, idx) => `${idx + 1}. Date: ${displayDate(j.entryDate)}, Alert: ${j.alertLevel || "normal"}, Categories: ${(j.categories || []).join(", ") || "none"}, Message: ${j.message}`).join('\n') : 'No journal entries available'}
 
 Generate a comprehensive health report with these sections:
 
@@ -141,6 +167,7 @@ Generate a comprehensive health report with these sections:
 - Immediate health risks
 - Long-term nutritional risks
 - Medication interactions with nutrition
+- Journal-reported symptom concerns and alert-level risks
 - Lifestyle factors affecting nutrition
 
 **5. PERSONALIZED NUTRITION RECOMMENDATIONS**
