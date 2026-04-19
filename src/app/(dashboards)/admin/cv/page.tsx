@@ -132,14 +132,31 @@ export default function CVPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
+    <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-soft-coral bg-clip-text pb-1">CV Management</h1>
-        <p className="text-sm text-[var(--color-cool-gray)] mt-1">
-          {isLoading ? "Loading…" : `${cvs.length} total CVs received`}
-        </p>
+      {/* Header — matches WorkersPageHeader style */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 -mt-2">
+        <div>
+          <h1 className="text-3xl font-bold pb-1 text-soft-coral">
+            CV Management
+          </h1>
+
+          {isLoading ? (
+            <div className="h-5 w-48 rounded-md animate-pulse bg-gray-100 mt-1" />
+          ) : (
+            <span
+              className="text-base font-semibold mt-0.5 block"
+              style={{
+                background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green), var(--color-soft-coral))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {cvs.length} Total CV{cvs.length !== 1 ? "s" : ""} Received
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Stat cards */}
@@ -175,7 +192,8 @@ export default function CVPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+        // FIX: removed items-start so all cards in a row stretch to equal height
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((cv) => (
             <CVCard
               key={cv.id}

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom"
 import { X, ExternalLink } from "lucide-react"
 
 interface CVPdfPreviewModalProps {
@@ -6,9 +7,22 @@ interface CVPdfPreviewModalProps {
   onClose: () => void
 }
 
+/**
+ * Converts any URL (Cloudinary or otherwise) into an embeddable PDF viewer URL.
+ * Using Google Docs viewer as the renderer so the raw PDF is displayed
+ * instead of a Cloudinary page wrapper.
+ */
+function toEmbedUrl(url: string): string {
+  return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`
+}
+
 export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPreviewModalProps) {
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="relative bg-white w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
 
         {/* Top stripe */}
@@ -22,26 +36,30 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
             <p className="text-xs text-[var(--color-cool-gray)] mt-0.5">CV Preview</p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Opens the raw Cloudinary/storage URL directly in a new tab */}
             <a
               href={cvLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/20 text-[var(--color-cool-gray)] hover:text-[var(--color-dark-slate-gray)] hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/20 text-[var(--color-cool-gray)] hover:text-[var(--color-dark-slate-gray)] hover:bg-gray-50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               Open in new tab
             </a>
-            <button onClick={onClose}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors active:scale-95"
+            >
               <X className="w-4 h-4 text-[var(--color-cool-gray)]" />
             </button>
           </div>
         </div>
 
-        {/* PDF iframe */}
+        {/* PDF iframe — rendered via Google Docs viewer so the actual PDF
+            content is shown instead of a Cloudinary landing page */}
         <div className="flex-1 min-h-0">
           <iframe
-            src={cvLink}
+            src={toEmbedUrl(cvLink)}
             className="w-full h-full"
             title={`${name} CV`}
           />
@@ -49,4 +67,7 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(modal, document.body)
 }
