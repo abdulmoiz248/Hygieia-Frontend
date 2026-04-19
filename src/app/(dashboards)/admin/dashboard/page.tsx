@@ -142,7 +142,7 @@ function AnnouncementPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 p-5 space-y-4">
           {result ? (
             <>
               <div className="flex gap-3 p-4 rounded-xl border border-[var(--color-mint-green)]/20"
