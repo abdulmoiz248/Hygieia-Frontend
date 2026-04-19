@@ -111,17 +111,17 @@ export default function CVCard({
           </span>
         </div>
 
-        {/* Contact — FIX: bold text + colored icons like WorkerCard */}
+        {/* Contact */}
         <div className="flex flex-col gap-2 mt-3">
           <div className="flex items-center gap-2.5 px-1">
             <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
-            <span className="text-xs text-[var(--color-dark-slate-gray)] truncate font-semibold">
+            <span className="text-xs text-[var(--color-cool-gray)] truncate">
               {cv.email}
             </span>
           </div>
           <div className="flex items-center gap-2.5 px-1">
             <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#10B981" }} />
-            <span className="text-xs text-[var(--color-dark-slate-gray)] font-semibold">
+            <span className="text-xs text-[var(--color-cool-gray)]">
               {cv.phone}
             </span>
           </div>
@@ -170,12 +170,12 @@ export default function CVCard({
         <div className="flex-1" />
 
         {/* Actions */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
 
           {/* "Update Status" toggle */}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80 active:scale-95"
+            className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-all duration-200 hover:opacity-80 active:scale-95"
             style={{ color, background: expanded ? `${color}15` : "transparent" }}
           >
             {expanded ? (
@@ -198,7 +198,7 @@ export default function CVCard({
             <button
               title="Preview CV"
               onClick={() => onPreview(cv.cvLink, cv.fullName)}
-              className="p-2 rounded-lg transition-all duration-200 text-[var(--color-soft-blue)] hover:bg-[oklch(0.95_0.05_210)] hover:scale-110 active:scale-95"
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-soft-blue)] hover:bg-[oklch(0.95_0.05_210)] hover:scale-110 active:scale-95"
             >
               <Eye className="w-3.5 h-3.5" />
             </button>
@@ -207,7 +207,7 @@ export default function CVCard({
             <button
               title="Download CV"
               onClick={() => handleDownload(cv.cvLink, cv.fullName)}
-              className="p-2 rounded-lg transition-all duration-200 text-[var(--color-cool-gray)] hover:bg-[oklch(0.93_0.02_180)] hover:text-[var(--color-dark-slate-gray)] hover:scale-110 active:scale-95"
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-cool-gray)] hover:bg-[oklch(0.93_0.02_180)] hover:text-[var(--color-dark-slate-gray)] hover:scale-110 active:scale-95"
             >
               <Download className="w-3.5 h-3.5" />
             </button>
@@ -216,7 +216,7 @@ export default function CVCard({
             <button
               title="Add as Worker"
               onClick={() => onAddAsWorker(cv)}
-              className="p-2 rounded-lg transition-all duration-200 text-[var(--color-mint-green)] hover:bg-[oklch(0.95_0.04_178)] hover:scale-110 active:scale-95"
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-mint-green)] hover:bg-[oklch(0.95_0.04_178)] hover:scale-110 active:scale-95"
             >
               <UserPlus className="w-3.5 h-3.5" />
             </button>
@@ -225,7 +225,7 @@ export default function CVCard({
             <button
               title="Delete CV"
               onClick={() => onDelete(cv.id)}
-              className="p-2 rounded-lg transition-all duration-200 text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] hover:scale-110 active:scale-95"
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] hover:scale-110 active:scale-95"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

@@ -7,13 +7,9 @@ interface CVPdfPreviewModalProps {
   onClose: () => void
 }
 
-/**
- * Converts any URL (Cloudinary or otherwise) into an embeddable PDF viewer URL.
- * Using Google Docs viewer as the renderer so the raw PDF is displayed
- * instead of a Cloudinary page wrapper.
- */
-function toEmbedUrl(url: string): string {
-  return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`
+function toViewerUrl(url: string, embedded = false): string {
+  const base = `https://docs.google.com/gview?url=${encodeURIComponent(url)}`
+  return embedded ? `${base}&embedded=true` : base
 }
 
 export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPreviewModalProps) {
@@ -36,9 +32,9 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
             <p className="text-xs text-[var(--color-cool-gray)] mt-0.5">CV Preview</p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Opens the raw Cloudinary/storage URL directly in a new tab */}
+            {/* Opens the PDF via Google Docs viewer — shows actual PDF, not Cloudinary page */}
             <a
-              href={cvLink}
+              href={toViewerUrl(cvLink)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/20 text-[var(--color-cool-gray)] hover:text-[var(--color-dark-slate-gray)] hover:bg-gray-50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
@@ -55,11 +51,10 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
           </div>
         </div>
 
-        {/* PDF iframe — rendered via Google Docs viewer so the actual PDF
-            content is shown instead of a Cloudinary landing page */}
+        {/* PDF iframe — embedded Google Docs viewer renders the actual PDF */}
         <div className="flex-1 min-h-0">
           <iframe
-            src={toEmbedUrl(cvLink)}
+            src={toViewerUrl(cvLink, true)}
             className="w-full h-full"
             title={`${name} CV`}
           />
