@@ -1,7 +1,6 @@
 "use client"
 
 import { Plus } from "lucide-react"
-import TextType from "@/blocks/TextAnimations/TextType/TextType"
 
 interface WorkersPageHeaderProps {
   totalCount:  number
@@ -19,23 +18,25 @@ export default function WorkersPageHeader({ totalCount, isLoading, onAddClick }:
           Manage Workers
         </h1>
 
+        {/*
+          Show skeleton only when isLoading is explicitly true.
+          Using a plain gradient span instead of TextType avoids the
+          "0 regist…" flash — the count is only rendered once real data arrives.
+        */}
         {isLoading ? (
-          <div className="h-6 w-48 rounded-md animate-pulse bg-gray-100 mt-0.5" />
+          <div className="h-5 w-48 rounded-md animate-pulse bg-gray-100 mt-1" />
         ) : (
-          <TextType
-            key={countText}
-            text={[countText]}
-            typingSpeed={60}
-            pauseDuration={0}
-            showCursor={false}
-            className="text-base font-semibold mt-0.5 capitalize"
+          <span
+            className="text-base font-semibold mt-0.5 block"
             style={{
               background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green), var(--color-soft-coral))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              backgroundClip:      "text",
             }}
-          />
+          >
+            {countText}
+          </span>
         )}
       </div>
 

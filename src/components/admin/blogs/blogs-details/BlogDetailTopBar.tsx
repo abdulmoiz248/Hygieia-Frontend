@@ -18,15 +18,16 @@ export function BlogDetailTopBar({
 
   return (
     <div
-      className="z-30 bg-white/90 backdrop-blur-md border-b"
+      className="z-30 bg-white/90 backdrop-blur-md border rounded-2xl overflow-hidden w-full"
       style={{ borderColor: "oklch(0.88 0.04 210)" }}
     >
-      <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+      {/* No max-w here — width is controlled by the parent page container, same as the blog card */}
+      <div className="w-full px-6 py-4 flex items-center justify-between gap-4">
 
         {/* Back link */}
         <Link
           href="/admin/blogs"
-          className="flex items-center gap-2 text-sm font-semibold transition-colors hover:text-[var(--color-soft-blue)]"
+          className="flex items-center gap-2 text-sm font-semibold transition-colors hover:text-[var(--color-soft-blue)] shrink-0"
           style={{ color: "var(--color-cool-gray)" }}
         >
           <ArrowLeft className="w-4 h-4" /> Blog Review
@@ -55,7 +56,7 @@ export function BlogDetailTopBar({
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {isPending && (
             <button
               onClick={onApprove}
