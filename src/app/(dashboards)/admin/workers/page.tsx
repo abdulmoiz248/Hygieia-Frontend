@@ -58,7 +58,7 @@ export default function ManageWorkersPage() {
   const showPathologists  = showAll || activeTab === "pathologist"
 
   return (
-    <div className="min-h-screen px-6 pt-2 pb-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
+    <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
       <WorkersPageHeader
         totalCount={totalCount}

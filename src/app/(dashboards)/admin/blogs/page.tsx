@@ -60,7 +60,7 @@ export default function BlogReviewPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen p-6 space-y-5 bg-[var(--color-snow-white)]">
+    <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)]">
 
       {/* Header — matches WorkersPageHeader style */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 -mt-2">

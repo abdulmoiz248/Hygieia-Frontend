@@ -97,19 +97,22 @@ export default function AdminFAQPage() {
     setDeleteId(null)
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen p-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
-      <FaqHeader totalCount={faqs.length} onCreateClick={handleOpenCreate} />
+    <>
+      <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)] fade-in">
+        <FaqHeader totalCount={faqs.length} onCreateClick={handleOpenCreate} />
 
-      <FaqSearch value={search} onChange={setSearch} />
+        <FaqSearch value={search} onChange={setSearch} />
 
-      <FaqList
-        faqs={filteredFaqs}
-        loading={loading}
-        onEdit={handleOpenEdit}
-        onDeleteRequest={setDeleteId}
-      />
+        <FaqList
+          faqs={filteredFaqs}
+          loading={loading}
+          onEdit={handleOpenEdit}
+          onDeleteRequest={setDeleteId}
+        />
+
+        <AdminToastContainer />
+      </div>
 
       {isFormOpen && (
         <FaqFormModal
@@ -128,8 +131,6 @@ export default function AdminFAQPage() {
           onClose={() => setDeleteId(null)}
         />
       )}
-
-      <AdminToastContainer />
-    </div>
+    </>
   )
 }
