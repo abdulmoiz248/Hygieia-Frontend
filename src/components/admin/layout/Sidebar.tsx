@@ -45,7 +45,7 @@ export function Sidebar({
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* HEADER */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 min-h-[73px]">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 h-[73px]">
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div
