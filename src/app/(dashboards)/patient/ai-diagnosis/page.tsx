@@ -9,9 +9,12 @@ import CardTitle from "@/components/patient dashboard/ai diagnosis/CardTitle"
 import Button from "@/components/patient dashboard/ai diagnosis/Button"
 import AnalysisProgressModal from "@/components/patient dashboard/ai diagnosis/AnalysisProgressModal"
 import ResultsModal from "@/components/patient dashboard/ai diagnosis/ResultsModal"
+import { predictModel } from "@/api/patient/recommendationsApi"
+import { useToast } from "@/hooks/use-toast"
 
 interface DiagnosisResult {
   type: "dental" | "acne"
+  predictedClass: string
   confidence: number
   recommendation: string
   severity: "mild" | "moderate" | "severe"
@@ -22,8 +25,10 @@ interface DiagnosisResult {
 // Remove the inline definitions of these components and use the imports instead.
 
 export default function AIDiagnosisPage() {
+  const { toast } = useToast()
   const [selectedType, setSelectedType] = useState<"dental" | "acne" | null>(null)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [result, setResult] = useState<DiagnosisResult | null>(null)
@@ -34,9 +39,68 @@ export default function AIDiagnosisPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
+  const getSeverity = (type: "dental" | "acne", predictedClass: string): "mild" | "moderate" | "severe" => {
+    if (type === "acne") {
+      if (predictedClass === "Cyst") return "severe"
+      if (predictedClass === "Papules" || predictedClass === "Pustules") return "moderate"
+      return "mild"
+    }
+
+    if (predictedClass === "Infection" || predictedClass === "Fractured Teeth") return "severe"
+    if (predictedClass === "Caries" || predictedClass === "Impacted teeth") return "moderate"
+    return "mild"
+  }
+
+  const getRecommendation = (type: "dental" | "acne", predictedClass: string): string => {
+    if (type === "acne") {
+      return `Detected pattern: ${predictedClass}. Please consult a dermatologist for confirmation and a personalized treatment plan.`
+    }
+
+    return `Detected pattern: ${predictedClass}. Please consult a dentist for proper evaluation and treatment planning.`
+  }
+
+  const getNextSteps = (type: "dental" | "acne", severity: "mild" | "moderate" | "severe") => {
+    if (type === "dental") {
+      return [
+        severity === "severe" ? "Schedule a dental consultation as soon as possible" : "Schedule a dental consultation within 2 weeks",
+        "Maintain good oral hygiene with fluoride toothpaste",
+        "Avoid hard or sticky foods temporarily",
+        "Use warm salt water rinse twice daily",
+        "Monitor for increased pain, swelling, or sensitivity",
+      ]
+    }
+
+    return [
+      severity === "severe" ? "Consult a dermatologist promptly for medical treatment" : "Book a dermatologist consultation for confirmation",
+      "Use gentle, non-comedogenic skincare products",
+      "Avoid touching or picking affected areas",
+      "Cleanse twice daily and apply prescribed/topical treatment as advised",
+      "Track changes and worsening inflammation over the next 1-2 weeks",
+    ]
+  }
+
+  const dataUrlToFile = (dataUrl: string, filename: string): File | null => {
+    const [meta, base64] = dataUrl.split(",")
+    if (!meta || !base64) {
+      return null
+    }
+
+    const mimeMatch = meta.match(/data:(.*?);base64/)
+    const mime = mimeMatch?.[1] ?? "image/jpeg"
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index)
+    }
+
+    return new File([bytes], filename, { type: mime })
+  }
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      setUploadedFile(file)
       const reader = new FileReader()
       reader.onload = (e) => {
         setUploadedImage(e.target?.result as string)
@@ -64,6 +128,8 @@ export default function AIDiagnosisPage() {
         ctx.drawImage(video, 0, 0)
         const imageData = canvas.toDataURL('image/jpeg')
         setUploadedImage(imageData)
+        const file = dataUrlToFile(imageData, `${selectedType ?? "diagnosis"}-capture.jpg`)
+        setUploadedFile(file)
         stopCamera()
       }
     }
@@ -79,61 +145,59 @@ export default function AIDiagnosisPage() {
   }
 
   const analyzeImage = async () => {
-    if (!uploadedImage || !selectedType) return
+    if (!uploadedImage || !uploadedFile || !selectedType) return
 
     setIsAnalyzing(true)
     setAnalysisProgress(0)
 
-    // Simulate AI analysis with progress
     const progressInterval = setInterval(() => {
       setAnalysisProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(progressInterval)
-          return 95
+        if (prev >= 90) {
+          return 90
         }
-        return prev + Math.random() * 15
+        return prev + 10
       })
     }, 200)
 
-    setTimeout(() => {
+    try {
+      const prediction = await predictModel(selectedType, uploadedFile)
       clearInterval(progressInterval)
       setAnalysisProgress(100)
 
-      const mockResult: DiagnosisResult = {
+      const severity = getSeverity(selectedType, prediction.predicted_class)
+      const apiResult: DiagnosisResult = {
         type: selectedType,
-        confidence: Math.floor(Math.random() * 30) + 70, // 70-100%
-        recommendation:
-          selectedType === "dental"
-            ? "Based on the image analysis, this appears to be a minor dental concern. I recommend scheduling a consultation with a dentist for proper evaluation."
-            : "The analysis suggests mild to moderate acne. Consider consulting with a dermatologist for a personalized treatment plan.",
-        severity: ["mild", "moderate", "severe"][Math.floor(Math.random() * 3)] as "mild" | "moderate" | "severe",
-        nextSteps:
-          selectedType === "dental"
-            ? [
-                "Schedule a dental consultation within 2 weeks",
-                "Maintain good oral hygiene with fluoride toothpaste",
-                "Avoid hard or sticky foods temporarily",
-                "Use warm salt water rinse twice daily",
-                "Monitor for any changes or increased pain",
-              ]
-            : [
-                "Consult with a dermatologist for professional assessment",
-                "Use gentle, non-comedogenic skincare products",
-                "Avoid touching or picking at affected areas",
-                "Consider topical treatments like benzoyl peroxide",
-                "Maintain a consistent skincare routine",
-              ],
+        predictedClass: prediction.predicted_class,
+        confidence: Math.round(prediction.confidence * 100),
+        recommendation: getRecommendation(selectedType, prediction.predicted_class),
+        severity,
+        nextSteps: getNextSteps(selectedType, severity),
       }
 
-      setResult(mockResult)
+      setResult(apiResult)
       setIsAnalyzing(false)
       setShowResults(true)
-    }, 3000)
+      toast({
+        title: "Analysis complete",
+        description: `Detected: ${prediction.predicted_class}`,
+      })
+    } catch (err: any) {
+      clearInterval(progressInterval)
+      setIsAnalyzing(false)
+      setAnalysisProgress(0)
+
+      const message = err?.response?.data?.message || err?.message || "Analysis failed"
+      toast({
+        title: "Analysis failed",
+        description: message,
+      })
+    }
   }
 
   const resetDiagnosis = () => {
     setSelectedType(null)
     setUploadedImage(null)
+    setUploadedFile(null)
     setResult(null)
     setShowResults(false)
     setAnalysisProgress(0)
@@ -253,7 +317,10 @@ export default function AIDiagnosisPage() {
                         variant="outline"
                         size="sm"
                         className="absolute top-2 right-2 bg-snow-white/90"
-                        onClick={() => setUploadedImage(null)}
+                        onClick={() => {
+                          setUploadedImage(null)
+                          setUploadedFile(null)
+                        }}
                       >
                         Change Photo
                       </Button>
@@ -278,10 +345,6 @@ export default function AIDiagnosisPage() {
         <ResultsModal open={showResults} onOpenChange={setShowResults} result={result} resetDiagnosis={resetDiagnosis} />
       </div>
     </div>
-         <AnalysisProgressModal open={isAnalyzing} selectedType={selectedType} analysisProgress={analysisProgress} />
-
-        {/* Results Modal */}
-        <ResultsModal open={showResults} onOpenChange={setShowResults} result={result} resetDiagnosis={resetDiagnosis} />
      </>
   )
 }

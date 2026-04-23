@@ -7,6 +7,7 @@ import { CheckCircle, AlertTriangle } from "lucide-react";
 
 interface DiagnosisResult {
   type: "dental" | "acne";
+  predictedClass: string;
   confidence: number;
   recommendation: string;
   severity: "mild" | "moderate" | "severe";
@@ -49,6 +50,10 @@ const ResultsModal: React.FC<ResultsModalProps> = ({ open, onOpenChange, result,
             <div className="text-5xl font-bold text-soft-blue mb-2">{result.confidence}%</div>
             <p className="text-cool-gray">Confidence Level</p>
             <Progress value={result.confidence} className="w-full max-w-sm mx-auto mt-2" />
+          </div>
+          <div className="bg-soft-blue/10 p-4 rounded-lg text-center">
+            <p className="text-cool-gray text-sm mb-1">Detected Disease</p>
+            <p className="text-xl font-semibold text-dark-slate-gray">{result.predictedClass}</p>
           </div>
           <div className="flex items-center justify-center gap-2">
             <AlertTriangle className={`w-5 h-5 ${getSeverityColor(result.severity)}`} />

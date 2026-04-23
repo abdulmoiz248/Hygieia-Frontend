@@ -1,17 +1,21 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Award, Dumbbell, FlaskConical, HeartPulse, Lightbulb, Moon, Pill, RefreshCw, Stethoscope } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import {
   getLatestPatientRecommendations,
+  predictModel,
   refreshPatientRecommendations,
+  type ModelType,
   type PatientRecommendation,
+  type PredictionData,
 } from "@/api/patient/recommendationsApi"
 
 import { Variants } from "framer-motion"
@@ -49,6 +53,13 @@ export default function HealthInsights() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [predictionType, setPredictionType] = useState<ModelType>("acne")
+  const [predictionFile, setPredictionFile] = useState<File | null>(null)
+  const [predictionResult, setPredictionResult] = useState<PredictionData | null>(null)
+  const [predictionError, setPredictionError] = useState<string | null>(null)
+  const [predicting, setPredicting] = useState(false)
+  const [modelWarmingUp, setModelWarmingUp] = useState(false)
+  const predictionResultRef = useRef<HTMLDivElement | null>(null)
 
   const patientId = profileId || getStoredPatientId()
 
@@ -56,6 +67,46 @@ export default function HealthInsights() {
     () => recommendations.slice(0, MAX_RECOMMENDATIONS),
     [recommendations]
   )
+
+  const probabilityEntries = useMemo(() => {
+    if (!predictionResult?.probabilities) {
+      return []
+    }
+
+    return Object.entries(predictionResult.probabilities).sort((a, b) => b[1] - a[1])
+  }, [predictionResult])
+
+  const detectedDisease = useMemo(() => {
+    if (predictionResult?.predicted_class) {
+      return predictionResult.predicted_class
+    }
+
+    if (probabilityEntries.length > 0) {
+      return probabilityEntries[0][0]
+    }
+
+    return "Unknown"
+  }, [predictionResult, probabilityEntries])
+
+  const confidencePercent = useMemo(() => {
+    if (typeof predictionResult?.confidence === "number") {
+      return (predictionResult.confidence * 100).toFixed(2)
+    }
+
+    if (probabilityEntries.length > 0) {
+      return (probabilityEntries[0][1] * 100).toFixed(2)
+    }
+
+    return "0.00"
+  }, [predictionResult, probabilityEntries])
+
+  useEffect(() => {
+    if (!predictionResult) {
+      return
+    }
+
+    predictionResultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+  }, [predictionResult])
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -115,6 +166,41 @@ export default function HealthInsights() {
       })
     } finally {
       setRefreshing(false)
+    }
+  }
+
+  const handlePredict = async () => {
+    if (!predictionFile) {
+      setPredictionError("Image file is required.")
+      return
+    }
+
+    setPredicting(true)
+    setPredictionError(null)
+    setModelWarmingUp(false)
+
+    try {
+      const result = await predictModel(predictionType, predictionFile)
+      setPredictionResult(result)
+      toast({
+        title: "Prediction completed",
+        description: `${predictionType === "acne" ? "Acne" : "Dental"} detected: ${result.predicted_class} (${(result.confidence * 100).toFixed(2)}%)`,
+      })
+    } catch (err: any) {
+      const status = err?.response?.status
+      const message = err?.response?.data?.message || err?.message || "Prediction failed"
+      setPredictionResult(null)
+      setPredictionError(message)
+      setModelWarmingUp(status === 503)
+
+      toast({
+        title: "Prediction failed",
+        description: status === 503
+          ? "Model is warming up. Please retry in a moment."
+          : message,
+      })
+    } finally {
+      setPredicting(false)
     }
   }
 
@@ -229,6 +315,104 @@ export default function HealthInsights() {
                 </motion.div>
               )
             })
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-md max-w-full">
+        <CardHeader className="border-b border-white/20 px-6">
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold text-dark-slate-gray">
+            <HeartPulse className="w-5 h-5 text-soft-blue" />
+            Model Predictions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 px-6 pb-6">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={predictionType === "acne" ? "default" : "outline"}
+              className={predictionType === "acne" ? "bg-soft-coral text-white hover:bg-soft-coral/90" : "border-white/30 bg-white/30"}
+              onClick={() => setPredictionType("acne")}
+              disabled={predicting}
+            >
+              Acne
+            </Button>
+            <Button
+              type="button"
+              variant={predictionType === "dental" ? "default" : "outline"}
+              className={predictionType === "dental" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "border-white/30 bg-white/30"}
+              onClick={() => setPredictionType("dental")}
+              disabled={predicting}
+            >
+              Dental
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const nextFile = event.target.files?.[0] ?? null
+                setPredictionFile(nextFile)
+                setPredictionError(null)
+                setPredictionResult(null)
+                setModelWarmingUp(false)
+              }}
+              className="border-white/30 bg-white/50"
+            />
+            <Button
+              type="button"
+              onClick={handlePredict}
+              disabled={predicting || !predictionFile}
+              className="rounded-full bg-soft-coral text-white hover:bg-soft-coral/90"
+            >
+              {predicting ? "Predicting..." : "Predict"}
+            </Button>
+            {modelWarmingUp && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePredict}
+                disabled={predicting || !predictionFile}
+                className="rounded-full border-white/30 bg-white/40"
+              >
+                Retry
+              </Button>
+            )}
+          </div>
+
+          {predictionError && (
+            <p className="text-sm text-soft-coral">{predictionError}</p>
+          )}
+
+          {predictionResult && (
+            <div ref={predictionResultRef} className="rounded-xl border border-white/20 bg-white/25 p-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium text-dark-slate-gray">
+                  Detected Disease: <span className="font-semibold">{detectedDisease}</span>
+                </p>
+                <p className="text-sm text-dark-slate-gray/80">
+                  Confidence: <span className="font-semibold">{confidencePercent}%</span>
+                </p>
+              </div>
+
+              {probabilityEntries.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-dark-slate-gray/70">
+                    Class probabilities
+                  </p>
+                  <div className="space-y-1">
+                    {probabilityEntries.map(([label, score]) => (
+                      <div key={label} className="flex items-center justify-between text-xs text-dark-slate-gray/80">
+                        <span>{label}</span>
+                        <span className="font-medium">{(score * 100).toFixed(2)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
