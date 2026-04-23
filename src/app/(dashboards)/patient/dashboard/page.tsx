@@ -9,7 +9,7 @@ import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStat
 import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSection"
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
-import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
+
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
@@ -118,7 +118,6 @@ function DashboardPageContent() {
         {/* <FolderApp /> */}
       </div>
 
-       <HealthInsights />
 
       {/* Advanced Analytics Section */}
    
