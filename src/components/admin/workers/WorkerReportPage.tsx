@@ -24,35 +24,6 @@ const ROLE_ICONS: Record<string, React.ElementType> = {
   pathologist:  FlaskConical,
 }
 
-const colorClasses = {
-  "soft-blue": {
-    bg:     "bg-gradient-to-br from-soft-blue/10 to-soft-blue/5 border-soft-blue/20",
-    text:   "text-soft-blue",
-    border: "border-l-soft-blue",                       // for border-l-4
-    hex:    "var(--color-soft-blue)",
-  },
-  "mint-green": {
-    bg:     "bg-gradient-to-br from-mint-green/10 to-mint-green/5 border-mint-green/20",
-    text:   "text-mint-green",
-    border: "border-l-mint-green",
-    hex:    "var(--color-mint-green)",
-  },
-  "soft-coral": {
-    bg:     "bg-gradient-to-br from-soft-coral/10 to-soft-coral/5 border-soft-coral/20",
-    text:   "text-soft-coral",
-    border: "border-l-soft-coral",
-    hex:    "var(--color-soft-coral)",
-  },
-  "cool-gray": {
-    bg:     "bg-gradient-to-br from-cool-gray/10 to-cool-gray/5 border-cool-gray/20",
-    text:   "text-cool-gray",
-    border: "border-l-cool-gray",
-    hex:    "var(--color-cool-gray)",
-  },
-}
-
-type ColorKey = keyof typeof colorClasses
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getInitials(name: string) {
   return name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase()
@@ -72,7 +43,7 @@ function Skel({ w = "w-16", h = "h-5" }: { w?: string; h?: string }) {
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface WorkerReportPageProps {
   worker:    Worker
-  report:    WorkerReport | null   // null while loading
+  report:    WorkerReport | null
   isLoading: boolean
 }
 
@@ -88,7 +59,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
     day: "numeric", month: "long", year: "numeric",
   })
 
-  // ── PDF (unchanged logic) ──────────────────────────────────────────────────
+  // ── PDF ────────────────────────────────────────────────────────────────────
   const handleDownloadPdf = async () => {
     if (!report) return
     setPdfLoading(true)
@@ -177,7 +148,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
           ["Total Appointments",   String(report.metrics.totalAppointments ?? "-")],
           ["Completion Rate",      `${compRate}%`],
           ["Account Active For",   `${report.overview.accountAgeDays ?? "-"} days`],
-          ["Unread Notifications", String(report.overview.unreadNotifications ?? "-")],
+          ["Unread Notifications", String(report.overview.unreadNotifications ?? 0)],
         ],
         didDrawPage: hook,
       })
@@ -207,10 +178,12 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen px-6 pb-10 space-y-6 bg-[var(--color-snow-white)] fade-in">
+    // FIX 1: reduced px-6 → px-4 sm:px-6 to trim horizontal padding
+    <div className="min-h-screen px-4 sm:px-6 pb-10 space-y-6 bg-[var(--color-snow-white)] fade-in">
 
       {/* ── Top bar ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pt-6">
+      {/* FIX 1: reduced pt-6 → pt-4 */}
+      <div className="flex items-center justify-between pt-4">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-sm font-medium text-dark-slate-gray hover:text-soft-blue transition-colors"
@@ -230,7 +203,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
         </Button>
       </div>
 
-      {/* ── Worker identity — available immediately from cached list ─────────── */}
+      {/* ── Worker identity ───────────────────────────────────────────────────── */}
       <Card
         className="w-full border-l-4 bg-cool-gray/10"
         style={{ borderLeftColor: "var(--color-soft-blue)" }}
@@ -249,7 +222,6 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                   <RoleIcon className="h-4 w-4 text-soft-blue" />
                   <span className="text-sm text-dark-slate-gray font-medium">{cfg.label}</span>
                   <span className="text-muted-foreground">·</span>
-                  {/* email comes from report; skeleton until ready */}
                   {isLoading
                     ? <Skel w="w-40" />
                     : <span className="text-sm text-muted-foreground">{report?.worker.email}</span>}
@@ -321,7 +293,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
             </div>
             {isLoading
               ? <Skel w="w-8" h="h-8" />
-              : <p className="text-3xl font-bold text-soft-blue">{report?.overview.unreadNotifications}</p>}
+              : <p className="text-3xl font-bold text-soft-blue">{report?.overview.unreadNotifications ?? 0}</p>}
             <p className="text-xs text-muted-foreground">unread</p>
           </CardContent>
         </Card>
@@ -330,7 +302,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
       {/* ── Completion progress bar ───────────────────────────────────────────── */}
       <Card className="w-full border-l-4 bg-cool-gray/10" style={{ borderLeftColor: "var(--color-soft-blue)" }}>
-        <CardContent className="pt-5 space-y-3">
+        <CardContent className="pt-1 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-soft-blue font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -338,7 +310,6 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
             </span>
             {isLoading ? <Skel w="w-10" /> : <span className="font-bold text-soft-coral">{compRate}%</span>}
           </div>
-          {/* Progress bar animates from 0 → value once data arrives */}
           <Progress value={isLoading ? 0 : compRate} className="h-2" />
           <div>
             {isLoading
@@ -352,41 +323,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
         </CardContent>
       </Card>
 
-      {/* ── Performance metrics summary grid ─────────────────────────────────── */}
-      <Card className="w-full border-l-4 bg-cool-gray/10" style={{ borderLeftColor: "var(--color-soft-blue)" }}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold text-soft-blue flex items-center gap-2">
-            {/* ← icon added here */}
-            <BarChart2 className="h-4 w-4 text-soft-blue" />
-            Performance Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {(
-              [
-                { label: "Appointments",  value: report?.metrics.totalAppointments,                             color: "mint-green"  },
-                { label: "Completion",    value: report ? `${compRate}%` : undefined,                           color: "soft-coral"  },
-                { label: "Account Age",   value: report ? `${report.overview.accountAgeDays}d` : undefined,     color: "soft-blue"   },
-                { label: "Notifications", value: report?.overview.unreadNotifications,                          color: "cool-gray"   },
-              ] as { label: string; value: string | number | undefined; color: ColorKey }[]
-            ).map(({ label, value, color }) => {
-              const c = colorClasses[color]
-              return (
-                <div key={label} className={`text-center p-3 rounded-lg border ${c.bg}`}>
-                  <p className={`text-sm font-medium ${c.text}`}>{label}</p>
-                  {isLoading || value === undefined
-                    ? <Skel w="w-10 mx-auto" h="h-5" />
-                    : <p className={`font-bold text-lg ${c.text}`}>{value}</p>}
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-
-      {/* ── Notifications alert — only shown once data loads ─────────────────── */}
+      {/* ── Notifications alert ───────────────────────────────────────────────── */}
       {!isLoading && report && report.overview.unreadNotifications > 0 && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-snow-white border border-soft-coral/20">
           <AlertTriangle className="h-4 w-4 mt-0.5 text-soft-coral" />
@@ -402,7 +339,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
       {/* ── AI insights ──────────────────────────────────────────────────────── */}
       <Card className="w-full border-l-4 bg-cool-gray/10" style={{ borderLeftColor: "var(--color-mint-green)" }}>
-        <CardHeader className="pb-2">
+        <CardHeader>
           <CardTitle className="text-base font-semibold text-soft-blue flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-mint-green" />
             AI-Generated Insights
@@ -411,7 +348,6 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
         <CardContent className="space-y-3">
           {isLoading
             ? (
-              // placeholder rows while fetching
               Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-snow-white">
                   <Skeleton className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0" />
