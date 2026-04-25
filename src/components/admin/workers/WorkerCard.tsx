@@ -1,17 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"                          // ← ADD
 import {
   Star, Mail, Phone, FileText, Trash2, Info,
   BadgeCheck,
 } from "lucide-react"
 import { Worker, Role, ROLE_CONFIG } from "@/types/admin/workers"
-import { useWorkerReport } from "@/hooks/admin/workers/useWorkerReport"
-import WorkerReportModal from "./WorkerReportModal"
 import WorkerInfoModal from "./WorkerInfoModal"
-import type { WorkerReport } from "@/hooks/admin/workers/useWorkerReport"
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-components (unchanged) ───────────────────────────────────────────────
 
 function Avatar({ name, img, color, gradient }: {
   name: string
@@ -64,20 +62,19 @@ interface WorkerCardProps {
 }
 
 export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
-  const [reportData,   setReportData]   = useState<WorkerReport | null>(null)
+  const router = useRouter()                                        // ← ADD
   const [showInfoModal, setShowInfoModal] = useState(false)
+  // ↓ REMOVE: reportData state + useWorkerReport + WorkerReportModal import
 
   const cfg = ROLE_CONFIG[worker.role]
-  const { mutate: fetchReport, isPending: reportLoading } = useWorkerReport()
 
   const handleDeleteClick = () => {
     onDelete({ workerId: worker._id, email: worker.email, role: worker.role })
   }
 
+  // ── Changed: no fetch, just navigate ─────────────────────────────────────
   const handleReportClick = () => {
-    fetchReport(worker.id, {
-      onSuccess: (data) => setReportData(data),
-    })
+    router.push(`/admin/workers/${worker.id}/report`)
   }
 
   return (
@@ -162,32 +159,21 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
             <button
               onClick={() => setShowInfoModal(true)}
               className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80"
-              style={{
-                color: cfg.color,
-                background: cfg.lightBg,
-              }}
+              style={{ color: cfg.color, background: cfg.lightBg }}
             >
               <Info className="w-3.5 h-3.5" />
               More info
             </button>
 
             <div className="flex items-center gap-1">
-              {/* Report button */}
+              {/* ── Report button — now navigates to the full page ── */}
               <button
                 onClick={handleReportClick}
-                disabled={reportLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 hover:bg-gray-100"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-gray-100"
                 style={{ color: cfg.color }}
               >
-                {reportLoading ? (
-                  <span
-                    className="w-3.5 h-3.5 border-2 rounded-full animate-spin"
-                    style={{ borderColor: `${cfg.color}30`, borderTopColor: cfg.color }}
-                  />
-                ) : (
-                  <FileText className="w-3.5 h-3.5" />
-                )}
-                {reportLoading ? "Loading…" : "Report"}
+                <FileText className="w-3.5 h-3.5" />
+                Report
               </button>
 
               {/* Delete button */}
@@ -203,16 +189,7 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
         </div>
       </div>
 
-      {/* Report Modal */}
-      {reportData && (
-        <WorkerReportModal
-          worker={worker}
-          report={reportData}
-          onClose={() => setReportData(null)}
-        />
-      )}
-
-      {/* Info Modal */}
+      {/* Info Modal (unchanged) */}
       {showInfoModal && (
         <WorkerInfoModal
           worker={worker}
