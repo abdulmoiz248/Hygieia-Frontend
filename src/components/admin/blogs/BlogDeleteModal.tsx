@@ -75,8 +75,10 @@ export default function BlogDeleteModal({ post, onClose }: BlogDeleteModalProps)
               style={{ color: "var(--color-soft-coral)" }}
             />
             <p className="text-sm text-[var(--color-cool-gray)] leading-relaxed">
-              <span className="font-semibold text-[var(--color-dark-slate-gray)]">"{`"${post.title}"`}"</span> will
-              be permanently deleted from the platform. This cannot be recovered.
+              <span className="font-semibold text-[var(--color-dark-slate-gray)]">
+                {`"${post.title}"`}
+              </span>
+              will be permanently deleted from the platform. This cannot be recovered.
             </p>
           </div>
         </div>
