@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
   const [announcementOpen, setAnnouncementOpen] = useState(false)
 
   return (
-    <>
+    <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)]">
       <Suspense fallback={
         <div className="space-y-6 lg:space-y-8 w-full animate-pulse">
           <div className="h-32 bg-gray-200 rounded-lg" />
@@ -342,6 +342,6 @@ export default function AdminDashboardPage() {
           <AnnouncementPanel onClose={() => setAnnouncementOpen(false)} />
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }

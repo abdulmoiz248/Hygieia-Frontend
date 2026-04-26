@@ -7,9 +7,14 @@ interface CVPdfPreviewModalProps {
   onClose: () => void
 }
 
-function toViewerUrl(url: string, embedded = false): string {
-  const base = `https://docs.google.com/gview?url=${encodeURIComponent(url)}`
-  return embedded ? `${base}&embedded=true` : base
+/** Embedded iframe — Google Docs viewer renders the PDF inline */
+function toEmbedUrl(url: string): string {
+  return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`
+}
+
+/** "Open in new tab" — uses the production app viewer so the URL and title look professional */
+function toAppViewerUrl(url: string, name: string): string {
+  return `https://hygieia-frontend.vercel.app/viewReport?fileUrl=${encodeURIComponent(url)}&title=${encodeURIComponent(name + " — CV")}`
 }
 
 export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPreviewModalProps) {
@@ -32,9 +37,9 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
             <p className="text-xs text-[var(--color-cool-gray)] mt-0.5">CV Preview</p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Opens the PDF via Google Docs viewer — shows actual PDF, not Cloudinary page */}
+            {/* Opens via your own /viewReport route — clean URL and proper title */}
             <a
-              href={toViewerUrl(cvLink)}
+              href={toAppViewerUrl(cvLink, name)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--color-cool-gray)]/20 text-[var(--color-cool-gray)] hover:text-[var(--color-dark-slate-gray)] hover:bg-gray-50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
@@ -54,9 +59,9 @@ export default function CVPdfPreviewModal({ cvLink, name, onClose }: CVPdfPrevie
         {/* PDF iframe — embedded Google Docs viewer renders the actual PDF */}
         <div className="flex-1 min-h-0">
           <iframe
-            src={toViewerUrl(cvLink, true)}
+            src={toEmbedUrl(cvLink)}
             className="w-full h-full"
-            title={`${name} CV`}
+            title={`${name} — CV`}
           />
         </div>
       </div>
