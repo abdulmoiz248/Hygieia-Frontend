@@ -8,7 +8,7 @@ interface BlogDetailBodyProps {
 
 function markdownToHtml(raw: string): string {
   // Normalise escape sequences and line endings
-  let md = raw
+  const md = raw
     .replace(/\\n/g, "\n")
     .replace(/\r\n/g, "\n")
 

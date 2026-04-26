@@ -54,7 +54,7 @@ function ActivityRow({ item, relativeTime }: { item: ActivityItem; relativeTime:
 
 export default function AdminRecentActivity() {
   const [open, setOpen] = useState(false)
-  const { isLoading, recent, overflow, activities, relativeTime } = useRecentActivity()
+  const { isLoading, recent, activities, relativeTime } = useRecentActivity()
 
   return (
     <>

@@ -6,7 +6,7 @@ import {
   ArrowLeft, Download, Loader2,
   Calendar, Activity, Target, AlertTriangle,
   Lightbulb, CheckCircle2, Clock, Bell, TrendingUp,
-  Stethoscope, Salad, FlaskConical, BarChart2,
+  Stethoscope, Salad, FlaskConical,
 } from "lucide-react"
 import { Badge }                from "@/components/ui/badge"
 import { Progress }             from "@/components/ui/progress"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"                          // ← ADD
+import { useRouter } from "next/navigation"                       
 import {
   Star, Mail, Phone, FileText, Trash2, Info,
   BadgeCheck,
@@ -11,7 +11,7 @@ import WorkerInfoModal from "./WorkerInfoModal"
 
 // ─── Sub-components (unchanged) ───────────────────────────────────────────────
 
-function Avatar({ name, img, color, gradient }: {
+function Avatar({ name, img, gradient }: {
   name: string
   img?: string
   color: string
@@ -62,9 +62,8 @@ interface WorkerCardProps {
 }
 
 export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
-  const router = useRouter()                                        // ← ADD
+  const router = useRouter()                                        
   const [showInfoModal, setShowInfoModal] = useState(false)
-  // ↓ REMOVE: reportData state + useWorkerReport + WorkerReportModal import
 
   const cfg = ROLE_CONFIG[worker.role]
 
