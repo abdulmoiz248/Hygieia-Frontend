@@ -2,15 +2,14 @@
 
 import { BookOpen, CheckCircle2, AlertCircle, Clock, Loader2, Mail, Rss, Users } from "lucide-react"
 import { useSentNewsletters } from "@/hooks/admin/newsletters/useSentNewsletters"
-import { formatDate } from "@/lib/admin/blog-helpers"
+import { formatDateOnly } from "@/helpers/date"
+import { timeAgo } from "@/helpers/formatTimeAgo"
 import type { SentNewsletterItem } from "@/hooks/admin/newsletters/useSentNewsletters"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** For blogpost type, the title is the subject line minus the trailing site suffix */
 function extractTitle(item: SentNewsletterItem): string {
   if (item.type === "blogpost") {
-    // e.g. "Why Modern Healthcare Needs AI More Than Ever - Hygieia Blog"
     return item.subject.replace(/\s*[-–|]\s*Hygieia.*$/i, "").trim()
   }
   return item.subject
@@ -19,9 +18,9 @@ function extractTitle(item: SentNewsletterItem): string {
 // ─── Row ──────────────────────────────────────────────────────────────────────
 
 function HistoryRow({ item }: { item: SentNewsletterItem }) {
-  const allSent  = item.failed_count === 0
-  const isBlog   = item.type === "blogpost"
-  const title    = extractTitle(item)
+  const allSent = item.failed_count === 0
+  const isBlog  = item.type === "blogpost"
+  const title   = extractTitle(item)
 
   return (
     <div className="flex items-start gap-4 px-4 py-4 rounded-xl border border-[var(--color-cool-gray)]/15 bg-gray-50 hover:bg-white hover:shadow-sm transition-all">
@@ -53,15 +52,15 @@ function HistoryRow({ item }: { item: SentNewsletterItem }) {
             className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 mt-0.5"
             style={
               isBlog
-                ? { background: "oklch(0.96 0.06 10)",   color: "var(--color-soft-coral)" }
-                : { background: "oklch(0.95 0.05 210)",  color: "var(--color-soft-blue)"  }
+                ? { background: "oklch(0.96 0.06 10)",  color: "var(--color-soft-coral)" }
+                : { background: "oklch(0.95 0.05 210)", color: "var(--color-soft-blue)"  }
             }
           >
             {isBlog ? "Blog Post" : "Manual"}
           </span>
         </div>
 
-        {/* Subject line (only for manual — blog title IS the subject) */}
+        {/* Subject line (only for manual) */}
         {!isBlog && (
           <p className="text-xs text-[var(--color-cool-gray)] flex items-center gap-1.5">
             <Mail className="w-3 h-3 flex-shrink-0" />
@@ -91,10 +90,13 @@ function HistoryRow({ item }: { item: SentNewsletterItem }) {
 
           <span className="w-px h-3 bg-gray-200" />
 
-          {/* Date */}
-          <span className="flex items-center gap-1 text-xs text-[var(--color-cool-gray)]">
+          {/* Date — formatted as "Apr 19, 2026" with time-ago tooltip feel */}
+          <span
+            className="flex items-center gap-1 text-xs text-[var(--color-cool-gray)]"
+            title={formatDateOnly(item.created_at)}
+          >
             <Clock className="w-3 h-3" />
-            {formatDate(item.created_at, "long")}
+            {timeAgo(item.created_at)}
           </span>
 
         </div>
@@ -152,7 +154,6 @@ export function SentHistoryTab() {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {/* newest first */}
               {[...items]
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .map((item) => (

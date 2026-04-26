@@ -3,11 +3,10 @@
 import { useState, useMemo } from "react"
 import { Loader2 } from "lucide-react"
 
-import { Tab, ViewMode } from "@/lib/admin/blog-helpers"
+import { Tab, ViewMode, BlogPost } from "@/lib/admin/blog-helpers"
 
-import { useBlogPosts }            from "@/hooks/admin/blogs/useAdminBlogPosts"
-import { useDeleteBlogPost }       from "@/hooks/admin/blogs/useDeleteBlogPost"
-import { useVerifyBlogPost }       from "@/hooks/admin/blogs/useVerifyBlogPost"
+import { useBlogPosts }             from "@/hooks/admin/blogs/useAdminBlogPosts"
+import { useVerifyBlogPost }        from "@/hooks/admin/blogs/useVerifyBlogPost"
 import { useToggleFeatureBlogPost } from "@/hooks/admin/blogs/useToggleFeatureBlogPost"
 
 import { BlogStatCards, buildStatCards } from "@/components/admin/blogs/BlogStatCards"
@@ -16,18 +15,19 @@ import { BlogCard }                      from "@/components/admin/blogs/BlogCard
 import { BlogRow }                       from "@/components/admin/blogs/BlogRow"
 import { BlogEmptyState }                from "@/components/admin/blogs/BlogEmptyState"
 import { AdminToastContainer }           from "@/toasts/AdminToasts"
+import BlogDeleteModal from "@/components/admin/blogs/BlogDeleteModal"
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BlogReviewPage() {
-  const [search,    setSearch]    = useState("")
-  const [viewMode,  setViewMode]  = useState<ViewMode>("grid")
-  const [activeTab, setActiveTab] = useState<Tab>("all")
+  const [search,      setSearch]      = useState("")
+  const [viewMode,    setViewMode]    = useState<ViewMode>("grid")
+  const [activeTab,   setActiveTab]   = useState<Tab>("all")
+  const [deletePost,  setDeletePost]  = useState<BlogPost | null>(null)
 
   const { data: posts = [], isLoading } = useBlogPosts()
 
-  const deleteMutation       = useDeleteBlogPost()
-  const verifyMutation       = useVerifyBlogPost()
+  const verifyMutation        = useVerifyBlogPost()
   const toggleFeatureMutation = useToggleFeatureBlogPost()
 
   // ── Derived State ────────────────────────────────────────────────────────
@@ -60,12 +60,26 @@ export default function BlogReviewPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen p-6 space-y-5 bg-[var(--color-snow-white)]">
+    <div className="min-h-screen px-6 pb-6 space-y-6 bg-[var(--color-snow-white)]">
 
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-soft-coral pb-0.5">Blog Review</h1>
-        <p className="text-sm text-[var(--color-cool-gray)]">Review, approve and manage all blog posts</p>
+      {/* Header — matches WorkersPageHeader style */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 -mt-2">
+        <div>
+          <h1 className="text-3xl font-bold pb-1 text-soft-coral">
+            Blog Review
+          </h1>
+          <p
+            className="text-base font-semibold mt-0.5 capitalize"
+            style={{
+              background: "linear-gradient(90deg, var(--color-soft-blue), var(--color-mint-green), var(--color-soft-coral))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Review, approve and manage all blog posts
+          </p>
+        </div>
       </div>
 
       {/* Stat Cards */}
@@ -95,8 +109,8 @@ export default function BlogReviewPage() {
             <BlogCard
               key={post.id}
               post={post}
-              onDelete={()        => deleteMutation.mutate(post)}
-              deleting={deleteMutation.isPending && deleteMutation.variables?.id === post.id}
+              onDelete={()        => setDeletePost(post)}
+              deleting={false}
               onVerify={()        => verifyMutation.mutate(post)}
               onToggleFeature={() => toggleFeatureMutation.mutate(post)}
               actioning={
@@ -112,8 +126,8 @@ export default function BlogReviewPage() {
             <BlogRow
               key={post.id}
               post={post}
-              onDelete={()        => deleteMutation.mutate(post)}
-              deleting={deleteMutation.isPending && deleteMutation.variables?.id === post.id}
+              onDelete={()        => setDeletePost(post)}
+              deleting={false}
               onVerify={()        => verifyMutation.mutate(post)}
               onToggleFeature={() => toggleFeatureMutation.mutate(post)}
               actioning={
@@ -123,6 +137,14 @@ export default function BlogReviewPage() {
             />
           ))}
         </div>
+      )}
+
+      {/* Delete Modal */}
+      {deletePost && (
+        <BlogDeleteModal
+          post={deletePost}
+          onClose={() => setDeletePost(null)}
+        />
       )}
 
       <AdminToastContainer />

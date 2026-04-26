@@ -1,6 +1,8 @@
 import { motion } from "framer-motion"
 import { Calendar, Clock, Tag } from "lucide-react"
-import { BlogPostDetail, getThemeGradient, getInitials, formatDate } from "@/lib/admin/blog-helpers"
+import { BlogPostDetail, getThemeGradient, getInitials } from "@/lib/admin/blog-helpers"
+import { formatDateOnly } from "@/helpers/date"
+import { timeAgo } from "@/helpers/formatTimeAgo"
 
 interface BlogDetailMetaProps {
   post: BlogPostDetail
@@ -40,8 +42,13 @@ export function BlogDetailMeta({ post }: BlogDetailMetaProps) {
 
         <span className="w-px h-4 bg-gray-200" />
 
-        <span className="text-xs text-[var(--color-cool-gray)] flex items-center gap-1">
-          <Calendar className="w-3.5 h-3.5" />{formatDate(post.createdAt, "long")}
+        {/* Full date shown, timeAgo as secondary tooltip */}
+        <span
+          className="text-xs text-[var(--color-cool-gray)] flex items-center gap-1"
+          title={timeAgo(post.createdAt)}
+        >
+          <Calendar className="w-3.5 h-3.5" />
+          {formatDateOnly(post.createdAt)}
         </span>
 
         {post.readTime > 0 && (

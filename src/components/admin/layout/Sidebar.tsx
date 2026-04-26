@@ -26,9 +26,9 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Users, label: "Manage Workers", href: "/workers" },
   { icon: FileText, label: "Manage Blogs", href: "/blogs" },
-  { icon: Mail, label: "Review Emails", href: "/newsletters" },
+  { icon: Mail, label: "Review Newsletters", href: "/newsletters" },
   { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
-  { icon: Search, label: "Manage CV", href: "/cv" },
+  { icon: Search, label: "Manage CVs", href: "/cv" },
 ]
 
 export function Sidebar({
@@ -45,7 +45,7 @@ export function Sidebar({
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* HEADER */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 min-h-[73px]">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 h-[73px]">
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div

@@ -2,35 +2,28 @@
 
 import { createPortal } from "react-dom"
 import { X, Trash2, AlertTriangle } from "lucide-react"
-import { Role } from "@/types/admin/workers"
-import { useDeleteWorker } from "@/hooks/admin/workers/useDeleteWorker"
+import { BlogPost } from "@/lib/admin/blog-helpers"
+import { useDeleteBlogPost } from "@/hooks/admin/blogs/useDeleteBlogPost"
 import { adminDestructive, adminError } from "@/toasts/AdminToasts"
 
-interface DeleteModalProps {
-  workerEmail: string
-  workerId: string
-  workerRole: Role
+interface BlogDeleteModalProps {
+  post:    BlogPost
   onClose: () => void
 }
 
-export default function DeleteModal({
-  workerEmail,
-  workerId,
-  workerRole,
-  onClose,
-}: DeleteModalProps) {
-  const { mutate: remove, isPending } = useDeleteWorker({
+export default function BlogDeleteModal({ post, onClose }: BlogDeleteModalProps) {
+  const { mutate: remove, isPending } = useDeleteBlogPost({
     onSuccess: () => {
-      adminDestructive("Worker removed successfully.")
+      adminDestructive(`"${post.title}" deleted.`)
       onClose()
     },
     onError: (err) => {
-      adminError(err.message || "Failed to remove worker.")
+      adminError(err.message || "Failed to delete post.")
     },
   })
 
   const handleConfirm = () => {
-    remove({ email: workerEmail, workerId, role: workerRole })
+    remove(post)
   }
 
   const modal = (
@@ -58,7 +51,7 @@ export default function DeleteModal({
             </div>
             <div>
               <h2 className="text-base font-semibold text-[var(--color-dark-slate-gray)] leading-tight">
-                Remove Worker
+                Delete Blog Post
               </h2>
               <p className="text-xs text-[var(--color-cool-gray)] mt-0.5">This action is permanent</p>
             </div>
@@ -82,7 +75,10 @@ export default function DeleteModal({
               style={{ color: "var(--color-soft-coral)" }}
             />
             <p className="text-sm text-[var(--color-cool-gray)] leading-relaxed">
-              This worker will be permanently removed from the platform. All associated data will be lost and cannot be recovered.
+              <span className="font-semibold text-[var(--color-dark-slate-gray)]">
+                {`"${post.title}"`}
+              </span>
+              will be permanently deleted from the platform. This cannot be recovered.
             </p>
           </div>
         </div>
@@ -102,7 +98,7 @@ export default function DeleteModal({
             className="px-5 py-2 rounded-xl text-white text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98] shadow-sm disabled:opacity-60"
             style={{ background: "linear-gradient(135deg, var(--color-soft-coral), oklch(0.55 0.28 15))" }}
           >
-            {isPending ? "Removing…" : "Remove Worker"}
+            {isPending ? "Deleting…" : "Delete Post"}
           </button>
         </div>
       </div>

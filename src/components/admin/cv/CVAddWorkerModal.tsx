@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom"
 import { X, UserPlus, CheckCircle2 } from "lucide-react"
 
 interface CVAddWorkerModalProps {
@@ -6,8 +7,12 @@ interface CVAddWorkerModalProps {
 }
 
 export default function CVAddWorkerModal({ name, onClose }: CVAddWorkerModalProps) {
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
 
         {/* Top stripe */}
@@ -54,4 +59,7 @@ export default function CVAddWorkerModal({ name, onClose }: CVAddWorkerModalProp
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(modal, document.body)
 }

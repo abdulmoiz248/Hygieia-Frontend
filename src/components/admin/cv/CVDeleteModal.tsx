@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom"
 import { X, Trash2, AlertTriangle } from "lucide-react"
 
 interface CVDeleteModalProps {
@@ -6,8 +7,12 @@ interface CVDeleteModalProps {
 }
 
 export default function CVDeleteModal({ onConfirm, onClose }: CVDeleteModalProps) {
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
 
         {/* Top stripe */}
@@ -46,7 +51,7 @@ export default function CVDeleteModal({ onConfirm, onClose }: CVDeleteModalProps
         {/* Actions */}
         <div className="flex justify-end gap-2 px-6 pb-5">
           <button onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-[var(--color-cool-gray)] transition-colors">
+            className="px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-[var(--color-cool-gray)] transition-colors active:scale-[0.98]">
             Cancel
           </button>
           <button onClick={onConfirm}
@@ -58,4 +63,7 @@ export default function CVDeleteModal({ onConfirm, onClose }: CVDeleteModalProps
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(modal, document.body)
 }

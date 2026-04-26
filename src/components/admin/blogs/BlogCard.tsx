@@ -6,6 +6,8 @@ import {
 import { BlogPost, getThemeGradient, getInitials } from "@/lib/admin/blog-helpers"
 import { Thumbnail } from "@/components/admin/blogs/Thumbnail"
 import { useSendBlogNewsletter } from "@/hooks/admin/newsletters/useSendBlogNewsletter"
+import { timeAgo } from "@/helpers/formatTimeAgo"
+import { formatDateOnly } from "@/helpers/date"
 
 interface BlogCardProps {
   post:            BlogPost
@@ -47,7 +49,7 @@ export function BlogCard({
       className="group rounded-2xl bg-white overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       style={{ border: "0.5px solid oklch(0.88 0.04 210)" }}
     >
-      {/* Thumbnail — badges live here only (status, featured, category) */}
+      {/* Thumbnail */}
       <Link href={`/admin/blogs/${post.id}`} className="block flex-shrink-0">
         <Thumbnail post={post} />
       </Link>
@@ -74,7 +76,7 @@ export function BlogCard({
             {post.tags.slice(0, 3).map(tag => (
               <span
                 key={tag}
-                className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium"
+                className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-[var(--color-cool-gray)] font-medium transition-colors cursor-default"
               >
                 #{tag}
               </span>
@@ -89,7 +91,7 @@ export function BlogCard({
           <button
             onClick={onVerify}
             disabled={busy}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 hover:brightness-110 hover:scale-[1.02] active:scale-95"
             style={{
               background:    "linear-gradient(135deg, #34d399, #059669)",
               color:         "#fff",
@@ -109,13 +111,13 @@ export function BlogCard({
           <button
             onClick={handleSendNewsletter}
             disabled={sendMutation.isPending}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
-           style={{
-  background: "linear-gradient(135deg, oklch(0.7 0.22 10), oklch(0.6 0.25 10))",
-  color: "#fff",
-  fontSize: "0.75rem",
-  letterSpacing: "0.03em",
-}}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 hover:brightness-110 hover:scale-[1.02] active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.7 0.22 10), oklch(0.6 0.25 10))",
+              color: "#fff",
+              fontSize: "0.75rem",
+              letterSpacing: "0.03em",
+            }}
           >
             {sendMutation.isPending
               ? <><Loader2 className="w-3 h-3 animate-spin" /> Sending…</>
@@ -126,7 +128,7 @@ export function BlogCard({
         {/* ── Footer: Author · Read time · Star (published) · Delete ── */}
         <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 mt-1">
 
-          {/* Author */}
+          {/* Author + time ago */}
           <div className="flex items-center gap-2 min-w-0">
             <div
               className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
@@ -134,9 +136,17 @@ export function BlogCard({
             >
               {getInitials(post.author)}
             </div>
-            <p className="text-xs font-medium text-[var(--color-dark-slate-gray)] truncate">
-              {post.author}
-            </p>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-[var(--color-dark-slate-gray)] truncate leading-tight">
+                {post.author}
+              </p>
+              <p
+                className="text-[10px] text-[var(--color-cool-gray)] truncate leading-tight"
+                title={formatDateOnly(post.createdAt)}
+              >
+                {timeAgo(post.createdAt)}
+              </p>
+            </div>
           </div>
 
           {/* Meta icons */}
@@ -152,7 +162,7 @@ export function BlogCard({
               <button
                 onClick={handleToggleFeature}
                 disabled={busy}
-                className="p-1 rounded-md transition-colors disabled:opacity-40 hover:bg-amber-50 active:scale-90"
+                className="p-1 rounded-md transition-all disabled:opacity-40 hover:bg-amber-50 hover:scale-110 active:scale-90"
                 title={post.isFeatured ? "Remove from featured" : "Mark as featured"}
               >
                 {actioning
@@ -170,7 +180,7 @@ export function BlogCard({
             <button
               onClick={handleDelete}
               disabled={busy}
-              className="p-1 rounded-md text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] transition-colors disabled:opacity-40 active:scale-90"
+              className="p-1 rounded-md text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] hover:scale-110 transition-all duration-150 disabled:opacity-40 active:scale-90"
               title="Delete"
             >
               {deleting

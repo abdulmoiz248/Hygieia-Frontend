@@ -145,27 +145,32 @@ export default function CVChatPanel({ onClose }: CVChatPanelProps) {
               {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {msg.sources.map((src) => (
-                    <a
+                    <div
                       key={src.cv_id}
-                      href={src.cv_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`Similarity: ${(src.similarity_score * 100).toFixed(0)}%`}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium transition-colors hover:bg-gray-100"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium"
                       style={{
                         borderColor: "oklch(0.88 0.04 210)",
                         color:       "var(--color-cool-gray)",
                       }}
                     >
-                      <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
-                      {src.email}
-                      <span
-                        className="ml-0.5 font-semibold"
+                      {/* Email shown as plain text — no raw URL exposed */}
+                      <span className="truncate max-w-[120px]">{src.email}</span>
+
+                      {/* "View PDF" opens the actual PDF via Google Docs viewer */}
+                      <a
+                        href={`https://docs.google.com/gview?url=${encodeURIComponent(src.cv_url)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="View CV PDF"
+                        className="flex items-center gap-0.5 hover:opacity-70 transition-opacity"
                         style={{ color: "var(--color-soft-blue)" }}
                       >
-                        {(src.similarity_score * 100).toFixed(0)}%
-                      </span>
-                    </a>
+                        <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
+                        <span className="font-semibold">
+                          {(src.similarity_score * 100).toFixed(0)}%
+                        </span>
+                      </a>
+                    </div>
                   ))}
                 </div>
               )}

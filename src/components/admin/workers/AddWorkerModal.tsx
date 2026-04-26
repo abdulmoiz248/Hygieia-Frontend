@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { createPortal } from "react-dom"
 import { X, User, Stethoscope, Salad, FlaskConical } from "lucide-react"
 import { Role } from "@/types/admin/workers"
 import { useRegisterWorker } from "@/hooks/admin/workers/useRegisterWorker"
@@ -62,28 +63,21 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
       return
     }
     setValidationError("")
-
-    // FIX: Separate the API payload (sent to backend) from the frontendRole
-    // (used only for cache invalidation in the hook). Previously _frontendRole
-    // was merged into the body and caused a 400 Bad Request from the backend DTO.
-    register(
-      {
-        name:          form.name.trim(),
-        personalEmail: form.personalEmail.trim(),
-        role:          ROLE_API_VALUE[form.role], // "doctor" | "nutritionist" | "lab-technician"
-      },
-      // Pass frontend Role as the second arg — your hook should accept this
-      // as metadata for cache invalidation (not forwarded to the API).
-      // If your hook signature is useRegisterWorker({ onSuccess, onError }),
-      // move frontendRole into a ref or closure instead — see comment below.
-      { meta: { frontendRole: form.role } } as any
-    )
+    register({
+      name:          form.name.trim(),
+      personalEmail: form.personalEmail.trim(),
+      role:          ROLE_API_VALUE[form.role],
+    }, { meta: { frontendRole: form.role } } as any)
   }
 
   const selectedRoleCfg = ROLE_OPTIONS.find((r) => r.value === form.role)!
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col border border-gray-100 overflow-hidden">
 
         {/* Role-coloured top stripe */}
@@ -125,7 +119,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
                     key={value}
                     type="button"
                     onClick={() => set("role")(value)}
-                    className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border text-xs font-medium transition-all duration-200"
+                    className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border text-xs font-medium transition-all duration-200 hover:scale-[1.02]"
                     style={
                       active
                         ? { background: bg, borderColor: color, color }
@@ -145,7 +139,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
             <label className="block text-xs font-medium text-[var(--color-cool-gray)] mb-1.5">Full Name</label>
             <input
               type="text"
-              id="worker-name" 
+              id="worker-name"
               name="worker-name"
               autoComplete="off"
               value={form.name}
@@ -203,4 +197,7 @@ export default function AddWorkerModal({ onClose }: AddWorkerModalProps) {
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(modal, document.body)
 }

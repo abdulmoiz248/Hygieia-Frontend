@@ -60,7 +60,7 @@ export default function CVCard({
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col">
+    <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full">
 
       {/* Role color stripe */}
       <div
@@ -112,14 +112,18 @@ export default function CVCard({
         </div>
 
         {/* Contact */}
-        <div className="flex flex-col gap-1.5 mt-3 text-xs text-[var(--color-cool-gray)]">
-          <div className="flex items-center gap-2">
-            <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="truncate">{cv.email}</span>
+        <div className="flex flex-col gap-2 mt-3">
+          <div className="flex items-center gap-2.5 px-1">
+            <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+            <span className="text-xs text-[var(--color-cool-gray)] truncate">
+              {cv.email}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{cv.phone}</span>
+          <div className="flex items-center gap-2.5 px-1">
+            <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#10B981" }} />
+            <span className="text-xs text-[var(--color-cool-gray)]">
+              {cv.phone}
+            </span>
           </div>
         </div>
 
@@ -137,7 +141,7 @@ export default function CVCard({
                   key={s}
                   onClick={() => onStatusChange(cv.id, s)}
                   disabled={isUpdatingStatus || cv.status === s}
-                  className="text-[11px] px-2.5 py-1 rounded-full font-semibold border-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="text-[11px] px-2.5 py-1 rounded-full font-semibold border-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1 hover:opacity-80 active:scale-95"
                   style={
                     cv.status === s
                       ? {
@@ -162,17 +166,17 @@ export default function CVCard({
           </div>
         )}
 
-        {/* Spacer */}
+        {/* Spacer pushes actions to bottom */}
         <div className="flex-1" />
 
         {/* Actions */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
 
-          {/* "Update Status" toggle — clearly labelled so users know it's here */}
+          {/* "Update Status" toggle */}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-xs font-medium transition-colors"
-            style={{ color }}
+            className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-all duration-200 hover:opacity-80 active:scale-95"
+            style={{ color, background: expanded ? `${color}15` : "transparent" }}
           >
             {expanded ? (
               <>
@@ -188,15 +192,13 @@ export default function CVCard({
             )}
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
 
             {/* Preview */}
             <button
               title="Preview CV"
               onClick={() => onPreview(cv.cvLink, cv.fullName)}
-              className="p-2 rounded-lg transition-colors text-[var(--color-soft-blue)]"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "oklch(0.95 0.05 210)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-soft-blue)] hover:bg-[oklch(0.95_0.05_210)] hover:scale-110 active:scale-95"
             >
               <Eye className="w-3.5 h-3.5" />
             </button>
@@ -205,9 +207,7 @@ export default function CVCard({
             <button
               title="Download CV"
               onClick={() => handleDownload(cv.cvLink, cv.fullName)}
-              className="p-2 rounded-lg transition-colors text-[var(--color-cool-gray)]"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "oklch(0.93 0.02 180)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-cool-gray)] hover:bg-[oklch(0.93_0.02_180)] hover:text-[var(--color-dark-slate-gray)] hover:scale-110 active:scale-95"
             >
               <Download className="w-3.5 h-3.5" />
             </button>
@@ -216,9 +216,7 @@ export default function CVCard({
             <button
               title="Add as Worker"
               onClick={() => onAddAsWorker(cv)}
-              className="p-2 rounded-lg transition-colors text-[var(--color-mint-green)]"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "oklch(0.95 0.04 178)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-mint-green)] hover:bg-[oklch(0.95_0.04_178)] hover:scale-110 active:scale-95"
             >
               <UserPlus className="w-3.5 h-3.5" />
             </button>
@@ -227,9 +225,7 @@ export default function CVCard({
             <button
               title="Delete CV"
               onClick={() => onDelete(cv.id)}
-              className="p-2 rounded-lg transition-colors text-[var(--color-soft-coral)]"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "oklch(0.96 0.06 10)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="p-1.5 rounded-lg transition-all duration-200 text-[var(--color-soft-coral)] hover:bg-[oklch(0.96_0.06_10)] hover:scale-110 active:scale-95"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

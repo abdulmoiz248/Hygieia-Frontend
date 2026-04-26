@@ -42,19 +42,17 @@ export default function BlogDetailPage() {
     setTimeout(() => router.push("/admin/blogs"), 1200)
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   if (isLoading) return <BlogDetailLoadingState />
   if (!post)     return <BlogDetailNotFound />
 
-  const isPending  = !post.isVerified
-  const verifying  = verifyMutation.isPending
-  const deleting   = deleteMutation.isPending
+  const isPending = !post.isVerified
+  const verifying = verifyMutation.isPending
+  const deleting  = deleteMutation.isPending
 
   return (
     <div className="min-h-screen bg-[var(--color-snow-white)]">
 
-      {/* Top bar */}
+      {/* Sticky top bar */}
       <BlogDetailTopBar
         post={post}
         isPending={isPending}
@@ -64,17 +62,27 @@ export default function BlogDetailPage() {
         onDeleteRequest={() => setConfirmDelete(true)}
       />
 
-      {/* Main content */}
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
 
-        <BlogDetailHero post={post} />
+        {/* ── White article card ───────────────────────────────────────────── */}
+        <div
+          className="bg-white rounded-2xl overflow-hidden shadow-sm"
+          style={{ border: "1.5px solid oklch(0.88 0.04 210)" }}
+        >
+          {/* Hero image — flush to card edges, no border-radius clip needed */}
+          <BlogDetailHero post={post} />
 
-        <BlogDetailMeta post={post} />
+          {/* Meta + body inside padded area */}
+          <div className="px-7 py-6 space-y-6">
+            <BlogDetailMeta post={post} />
 
-        <div className="border-t" style={{ borderColor: "oklch(0.88 0.04 210)" }} />
+            <div className="border-t" style={{ borderColor: "oklch(0.92 0.02 210)" }} />
 
-        <BlogDetailBody content={post.content} />
+            <BlogDetailBody content={post.content} />
+          </div>
+        </div>
 
+        {/* ── Admin action panel — outside the card, clearly a control surface ── */}
         <BlogDetailActionPanel
           isPending={isPending}
           title={post.title}

@@ -14,8 +14,8 @@ export function BlogDetailHero({ post }: BlogDetailHeroProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative w-full rounded-2xl overflow-hidden"
-      style={{ height: "260px", border: "1.5px solid oklch(0.88 0.04 210)" }}
+      className="relative w-full"
+      style={{ height: "260px" }}
     >
       {post.image ? (
         <>

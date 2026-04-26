@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { BASE_URL, BlogPost } from "@/lib/admin/blog-helpers"
 import { adminDestructive, adminError } from "@/toasts/AdminToasts"
 
-export function useDeleteBlogPost() {
+interface UseDeleteBlogPostOptions {
+  onSuccess?: () => void
+  onError?:   (err: Error) => void
+}
+
+export function useDeleteBlogPost(options?: UseDeleteBlogPostOptions) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -15,10 +20,17 @@ export function useDeleteBlogPost() {
       queryClient.setQueryData<BlogPost[]>(["admin", "blogPosts"], (prev = []) =>
         prev.filter(p => p.id !== post.id)
       )
-      adminDestructive(`"${post.title}" deleted.`)
+      // Only show default toast if caller doesn't handle it themselves
+      if (!options?.onSuccess) {
+        adminDestructive(`"${post.title}" deleted.`)
+      }
+      options?.onSuccess?.()
     },
-    onError: () => {
-      adminError("Failed to delete post.")
+    onError: (err: Error) => {
+      if (!options?.onError) {
+        adminError("Failed to delete post.")
+      }
+      options?.onError?.(err)
     },
   })
 }
