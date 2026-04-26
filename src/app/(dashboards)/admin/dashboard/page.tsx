@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Suspense } from "react"
 import {
@@ -95,13 +96,14 @@ function AnnouncementPanel({ onClose }: { onClose: () => void }) {
   const selectedOption = TARGET_OPTIONS.find((o) => o.value === target)
   const hasError       = submitAttempted && (!title.trim() || !message.trim() || !target)
 
-  return (
+  return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop — portalled into document.body for full-height coverage */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={() => { if (!mutation.isPending) onClose() }}
         className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+        style={{ top: 0, left: 0, width: "100%", height: "100%" }}
       />
 
       {/* Panel */}
@@ -282,7 +284,8 @@ function AnnouncementPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </motion.div>
-    </>
+    </>,
+    document.body
   )
 }
 
