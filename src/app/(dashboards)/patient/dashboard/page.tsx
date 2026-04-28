@@ -17,6 +17,7 @@ import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-s
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import { usePatientMedicineStore } from "@/store/patient/medicine-store"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
+import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -119,6 +120,7 @@ function DashboardPageContent() {
       </div>
 
 
+<HealthInsights/>
       {/* Advanced Analytics Section */}
    
         <DashboardGraphs />
