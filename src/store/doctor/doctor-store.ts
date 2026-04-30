@@ -32,7 +32,7 @@ export interface DoctorStore {
   profile: DoctorProfile | null
   notifications: Notification[]
   loading: boolean
-  setProfile: (profileData: DoctorProfile) => void
+  setProfile: (profileData: DoctorProfile) => Promise<void>
   setProfileData: (profileData: DoctorProfile) => void
   updateProfileField: <K extends keyof DoctorProfile>(
     field: K,

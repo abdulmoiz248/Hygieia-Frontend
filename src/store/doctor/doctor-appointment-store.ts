@@ -1,29 +1,10 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
+import { Appointment, AppointmentStatus } from "@/types/patient/appointment"
 
-// Adjust import path to your doctor appointment types
-export enum AppointmentStatus {
-  Upcoming = "upcoming",
-  Completed = "completed",
-  Cancelled = "cancelled",
-  Pending = "pending",
-}
-
-export interface DoctorAppointment {
-  id: string
-  patientId: string
-  patientName: string
-  patientAvatar?: string
-  date: string
-  time: string
-  type: string
-  status: AppointmentStatus
-  notes?: string
-}
-
-interface DoctorAppointmentStore {
-  appointments: DoctorAppointment[]
-  selectedAppointment: DoctorAppointment | null
+interface AppointmentStore {
+  appointments: Appointment[]
+  selectedAppointment: Appointment | null
   filters: {
     status: AppointmentStatus | "all"
     date: string
@@ -31,15 +12,15 @@ interface DoctorAppointmentStore {
   }
   isLoading: boolean
 
-  setAppointments: (appointments: DoctorAppointment[]) => void
-  setSelectedAppointment: (appointment: DoctorAppointment | null) => void
-  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void
-  setFilters: (filters: Partial<DoctorAppointmentStore["filters"]>) => void
+  setSelectedAppointment: (appointment: Appointment | null) => void
+  updateAppointmentStatus: (id: string, status: Appointment["status"]) => void
+  setFilters: (filters: Partial<AppointmentStore["filters"]>) => void
   setLoading: (loading: boolean) => void
   markAppointmentDone: (id: string) => void
+  setAppointments: (appointments: Appointment[]) => void
 }
 
-export const useDoctorAppointmentStore = create<DoctorAppointmentStore>()(
+export const useDoctorAppointmentStore = create<AppointmentStore>()(
   devtools(
     (set) => ({
       appointments: [],
@@ -53,13 +34,12 @@ export const useDoctorAppointmentStore = create<DoctorAppointmentStore>()(
 
       setAppointments: (appointments) => set({ appointments }),
 
-      setSelectedAppointment: (appointment) =>
-        set({ selectedAppointment: appointment }),
+      setSelectedAppointment: (appointment) => set({ selectedAppointment: appointment }),
 
       updateAppointmentStatus: (id, status) =>
         set((state) => ({
           appointments: state.appointments.map((apt) =>
-            apt.id === id ? { ...apt, status } : apt
+            apt.id === id ? { ...apt, status } : apt,
           ),
         })),
 
@@ -70,15 +50,14 @@ export const useDoctorAppointmentStore = create<DoctorAppointmentStore>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
-      markAppointmentDone: (id) =>
+      markAppointmentDone: (id) => {
         set((state) => ({
           appointments: state.appointments.map((apt) =>
-            apt.id === id
-              ? { ...apt, status: AppointmentStatus.Completed }
-              : apt
+            apt.id === id ? { ...apt, status: AppointmentStatus.Completed as const } : apt,
           ),
-        })),
+        }))
+      },
     }),
-    { name: "doctor-appointment-store" }
-  )
+    { name: "doctor-appointment-store" },
+  ),
 )

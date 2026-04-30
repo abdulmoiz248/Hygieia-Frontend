@@ -37,7 +37,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState("verifyEmail")
-  const user=useDoctorStore().profile
+  const { profile: user } = useDoctorStore()
 
 
    

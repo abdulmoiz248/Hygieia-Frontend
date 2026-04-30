@@ -14,7 +14,7 @@ import { useDoctorProfile } from "@/hooks/doctor/useDoctorProfile"
 import { useDoctorAppointment } from "@/hooks/doctor/useDoctorAppointment"
 import { useDoctorPrescription } from "@/hooks/doctor/useDoctorPrescription"
 import { useDoctorDashboard } from "@/hooks/doctor/useDoctorDashboard"
-import { AppointmentStatus } from "@/store/doctor/doctor-appointment-store"
+import { AppointmentStatus } from "@/types/patient/appointment"
 
 interface DoctorDashboardLayoutProps {
   children: React.ReactNode
