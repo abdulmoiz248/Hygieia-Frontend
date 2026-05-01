@@ -71,9 +71,9 @@ export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
     onDelete({ workerId: worker._id, email: worker.email, role: worker.role })
   }
 
-  // ── Changed: no fetch, just navigate ─────────────────────────────────────
+  // ─── Changed: open in new window ─────────────────────────────────────
   const handleReportClick = () => {
-    router.push(`/admin/workers/${worker.id}/report`)
+    window.open(`/admin/workers/${worker.id}/report`, '_blank')
   }
 
   return (

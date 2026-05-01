@@ -7,20 +7,107 @@ const BASE_URL = "http://localhost:4000"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface WorkerReport {
-  worker: {
+  worker?: {
     id: string
     role: string
     email: string
+    createdAt: string
+  }
+  workerDetails?: {
+    profile?: {
+      email?: string
+      phone?: string
+      name?: string
+      img?: string
+    }
   }
   overview: {
     accountAgeDays: number
-    unreadNotifications: number
+    accountStatus?: string
+    performanceLevel?: string
+    unreadNotifications?: number
+    notifications?: {
+      total: number
+      unread: number
+      read: number
+    }
+    patients?: {
+      totalUniquePatients: number
+      returningPatients: number
+      newPatientsLast7Days: number
+      newPatientsLast30Days: number
+    }
   }
   metrics: {
-    totalAppointments: number
-    completionRate: number
+    // Legacy flat metrics
+    totalAppointments?: number
+    completedAppointments?: number
+    upcomingAppointments?: number
+    cancelledAppointments?: number
+    completionRate?: number
+    totalDietPlans?: number
+    activeDietPlans?: number
+    uniquePatients?: number
+    averageRating?: number
+    totalLabBookings?: number
+    completedBookings?: number
+    pendingBookings?: number
+    cancelledBookings?: number
+    totalPrescriptions?: number
+    activePrescriptions?: number
+    completedPrescriptions?: number
+    totalReferrals?: number
+    dismissedReferrals?: number
+    pendingReferrals?: number
+    totalBlogPosts?: number
+    verifiedBlogPosts?: number
+    
+    // New nested metrics
+    core?: any
+    engagement?: any
+    efficiency?: any
+  }
+  analytics: {
+    timeSeries: {
+      appointmentsLast12Months?: { month: string; totalAppointments: number; completedAppointments: number }[]
+      dietPlansLast12Months?: { month: string; totalDietPlans: number }[]
+      reviewsLast12Months?: { month: string; averageRating: number }[]
+      labTestsLast12Months?: { month: string; totalLabBookings: number; completedBookings: number; pendingBookings: number }[]
+      prescriptionsLast12Months?: { month: string; totalPrescriptions: number; activePrescriptions: number; completedPrescriptions: number }[]
+      referralsLast12Months?: { month: string; totalReferrals: number; dismissedReferrals: number; pendingReferrals: number }[]
+    }
+    patientTrends: {
+      newPatientsLast7Days: { date: string; newPatients: number; cumulative: number }[]
+      patientGrowthLast12Months: { month: string; newPatients: number; cumulativePatients: number }[]
+    }
+    performance?: any
+    quality?: any
+  }
+  recentActivity: {
+    notifications?: { id: string; title: string; notification_msg: string; created_at: string }[]
+    appointments?: { id: string; date: string; time: string; status: string; type: string }[]
+    dietPlans?: { id: string; start_date: string; end_date: string; daily_calories: string }[]
+    reviews?: { id: string; rating: number; created_at: string }[]
+    labBookings?: { id: string; test_id: string; scheduled_date: string; scheduled_time: string; status: string; location: string }[]
+    prescriptions?: { id: string; start_date: string; end_date: string; status: string; created_at: string }[]
+    referredTests?: any[]
+    blogPosts?: any[]
+  }
+  detailed?: {
+    nextUpcomingAppointment?: { id: string; date: string; time: string; mode: string } | null
+    nextScheduledBooking?: any | null
+    profile?: {
+      id: string
+      name: string
+      phone: string
+      img: string
+      gender: string
+      dateofbirth: string
+      personal_email: string | null
+    }
   }
   insights: string[]
+  recommendations?: string[]
 }
 
 // ─── Fetcher ──────────────────────────────────────────────────────────────────
