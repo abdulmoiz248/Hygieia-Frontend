@@ -34,6 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useRouter } from "next/router"
 
 type ProviderReview = {
   id: string
@@ -66,6 +67,7 @@ const formatReviewDate = (date: string): string => {
 }
 
 export function NutritionistProfile({ id }: { id: string }) {
+  const router = useRouter()
   const { data: nutritionists, isLoading, isError } = useNutritionists()
   const [showQR, setShowQR] = useState(false)
   const [reviews, setReviews] = useState<ProviderReview[]>([])
@@ -383,7 +385,13 @@ export function NutritionistProfile({ id }: { id: string }) {
                     per session
                   </div>
                 </div>
-                <Button className="w-full bg-soft-blue text-snow-white font-bold py-4 rounded-xl shadow-lg text-lg">
+                <Button
+                  onClick={()=>{
+                  
+                  localStorage.setItem("doctor", id)
+                  router.push('/patient/appointments/new')
+                 }}
+                 className="w-full bg-soft-blue text-snow-white font-bold py-4 rounded-xl shadow-lg text-lg">
                   Book Consultation
                 </Button>
                 <p className="text-xs md:text-sm text-muted-foreground mt-4">

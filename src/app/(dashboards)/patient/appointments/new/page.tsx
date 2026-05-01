@@ -74,6 +74,16 @@ export default function NewAppointmentPage() {
   },[])
 
 
+
+  useEffect(() => {
+  const doctorId = localStorage.getItem("doctor")
+  if (doctorId) {
+    setSelectedDoctor(doctorId)
+    localStorage.removeItem("doctor")
+  }
+}, [])
+
+
   
   useEffect(()=>{
     const appointmentId=localStorage.getItem("reschedule")

@@ -1,6 +1,6 @@
 "use client"
 
-import { notFound } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { useDoctors } from "@/hooks/useDoctors"
 import type { Doctor } from "@/types"
 import Loader from "@/components/loader/loader"
@@ -66,6 +66,8 @@ const formatReviewDate = (date: string): string => {
 }
 
 export function DoctorProfile({ id }: { id: string }) {
+
+  const router = useRouter()
   const { data: doctors, isLoading, isError } = useDoctors()
   const [showQR, setShowQR] = useState(false)
   const [reviews, setReviews] = useState<ProviderReview[]>([])
@@ -150,6 +152,10 @@ export function DoctorProfile({ id }: { id: string }) {
       setShowQR(true)
     }
   }
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green pt-13">
@@ -379,7 +385,13 @@ export function DoctorProfile({ id }: { id: string }) {
                     per session
                   </div>
                 </div>
-                <Button className="w-full bg-soft-blue text-snow-white font-bold py-4 rounded-xl shadow-lg text-lg">
+                <Button 
+                 onClick={()=>{
+                  
+                  localStorage.setItem("doctor", id)
+                  router.push('/patient/appointments/new')
+                 }}
+                className="w-full bg-soft-blue text-snow-white font-bold py-4 rounded-xl shadow-lg text-lg">
                   Book Consultation
                 </Button>
                 <p className="text-xs md:text-sm text-muted-foreground mt-4">
