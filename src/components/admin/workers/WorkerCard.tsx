@@ -1,60 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"                       
 import {
-  Star, Mail, Phone, FileText, Trash2, Info,
-  BadgeCheck,
+  Star, Mail, Phone, FileText, Trash2,
+  BadgeCheck, MapPin, ExternalLink, ShieldCheck
 } from "lucide-react"
 import { Worker, Role, ROLE_CONFIG } from "@/types/admin/workers"
 import WorkerInfoModal from "./WorkerInfoModal"
-
-// ─── Sub-components (unchanged) ───────────────────────────────────────────────
-
-function Avatar({ name, img, gradient }: {
-  name: string
-  img?: string
-  color: string
-  gradient: string
-}) {
-  if (img) {
-    return (
-      <img
-        src={img}
-        alt={name}
-        className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover flex-shrink-0 shadow-sm"
-      />
-    )
-  }
-  const initials = name
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase()
-  return (
-    <div
-      className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0"
-      style={{ background: gradient }}
-    >
-      {initials}
-    </div>
-  )
-}
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-1 flex-shrink-0">
-      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-      <span className="text-xs font-semibold text-[var(--color-dark-slate-gray)]">
-        {rating > 0 ? rating.toFixed(1) : "0"}
-      </span>
-    </div>
-  )
-}
-
-// ─── Main Card ────────────────────────────────────────────────────────────────
+import { Button } from "@/components/ui/button"
 
 interface WorkerCardProps {
   worker: Worker
@@ -62,133 +15,142 @@ interface WorkerCardProps {
 }
 
 export default function WorkerCard({ worker, onDelete }: WorkerCardProps) {
-  const router = useRouter()                                        
   const [showInfoModal, setShowInfoModal] = useState(false)
+  const cfg = ROLE_CONFIG[worker.role] || { label: worker.role, color: "#008396", gradient: "linear-gradient(to right, #008396, #00c6d9)", lightBg: "#e0f7fa" }
 
-  const cfg = ROLE_CONFIG[worker.role]
-
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     onDelete({ workerId: worker._id, email: worker.email, role: worker.role })
   }
 
-  // ─── Changed: open in new window ─────────────────────────────────────
-  const handleReportClick = () => {
+  const handleReportClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     window.open(`/admin/workers/${worker.id}/report`, '_blank')
   }
 
+  // Get Avatar Initials
+  const initials = worker.name
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
+
   return (
     <>
-      <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col">
+      <div 
+        onClick={() => setShowInfoModal(true)}
+        className="group relative flex flex-col h-full rounded-2xl bg-white border border-cool-gray/20 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-1"
+      >
+        {/* Dynamic Gradient Header Background */}
+        <div 
+          className="h-24 w-full relative overflow-hidden flex-shrink-0"
+          style={{ background: cfg.gradient }}
+        >
+          {/* Decorative Pattern overlay */}
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[size:16px_16px]"></div>
+        </div>
 
-        {/* Coloured top stripe */}
-        <div className="h-1 w-full flex-shrink-0" style={{ background: cfg.gradient }} />
-
-        <div className="p-4 sm:p-5 flex flex-col flex-1">
-
-          {/* ── Header ── */}
-          <div className="flex items-start gap-3 sm:gap-4">
-            <Avatar
-              name={worker.name}
-              img={worker.img}
-              color={cfg.color}
-              gradient={cfg.gradient}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-[var(--color-dark-slate-gray)] text-sm sm:text-base leading-tight line-clamp-1 min-w-0">
-                  {worker.name}
-                </h3>
-                <StarRating rating={worker.rating} />
-              </div>
-              <p className="text-xs mt-1 font-medium truncate" style={{ color: cfg.color }}>
-                {worker.specialization || cfg.label}
-              </p>
-              <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-2">
-                {worker.experienceYears > 0 && (
-                  <span
-                    className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full font-medium"
-                    style={{ background: cfg.lightBg, color: cfg.color }}
-                  >
-                    {worker.experienceYears} yrs exp
-                  </span>
-                )}
-                {worker.consultationFee > 0 && (
-                  <span className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium">
-                    Rs.&nbsp;{worker.consultationFee.toLocaleString()}
-                  </span>
-                )}
-                {worker.certifications.slice(0, 1).map((c) => (
-                  <span
-                    key={c}
-                    className="text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-gray-100 text-[var(--color-cool-gray)] font-medium flex items-center gap-1"
-                  >
-                    <BadgeCheck className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate max-w-[80px] sm:max-w-none">{c}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ── Contact ── */}
-          <div className="flex flex-col gap-2 mt-4">
-            {worker.personal_email && (
-              <div className="flex items-center gap-2.5 px-1">
-                <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: cfg.color }} />
-                <span className="text-xs text-[var(--color-dark-slate-gray)] truncate font-semibold">
-                  {worker.personal_email}
-                </span>
+        {/* Avatar Profile Picture - Overlapping */}
+        <div className="relative px-6 flex justify-center -mt-12 mb-3">
+          <div className="relative">
+            {worker.img ? (
+              <img
+                src={worker.img}
+                alt={worker.name}
+                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md bg-white"
+              />
+            ) : (
+              <div
+                className="w-24 h-24 rounded-full border-4 border-white shadow-md flex items-center justify-center text-white font-bold text-2xl"
+                style={{ background: cfg.gradient }}
+              >
+                {initials}
               </div>
             )}
-            {worker.phone && (
-              <div className="flex items-center gap-2.5 px-1">
-                <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#10B981" }} />
-                <span className="text-xs text-[var(--color-dark-slate-gray)] font-semibold">
-                  {worker.phone}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1" />
-
-          {/* ── Footer ── */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            {/* More info */}
-            <button
-              onClick={() => setShowInfoModal(true)}
-              className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80"
-              style={{ color: cfg.color, background: cfg.lightBg }}
-            >
-              <Info className="w-3.5 h-3.5" />
-              More info
-            </button>
-
-            <div className="flex items-center gap-1">
-              {/* ── Report button — now navigates to the full page ── */}
-              <button
-                onClick={handleReportClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-gray-100"
-                style={{ color: cfg.color }}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                Report
-              </button>
-
-              {/* Delete button */}
-              <button
-                onClick={handleDeleteClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-soft-coral)] transition-all duration-200 hover:bg-[var(--color-soft-coral)]/10"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Remove
-              </button>
+            
+            {/* Status / Verified Badge */}
+            <div className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-sm">
+              <ShieldCheck className="w-5 h-5 text-mint-green fill-mint-green/20" />
             </div>
           </div>
         </div>
+
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 px-6 pb-6 text-center">
+          
+          <h3 className="font-bold text-lg text-dark-slate-gray leading-tight group-hover:text-soft-blue transition-colors">
+            {worker.name}
+          </h3>
+          
+          <p className="text-sm font-medium mt-1 mb-3" style={{ color: cfg.color }}>
+            {worker.specialization || cfg.label}
+          </p>
+
+          <div className="flex items-center justify-center gap-1.5 mb-4">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-bold text-dark-slate-gray">
+              {worker.rating > 0 ? worker.rating.toFixed(1) : "New"}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">Rating</span>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            {worker.experienceYears > 0 && (
+              <span className="text-xs px-2.5 py-1 rounded-md font-semibold bg-cool-gray/10 text-dark-slate-gray border border-cool-gray/20">
+                {worker.experienceYears} Yrs Exp
+              </span>
+            )}
+            {worker.certifications.slice(0, 1).map((c) => (
+              <span key={c} className="text-xs px-2.5 py-1 rounded-md font-semibold bg-mint-green/10 text-mint-green border border-mint-green/20 flex items-center gap-1">
+                <BadgeCheck className="w-3.5 h-3.5" />
+                <span className="truncate max-w-[100px]">{c}</span>
+              </span>
+            ))}
+          </div>
+
+          {/* Flexible Space */}
+          <div className="flex-1" />
+
+          {/* Divider */}
+          <div className="w-full h-px bg-cool-gray/10 my-4" />
+
+          {/* Quick Actions Footer */}
+          <div className="flex items-center justify-between gap-3">
+            <Button
+            
+              size="sm"
+              onClick={handleReportClick}
+              className="flex-1 bg-soft-blue text-snow-white "
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Report
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDeleteClick}
+              className="text-soft-coral hover:bg-soft-coral/10 hover:text-soft-coral shrink-0 h-9 w-9 border border-transparent hover:border-soft-coral/30"
+              title="Remove Worker"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+          
+        </div>
+        
+        {/* Subtle hover overlay hint */}
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="bg-white/90 backdrop-blur text-xs font-semibold px-2 py-1 rounded-md text-dark-slate-gray shadow-sm flex items-center gap-1">
+            View Profile <ExternalLink className="w-3 h-3" />
+          </div>
+        </div>
+
       </div>
 
-      {/* Info Modal (unchanged) */}
       {showInfoModal && (
         <WorkerInfoModal
           worker={worker}
