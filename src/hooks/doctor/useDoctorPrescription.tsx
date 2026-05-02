@@ -7,12 +7,11 @@ export const useDoctorPrescription = (doctorId: string) => {
     queryKey: ["doctorPrescriptions", doctorId],
     queryFn: async (): Promise<Prescription[]> => {
       if (!doctorId) throw new Error("Missing doctorId")
-     const { data } = await api.get(
-  "/appointments/prescriptions/assigned",
-  {
-    params: { doctorId },
-  }
-)
+
+      const { data } = await api.get("/appointments/prescriptions/assigned", {
+        params: { doctorId },
+      })
+
       const items: any[] = Array.isArray(data) ? data : data.items ?? []
 
       return items.map((prescription: any): Prescription => ({
@@ -32,8 +31,7 @@ export const useDoctorPrescription = (doctorId: string) => {
           ? new Date(prescription.start_date)
           : "",
         patientId: prescription.patient_id ?? prescription.patientId,
-        patientName:
-          prescription.patientName ?? prescription.patient?.name ?? "",
+        patientName: prescription.patientName ?? prescription.patient?.name ?? "",
         doctorId: prescription.doctor_id ?? prescription.doctorId,
       }))
     },
