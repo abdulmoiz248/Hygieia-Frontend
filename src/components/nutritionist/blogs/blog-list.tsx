@@ -4,9 +4,10 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Eye, Plus, LayoutGrid, LayoutList } from "lucide-react"
+import { Trash2, Eye, Plus, LayoutGrid, LayoutList, Search } from "lucide-react"
 import { motion, Variants } from "framer-motion"
 import { useBlogStore, Blog } from "@/store/nutritionist/blogs-store"
+import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Loader from '@/components/loader/loader'
 
@@ -25,6 +26,7 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
   const { blogs, loading, error, fetchBlogs, deleteBlog } = useBlogStore()
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null)
   const [viewMode, setViewMode] = useState<"list" | "grid">("list")
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     if (blogs.length === 0) fetchBlogs()
@@ -49,39 +51,57 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
     return <div className="text-center text-soft-coral p-8">Error loading blogs: {error}</div>
   }
 
+  const filteredBlogs = blogs.filter((blog) =>
+    blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    blog.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    blog.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    blog.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  )
+
   return (
     <div className="space-y-6">
+      {/* Row 1: Title + New Post */}
       <motion.div variants={itemVariants} className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-soft-coral">My Blogs</h1>
           <p className="text-cool-gray">Manage your blog posts and create new content</p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* View toggle */}
-          <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-             <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setViewMode("grid")}
-              className={`rounded-none px-3 ${viewMode === "grid" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setViewMode("list")}
-              className={`rounded-none px-3 ${viewMode === "list" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
-            >
-              <LayoutList className="w-4 h-4" />
-            </Button>
-          </div>
-          <Button onClick={onCreate} className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
-            <Plus className="w-4 h-4 mr-2" />
-            New Post
+        <Button onClick={onCreate} className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
+          <Plus className="w-4 h-4 mr-2" />
+          New Post
+        </Button>
+      </motion.div>
+
+      {/* Row 2: Search + View toggle */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search blogs by title, category or tag..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 rounded-xl border border-gray-200 focus:ring-2 focus:ring-soft-blue/30 focus:border-soft-blue transition-all"
+          />
+        </div>
+        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shrink-0">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setViewMode("list")}
+            className={`rounded-none px-3 ${viewMode === "list" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
+          >
+            <LayoutList className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setViewMode("grid")}
+            className={`rounded-none px-3 ${viewMode === "grid" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
+          >
+            <LayoutGrid className="w-4 h-4" />
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {!blogs || blogs.length === 0 ? (
         <Card>
@@ -92,10 +112,16 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
             </Button>
           </CardContent>
         </Card>
+      ) : filteredBlogs.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-cool-gray">No blogs match your search.</p>
+          </CardContent>
+        </Card>
       ) : viewMode === "list" ? (
         /* ── LIST VIEW ── */
         <div className="grid gap-6">
-          {blogs.map((blog) => (
+          {filteredBlogs.map((blog) => (
             <Card
               key={blog.id}
               className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
@@ -165,7 +191,7 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
       ) : (
         /* ── GRID VIEW (2 columns) ── */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {blogs.map((blog) => (
+          {filteredBlogs.map((blog) => (
             <Card
               key={blog.id}
               className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col"
@@ -236,12 +262,14 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation modal */}
       {blogToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
             <h2 className="text-lg font-bold text-soft-coral mb-4">Delete Blog?</h2>
-            <p className="text-cool-gray mb-6">Are you sure you want to delete &quot;{blogToDelete.title}&quot;? This action cannot be undone.</p>
+            <p className="text-cool-gray mb-6">
+              Are you sure you want to delete &quot;{blogToDelete.title}&quot;? This action cannot be undone.
+            </p>
             <div className="flex justify-center gap-4">
               <Button onClick={() => setBlogToDelete(null)} className="bg-cool-gray hover:bg-cool-gray/80 text-white">
                 Cancel
