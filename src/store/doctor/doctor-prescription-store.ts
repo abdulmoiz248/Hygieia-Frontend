@@ -73,7 +73,6 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
       updatePrescriptionBackend: async (prescriptionId, updates, doctorId) => {
         set({ isLoading: true })
         try {
-          // Parse medications back to array if stored as JSON string
           let medicationsArray: object[] = []
           if (updates.medications) {
             try {
@@ -98,7 +97,6 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
             }
           )
 
-          // Map response back to local Prescription shape
           const updatedPrescription: Prescription = {
             id: data.id ?? prescriptionId,
             diagnosis: data.diagnosis ?? updates.diagnosis ?? "",
