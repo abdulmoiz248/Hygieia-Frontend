@@ -78,8 +78,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   
   // Details
   const workerName = report?.detailed?.profile?.name || worker.name
-  //@ts-ignore
-  const workerAvatar = report?.detailed?.profile?.img || worker.avatar
+  const workerAvatar = report?.detailed?.profile?.img || worker.img || ""
   const workerPhone = report?.detailed?.profile?.phone
 
   // Unread notifications
@@ -482,7 +481,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
             {/* Recent Activity */}
             {(!isLoading && report?.recentActivity) && (
-              <div className="space-y-6">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 {report.recentActivity.appointments && report.recentActivity.appointments.length > 0 && (
                   <Card className="hover-lift border-secondary/20 overflow-hidden shadow-md rounded-2xl">
                     <CardHeader className="bg-cool-gray/5 border-b">
