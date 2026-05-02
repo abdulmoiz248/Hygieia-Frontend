@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MessageSquare, Plus, Trash2, Edit2, Check, X, Loader2, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useChatbotStore } from "@/store/patient/chatbot-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { formatDistanceToNow } from "date-fns"
@@ -23,8 +31,20 @@ export function ChatSidebar() {
     renameConversation,
   } = useChatbotStore()
 
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState("")
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
+  const [selectedConversationTitle, setSelectedConversationTitle] = useState("")
+  const [renameTitle, setRenameTitle] = useState("")
+  const [renameSubmitting, setRenameSubmitting] = useState(false)
+  const [renameError, setRenameError] = useState("")
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false)
+
+  const MAX_RENAME_WORDS = 30
+
+  const countWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).length
+
+  const limitWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).slice(0, MAX_RENAME_WORDS).join(" ")
 
   useEffect(() => {
     if (patientId) {
@@ -34,28 +54,57 @@ export function ChatSidebar() {
 
   const handleRename = (e: React.MouseEvent, id: string, currentTitle: string) => {
     e.stopPropagation()
-    setEditingId(id)
-    setEditTitle(currentTitle)
+    setSelectedConversationId(id)
+    setSelectedConversationTitle(currentTitle || "")
+    setRenameTitle(currentTitle || "")
+    setRenameError("")
+    setRenameOpen(true)
   }
 
-  const submitRename = async (e: React.MouseEvent | React.FormEvent, id: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (editTitle.trim() && patientId) {
-      await renameConversation(patientId, id, editTitle.trim())
+  const submitRename = async () => {
+    if (!patientId || !selectedConversationId) return
+
+    const nextTitle = renameTitle.trim()
+    const wordCount = countWords(nextTitle)
+
+    if (!nextTitle) {
+      setRenameError("Conversation name is required.")
+      return
     }
-    setEditingId(null)
+
+    if (wordCount > MAX_RENAME_WORDS) {
+      setRenameError(`Conversation name cannot exceed ${MAX_RENAME_WORDS} words.`)
+      setRenameTitle(limitWords(nextTitle))
+      return
+    }
+
+    setRenameSubmitting(true)
+    setRenameError("")
+
+    try {
+      await renameConversation(patientId, selectedConversationId, nextTitle)
+      setRenameOpen(false)
+    } finally {
+      setRenameSubmitting(false)
+    }
   }
 
-  const cancelRename = (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent, id: string, currentTitle: string) => {
     e.stopPropagation()
-    setEditingId(null)
+    setSelectedConversationId(id)
+    setSelectedConversationTitle(currentTitle || "Untitled conversation")
+    setDeleteOpen(true)
   }
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
-    if (confirm("Are you sure you want to delete this conversation?") && patientId) {
-      await deleteConversation(patientId, id)
+  const confirmDelete = async () => {
+    if (!patientId || !selectedConversationId) return
+
+    setDeleteSubmitting(true)
+    try {
+      await deleteConversation(patientId, selectedConversationId)
+      setDeleteOpen(false)
+    } finally {
+      setDeleteSubmitting(false)
     }
   }
 
@@ -111,66 +160,46 @@ export function ChatSidebar() {
                 }`}
                 onClick={() => patientId && loadConversation(patientId, conv.conversation_id)}
               >
-                {editingId === conv.conversation_id ? (
-                  <form onSubmit={(e) => submitRename(e, conv.conversation_id)} className="flex items-center gap-2 bg-white rounded-lg p-1">
-                    <input
-                      autoFocus
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm border-b-2 border-soft-blue bg-transparent text-dark-slate-gray focus:outline-none"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <button type="button" onClick={(e) => submitRename(e, conv.conversation_id)} className="p-1.5 text-mint-green hover:bg-mint-green/10 rounded-md transition-colors">
-                      <Check className="w-4 h-4" />
-                    </button>
-                    <button type="button" onClick={cancelRename} className="p-1.5 text-soft-coral hover:bg-soft-coral/10 rounded-md transition-colors">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </form>
-                ) : (
-                  <>
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-xl mt-0.5 transition-colors ${
-                        activeConversationId === conv.conversation_id 
-                          ? "bg-gradient-to-br from-soft-blue to-mint-green text-white" 
-                          : "bg-gray-100/80 text-cool-gray group-hover:bg-gray-200/60 group-hover:text-soft-blue"
-                      }`}>
-                        <MessageSquare className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 overflow-hidden">
-                        <h4 className={`text-[14px] font-medium truncate ${
-                          activeConversationId === conv.conversation_id ? "text-dark-slate-gray" : "text-gray-600"
-                        }`}>
-                          {conv.title || "New Conversation"}
-                        </h4>
-                        <p className="text-[12px] text-cool-gray/80 truncate mt-0.5">
-                          {conv.preview || "No messages yet"}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-opacity bg-white/90 backdrop-blur-sm p-1 rounded-lg border border-gray-100 shadow-sm">
-                      <button
-                        onClick={(e) => handleRename(e, conv.conversation_id, conv.title)}
-                        className="p-1.5 text-cool-gray hover:text-soft-blue hover:bg-soft-blue/10 rounded-md transition-colors"
-                        title="Rename"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => handleDelete(e, conv.conversation_id)}
-                        className="p-1.5 text-cool-gray hover:text-soft-coral hover:bg-soft-coral/10 rounded-md transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-xl mt-0.5 transition-colors ${
+                    activeConversationId === conv.conversation_id 
+                      ? "bg-gradient-to-br from-soft-blue to-mint-green text-white" 
+                      : "bg-gray-100/80 text-cool-gray group-hover:bg-gray-200/60 group-hover:text-soft-blue"
+                  }`}>
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <h4 className={`text-[14px] font-medium truncate ${
+                      activeConversationId === conv.conversation_id ? "text-dark-slate-gray" : "text-gray-600"
+                    }`}>
+                      {conv.title || "New Conversation"}
+                    </h4>
+                    <p className="text-[12px] text-cool-gray/80 truncate mt-0.5">
+                      {conv.preview || "No messages yet"}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-opacity bg-white/90 backdrop-blur-sm p-1 rounded-lg border border-gray-100 shadow-sm">
+                  <button
+                    onClick={(e) => handleRename(e, conv.conversation_id, conv.title)}
+                    className="p-1.5 text-cool-gray hover:text-soft-blue hover:bg-soft-blue/10 rounded-md transition-colors"
+                    title="Rename"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(e, conv.conversation_id, conv.title)}
+                    className="p-1.5 text-cool-gray hover:text-soft-coral hover:bg-soft-coral/10 rounded-md transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-                    <div className="mt-2 text-[10px] text-cool-gray/50 text-right font-medium">
-                      {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
-                    </div>
-                  </>
-                )}
+                <div className="mt-2 text-[10px] text-cool-gray/50 text-right font-medium">
+                  {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -189,6 +218,111 @@ export function ChatSidebar() {
           </div>
         )}
       </div>
+
+      <Dialog open={renameOpen} onOpenChange={(open) => {
+        setRenameOpen(open)
+        if (!open) {
+          setRenameError("")
+          setRenameSubmitting(false)
+        }
+      }}>
+        <DialogContent className="sm:max-w-md rounded-2xl border border-white/60 bg-white/95 p-6 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-dark-slate-gray">Rename chat</DialogTitle>
+            <DialogDescription className="text-cool-gray">
+              Update the conversation title. Maximum 30 words.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <input
+              autoFocus
+              value={renameTitle}
+              onChange={(e) => {
+                const nextValue = e.target.value
+                const trimmedValue = limitWords(nextValue)
+
+                setRenameTitle(trimmedValue)
+                setRenameError("")
+              }}
+              onPaste={(e) => {
+                e.preventDefault()
+                const pastedText = e.clipboardData.getData("text")
+                setRenameTitle(limitWords(`${renameTitle} ${pastedText}`.trim()))
+                setRenameError("")
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  void submitRename()
+                }
+              }}
+              placeholder="Enter chat name"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-dark-slate-gray outline-none transition-colors focus:border-soft-blue"
+            />
+            <div className="flex items-center justify-between text-xs text-cool-gray">
+              <span>{countWords(renameTitle)} / {MAX_RENAME_WORDS} words</span>
+              {renameError ? <span className="text-soft-coral">{renameError}</span> : <span>Keep it short and clear.</span>}
+            </div>
+          </div>
+
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRenameOpen(false)}
+              className="rounded-xl"
+              disabled={renameSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void submitRename()}
+              className="rounded-xl bg-soft-blue text-white hover:bg-soft-blue/90"
+              disabled={renameSubmitting || !renameTitle.trim()}
+            >
+              {renameSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={(open) => {
+        setDeleteOpen(open)
+        if (!open) {
+          setDeleteSubmitting(false)
+        }
+      }}>
+        <DialogContent className="sm:max-w-md rounded-2xl border border-white/60 bg-white/95 p-6 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-dark-slate-gray">Delete chat</DialogTitle>
+            <DialogDescription className="text-cool-gray">
+              This will permanently remove “{selectedConversationTitle || "this conversation"}” and its messages.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              className="rounded-xl"
+              disabled={deleteSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void confirmDelete()}
+              className="rounded-xl bg-soft-coral text-white hover:bg-soft-coral/90"
+              disabled={deleteSubmitting}
+            >
+              {deleteSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete chat"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
