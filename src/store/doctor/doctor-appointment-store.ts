@@ -34,12 +34,13 @@ export const useDoctorAppointmentStore = create<AppointmentStore>()(
 
       setAppointments: (appointments) => set({ appointments }),
 
-      setSelectedAppointment: (appointment) => set({ selectedAppointment: appointment }),
+      setSelectedAppointment: (appointment) =>
+        set({ selectedAppointment: appointment }),
 
       updateAppointmentStatus: (id, status) =>
         set((state) => ({
           appointments: state.appointments.map((apt) =>
-            apt.id === id ? { ...apt, status } : apt,
+            apt.id === id ? { ...apt, status } : apt
           ),
         })),
 
@@ -53,11 +54,13 @@ export const useDoctorAppointmentStore = create<AppointmentStore>()(
       markAppointmentDone: (id) => {
         set((state) => ({
           appointments: state.appointments.map((apt) =>
-            apt.id === id ? { ...apt, status: AppointmentStatus.Completed as const } : apt,
+            apt.id === id
+              ? { ...apt, status: AppointmentStatus.Completed as const }
+              : apt
           ),
         }))
       },
     }),
-    { name: "doctor-appointment-store" },
-  ),
+    { name: "doctor-appointment-store" }
+  )
 )

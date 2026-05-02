@@ -14,125 +14,145 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, FileText, Target, Plus } from "lucide-react"
-import { useDoctorAppointmentStore } from "@/store/doctor/doctor-appointment-store"
+import { CheckCircle, FileText, Target, Plus, Trash2 } from "lucide-react"
+import { useDoctorAppointmentStore } from "@/store/doctor/appointment-store"
 import { useDoctorPrescriptionStore } from "@/store/doctor/doctor-prescription-store"
 import { completeAppointment } from "@/api/doctor/appointmentApi"
 import { toast } from "sonner"
 
+interface Medication {
+  name: string
+  dosage: string
+  frequency: string
+  duration: string
+  instructions: string
+  time: string
+}
+
+const DEFAULT_MEDICATION: Medication = {
+  name: "",
+  dosage: "",
+  frequency: "",
+  duration: "",
+  instructions: "",
+  time: "",
+}
+
 export function MarkDoneModal() {
-  const { selectedAppointment, setSelectedAppointment, markAppointmentDone } = useDoctorAppointmentStore()
-  // ✅ Fixed: was `usePrescriptionStore` which doesn't exist — correct hook name
+  const { selectedAppointment, setSelectedAppointment, markAppointmentDone } =
+    useDoctorAppointmentStore()
   const { addPrescription } = useDoctorPrescriptionStore()
 
-  const [sessionNotes, setSessionNotes] = useState("")
+  const [report, setReport] = useState("")
   const [nextAction, setNextAction] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   // Prescription fields
-  const [diagnosis, setDiagnosis] = useState("")
-  const [medicationName, setMedicationName] = useState("")
-  const [dosage, setDosage] = useState("")
-  const [frequency, setFrequency] = useState("")
-  const [duration, setDuration] = useState("7")
-  const [instructions, setInstructions] = useState("")
   const [prescriptionNotes, setPrescriptionNotes] = useState("")
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().split("T")[0]
+  )
+  const [endDate, setEndDate] = useState(
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+  )
+  const [medications, setMedications] = useState<Medication[]>([
+    { ...DEFAULT_MEDICATION },
+  ])
 
   const open = !!selectedAppointment
   const appointment = selectedAppointment
 
+  const addMedication = () => {
+    setMedications((prev) => [...prev, { ...DEFAULT_MEDICATION }])
+  }
+
+  const removeMedication = (index: number) => {
+    setMedications((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const updateMedication = (
+    index: number,
+    field: keyof Medication,
+    value: string
+  ) => {
+    setMedications((prev) =>
+      prev.map((med, i) => (i === index ? { ...med, [field]: value } : med))
+    )
+  }
+
   const handleMarkDone = async () => {
     if (!appointment) return
 
-    // ✅ Validate before hitting API
-    if (nextAction === "write-prescription") {
-      if (!diagnosis.trim() || !medicationName.trim()) {
-        toast.error("Missing Prescription Details", {
-          description: "Please enter a diagnosis and at least one medication.",
-        })
-        return
-      }
-    }
-
     setIsLoading(true)
-
     try {
-      // ✅ Fixed: calculate real start/end dates for the prescription
-      const durationDays = parseInt(duration, 10)
-      const startDate = new Date().toISOString().split("T")[0]
-      const endDate = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0]
+      const doctorId = localStorage.getItem("id") || ""
 
-      // ✅ Fixed: call the real backend API — POST /appointments/{id}/complete-doctor
-      await completeAppointment(appointment.id, {
-        report: sessionNotes.trim() || undefined,
-        ...(nextAction === "write-prescription" && {
-          prescription: {
-            notes: prescriptionNotes.trim() || undefined,
-            startDate,
-            endDate,
-            status: "active",
-            // ✅ Fixed: backend expects medications as an array of objects, not flat fields
-            medications: [
-              {
-                name: medicationName.trim(),
-                dosage: dosage.trim(),
-                frequency: frequency.trim(),
-                duration: `${duration} days`,
-                instructions: instructions.trim() || undefined,
-              },
-            ],
-          },
-        }),
-      })
+      if (nextAction === "assign-prescription") {
+        const hasEmptyMedName = medications.some((m) => !m.name.trim())
+        if (hasEmptyMedName) {
+          toast.error("Please fill in medication names for all entries.")
+          setIsLoading(false)
+          return
+        }
 
-      // ✅ Update local store only after successful API call
-      markAppointmentDone(appointment.id)
-
-      // ✅ Also add to local prescription store for immediate UI reflection
-      if (nextAction === "write-prescription") {
-        addPrescription({
-          id: `rx-${Date.now()}`,
-          patientId: appointment.patient?.id,
-          patientName: appointment.patient?.name ?? "",
-          doctorId: localStorage.getItem("id") ?? undefined,
-          diagnosis: diagnosis.trim(),
-          // Store as JSON string to match backend shape; adjust if store type changes
-          medications: JSON.stringify([
-            {
-              name: medicationName.trim(),
-              dosage: dosage.trim(),
-              frequency: frequency.trim(),
-              duration: `${duration} days`,
-              instructions: instructions.trim(),
+        await completeAppointment(appointment.id, {
+          doctorId,
+          dto: {
+            report: report.trim(),
+            prescription: {
+              notes: prescriptionNotes.trim(),
+              startDate,
+              endDate,
+              status: "active",
+              medications: medications.map((m) => ({
+                name: m.name,
+                dosage: m.dosage,
+                frequency: m.frequency,
+                duration: m.duration,
+                instructions: m.instructions,
+                time: m.time,
+              })),
             },
-          ]),
-          dosage: dosage.trim(),
-          frequency: frequency.trim(),
-          duration: `${duration} days`,
-          notes: prescriptionNotes.trim(),
-          startDate,
-          followUpDate: endDate,
+          },
         })
 
-        // ✅ Fixed: use toast instead of alert()
-        toast.success("Prescription Issued", {
-          description: `Prescription for "${diagnosis}" has been issued for ${appointment.patient?.name}.`,
+        // Optimistically add to local prescription store
+        addPrescription({
+          diagnosis: report.trim(),
+          medications: JSON.stringify(medications),
+          dosage: medications[0]?.dosage || "",
+          frequency: medications[0]?.frequency || "",
+          duration: medications[0]?.duration || "",
+          notes: prescriptionNotes.trim(),
+          followUpDate: endDate,
+          startDate,
+          patientId: appointment.patient?.id || appointment.id,
+          patientName: appointment.patient?.name || "",
+          doctorId,
+        })
+
+        toast.success("Appointment completed & prescription assigned!", {
+          description: `Prescription issued for ${appointment.patient?.name}.`,
         })
       } else {
-        toast.success("Appointment Completed", {
-          description: `Appointment with ${appointment.patient?.name} has been marked as done.`,
+        // Complete without prescription
+        await completeAppointment(appointment.id, {
+          doctorId,
+          dto: {
+            report: report.trim(),
+          },
+        })
+
+        toast.success("Appointment completed!", {
+          description: `Session with ${appointment.patient?.name} marked as done.`,
         })
       }
 
+      markAppointmentDone(appointment.id)
       handleClose()
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error completing appointment:", error)
-      // ✅ Fixed: use toast instead of alert()
-      toast.error("Failed to Complete Appointment", {
-        description: error?.response?.data?.message ?? "Something went wrong. Please try again.",
-      })
+      toast.error("Error completing appointment. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -140,16 +160,23 @@ export function MarkDoneModal() {
 
   const handleClose = () => {
     setSelectedAppointment(null)
-    setSessionNotes("")
+    setReport("")
     setNextAction("")
-    setDiagnosis("")
-    setMedicationName("")
-    setDosage("")
-    setFrequency("")
-    setDuration("7")
-    setInstructions("")
     setPrescriptionNotes("")
+    setStartDate(new Date().toISOString().split("T")[0])
+    setEndDate(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0]
+    )
+    setMedications([{ ...DEFAULT_MEDICATION }])
   }
+
+  const isSubmitDisabled =
+    isLoading ||
+    !report.trim() ||
+    (nextAction === "assign-prescription" &&
+      medications.some((m) => !m.name.trim()))
 
   if (!appointment) return null
 
@@ -158,34 +185,51 @@ export function MarkDoneModal() {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <CheckCircle className="h-5 w-5" style={{ color: "var(--color-mint-green)" }} />
+            <CheckCircle
+              className="h-5 w-5"
+              style={{ color: "var(--color-mint-green)" }}
+            />
             <span>Complete Appointment</span>
           </DialogTitle>
           <DialogDescription>
-            Mark the appointment with <strong>{appointment.patient?.name}</strong> as completed and add clinical notes.
+            Mark the appointment with{" "}
+            <strong>{appointment.patient?.name}</strong> as completed and add a
+            session report.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Session / Clinical Notes */}
+          {/* Session Report */}
           <div className="space-y-2">
-            <Label htmlFor="session-notes" className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" style={{ color: "var(--color-soft-blue)" }} />
-              <span>Clinical Notes</span>
+            <Label
+              htmlFor="session-report"
+              className="flex items-center space-x-2"
+            >
+              <FileText
+                className="h-4 w-4"
+                style={{ color: "var(--color-soft-blue)" }}
+              />
+              <span>Session Report / Diagnosis</span>
             </Label>
             <Textarea
-              id="session-notes"
-              placeholder="Document symptoms, diagnosis, treatment plan, observations, and patient progress..."
-              value={sessionNotes}
-              onChange={(e) => setSessionNotes(e.target.value)}
+              id="session-report"
+              placeholder="Document the consultation, diagnosis, patient progress, concerns discussed, and any observations..."
+              value={report}
+              onChange={(e) => setReport(e.target.value)}
               className="min-h-[120px]"
             />
           </div>
 
           {/* Next Action */}
           <div className="space-y-2">
-            <Label htmlFor="next-action" className="flex items-center space-x-2">
-              <Target className="h-4 w-4" style={{ color: "var(--color-soft-coral)" }} />
+            <Label
+              htmlFor="next-action"
+              className="flex items-center space-x-2"
+            >
+              <Target
+                className="h-4 w-4"
+                style={{ color: "var(--color-soft-coral)" }}
+              />
               <span>Next Action Required</span>
             </Label>
             <Select value={nextAction} onValueChange={setNextAction}>
@@ -193,113 +237,184 @@ export function MarkDoneModal() {
                 <SelectValue placeholder="Select next action for this patient" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="write-prescription">Write Prescription</SelectItem>
-                <SelectItem value="refer-specialist">Refer to Specialist</SelectItem>
-                <SelectItem value="schedule-followup">Schedule Follow-up</SelectItem>
-                <SelectItem value="no-action">No Immediate Action Required</SelectItem>
+                <SelectItem value="assign-prescription">
+                  Assign Prescription
+                </SelectItem>
+                <SelectItem value="no-action">
+                  No Immediate Action Required
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Prescription Form */}
-          {nextAction === "write-prescription" && (
+          {nextAction === "assign-prescription" && (
             <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
               <div className="flex items-center space-x-2 mb-3">
-                <Plus className="h-4 w-4" style={{ color: "var(--color-mint-green)" }} />
+                <Plus
+                  className="h-4 w-4"
+                  style={{ color: "var(--color-mint-green)" }}
+                />
                 <h4 className="font-medium">Prescription Details</h4>
               </div>
 
+              {/* Date range */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="diagnosis">Diagnosis</Label>
-                  <Input
-                    id="diagnosis"
-                    placeholder="e.g., Hypertension, Type 2 Diabetes, Upper Respiratory Infection"
-                    value={diagnosis}
-                    onChange={(e) => setDiagnosis(e.target.value)}
-                  />
-                </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="medication-name">Medication Name</Label>
+                  <Label htmlFor="start-date">Start Date</Label>
                   <Input
-                    id="medication-name"
-                    placeholder="e.g., Amoxicillin 500mg"
-                    value={medicationName}
-                    onChange={(e) => setMedicationName(e.target.value)}
+                    id="start-date"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="dosage">Dosage</Label>
+                  <Label htmlFor="end-date">End Date</Label>
                   <Input
-                    id="dosage"
-                    placeholder="e.g., 1 tablet"
-                    value={dosage}
-                    onChange={(e) => setDosage(e.target.value)}
+                    id="end-date"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                   />
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="frequency">Frequency</Label>
-                  <Select value={frequency} onValueChange={setFrequency}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="once-daily">Once daily</SelectItem>
-                      <SelectItem value="twice-daily">Twice daily</SelectItem>
-                      <SelectItem value="three-times-daily">Three times daily</SelectItem>
-                      <SelectItem value="four-times-daily">Four times daily</SelectItem>
-                      <SelectItem value="as-needed">As needed (PRN)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Prescription notes */}
+              <div className="space-y-2">
+                <Label htmlFor="prescription-notes">
+                  Prescription Notes{" "}
+                  <span className="text-cool-gray font-normal">(Optional)</span>
+                </Label>
+                <Textarea
+                  id="prescription-notes"
+                  placeholder="Additional instructions or notes for the patient..."
+                  value={prescriptionNotes}
+                  onChange={(e) => setPrescriptionNotes(e.target.value)}
+                  className="min-h-[60px] resize-none"
+                />
+              </div>
+
+              {/* Medications */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>
+                    Medications{" "}
+                    <span className="text-soft-coral">*</span>
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addMedication}
+                    className="text-xs"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Medication
+                  </Button>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="rx-duration">Duration (days)</Label>
-                  <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3">3 days</SelectItem>
-                      <SelectItem value="5">5 days</SelectItem>
-                      <SelectItem value="7">7 days</SelectItem>
-                      <SelectItem value="14">14 days</SelectItem>
-                      <SelectItem value="30">30 days</SelectItem>
-                      <SelectItem value="90">90 days (chronic)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {medications.map((med, index) => (
+                  <div
+                    key={index}
+                    className="p-3 border rounded-lg bg-white/50 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-cool-gray uppercase tracking-wide">
+                        Medication {index + 1}
+                      </span>
+                      {medications.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeMedication(index)}
+                          className="text-soft-coral hover:text-soft-coral/80 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
 
-                {/* ✅ Added instructions field to match backend MedicationPayload */}
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="instructions">Instructions</Label>
-                  <Input
-                    id="instructions"
-                    placeholder="e.g., Take with food, avoid alcohol, store below 25°C"
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="rx-notes">Prescription Notes</Label>
-                  <Input
-                    id="rx-notes"
-                    placeholder="e.g., Review after 1 week"
-                    value={prescriptionNotes}
-                    onChange={(e) => setPrescriptionNotes(e.target.value)}
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">
+                          Name <span className="text-soft-coral">*</span>
+                        </Label>
+                        <Input
+                          placeholder="e.g., Amoxicillin"
+                          value={med.name}
+                          onChange={(e) =>
+                            updateMedication(index, "name", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Dosage</Label>
+                        <Input
+                          placeholder="e.g., 500mg"
+                          value={med.dosage}
+                          onChange={(e) =>
+                            updateMedication(index, "dosage", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Frequency</Label>
+                        <Input
+                          placeholder="e.g., Twice daily"
+                          value={med.frequency}
+                          onChange={(e) =>
+                            updateMedication(
+                              index,
+                              "frequency",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Duration</Label>
+                        <Input
+                          placeholder="e.g., 7 days"
+                          value={med.duration}
+                          onChange={(e) =>
+                            updateMedication(index, "duration", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Time</Label>
+                        <Input
+                          placeholder="e.g., After meals"
+                          value={med.time}
+                          onChange={(e) =>
+                            updateMedication(index, "time", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Instructions</Label>
+                        <Input
+                          placeholder="e.g., Take with water"
+                          value={med.instructions}
+                          onChange={(e) =>
+                            updateMedication(
+                              index,
+                              "instructions",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Patient Summary */}
+          {/* Patient Info Summary */}
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-medium mb-3">Patient Summary</h4>
+            <h4 className="font-medium mb-3">Patient Information</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="font-medium text-muted-foreground">Type:</span>
@@ -320,24 +435,28 @@ export function MarkDoneModal() {
               {appointment.patient && (
                 <>
                   <div>
-                    <span className="font-medium text-muted-foreground">Weight:</span>
-                    <p>{appointment.patient.weight ?? "N/A"} kg</p>
+                    <span className="font-medium text-muted-foreground">
+                      Weight:
+                    </span>
+                    <p>{appointment.patient.weight} kg</p>
                   </div>
                   <div>
-                    <span className="font-medium text-muted-foreground">Height:</span>
-                    <p>{appointment.patient.height ?? "N/A"} cm</p>
+                    <span className="font-medium text-muted-foreground">
+                      Height:
+                    </span>
+                    <p>{appointment.patient.height} cm</p>
                   </div>
                   <div className="sm:col-span-2">
-                    <span className="font-medium text-muted-foreground">Conditions:</span>
+                    <span className="font-medium text-muted-foreground">
+                      Conditions:
+                    </span>
                     <p>{appointment.patient.conditions || "None"}</p>
                   </div>
                   <div className="sm:col-span-2">
-                    <span className="font-medium text-muted-foreground">Allergies:</span>
+                    <span className="font-medium text-muted-foreground">
+                      Allergies:
+                    </span>
                     <p>{appointment.patient.allergies || "None"}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <span className="font-medium text-muted-foreground">Current Medications:</span>
-                    <p>{appointment.patient.medications || "None"}</p>
                   </div>
                 </>
               )}
@@ -356,17 +475,13 @@ export function MarkDoneModal() {
           </Button>
           <Button
             onClick={handleMarkDone}
-            disabled={
-              isLoading ||
-              !sessionNotes.trim() ||
-              (nextAction === "write-prescription" && (!diagnosis.trim() || !medicationName.trim()))
-            }
+            disabled={isSubmitDisabled}
             className="bg-[var(--color-mint-green)] hover:bg-[var(--color-mint-green)]/90 w-full sm:w-auto"
           >
             {isLoading
               ? "Completing..."
-              : nextAction === "write-prescription"
-                ? "Complete & Issue Prescription"
+              : nextAction === "assign-prescription"
+                ? "Complete & Assign Prescription"
                 : "Complete Appointment"}
           </Button>
         </DialogFooter>

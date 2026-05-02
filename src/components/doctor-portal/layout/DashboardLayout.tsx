@@ -70,7 +70,7 @@ export function DoctorDashboardLayout({ children }: DoctorDashboardLayoutProps) 
   const {
     data: prescriptions,
     isLoading: isLoadingPrescriptions,
-    // Not a hard error — prescription API may not be ready yet
+    isError: error3,
   } = useDoctorPrescription(id)
 
   useEffect(() => {
@@ -95,17 +95,24 @@ export function DoctorDashboardLayout({ children }: DoctorDashboardLayoutProps) 
   }, [dashboardData])
 
   // ── Guards ────────────────────────────────────────────────────
-  // Only block on errors we actually care about (prescriptions API may not exist yet)
-  if (error1 || error2 || error4)
-    throw new Error("Failed to load doctor data")
+  if (error1 || error2 || error3 || error4){
+    console.log("Profile error:", error1)
+  console.log("Appointments error:", error2)
+  console.log("Prescriptions error:", error3)
+  console.log("Dashboard error:", error4)
+  return <div>Failed to load doctor data</div>
 
-  // Block render until critical data is ready (prescriptions are optional)
+  }
+  
+
   if (
     isLoadingProfile ||
     isLoadingAppointments ||
+    isLoadingPrescriptions ||
     isLoadingDashboard ||
     !profile ||
-    !appointments
+    !appointments ||
+    !prescriptions
   )
     return <Loader />
 

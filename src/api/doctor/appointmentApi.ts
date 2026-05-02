@@ -1,9 +1,5 @@
 import api from "@/lib/axios"
 
-// ─────────────────────────────────────────────
-// Cancel Appointment
-// ─────────────────────────────────────────────
-
 export interface CancelAppointmentPayload {
   reason: string
   notes?: string
@@ -25,7 +21,10 @@ export interface CancelAppointmentResponse {
 
 /**
  * Cancel an appointment by the doctor
- * PATCH /appointments/{id}/cancel
+ *
+ * @param appointmentId - The ID of the appointment to cancel
+ * @param payload - The cancellation reason, optional notes, and doctor ID
+ * @returns Promise with the cancelled appointment details
  */
 export const cancelAppointment = async (
   appointmentId: string,
@@ -43,37 +42,32 @@ export const cancelAppointment = async (
       reason: payload.reason,
       notes: payload.notes,
       cancelledBy: "doctor",
-      doctorId, 
+      doctorId,
     }
   )
   return response.data
 }
 
-// ─────────────────────────────────────────────
-// Complete Appointment (Doctor)
-// ─────────────────────────────────────────────
-
-export interface MedicationPayload {
-  name: string
-  dosage: string
-  frequency: string
-  duration: string
-  instructions?: string
-  time?: string
-}
-
-export interface PrescriptionPayload {
-  notes?: string
-  startDate: string        // e.g. "2026-04-30"
-  endDate: string          // e.g. "2026-05-30"
-  status: "active"
-  medications: MedicationPayload[]
-}
-
 export interface CompleteAppointmentPayload {
-  report?: string
-  referredTestIds?: string[]
-  prescription?: PrescriptionPayload
+  doctorId: string
+  dto: {
+    report?: string
+    referredTestIds?: string[]
+    prescription?: {
+      notes: string
+      startDate: string
+      endDate: string
+      status: "active"
+      medications: {
+        name: string
+        dosage: string
+        frequency: string
+        duration: string
+        instructions?: string
+        time?: string
+      }[]
+    }
+  }
 }
 
 export interface CompleteAppointmentResponse {
@@ -86,25 +80,18 @@ export interface CompleteAppointmentResponse {
 }
 
 /**
- * Mark a doctor appointment as complete, with optional prescription
- * POST /appointments/{id}/complete-doctor
+ * Mark a doctor appointment as completed and optionally assign a prescription.
+ *
+ * @param appointmentId - The ID of the appointment to complete
+ * @param payload - doctorId + dto (report, referredTestIds, prescription)
  */
 export const completeAppointment = async (
   appointmentId: string,
-  dto: CompleteAppointmentPayload
+  payload: CompleteAppointmentPayload
 ): Promise<CompleteAppointmentResponse> => {
-  const doctorId = localStorage.getItem("id")
-
-  if (!doctorId) {
-    throw new Error("Doctor ID is required. Please log in again.")
-  }
-
   const response = await api.post<CompleteAppointmentResponse>(
     `/appointments/${appointmentId}/complete-doctor`,
-    {
-      doctorId,
-      dto,
-    }
+    payload
   )
   return response.data
 }

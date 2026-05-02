@@ -32,7 +32,8 @@ const CANCELLATION_REASONS = [
 ]
 
 export function AppointmentsList() {
-  const { appointments, updateAppointmentStatus } = useDoctorAppointmentStore()
+  const { appointments, updateAppointmentStatus } =
+    useDoctorAppointmentStore()
   const router = useRouter()
 
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
@@ -41,7 +42,9 @@ export function AppointmentsList() {
   const [additionalNotes, setAdditionalNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const filteredAppointments = appointments.filter((apt) => apt.status === AppointmentStatus.Upcoming)
+  const filteredAppointments = appointments.filter(
+    (apt) => apt.status === AppointmentStatus.Upcoming
+  )
 
   const appointmentsByMonth = filteredAppointments.reduce(
     (acc, apt) => {
@@ -53,7 +56,7 @@ export function AppointmentsList() {
       acc[month].push(apt)
       return acc
     },
-    {} as Record<string, typeof filteredAppointments>,
+    {} as Record<string, typeof filteredAppointments>
   )
 
   const getModeIcon = (mode: string) => {
@@ -71,10 +74,7 @@ export function AppointmentsList() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-    })
+    return date.toLocaleDateString("en-US", { day: "numeric", month: "short" })
   }
 
   const isTimeReached = (aptDate: string, aptTime: string) => {
@@ -131,7 +131,8 @@ export function AppointmentsList() {
     <div className="w-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-soft-coral mb-2">
-          Upcoming Appointments <span className="text-cool-gray">({filteredAppointments.length})</span>
+          Upcoming Appointments{" "}
+          <span className="text-cool-gray">({filteredAppointments.length})</span>
         </h1>
         <p className="text-cool-gray text-base">Stay on top of your patient schedule</p>
       </div>
@@ -144,8 +145,12 @@ export function AppointmentsList() {
                 <Calendar className="h-8 w-8 text-soft-coral" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-dark-slate-gray mb-1">No appointments yet</h3>
-                <p className="text-sm text-cool-gray">Once patients book appointments, they&apos;ll appear here</p>
+                <h3 className="text-lg font-semibold text-dark-slate-gray mb-1">
+                  No appointments yet
+                </h3>
+                <p className="text-sm text-cool-gray">
+                  Once patients book appointments, they&apos;ll appear here
+                </p>
               </div>
             </div>
           </CardContent>
@@ -156,17 +161,19 @@ export function AppointmentsList() {
             <div key={month}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-1 w-8 bg-gradient-to-r from-soft-coral to-soft-blue rounded-full" />
-                <h2 className="text-sm font-semibold text-cool-gray uppercase tracking-wide">{month}</h2>
+                <h2 className="text-sm font-semibold text-cool-gray uppercase tracking-wide">
+                  {month}
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {monthAppointments.map((appointment) => {
-                  const canMarkDone = isTimeReached(appointment.date, appointment.time)
+                  const canComplete = isTimeReached(appointment.date, appointment.time)
 
                   return (
                     <Card
                       key={appointment.id}
-                      className="border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
+                      className="border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
                     >
                       <CardContent className="p-0">
                         <div className="relative h-full flex flex-col">
@@ -185,7 +192,9 @@ export function AppointmentsList() {
                           <div className="p-5 flex flex-col h-full">
                             <div className="flex items-start gap-3 mb-4">
                               <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-soft-blue/20">
-                                <AvatarImage src={appointment.patient?.avatar || "/placeholder.svg"} />
+                                <AvatarImage
+                                  src={appointment.patient?.avatar || "/placeholder.svg"}
+                                />
                                 <AvatarFallback className="text-xs font-semibold bg-gradient-to-r from-soft-blue to-soft-coral text-white">
                                   {appointment.patient?.name
                                     .split(" ")
@@ -197,24 +206,32 @@ export function AppointmentsList() {
                                 <h3 className="font-semibold text-sm text-dark-slate-gray truncate">
                                   {appointment.patient?.name}
                                 </h3>
-                                <p className="text-xs text-cool-gray capitalize">{appointment.type}</p>
+                                <p className="text-xs text-cool-gray capitalize">
+                                  {appointment.type}
+                                </p>
                               </div>
                             </div>
 
                             <div className="space-y-2 mb-4">
                               <div className="flex items-center gap-2 text-sm">
                                 <CalendarDays className="h-4 w-4 text-soft-blue flex-shrink-0" />
-                                <span className="font-medium text-dark-slate-gray">{formatDate(appointment.date)}</span>
+                                <span className="font-medium text-dark-slate-gray">
+                                  {formatDate(appointment.date)}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <Clock className="h-4 w-4 text-soft-coral flex-shrink-0" />
-                                <span className="font-medium text-dark-slate-gray">{formatTime(appointment.time)}</span>
+                                <span className="font-medium text-dark-slate-gray">
+                                  {formatTime(appointment.time)}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <div className="h-4 w-4 flex items-center justify-center text-soft-blue flex-shrink-0">
                                   {getModeIcon(appointment.mode)}
                                 </div>
-                                <span className="text-cool-gray capitalize">{appointment.mode}</span>
+                                <span className="text-cool-gray capitalize">
+                                  {appointment.mode}
+                                </span>
                               </div>
                             </div>
 
@@ -230,9 +247,9 @@ export function AppointmentsList() {
                               <Button
                                 onClick={() => router.push(`/doctor/appointments/${appointment.id}`)}
                                 size="sm"
-                                disabled={!canMarkDone}
+                                disabled={!canComplete}
                                 className={`w-full rounded-lg shadow-sm font-medium text-xs ${
-                                  canMarkDone
+                                  canComplete
                                     ? "bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
                                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                                 }`}
@@ -240,6 +257,7 @@ export function AppointmentsList() {
                                 <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                                 <span>Complete</span>
                               </Button>
+
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
@@ -275,7 +293,10 @@ export function AppointmentsList() {
               {selectedAppointment && (
                 <span>
                   Cancel appointment with{" "}
-                  <strong className="text-dark-slate-gray">{selectedAppointment.patient?.name}</strong> on{" "}
+                  <strong className="text-dark-slate-gray">
+                    {selectedAppointment.patient?.name}
+                  </strong>{" "}
+                  on{" "}
                   <strong className="text-dark-slate-gray">
                     {new Date(selectedAppointment.date).toLocaleDateString("en-US", {
                       month: "short",
@@ -293,7 +314,11 @@ export function AppointmentsList() {
               <Label className="text-sm font-medium text-dark-slate-gray">
                 Reason <span className="text-soft-coral">*</span>
               </Label>
-              <RadioGroup value={cancellationReason} onValueChange={setCancellationReason} className="space-y-1">
+              <RadioGroup
+                value={cancellationReason}
+                onValueChange={setCancellationReason}
+                className="space-y-1"
+              >
                 {CANCELLATION_REASONS.map((reason) => (
                   <div key={reason.id} className="flex items-center space-x-2">
                     <RadioGroupItem value={reason.id} id={reason.id} />
@@ -307,7 +332,8 @@ export function AppointmentsList() {
 
             <div className="space-y-2">
               <Label htmlFor="additional-notes" className="text-sm font-medium text-dark-slate-gray">
-                Additional Notes <span className="text-cool-gray font-normal">(Optional)</span>
+                Additional Notes{" "}
+                <span className="text-cool-gray font-normal">(Optional)</span>
               </Label>
               <Textarea
                 id="additional-notes"

@@ -24,7 +24,6 @@ interface SidebarProps {
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Calendar, label: "Appointments", href: "/appointments" },
-  { icon: Users, label: "Patients", href: "/patients" },
   { icon: FileText, label: "Prescriptions", href: "/prescriptions" },
   { icon: BookOpen, label: "Blogs", href: "/blogs" },
 ]

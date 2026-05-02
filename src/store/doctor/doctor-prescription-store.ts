@@ -70,28 +70,74 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
+      /**
+       * ✅ FIXED: Was calling /prescriptions/{prescriptionId} which doesn't exist.
+       *
+       * Correct endpoint: PATCH /appointments/prescriptions/patient/{patientId}
+       * The patientId comes from the updates object (already in the Prescription interface).
+       * The prescriptionId is passed in the dto body so the backend knows which record to update.
+       *
+       * Request shape expected by the API:
+       * {
+       *   doctorId: string,
+       *   dto: { notes, startDate, endDate, status, medications[] }
+       * }
+       */
       updatePrescriptionBackend: async (prescriptionId, updates, doctorId) => {
+        // patientId is required to build the URL
+        const patientId = updates.patientId
+        if (!patientId) {
+          console.error(
+            "[doctor-prescription-store] updatePrescriptionBackend: patientId is missing in updates. " +
+              "Make sure you pass the full prescription object including patientId."
+          )
+          return
+        }
+
         set({ isLoading: true })
         try {
-          const payload = toSnakeCase({ ...updates, doctorId })
+          // Parse medications back to array if stored as JSON string
+          let medicationsArray: object[] = []
+          if (updates.medications) {
+            try {
+              medicationsArray = JSON.parse(updates.medications as string)
+            } catch {
+              // If not JSON, wrap in minimal object so the API doesn't fail
+              medicationsArray = [{ name: updates.medications }]
+            }
+          }
+
+          // ✅ Correct endpoint and body shape
           const { data } = await api.patch(
-            `/prescriptions/${prescriptionId}`,
-            payload
+            `/appointments/prescriptions/patient/${patientId}`,
+            {
+              doctorId,
+              dto: {
+                notes: updates.notes,
+                startDate: updates.startDate,
+                endDate: updates.followUpDate, // followUpDate maps to endDate in the API
+                status: "active",
+                medications: medicationsArray,
+              },
+            }
           )
 
+          // Map the response back into the local Prescription shape
           const updatedPrescription: Prescription = {
-            id: data.id,
-            diagnosis: data.diagnosis,
-            medications: data.medications,
-            dosage: data.dosage,
-            frequency: data.frequency,
-            duration: data.duration,
-            notes: data.notes,
-            followUpDate: data.follow_up_date,
-            startDate: data.start_date,
-            patientId: data.patient_id,
-            patientName: data.patientName,
-            doctorId: data.doctor_id,
+            id: data.id ?? prescriptionId,
+            diagnosis: data.diagnosis ?? updates.diagnosis ?? "",
+            medications: Array.isArray(data.medications)
+              ? JSON.stringify(data.medications)
+              : data.medications ?? updates.medications ?? "",
+            dosage: data.dosage ?? updates.dosage ?? "",
+            frequency: data.frequency ?? updates.frequency ?? "",
+            duration: data.duration ?? updates.duration ?? "",
+            notes: data.notes ?? updates.notes ?? "",
+            followUpDate: data.end_date ?? data.follow_up_date ?? updates.followUpDate ?? "",
+            startDate: data.start_date ?? updates.startDate ?? "",
+            patientId: data.patient_id ?? patientId,
+            patientName: data.patientName ?? updates.patientName ?? "",
+            doctorId: data.doctor_id ?? doctorId,
           }
 
           get().updatePrescription(prescriptionId, updatedPrescription)
@@ -105,16 +151,3 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
     { name: "doctor-prescription-store" }
   )
 )
-
-const toSnakeCase = (prescription: Partial<Prescription>) => ({
-  diagnosis: prescription.diagnosis,
-  medications: prescription.medications,
-  dosage: prescription.dosage,
-  frequency: prescription.frequency,
-  duration: prescription.duration,
-  notes: prescription.notes,
-  follow_up_date: prescription.followUpDate,
-  start_date: prescription.startDate,
-  patient_id: prescription.patientId,
-  doctor_id: prescription.doctorId,
-})

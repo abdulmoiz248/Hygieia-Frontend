@@ -7,13 +7,14 @@ export const useDoctorPrescription = (doctorId: string) => {
     queryKey: ["doctorPrescriptions", doctorId],
     queryFn: async (): Promise<Prescription[]> => {
       if (!doctorId) throw new Error("Missing doctorId")
-      const { data } = await api.get(
-        `/appointments/prescription/assigned?doctorId=${doctorId}`
-      )
-
+     const { data } = await api.get(
+  "/appointments/prescriptions/assigned",
+  {
+    params: { doctorId },
+  }
+)
       const items: any[] = Array.isArray(data) ? data : data.items ?? []
 
-      // ✅ Fixed: map medications array properly — backend returns medications as an array of objects
       return items.map((prescription: any): Prescription => ({
         id: prescription.id,
         diagnosis: prescription.diagnosis ?? "",
@@ -24,10 +25,15 @@ export const useDoctorPrescription = (doctorId: string) => {
         frequency: prescription.frequency ?? "",
         duration: prescription.duration ?? "",
         notes: prescription.notes ?? "",
-        followUpDate: prescription.follow_up_date ? new Date(prescription.follow_up_date) : "",
-        startDate: prescription.start_date ? new Date(prescription.start_date) : "",
+        followUpDate: prescription.follow_up_date
+          ? new Date(prescription.follow_up_date)
+          : "",
+        startDate: prescription.start_date
+          ? new Date(prescription.start_date)
+          : "",
         patientId: prescription.patient_id ?? prescription.patientId,
-        patientName: prescription.patientName ?? prescription.patient?.name ?? "",
+        patientName:
+          prescription.patientName ?? prescription.patient?.name ?? "",
         doctorId: prescription.doctor_id ?? prescription.doctorId,
       }))
     },

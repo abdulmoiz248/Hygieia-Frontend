@@ -1,784 +1,666 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import {
-  ArrowLeft,
-  User,
-  Calendar,
-  Clock,
-  Video,
-  MapPin,
-  FileText,
-  Activity,
-  TestTube,
-  Brain,
-  History,
-  CheckCircle,
-  Stethoscope,
-  Pill,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Save,
-  Loader2,
-} from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import api from "@/lib/axios"
-import useDoctorStore from "@/store/doctor/doctor-store"
-import { EnhancedFitnessCharts } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
+import { Progress } from "@/components/ui/progress"
+import Loader from "@/components/loader/loader"
+import {
+  Calendar,
+  Heart,
+  FileText,
+  ExternalLink,
+  ShieldOff,
+  Activity,
+  Weight,
+  Ruler,
+  Clock,
+  Stethoscope,
+  BarChart3,
+  Star,
+  Target,
+  ClipboardList,
+  Video,
+  Pill,
+} from "lucide-react"
+import { AppointmentMode, AppointmentStatus, type Appointment } from "@/types/patient/appointment"
+import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
+import { MedicalRecord } from "@/types"
+import { useDoctorAppointmentStore } from "@/store/doctor/doctor-appointment-store"
+import { PrescriptionDialog, PrescriptionFormData } from "./PrescriptionDialog"
+import { formatDateOnly } from "@/helpers/date"
 import LabTests from "@/components/nutritionist/appointments/id/LabTest"
-import PreviousAppointmentsCard from "@/components/doctor-portal/appointments/id/DoctorPreviousAppointments"
-import { generateDoctorAIReport } from "@/components/doctor-portal/appointments/id/DoctorAiReport"
-import type { LabTest } from "@/types/patient/lab"
+import api from "@/lib/axios"
+import { completeAppointment } from "@/api/doctor/appointmentApi"
+import PreviousDoctorAppointmentsCard from "./PreviousDoctorAppointment"
+import useDoctorStore from "@/store/doctor/doctor-store"
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PatientData {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  avatar?: string
-  dateOfBirth: string
-  gender: string
-  weight: number
-  height: number
-  bloodType: string
-  healthscore: number
-  adherence: number
-  allergies: string
-  conditions: string
-  medications: string
-  familyHistory: string
-  lifestyle: string
+export const fetchPatientAnalytics = async (patientId: string) => {
+  const res = await api.get(`/analytics/${patientId}`)
+  if (!res.data) throw new Error("Failed to fetch analytics")
+  return res.data
 }
-
-interface AppointmentDetail {
-  id: string
-  date: string
-  time: string
-  status: string
-  type: string
-  mode: string
-  notes?: string
-  report?: string
-  data_shared: boolean
-  patient: PatientData
-  patient_id: string
-}
-
-interface FitnessEntry {
-  id: string
-  created_at: string
-  patient_id: string
-  steps: number
-  water: number
-  sleep: number
-  calories_burned: number
-  calories_intake: number
-  fat: number
-  protein: number
-  carbs: number
-}
-
-interface MedicalNote {
-  diagnosis: string
-  prescription: string
-  followUpDate: string
-  additionalNotes: string
-}
-
-interface ReferredTest {
-  test: LabTest
-  referredAt: string
-}
-
-// ─── Status helpers ───────────────────────────────────────────────────────────
-
-const statusConfig: Record<string, { color: string; label: string }> = {
-  upcoming: { color: "bg-soft-blue text-white", label: "Upcoming" },
-  completed: { color: "bg-mint-green text-white", label: "Completed" },
-  cancelled: { color: "bg-soft-coral text-white", label: "Cancelled" },
-  "in-progress": { color: "bg-yellow-400 text-white", label: "In Progress" },
-}
-
-const modeIcon = (mode: string) =>
-  mode === "online" ? (
-    <Video className="w-4 h-4 text-soft-blue" />
-  ) : (
-    <MapPin className="w-4 h-4 text-mint-green" />
-  )
-
-// ─── Animation variants ────────────────────────────────────────────────────────
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-}
-
-const stagger = {
-  visible: { transition: { staggerChildren: 0.08 } },
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DoctorAppointment({ appointmentId }: { appointmentId: string }) {
+  const { addPrescription } = {
+    // minimal shim — update store reactively after completion
+    addPrescription: (p: any) => {},
+  }
+  const user = useDoctorStore().profile
+
+  const { appointments, isLoading, updateAppointmentStatus } = useDoctorAppointmentStore()
+  const [appointment, setAppointment] = useState<Appointment | null>(null)
+  const [isMarkingDone, setIsMarkingDone] = useState(false)
+  const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
+  const [assignedPrescription, setAssignedPrescription] = useState<PrescriptionFormData | null>(null)
+  const [referredTests, setReferredTests] = useState<any[]>([])
+  const [doctorReport, setDoctorReport] = useState("")
+  const [appointmentDone, setAppointmentDone] = useState(false)
   const router = useRouter()
-  const { profile: doctor } = useDoctorStore()
-
-  const [appointment, setAppointment] = useState<AppointmentDetail | null>(null)
-  const [fitnessData, setFitnessData] = useState<FitnessEntry[]>([])
-  const [medicalRecords, setMedicalRecords] = useState<any[]>([])
-  const [referredTests, setReferredTests] = useState<ReferredTest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  // Medical notes state
-  const [notes, setNotes] = useState<MedicalNote>({
-    diagnosis: "",
-    prescription: "",
-    followUpDate: "",
-    additionalNotes: "",
-  })
-  const [savingNotes, setSavingNotes] = useState(false)
-  const [notesSaved, setNotesSaved] = useState(false)
-
-  // AI report state
-  const [aiReport, setAiReport] = useState<string>("")
-  const [generatingReport, setGeneratingReport] = useState(false)
-  const [reportExpanded, setReportExpanded] = useState(false)
-
-  // Mark complete state
-  const [completing, setCompleting] = useState(false)
-
-  // ─── Fetch appointment + patient data ──────────────────────────────────────
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        setLoading(true)
-        const apptRes = await api.get(`/appointments/${appointmentId}`)
-        const appt: AppointmentDetail = apptRes.data.data || apptRes.data
+    const foundAppointment = appointments.find((apt) => apt.id === appointmentId)
+    if (foundAppointment) setAppointment(foundAppointment)
+  }, [appointments, appointmentId])
 
-        setAppointment(appt)
-
-        // Pre-populate notes if they exist
-        if (appt.notes) {
-          try {
-            const parsed = JSON.parse(appt.notes)
-            if (parsed && typeof parsed === "object") setNotes(parsed)
-            else setNotes((prev) => ({ ...prev, additionalNotes: appt.notes || "" }))
-          } catch {
-            setNotes((prev) => ({ ...prev, additionalNotes: appt.notes || "" }))
-          }
-        }
-
-        // Fetch patient fitness data (last 30 days)
-        if (appt.patient_id) {
-          try {
-            const fitnessRes = await api.get(`/fitness/${appt.patient_id}`)
-            setFitnessData(fitnessRes.data.data || fitnessRes.data || [])
-          } catch {
-            setFitnessData([])
-          }
-
-          // Fetch medical records
-          try {
-            const recordsRes = await api.get(`/medical-records/${appt.patient_id}`)
-            setMedicalRecords(recordsRes.data.data || recordsRes.data || [])
-          } catch {
-            setMedicalRecords([])
-          }
-        }
-      } catch (err: any) {
-        setError(err.message || "Failed to load appointment")
-      } finally {
-        setLoading(false)
-      }
+  useEffect(() => {
+    const getData = async () => {
+      if (!appointment?.patient?.id) return
+      const data = await fetchPatientAnalytics(appointment.patient.id)
+      setFitnessData(data.fitness)
+      setMedicalRecords(data.medicalRecords)
     }
+    if (appointment?.dataShared) getData()
+  }, [appointment])
 
-    fetchAll()
-  }, [appointmentId])
+  const labTestsRef = useRef<HTMLDivElement | null>(null)
+  const handleScrollToLabTests = () => {
+    labTestsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
-  // ─── Actions ───────────────────────────────────────────────────────────────
+  const handleAssignPrescription = (prescription: PrescriptionFormData) => {
+    setAssignedPrescription(prescription)
+  }
 
-  const handleSaveNotes = async () => {
-    if (!appointment) return
-    setSavingNotes(true)
+  const handleTestReferral = (referral: any) => {
+    setReferredTests((prev) => [...prev, referral])
+  }
+
+  const handleRemoveTest = (id: string) => {
+    setReferredTests((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  const handleMarkAppointmentDone = async () => {
+    setIsMarkingDone(true)
     try {
-      await api.put(`/appointments/${appointmentId}`, {
-        notes: JSON.stringify(notes),
+      const doctorId = user?.id || localStorage.getItem("id") || ""
+
+      await completeAppointment(appointmentId, {
+        doctorId,
+        dto: {
+          report: doctorReport,
+          referredTestIds: referredTests.map((t) => t.id),
+          ...(assignedPrescription && {
+            prescription: {
+              notes: assignedPrescription.notes,
+              startDate: assignedPrescription.startDate instanceof Date
+                ? assignedPrescription.startDate.toISOString().split("T")[0]
+                : assignedPrescription.startDate,
+              endDate: assignedPrescription.endDate instanceof Date
+                ? assignedPrescription.endDate.toISOString().split("T")[0]
+                : assignedPrescription.endDate,
+              status: "active",
+              medications: assignedPrescription.medications,
+            },
+          }),
+        },
       })
-      setNotesSaved(true)
-      setTimeout(() => setNotesSaved(false), 3000)
-    } catch (err) {
-      console.error("Failed to save notes", err)
+
+      setAppointmentDone(true)
+      updateAppointmentStatus(appointmentId, AppointmentStatus.Completed)
+      router.push("/doctor/appointments")
+    } catch (err: any) {
+      console.error("Failed to complete appointment:", err.message || err)
     } finally {
-      setSavingNotes(false)
+      setIsMarkingDone(false)
     }
   }
 
-  const handleMarkComplete = async () => {
-    if (!appointment) return
-    setCompleting(true)
-    try {
-      await api.put(`/appointments/${appointmentId}`, { status: "completed" })
-      setAppointment((prev) => (prev ? { ...prev, status: "completed" } : null))
-    } catch (err) {
-      console.error("Failed to mark complete", err)
-    } finally {
-      setCompleting(false)
-    }
-  }
-
-  const handleReferTest = async (test: LabTest) => {
-    if (!appointment) return
-    try {
-      await api.post(`/appointments/${appointmentId}/lab-tests`, {
-        testId: test.id,
-        patientId: appointment.patient_id,
-      })
-      setReferredTests((prev) => [...prev, { test, referredAt: new Date().toISOString() }])
-    } catch (err) {
-      console.error("Failed to refer test", err)
-    }
-  }
-
-  const handleGenerateReport = async () => {
-    if (!appointment?.patient) return
-    setGeneratingReport(true)
-    setReportExpanded(true)
-    try {
-      const report = await generateDoctorAIReport(
-        appointment.patient,
-        fitnessData,
-        medicalRecords
-      )
-      setAiReport(report)
-      // Optionally persist the report
-      await api.put(`/appointments/${appointmentId}`, { report })
-    } catch (err) {
-      console.error("Failed to generate report", err)
-      setAiReport("Failed to generate report. Please try again.")
-    } finally {
-      setGeneratingReport(false)
-    }
-  }
-
-  // ─── Render helpers ────────────────────────────────────────────────────────
-
-  const calcAge = (dob: string) =>
-    dob ? new Date().getFullYear() - new Date(dob).getFullYear() : "—"
-
-  const bmi = appointment?.patient
-    ? (
-        appointment.patient.weight /
-        ((appointment.patient.height / 100) ** 2)
-      ).toFixed(1)
-    : "—"
-
-  // ─── Loading / Error ───────────────────────────────────────────────────────
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-3 text-cool-gray">
-          <Loader2 className="w-8 h-8 animate-spin text-soft-blue" />
-          <p className="text-sm">Loading appointment details…</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader />
       </div>
     )
   }
 
-  if (error || !appointment) {
+  if (!appointment) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <AlertCircle className="w-10 h-10 text-soft-coral" />
-        <p className="text-soft-coral font-medium">{error || "Appointment not found"}</p>
-        <Button variant="outline" onClick={() => router.back()}>
-          Go Back
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-6">
+        <Card className="w-full max-w-md hover-lift">
+          <CardContent className="flex flex-col items-center justify-center h-64 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+              <FileText className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Appointment Not Found</h3>
+              <p className="text-sm text-muted-foreground">
+                The requested appointment could not be located.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  const { patient } = appointment
-  const statusCfg = statusConfig[appointment.status] ?? { color: "bg-gray-400 text-white", label: appointment.status }
-
-  // ─── Main render ───────────────────────────────────────────────────────────
+  const { patient, date, time, type, notes, dataShared } = appointment
 
   return (
-    <motion.div
-      variants={stagger}
-      initial="hidden"
-      animate="visible"
-      className="space-y-6 p-4 md:p-6 bg-snow-white min-h-screen"
-    >
-      {/* ── Back + Header ── */}
-      <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="rounded-full hover:bg-soft-blue/10"
-        >
-          <ArrowLeft className="w-5 h-5 text-soft-blue" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-soft-coral">Appointment Details</h1>
-          <p className="text-sm text-cool-gray">
-            {new Date(appointment.date).toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {appointment.time}
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Badge className={statusCfg.color}>{statusCfg.label}</Badge>
-          {appointment.status !== "completed" && (
-            <Button
-              size="sm"
-              onClick={handleMarkComplete}
-              disabled={completing}
-              className="bg-mint-green hover:bg-mint-green/90 text-white gap-1.5"
-            >
-              {completing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircle className="w-4 h-4" />
-              )}
-              Mark Complete
-            </Button>
-          )}
-        </div>
-      </motion.div>
-
-      {/* ── Patient + Appointment Summary Cards ── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Patient Card */}
-        <Card className="lg:col-span-2 rounded-3xl border border-gray-100 shadow-md bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <Avatar className="w-20 h-20 border-4 border-soft-blue/20 shadow-lg shrink-0">
-                <AvatarImage src={patient?.avatar} />
-                <AvatarFallback className="text-xl font-semibold text-soft-blue bg-soft-blue/10">
-                  {patient?.name?.split(" ").map((n) => n[0]).join("") ?? "?"}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-dark-slate-gray">{patient?.name}</h2>
-                <p className="text-sm text-cool-gray">{patient?.email}</p>
-
-                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-dark-slate-gray/80">
-                  <span className="flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-soft-blue" />
-                    {calcAge(patient?.dateOfBirth)} yrs · {patient?.gender}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-mint-green" />
-                    BMI {bmi}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Pill className="w-3.5 h-3.5 text-soft-coral" />
-                    Blood {patient?.bloodType}
-                  </span>
-                </div>
-
-                {/* Quick clinical flags */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {patient?.allergies && patient.allergies !== "None" && (
-                    <Badge className="bg-soft-coral/10 text-soft-coral border border-soft-coral/30 text-xs">
-                      ⚠ {patient.allergies}
-                    </Badge>
-                  )}
-                  {patient?.conditions && patient.conditions !== "None" && (
-                    <Badge className="bg-soft-blue/10 text-soft-blue border border-soft-blue/30 text-xs">
-                      {patient.conditions}
-                    </Badge>
-                  )}
-                  {patient?.medications && patient.medications !== "None" && (
-                    <Badge className="bg-mint-green/10 text-mint-green border border-mint-green/30 text-xs">
-                      Rx: {patient.medications}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Appointment Meta Card */}
-        <Card className="rounded-3xl border border-gray-100 shadow-md bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-6 space-y-4">
-            <h3 className="font-semibold text-soft-blue flex items-center gap-2">
-              <Stethoscope className="w-4 h-4" />
-              Appointment Info
-            </h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2 text-dark-slate-gray/80">
-                <Calendar className="w-4 h-4 text-soft-blue" />
-                <span>{new Date(appointment.date).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2 text-dark-slate-gray/80">
-                <Clock className="w-4 h-4 text-soft-blue" />
-                <span>{appointment.time}</span>
-              </div>
-              <div className="flex items-center gap-2 text-dark-slate-gray/80">
-                {modeIcon(appointment.mode)}
-                <span className="capitalize">{appointment.mode}</span>
-              </div>
-              <div className="flex items-center gap-2 text-dark-slate-gray/80">
-                <FileText className="w-4 h-4 text-soft-blue" />
-                <span className="capitalize">{appointment.type}</span>
-              </div>
-              <Separator />
-              <div>
-                <p className="text-xs text-cool-gray mb-1">Health Score</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-soft-blue to-mint-green rounded-full transition-all"
-                      style={{ width: `${patient?.healthscore ?? 0}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-soft-blue">
-                    {patient?.healthscore ?? "—"}/100
-                  </span>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br bg-transparent">
+      <div className="container mx-auto space-y-8">
+        {/* Page Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Stethoscope className="w-6 h-6 text-soft-coral" />
               </div>
               <div>
-                <p className="text-xs text-cool-gray mb-1">Adherence</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-mint-green to-soft-blue rounded-full transition-all"
-                      style={{ width: `${patient?.adherence ?? 0}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-mint-green">
-                    {patient?.adherence ?? "—"}%
-                  </span>
-                </div>
+                <h1 className="text-3xl lg:text-4xl font-bold text-balance text-soft-coral">
+                  Patient Consultation
+                </h1>
+                <p className="text-cool-gray text-lg">
+                  Comprehensive health overview and analytics
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          </div>
+        </div>
 
-      {/* ── Tabs ── */}
-      <motion.div variants={fadeUp}>
-        <Tabs defaultValue="notes" className="w-full">
-          <TabsList className="flex flex-wrap gap-1 h-auto bg-white border border-gray-200 rounded-2xl p-1 shadow-sm mb-6">
-            {[
-              { value: "notes", icon: <FileText className="w-4 h-4" />, label: "Medical Notes" },
-              { value: "health", icon: <Activity className="w-4 h-4" />, label: "Health Data" },
-              { value: "labs", icon: <TestTube className="w-4 h-4" />, label: "Lab Tests" },
-              { value: "report", icon: <Brain className="w-4 h-4" />, label: "AI Report" },
-              { value: "history", icon: <History className="w-4 h-4" />, label: "History" },
-            ].map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="flex items-center gap-1.5 text-sm rounded-xl data-[state=active]:bg-soft-blue data-[state=active]:text-white"
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* ── LEFT SIDEBAR ── */}
+          <div className="xl:col-span-1 space-y-6">
+            {/* Patient Profile Card */}
+            <Card className="hover-lift bg-white overflow-hidden">
+              <div className="p-6">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <Avatar className="w-28 h-28 border-4 border-background shadow-lg mb-4">
+                    <AvatarImage src={patient.avatar || "/placeholder.svg"} alt={patient.name} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+                      {patient.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="w-full">
+                    <h3 className="text-xl font-bold text-soft-coral">{patient.name}</h3>
+                    <p className="text-cool-gray">
+                      {patient.gender} •{" "}
+                      {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} years
+                    </p>
+                    {dataShared && (
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          <span className="text-sm font-medium ml-1">Health Score</span>
+                        </div>
+                        <Badge variant="secondary" className="bg-secondary/20 text-soft-coral">
+                          {patient.healthscore}/100
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-          {/* ── Medical Notes Tab ── */}
-          <TabsContent value="notes">
-            <Card className="rounded-3xl border border-gray-100 shadow-md">
-              <CardHeader className="border-b">
-                <CardTitle className="text-soft-blue flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Clinical Notes & Prescription
+              <CardContent className="p-6 pt-0 space-y-6">
+                {/* Physical Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 rounded-lg bg-cool-gray/10">
+                    <Weight className="w-5 h-5 text-soft-blue mx-auto mb-1" />
+                    <p className="text-sm text-dark-slate-gray">Weight</p>
+                    <p className="text-lg font-bold text-soft-blue">{patient.weight} kg</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-cool-gray/10">
+                    <Ruler className="w-5 h-5 text-soft-blue mx-auto mb-1" />
+                    <p className="text-sm text-dark-slate-gray">Height</p>
+                    <p className="text-lg font-bold text-soft-blue">{patient.height}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Medical Information */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-soft-coral flex items-center gap-2">
+                    <Heart className="w-4 h-4" />
+                    Medical Info
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-cool-gray/10">
+                      <span className="text-sm text-soft-blue">Blood Type</span>
+                      <Badge variant="outline" className="bg-soft-coral text-cool-gray">
+                        {patient.bloodType}
+                      </Badge>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Allergies</p>
+                      <p className="text-sm text-cool-gray">{patient.allergies}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Conditions</p>
+                      <p className="text-sm text-cool-gray">{patient.conditions}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {dataShared && (
+                  <>
+                    <Separator />
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-soft-coral flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Health Metrics
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-soft-blue">
+                              Adherence Rate
+                            </span>
+                            <Badge className="bg-secondary/20 text-mint-green">
+                              {patient.adherence}
+                            </Badge>
+                          </div>
+                          <Progress
+                            value={
+                              patient.adherence === "High"
+                                ? 85
+                                : patient.adherence === "Medium"
+                                  ? 60
+                                  : 35
+                            }
+                            className="h-2 text-soft-blue"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="hover-lift border-accent/20">
+              <CardHeader className="bg-accent/5">
+                <CardTitle className="text-soft-coral flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2">
-                    <Label className="text-soft-blue font-medium">Diagnosis</Label>
-                    <Textarea
-                      placeholder="Primary diagnosis and clinical findings…"
-                      value={notes.diagnosis}
-                      onChange={(e) => setNotes((p) => ({ ...p, diagnosis: e.target.value }))}
-                      rows={4}
-                      className="rounded-xl resize-none"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-soft-blue font-medium">Prescription / Treatment Plan</Label>
-                    <Textarea
-                      placeholder="Medications, dosage, treatment instructions…"
-                      value={notes.prescription}
-                      onChange={(e) => setNotes((p) => ({ ...p, prescription: e.target.value }))}
-                      rows={4}
-                      className="rounded-xl resize-none"
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label className="text-soft-blue font-medium">Follow-up Date</Label>
-                  <Input
-                    type="date"
-                    value={notes.followUpDate}
-                    onChange={(e) => setNotes((p) => ({ ...p, followUpDate: e.target.value }))}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="rounded-xl max-w-xs"
-                  />
-                </div>
+              <CardContent className="p-6 py-0 space-y-3">
+                {/* Prescription Dialog replaces DietPlanDialog */}
+                <PrescriptionDialog
+                  patientName={patient.name}
+                  onAssign={handleAssignPrescription}
+                />
 
-                <div className="space-y-2">
-                  <Label className="text-soft-blue font-medium">Additional Notes</Label>
-                  <Textarea
-                    placeholder="Any additional clinical observations, patient history updates, or recommendations…"
-                    value={notes.additionalNotes}
-                    onChange={(e) => setNotes((p) => ({ ...p, additionalNotes: e.target.value }))}
-                    rows={4}
-                    className="rounded-xl resize-none"
-                  />
-                </div>
+                <Button
+                  onClick={handleScrollToLabTests}
+                  className="border-soft-coral w-full bg-soft-coral hover:bg-soft-coral/90 hover:text-white text-white"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Refer Test
+                </Button>
 
-                {/* Patient background for quick reference */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-gray-50 rounded-2xl text-sm">
-                  <div>
-                    <p className="text-xs text-cool-gray mb-0.5">Known Allergies</p>
-                    <p className="text-dark-slate-gray font-medium">{patient?.allergies || "None"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-cool-gray mb-0.5">Current Medications</p>
-                    <p className="text-dark-slate-gray font-medium">{patient?.medications || "None"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-cool-gray mb-0.5">Medical Conditions</p>
-                    <p className="text-dark-slate-gray font-medium">{patient?.conditions || "None"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-cool-gray mb-0.5">Family History</p>
-                    <p className="text-dark-slate-gray font-medium">{patient?.familyHistory || "None"}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
+                {appointment.mode === AppointmentMode.Online && (
                   <Button
-                    onClick={handleSaveNotes}
-                    disabled={savingNotes}
-                    className="bg-soft-blue hover:bg-soft-blue/90 text-white gap-2"
+                    onClick={() => window.open(appointment.start_link, "_blank")}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                   >
-                    {savingNotes ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    Save Notes
+                    <Video className="w-4 h-4" />
+                    Join Meeting
                   </Button>
-                  {notesSaved && (
-                    <span className="text-sm text-mint-green flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4" />
-                      Saved successfully
-                    </span>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Appointment Details */}
+            <Card className="hover-lift">
+              <CardHeader className="bg-white">
+                <CardTitle className="text-soft-coral flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Appointment Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0 space-y-4">
+                <div className="space-y-3 text-soft-blue">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-4 h-4 text-cool-gray" />
+                    <div>
+                      <p className="text-sm font-medium text-soft-blue">{date}</p>
+                      <p className="text-xs text-soft-blue">
+                        {time} • {appointment.mode}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Activity className="w-4 h-4 text-cool-gray" />
+                    <p className="text-sm text-soft-blue">{type}</p>
+                  </div>
+
+                  {notes && (
+                    <div className="mt-4 p-3 mb-0 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm font-medium text-soft-coral mb-1">Notes</p>
+                      <p className="text-sm text-cool-gray">{notes}</p>
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Referred Tests Summary */}
-            {referredTests.length > 0 && (
-              <Card className="mt-4 rounded-3xl border border-gray-100 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-soft-coral flex items-center gap-2 text-base">
-                    <TestTube className="w-4 h-4" />
-                    Referred Lab Tests This Session
+            {/* Additional Info */}
+            <Card className="hover-lift">
+              <CardHeader className="bg-white">
+                <CardTitle className="text-soft-coral flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Additional Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0 space-y-4">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-soft-coral flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    Other Health Details
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Medications</p>
+                      <p className="text-sm text-cool-gray">{patient.medications || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Ongoing Medications</p>
+                      <p className="text-sm text-cool-gray">
+                        {patient.ongoingMedications || "N/A"}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Surgery History</p>
+                      <p className="text-sm text-cool-gray">{patient.surgeryHistory || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Implants</p>
+                      <p className="text-sm text-cool-gray">{patient.implants || "N/A"}</p>
+                    </div>
+                    {patient.gender === "Female" && (
+                      <>
+                        <div className="p-2 rounded-lg bg-cool-gray/10">
+                          <p className="text-sm text-soft-blue mb-1">Pregnancy Status</p>
+                          <p className="text-sm text-cool-gray">
+                            {patient.pregnancyStatus || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-cool-gray/10">
+                          <p className="text-sm text-soft-blue mb-1">Menstrual Cycle</p>
+                          <p className="text-sm text-cool-gray">
+                            {patient.menstrualCycle || "N/A"}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Mental Health</p>
+                      <p className="text-sm text-cool-gray">{patient.mentalHealth || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Family History</p>
+                      <p className="text-sm text-cool-gray">{patient.familyHistory || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Organ Donor</p>
+                      <p className="text-sm text-cool-gray">{patient.organDonor || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Disabilities</p>
+                      <p className="text-sm text-cool-gray">{patient.disabilities || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                      <p className="text-sm text-soft-blue mb-1">Lifestyle</p>
+                      <p className="text-sm text-cool-gray">{patient.lifestyle || "N/A"}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Previous Appointments — uses new doctor-specific component */}
+            <PreviousDoctorAppointmentsCard doctorId={user?.id || ""} patientId={patient.id} />
+          </div>
+
+          {/* ── MAIN CONTENT ── */}
+          <div className="xl:col-span-3 space-y-8">
+            {/* Summary Card — shown once something is staged */}
+            {(assignedPrescription || referredTests.length > 0 || doctorReport) && (
+              <Card
+                className={`hover-lift bg-white border-accent/30 shadow-md rounded-2xl overflow-hidden transition-all ${
+                  appointmentDone ? "opacity-60 pointer-events-none" : ""
+                }`}
+              >
+                <CardHeader className="border-b">
+                  <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                    <ClipboardList className="w-6 h-6" />
+                    Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {referredTests.map(({ test }, i) => (
-                      <Badge
-                        key={i}
-                        className="bg-soft-coral/10 text-soft-coral border border-soft-coral/30"
-                      >
-                        {test.name}
-                      </Badge>
-                    ))}
+
+                <CardContent className="space-y-6">
+                  {/* Assigned Prescription */}
+                  {assignedPrescription && (
+                    <div className="p-4 rounded-xl bg-cool-gray/10 border border-mint-green/30">
+                      <h4 className="font-semibold text-soft-blue flex items-center gap-2">
+                        <Pill className="w-4 h-4" /> Assigned Prescription
+                      </h4>
+                      <p className="text-sm text-cool-gray mt-1">
+                        {assignedPrescription.medications.length} medication
+                        {assignedPrescription.medications.length !== 1 ? "s" : ""}:{" "}
+                        {assignedPrescription.medications.map((m) => m.name).join(", ")}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {assignedPrescription.startDate && assignedPrescription.endDate
+                          ? `${new Date(assignedPrescription.startDate).toLocaleDateString()} → ${new Date(
+                              assignedPrescription.endDate
+                            ).toLocaleDateString()}`
+                          : "No date range specified"}
+                      </p>
+                      {assignedPrescription.notes && (
+                        <p className="text-sm italic text-cool-gray mt-2">
+                          "{assignedPrescription.notes}"
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Referred Tests */}
+                  {referredTests.length > 0 && (
+                    <div className="p-4 rounded-xl bg-cool-gray/10 border border-soft-blue/30">
+                      <h4 className="font-semibold text-soft-blue flex items-center gap-2">
+                        🧪 Referred Lab Tests
+                      </h4>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {[...new Map(referredTests.map((t) => [t.id, t])).values()].map((test) => (
+                          <div
+                            key={test.id}
+                            className="flex items-center gap-2 bg-soft-blue/20 text-dark-slate-gray border border-soft-blue/30 px-3 py-1 rounded-lg text-sm"
+                          >
+                            {test.name}
+                            <button
+                              onClick={() => handleRemoveTest(test.id)}
+                              className="text-xs text-red-500 hover:text-red-700"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Doctor Report */}
+                  <div className="p-4 rounded-xl bg-cool-gray/10 border border-soft-coral/30">
+                    <h4 className="font-semibold text-soft-blue flex items-center gap-2">
+                      📝 Report
+                    </h4>
+                    <textarea
+                      value={doctorReport}
+                      onChange={(e) => setDoctorReport(e.target.value)}
+                      placeholder="Write your report here..."
+                      className="w-full mt-2 p-3 border border-soft-blue/30 rounded-lg text-sm focus:ring-2 focus:ring-soft-coral outline-none"
+                      rows={4}
+                    />
+                  </div>
+                </CardContent>
+
+                {/* Mark Done */}
+                {!appointmentDone && (
+                  <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
+                    <Button
+                      className="bg-soft-coral text-white hover:bg-soft-coral/80"
+                      onClick={handleMarkAppointmentDone}
+                      disabled={doctorReport.length < 10 || isMarkingDone}
+                    >
+                      {isMarkingDone ? "Saving..." : "Mark Appointment Done"}
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* Fitness Analytics */}
+            {dataShared ? (
+              <Card className="hover-lift overflow-hidden">
+                <CardHeader className="border-b">
+                  <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                    <Activity className="w-6 h-6" />
+                    Health & Fitness Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <EnhancedFitnessCharts data={fitnessData} />
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="hover-lift border-muted">
+                <CardContent className="flex flex-col items-center justify-center h-96 text-center space-y-6">
+                  <div className="w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center">
+                    <ShieldOff className="w-12 h-12 text-soft-coral" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold text-soft-coral">
+                      Health Data Not Available
+                    </h3>
+                    <p className="text-muted-foreground max-w-md">
+                      The patient has not granted permission to share detailed health and fitness
+                      data. Only basic profile information is accessible.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
 
-          {/* ── Health Data Tab ── */}
-          <TabsContent value="health">
-            {fitnessData.length > 0 ? (
-              <EnhancedFitnessCharts data={fitnessData} />
-            ) : (
-              <Card className="rounded-3xl border border-gray-100 shadow-md">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-cool-gray gap-3">
-                  <Activity className="w-10 h-10 opacity-40" />
-                  <p>No fitness data available for this patient</p>
-                  <p className="text-sm opacity-70">
-                    The patient hasn&apos;t logged any health data yet.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* ── Lab Tests Tab ── */}
-          <TabsContent value="labs">
-            <div className="space-y-4">
-              <LabTests onReferTest={handleReferTest} />
-
-              {referredTests.length > 0 && (
-                <Card className="rounded-3xl border border-gray-100 shadow-md">
-                  <CardHeader>
-                    <CardTitle className="text-soft-blue text-base flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-mint-green" />
-                      Referred Tests ({referredTests.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      {referredTests.map(({ test, referredAt }, i) => (
+            {/* Medical Records */}
+            {dataShared && (
+              <Card className="hover-lift border-secondary/20">
+                <CardHeader className="bg-secondary/5 border-b">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                        <FileText className="w-6 h-6" />
+                        Medical Records & Documents
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Patient&apos;s medical history, test results, and prescriptions
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-secondary text-mint-green">
+                      {medicalRecords.length} Records
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  {medicalRecords.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                      <FileText className="w-10 h-10 mb-3 text-soft-blue/70" />
+                      <p className="text-sm">No medical records available yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {medicalRecords.map((record) => (
                         <div
-                          key={i}
-                          className="flex items-center justify-between p-3 bg-mint-green/5 border border-mint-green/20 rounded-xl text-sm"
+                          key={record.id}
+                          className="group flex items-center justify-between p-4 border border-secondary/20 rounded-xl bg-cool-gray/10 transition-all duration-200"
                         >
-                          <div>
-                            <p className="font-medium text-dark-slate-gray">{test.name}</p>
-                            <p className="text-xs text-cool-gray">{test.category}</p>
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                              <FileText className="w-6 h-6 text-soft-blue" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-soft-coral group-hover:text-soft-coral/90 transition-colors">
+                                {record.title}
+                              </h4>
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs bg-mint-green text-white"
+                                  >
+                                    {record.record_type}
+                                  </Badge>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {formatDateOnly(new Date(record.date))}
+                                </span>
+                                {record.doctorName && (
+                                  <span className="flex items-center gap-1">
+                                    <Stethoscope className="w-3 h-3" />
+                                    {record.doctorName}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-xs text-cool-gray">
-                            {new Date(referredAt).toLocaleTimeString()}
-                          </span>
+                          <Button
+                            size="sm"
+                            className="gap-2 ml-4 bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+                            onClick={() => window.open(record.file_url, "_blank")}
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            View
+                          </Button>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* ── AI Report Tab ── */}
-          <TabsContent value="report">
-            <Card className="rounded-3xl border border-gray-100 shadow-md">
-              <CardHeader className="border-b">
-                <CardTitle className="text-soft-blue flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Brain className="w-5 h-5" />
-                    AI Clinical Report
-                  </span>
-                  <Button
-                    onClick={handleGenerateReport}
-                    disabled={generatingReport}
-                    className="bg-gradient-to-r from-soft-blue to-mint-green hover:opacity-90 text-white gap-2 text-sm"
-                  >
-                    {generatingReport ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Analysing…
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="w-4 h-4" />
-                        {aiReport ? "Regenerate Report" : "Generate Report"}
-                      </>
-                    )}
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="p-6">
-                {!aiReport && !generatingReport && (
-                  <div className="flex flex-col items-center justify-center py-16 text-cool-gray gap-3">
-                    <Brain className="w-12 h-12 opacity-30" />
-                    <p className="font-medium">No report generated yet</p>
-                    <p className="text-sm opacity-70 text-center max-w-sm">
-                      Click &quot;Generate Report&quot; to produce an AI-powered clinical summary based on
-                      the patient&apos;s 30-day health data and profile.
-                    </p>
-                  </div>
-                )}
-
-                {generatingReport && (
-                  <div className="flex flex-col items-center justify-center py-16 gap-4">
-                    <Loader2 className="w-10 h-10 animate-spin text-soft-blue" />
-                    <p className="text-cool-gray text-sm">Analysing patient data…</p>
-                  </div>
-                )}
-
-                {aiReport && !generatingReport && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-cool-gray">
-                        Based on {fitnessData.length} days of health data
-                      </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setReportExpanded((p) => !p)}
-                        className="text-soft-blue gap-1"
-                      >
-                        {reportExpanded ? (
-                          <>
-                            <ChevronUp className="w-4 h-4" /> Collapse
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="w-4 h-4" /> Expand
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    <ScrollArea className={reportExpanded ? "h-[600px]" : "h-[300px]"}>
-                      <div className="prose prose-sm max-w-none text-dark-slate-gray/90 whitespace-pre-wrap leading-relaxed pr-4">
-                        {aiReport}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ── History Tab ── */}
-          <TabsContent value="history">
-            {doctor?.id ? (
-              <PreviousAppointmentsCard
-                doctorId={doctor.id}
-                patientId={appointment.patient_id}
-              />
-            ) : (
-              <Card className="rounded-3xl border border-gray-100 shadow-md">
-                <CardContent className="flex flex-col items-center justify-center py-12 text-cool-gray gap-2">
-                  <History className="w-10 h-10 opacity-40" />
-                  <p>Unable to load history — doctor ID not found.</p>
+                  )}
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-        </Tabs>
-      </motion.div>
-    </motion.div>
+
+            {/* Lab Tests */}
+            <div ref={labTestsRef}>
+              <LabTests onReferTest={handleTestReferral} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
