@@ -102,7 +102,7 @@ export default function DashboardPage() {
                 </div>
               ))}
 
-              <Button variant="outline" className="w-full bg-transparent">
+              <Button variant="outline" className="w-full bg-soft-coral text-white">
                 View All Appointments
               </Button>
             </CardContent>

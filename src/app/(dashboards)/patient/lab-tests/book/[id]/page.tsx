@@ -390,7 +390,11 @@ export default function BookLabTestPage() {
                 selected={selectedDate}
                 onSelect={handleDateSelect}
                 className="rounded-5 border-0 w-full max-w-[450px] mx-auto"
-                disabled={(date: Date) => date < new Date()}
+                disabled={(date: Date) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  return date < today;
+                }}
                 showOutsideDays={false}
                 today={selectedDate}
               />

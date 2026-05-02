@@ -125,7 +125,11 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
                     onSelect={handleDateSelect}
                     className="rounded-lg border w-[450px]"
                     showOutsideDays={false}
-                    disabled={(date: Date) => date < new Date()}
+                    disabled={(date: Date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
                   />
                 </div>
               </div>

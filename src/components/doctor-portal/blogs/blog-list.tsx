@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Eye, Plus, LayoutGrid, LayoutList, Search } from "lucide-react"
 import { motion, Variants } from "framer-motion"
-import { useBlogStore, Blog } from "@/store/nutritionist/blogs-store"
+import { useBlogStore, Blog } from "@/store/doctor/blogs-store"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Loader from '@/components/loader/loader'

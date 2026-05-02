@@ -34,8 +34,8 @@ export interface Appointment {
   mode:AppointmentMode
   dataShared:boolean
   start_link?:string
-  location?: string  // For physical appointments
-  link?: string      // For online appointments
+  location?: string  
+  link?: string      
 }
 
 

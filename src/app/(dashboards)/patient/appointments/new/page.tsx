@@ -44,7 +44,7 @@ export default function NewAppointmentPage() {
   
   const user = usePatientProfileStore((store) => store.profile)
   const { appointments, createAppointment, updateAppointment } = usePatientAppointmentsStore()
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date(Date.now() + 86400000))
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [appointmentMode, setAppointmentMode] = useState("")
   const [selectedDoctor, setSelectedDoctor] = useState("")
@@ -182,7 +182,11 @@ useEffect(()=>{
   selected={selectedDate}
   onSelect={setSelectedDate}
   className="rounded-5 border-0 w-full max-w-[450px] mx-auto"
-  disabled={(date: Date) => date < new Date()}
+  disabled={(date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  }}
   showOutsideDays={false}
   today={selectedDate}
 />

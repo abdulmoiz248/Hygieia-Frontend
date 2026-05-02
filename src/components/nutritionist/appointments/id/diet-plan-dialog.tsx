@@ -221,7 +221,11 @@ min={1}
           mode="single"
           selected={formData.startDate as Date}
           onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date as Date, endDate: date as Date }))} 
-          disabled={(date) => date < new Date()} // disable past dates
+          disabled={(date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date < today;
+          }}
           initialFocus
         />
       </PopoverContent>

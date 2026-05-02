@@ -8,32 +8,27 @@ export function middleware(req: NextRequest) {
   const role = req.cookies.get('role')?.value
 
   // ── Protect role-specific routes ──────────────────────────────────────────
+const protectedRoutes = ['admin', 'doctor', 'pathologist', 'nutritionist']
 
-  // Admin routes → must be logged in AND role === "admin"
-  if (url.pathname.startsWith('/admin')) {
-    if (!token) {
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-    if (role !== 'admin') {
-      // Logged in but wrong role → send to their own dashboard
-      url.pathname = `/${role}/dashboard`
-      return NextResponse.redirect(url)
-    }
-  }
+const matchedRoute = protectedRoutes.find(route =>
+  url.pathname.startsWith(`/${route}`)
+)
 
-  // Pathologist / Nutritionist routes → must be logged in
-  if (
-    (url.pathname.startsWith('/pathologist') || url.pathname.startsWith('/nutritionist')) &&
-    !token
-  ) {
+if (matchedRoute) {
+  if (!token) {
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
+  if (role !== matchedRoute) {
+    url.pathname = role ? `/${role}/dashboard` : '/login'
+    return NextResponse.redirect(url)
+  }
+}
+
   // ── Redirect logged-in users away from login/signup ───────────────────────
   if ((url.pathname === '/login' || url.pathname === '/signup') && token && role) {
-    url.pathname = `/${role}/dashboard`
+    url.pathname = role ? `/${role}/dashboard` : '/login'
     return NextResponse.redirect(url)
   }
 
@@ -47,5 +42,6 @@ export const config = {
     '/admin/:path*',
     '/pathologist/:path*',
     '/nutritionist/:path*',
+    '/doctor/:path*',
   ],
 }
