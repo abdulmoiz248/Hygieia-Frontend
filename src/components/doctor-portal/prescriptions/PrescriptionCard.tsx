@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Edit, Calendar, Pill, FileText, AlertTriangle } from "lucide-react"
+import { Edit, Calendar, Pill, FileText } from "lucide-react"
 import { EditPrescriptionDialog } from "./EditPrescriptionDialog"
 import { Prescription } from "@/store/doctor/doctor-prescription-store"
 

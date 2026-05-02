@@ -46,10 +46,6 @@ export const fetchPatientAnalytics = async (patientId: string) => {
 }
 
 export default function DoctorAppointment({ appointmentId }: { appointmentId: string }) {
-  const { addPrescription } = {
-    // minimal shim — update store reactively after completion
-    addPrescription: (p: any) => {},
-  }
   const user = useDoctorStore().profile
 
   const { appointments, isLoading, updateAppointmentStatus } = useDoctorAppointmentStore()
@@ -483,7 +479,7 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
                       </p>
                       {assignedPrescription.notes && (
                         <p className="text-sm italic text-cool-gray mt-2">
-                          "{assignedPrescription.notes}"
+                           {`"${assignedPrescription.notes}"`}
                         </p>
                       )}
                     </div>
