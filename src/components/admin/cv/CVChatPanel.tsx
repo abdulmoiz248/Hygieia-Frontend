@@ -103,7 +103,6 @@ export default function CVChatPanel({ onClose }: CVChatPanelProps) {
           </div>
           <div>
             <p className="text-sm font-semibold text-white leading-tight">CV Assistant</p>
-            <p className="text-[11px] text-white/70">Powered by RAG · Groq</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors text-white">
