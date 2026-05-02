@@ -70,30 +70,7 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
-      /**
-       * ✅ FIXED: Was calling /prescriptions/{prescriptionId} which doesn't exist.
-       *
-       * Correct endpoint: PATCH /appointments/prescriptions/patient/{patientId}
-       * The patientId comes from the updates object (already in the Prescription interface).
-       * The prescriptionId is passed in the dto body so the backend knows which record to update.
-       *
-       * Request shape expected by the API:
-       * {
-       *   doctorId: string,
-       *   dto: { notes, startDate, endDate, status, medications[] }
-       * }
-       */
       updatePrescriptionBackend: async (prescriptionId, updates, doctorId) => {
-        // patientId is required to build the URL
-        const patientId = updates.patientId
-        if (!patientId) {
-          console.error(
-            "[doctor-prescription-store] updatePrescriptionBackend: patientId is missing in updates. " +
-              "Make sure you pass the full prescription object including patientId."
-          )
-          return
-        }
-
         set({ isLoading: true })
         try {
           // Parse medications back to array if stored as JSON string
@@ -102,27 +79,26 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
             try {
               medicationsArray = JSON.parse(updates.medications as string)
             } catch {
-              // If not JSON, wrap in minimal object so the API doesn't fail
               medicationsArray = [{ name: updates.medications }]
             }
           }
 
-          // ✅ Correct endpoint and body shape
+          // PATCH /appointments/prescriptions/{id}
           const { data } = await api.patch(
-            `/appointments/prescriptions/patient/${patientId}`,
+            `/appointments/prescriptions/${prescriptionId}`,
             {
               doctorId,
               dto: {
                 notes: updates.notes,
                 startDate: updates.startDate,
-                endDate: updates.followUpDate, // followUpDate maps to endDate in the API
+                endDate: updates.followUpDate,
                 status: "active",
                 medications: medicationsArray,
               },
             }
           )
 
-          // Map the response back into the local Prescription shape
+          // Map response back to local Prescription shape
           const updatedPrescription: Prescription = {
             id: data.id ?? prescriptionId,
             diagnosis: data.diagnosis ?? updates.diagnosis ?? "",
@@ -135,7 +111,7 @@ export const useDoctorPrescriptionStore = create<DoctorPrescriptionStore>()(
             notes: data.notes ?? updates.notes ?? "",
             followUpDate: data.end_date ?? data.follow_up_date ?? updates.followUpDate ?? "",
             startDate: data.start_date ?? updates.startDate ?? "",
-            patientId: data.patient_id ?? patientId,
+            patientId: data.patient_id ?? updates.patientId ?? "",
             patientName: data.patientName ?? updates.patientName ?? "",
             doctorId: data.doctor_id ?? doctorId,
           }

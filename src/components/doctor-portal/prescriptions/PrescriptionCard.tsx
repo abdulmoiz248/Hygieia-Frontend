@@ -126,17 +126,7 @@ export function PrescriptionCard({ prescription, onUpdate }: PrescriptionCardPro
             </div>
           )}
 
-          {/* Duration & Frequency Summary */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-3 rounded-lg bg-white/40">
-              <p className="text-sm text-muted-foreground">Duration</p>
-              <p className="font-semibold">{prescription.duration || "—"}</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-white/40">
-              <p className="text-sm text-muted-foreground">Frequency</p>
-              <p className="font-semibold">{prescription.frequency || "—"}</p>
-            </div>
-          </div>
+
 
           {/* Notes */}
           {prescription.notes && (
