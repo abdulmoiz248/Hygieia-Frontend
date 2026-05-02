@@ -70,7 +70,7 @@ const RecentDietPlans = () => {
           ))
         )}
 
-        <Button variant="outline" className="w-full bg-transparent">
+        <Button variant="outline" className="w-full bg-mint-green text-white">
           View All Diet Plans
         </Button>
       </CardContent>
