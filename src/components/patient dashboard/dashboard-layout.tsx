@@ -37,11 +37,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <TopNav onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
         <main
-          className={`flex-1 overflow-y-auto transition-all duration-300 ease-in-out ${
+          className={`flex-1 min-h-0 overflow-y-auto transition-all duration-300 ease-in-out ${
             isChatPage ? "p-0 " : "p-4 lg:p-6"
           }`}
         >
-          <div className="max-w-full mx-auto">{children}</div>
+          <div className="max-w-full mx-auto h-full min-h-0">{children}</div>
         </main>
       </div>
     </div>
