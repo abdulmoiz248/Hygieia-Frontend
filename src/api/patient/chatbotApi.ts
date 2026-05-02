@@ -45,8 +45,9 @@ export async function sendChatMessage(data: ChatRequest): Promise<ChatResponseDa
 /**
  * Confirm a pending action
  */
-export async function confirmChatAction(data: ChatConfirmRequest): Promise<void> {
-  await api.post(`${BASE_URL}/confirm`, data, { headers: getAuthHeaders() })
+export async function confirmChatAction(data: ChatConfirmRequest): Promise<ChatResponseData> {
+  const response = await api.post(`${BASE_URL}/confirm`, data, { headers: getAuthHeaders() })
+  return unwrapData<ChatResponseData>(response.data)
 }
 
 /**

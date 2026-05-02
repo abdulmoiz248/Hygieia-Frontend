@@ -217,22 +217,33 @@ export const useChatbotStore = create<ChatbotState>()(
       },
 
       confirmAction: async (patientId, actionToken) => {
-        const { activeConversationId } = get()
+        const { activeConversationId, messages } = get()
         if (!activeConversationId) return
 
         try {
           set({ isSending: true, error: null })
-          await chatbotApi.confirmChatAction({
+          const data = await chatbotApi.confirmChatAction({
             patientId,
             conversationId: activeConversationId,
             actionToken,
           })
           
-          // You might want to automatically send a message saying "Action confirmed" or let the UI handle it.
-          // For now, we will just update the isSending state.
-          set({ isSending: false })
+          const assistantMessage: ChatbotMessage = {
+            id: `msg-${Date.now()}`,
+            role: data.message.role,
+            content: data.message.content,
+            createdAt: data.message.created_at,
+            uiComponents: data.ui_components,
+            quickReplies: data.quick_replies,
+            pendingAction: data.pending_action,
+            status: "sent",
+          }
+
+          set((state) => ({
+            messages: [...state.messages, assistantMessage],
+            isSending: false,
+          }))
           
-          // Optionally refresh the chat history or add a local success message.
         } catch (error: any) {
           set({ error: error?.message || "Failed to confirm action", isSending: false })
         }

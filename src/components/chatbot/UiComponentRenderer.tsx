@@ -104,6 +104,7 @@ export function UiComponentRenderer({ component }: Props) {
 
     case "doctor_list":
     case "nutritionist_list":
+    case "lab_technician_list":
       const items = (data.items as any[]) || []
       return (
         <div className="grid grid-cols-1 gap-3 mt-3">
@@ -191,6 +192,145 @@ export function UiComponentRenderer({ component }: Props) {
                 )})}
             </div>
         )
+
+    case "appointment_list":
+      const apptItems = (data.items as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          {apptItems.map((appt: any) => (
+             <Card key={appt.id}>
+               <CardContent className="p-3">
+                 <h4 className="text-sm font-bold text-dark-slate-gray capitalize">{appt.appt_type || appt.type || "Appointment"}</h4>
+                 <div className="text-xs text-cool-gray mt-1 flex gap-2">
+                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {appt.date}</span>
+                   <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {appt.time}</span>
+                 </div>
+                 {appt.status && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {appt.status}</p>}
+                 {appt.mode && <p className="text-xs mt-1 capitalize text-dark-slate-gray/80">Mode: {appt.mode}</p>}
+               </CardContent>
+             </Card>
+          ))}
+        </div>
+      )
+
+    case "appointment_card":
+      return (
+        <Card className="mt-3">
+          <CardContent className="p-3">
+            <h4 className="text-sm font-bold text-dark-slate-gray capitalize">{(data.appt_type as string) || (data.type as string) || "Appointment"}</h4>
+            <div className="text-xs text-cool-gray mt-1 flex gap-2">
+              <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {data.date as string}</span>
+              <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {data.time as string}</span>
+            </div>
+            {data.status && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {data.status as string}</p>}
+            {data.mode && <p className="text-xs mt-1 capitalize text-dark-slate-gray/80">Mode: {data.mode as string}</p>}
+          </CardContent>
+        </Card>
+      )
+
+    case "prescription_list":
+      const prescriptions = (data.items as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          {prescriptions.map((rx: any) => (
+             <Card key={rx.id}>
+               <CardContent className="p-3">
+                 <h4 className="text-sm font-bold text-dark-slate-gray">Prescription {rx.start_date ? `from ${rx.start_date}` : ""}</h4>
+                 {rx.doctorName && <p className="text-xs text-cool-gray mt-1">Dr. {rx.doctorName}</p>}
+                 <div className="mt-2 space-y-2">
+                   {(rx.medications || []).map((med: any, idx: number) => (
+                     <div key={idx} className="bg-gray-50 p-2 rounded text-xs border">
+                       <span className="font-semibold">{med.name}</span> - {med.dosage}
+                       <p className="mt-1 text-cool-gray">{med.frequency} at {med.time}</p>
+                       {med.instructions && <p className="mt-1 italic">{med.instructions}</p>}
+                     </div>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+          ))}
+        </div>
+      )
+
+    case "medical_record_list":
+      const records = (data.items as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          {records.map((rec: any) => (
+             <Card key={rec.id}>
+               <CardContent className="p-3">
+                 <h4 className="text-sm font-bold text-dark-slate-gray">{rec.title}</h4>
+                 <div className="text-xs text-cool-gray mt-1 flex gap-2">
+                   <span className="capitalize">{rec.record_type}</span>
+                   {rec.date && <span>• {rec.date}</span>}
+                 </div>
+                 {rec.doctor_name && <p className="text-xs mt-1 text-dark-slate-gray/80">Dr. {rec.doctor_name}</p>}
+                 {rec.file_url && (
+                   <a href={rec.file_url} target="_blank" rel="noreferrer" className="text-xs text-soft-blue hover:underline mt-2 inline-block">
+                     View Document
+                   </a>
+                 )}
+               </CardContent>
+             </Card>
+          ))}
+        </div>
+      )
+
+    case "medication_log_list":
+      const logs = (data.items as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-2 mt-3">
+          {logs.map((log: any) => (
+             <div key={log.id} className="p-2 border rounded-lg bg-white flex items-center justify-between">
+               <div>
+                 <p className="text-xs font-semibold">{log.medicationName || "Medication"}</p>
+                 <p className="text-[10px] text-cool-gray">Scheduled: {log.scheduledTime}</p>
+               </div>
+               {log.taken ? (
+                 <CheckCircle2 className="w-4 h-4 text-mint-green" />
+               ) : (
+                 <XCircle className="w-4 h-4 text-soft-coral" />
+               )}
+             </div>
+          ))}
+        </div>
+      )
+
+    case "lab_booking_list":
+      const labBookings = (data.items as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          {labBookings.map((b: any) => (
+             <Card key={b.id}>
+               <CardContent className="p-3">
+                 <h4 className="text-sm font-bold text-dark-slate-gray">{b.test?.name || "Lab Test"}</h4>
+                 <div className="text-xs text-cool-gray mt-1 flex gap-2">
+                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {b.scheduledDate}</span>
+                   <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {b.scheduledTime}</span>
+                 </div>
+                 <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {b.status}</p>
+                 {b.location && <p className="text-xs mt-1 text-dark-slate-gray/80">Location: {b.location}</p>}
+               </CardContent>
+             </Card>
+          ))}
+        </div>
+      )
+
+    case "recommendation_list":
+      const recs = (data.recommendations as any[]) || []
+      return (
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          {recs.map((rec: any, i: number) => (
+             <Card key={i}>
+               <CardContent className="p-3">
+                 <h4 className="text-sm font-bold text-soft-blue">{rec.title}</h4>
+                 <p className="text-xs text-dark-slate-gray mt-1">{rec.description}</p>
+                 <p className="text-[10px] text-cool-gray mt-2 uppercase">{rec.category}</p>
+               </CardContent>
+             </Card>
+          ))}
+        </div>
+      )
 
     default:
       // Fallback for unknown types
