@@ -40,11 +40,7 @@ export function ChatSidebar() {
   const [renameError, setRenameError] = useState("")
   const [deleteSubmitting, setDeleteSubmitting] = useState(false)
 
-  const MAX_RENAME_WORDS = 30
-
-  const countWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).length
-
-  const limitWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).slice(0, MAX_RENAME_WORDS).join(" ")
+  const MAX_RENAME_CHARS = 30
 
   useEffect(() => {
     if (patientId) {
@@ -65,16 +61,16 @@ export function ChatSidebar() {
     if (!patientId || !selectedConversationId) return
 
     const nextTitle = renameTitle.trim()
-    const wordCount = countWords(nextTitle)
+    const charCount = nextTitle.length
 
     if (!nextTitle) {
       setRenameError("Conversation name is required.")
       return
     }
 
-    if (wordCount > MAX_RENAME_WORDS) {
-      setRenameError(`Conversation name cannot exceed ${MAX_RENAME_WORDS} words.`)
-      setRenameTitle(limitWords(nextTitle))
+    if (charCount > MAX_RENAME_CHARS) {
+      setRenameError(`Conversation name cannot exceed ${MAX_RENAME_CHARS} characters.`)
+      setRenameTitle(nextTitle.slice(0, MAX_RENAME_CHARS))
       return
     }
 
@@ -230,7 +226,7 @@ export function ChatSidebar() {
           <DialogHeader>
             <DialogTitle className="text-dark-slate-gray">Rename chat</DialogTitle>
             <DialogDescription className="text-cool-gray">
-              Update the conversation title. Maximum 30 words.
+              Update the conversation title. Maximum 30 characters.
             </DialogDescription>
           </DialogHeader>
 
@@ -238,18 +234,23 @@ export function ChatSidebar() {
             <input
               autoFocus
               value={renameTitle}
+              maxLength={MAX_RENAME_CHARS}
               onChange={(e) => {
-                const nextValue = e.target.value
-                const trimmedValue = limitWords(nextValue)
-
-                setRenameTitle(trimmedValue)
+                setRenameTitle(e.target.value)
                 setRenameError("")
               }}
               onPaste={(e) => {
-                e.preventDefault()
                 const pastedText = e.clipboardData.getData("text")
-                setRenameTitle(limitWords(`${renameTitle} ${pastedText}`.trim()))
-                setRenameError("")
+                const availableSpace = MAX_RENAME_CHARS - renameTitle.length
+                if (availableSpace <= 0) {
+                  e.preventDefault()
+                  return
+                }
+
+                if (pastedText.length > availableSpace) {
+                  e.preventDefault()
+                  setRenameTitle(`${renameTitle}${pastedText.slice(0, availableSpace)}`)
+                }
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -261,7 +262,7 @@ export function ChatSidebar() {
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-dark-slate-gray outline-none transition-colors focus:border-soft-blue"
             />
             <div className="flex items-center justify-between text-xs text-cool-gray">
-              <span>{countWords(renameTitle)} / {MAX_RENAME_WORDS} words</span>
+              <span>{renameTitle.length} / {MAX_RENAME_CHARS} characters</span>
               {renameError ? <span className="text-soft-coral">{renameError}</span> : <span>Keep it short and clear.</span>}
             </div>
           </div>
