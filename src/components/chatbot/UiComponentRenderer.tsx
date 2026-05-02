@@ -7,6 +7,24 @@ import { useChatbotStore } from "@/store/patient/chatbot-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { UiComponent } from "@/types/patient-chat"
 
+const formatDate = (dateStr?: string | null) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const formatted = d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+    // Convert 'May' to 'may' if the user specifically requested lowercase, or just let 'May' be.
+    // The user typed "23 may 2026" but "23 May 2026" is proper formatting. Let's return long month format.
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 interface Props {
   component: UiComponent
 }
@@ -164,7 +182,7 @@ export function UiComponentRenderer({ component }: Props) {
              <Card key={test.id}>
                <CardContent className="p-3">
                  <h4 className="text-sm font-bold text-dark-slate-gray">{test.name}</h4>
-                 {test.price && <p className="text-xs text-mint-green font-semibold mt-1">${test.price}</p>}
+                 {test.price && <p className="text-xs text-mint-green font-semibold mt-1">Rs. {test.price}</p>}
                  {test.description && <p className="text-xs text-cool-gray mt-1 line-clamp-2">{test.description}</p>}
                  <Button 
                   size="sm" 
@@ -202,7 +220,7 @@ export function UiComponentRenderer({ component }: Props) {
                <CardContent className="p-3">
                  <h4 className="text-sm font-bold text-dark-slate-gray capitalize">{appt.appt_type || appt.type || "Appointment"}</h4>
                  <div className="text-xs text-cool-gray mt-1 flex gap-2">
-                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {appt.date}</span>
+                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {formatDate(appt.date)}</span>
                    <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {appt.time}</span>
                  </div>
                  {appt.status && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {appt.status}</p>}
@@ -219,7 +237,7 @@ export function UiComponentRenderer({ component }: Props) {
           <CardContent className="p-3">
             <h4 className="text-sm font-bold text-dark-slate-gray capitalize">{(data.appt_type as string) || (data.type as string) || "Appointment"}</h4>
             <div className="text-xs text-cool-gray mt-1 flex gap-2">
-              <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {data.date as string}</span>
+              <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {formatDate(data.date as string)}</span>
               <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {data.time as string}</span>
             </div>
             {data.status && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {data.status as string}</p>}
@@ -235,7 +253,7 @@ export function UiComponentRenderer({ component }: Props) {
           {prescriptions.map((rx: any) => (
              <Card key={rx.id}>
                <CardContent className="p-3">
-                 <h4 className="text-sm font-bold text-dark-slate-gray">Prescription {rx.start_date ? `from ${rx.start_date}` : ""}</h4>
+                 <h4 className="text-sm font-bold text-dark-slate-gray">Prescription {rx.start_date ? `from ${formatDate(rx.start_date)}` : ""}</h4>
                  {rx.doctorName && <p className="text-xs text-cool-gray mt-1">Dr. {rx.doctorName}</p>}
                  <div className="mt-2 space-y-2">
                    {(rx.medications || []).map((med: any, idx: number) => (
@@ -262,7 +280,7 @@ export function UiComponentRenderer({ component }: Props) {
                  <h4 className="text-sm font-bold text-dark-slate-gray">{rec.title}</h4>
                  <div className="text-xs text-cool-gray mt-1 flex gap-2">
                    <span className="capitalize">{rec.record_type}</span>
-                   {rec.date && <span>• {rec.date}</span>}
+                   {rec.date && <span>• {formatDate(rec.date)}</span>}
                  </div>
                  {rec.doctor_name && <p className="text-xs mt-1 text-dark-slate-gray/80">Dr. {rec.doctor_name}</p>}
                  {rec.file_url && (
@@ -305,7 +323,7 @@ export function UiComponentRenderer({ component }: Props) {
                <CardContent className="p-3">
                  <h4 className="text-sm font-bold text-dark-slate-gray">{b.test?.name || "Lab Test"}</h4>
                  <div className="text-xs text-cool-gray mt-1 flex gap-2">
-                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {b.scheduledDate}</span>
+                   <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {formatDate(b.scheduledDate)}</span>
                    <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {b.scheduledTime}</span>
                  </div>
                  <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {b.status}</p>
