@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {  Trash2, Eye, Plus } from "lucide-react"
+import { Trash2, Eye, Plus, LayoutGrid, LayoutList } from "lucide-react"
 import { motion, Variants } from "framer-motion"
 import { useBlogStore, Blog } from "@/store/nutritionist/blogs-store"
 import Image from "next/image"
@@ -24,6 +24,7 @@ const itemVariants: Variants = {
 export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
   const { blogs, loading, error, fetchBlogs, deleteBlog } = useBlogStore()
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null)
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list")
 
   useEffect(() => {
     if (blogs.length === 0) fetchBlogs()
@@ -37,12 +38,11 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
   }
 
   if (loading) {
-    return 
-      (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <Loader />
-    </div>
-  )
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader />
+      </div>
+    )
   }
 
   if (error) {
@@ -56,10 +56,31 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
           <h1 className="text-3xl font-bold text-soft-coral">My Blogs</h1>
           <p className="text-cool-gray">Manage your blog posts and create new content</p>
         </div>
-        <Button onClick={onCreate} className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
-          <Plus className="w-4 h-4 mr-2" />
-          New Post
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+             <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setViewMode("grid")}
+              className={`rounded-none px-3 ${viewMode === "grid" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setViewMode("list")}
+              className={`rounded-none px-3 ${viewMode === "list" ? "bg-soft-blue text-white hover:bg-soft-blue/90" : "text-cool-gray hover:bg-gray-100"}`}
+            >
+              <LayoutList className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button onClick={onCreate} className="bg-soft-blue hover:bg-soft-blue/90 text-snow-white">
+            <Plus className="w-4 h-4 mr-2" />
+            New Post
+          </Button>
+        </div>
       </motion.div>
 
       {!blogs || blogs.length === 0 ? (
@@ -71,7 +92,8 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
             </Button>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === "list" ? (
+        /* ── LIST VIEW ── */
         <div className="grid gap-6">
           {blogs.map((blog) => (
             <Card
@@ -106,11 +128,9 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
                       <span className="text-xs text-cool-gray">+{blog.tags.length - 3} more</span>
                     )}
                   </div>
-
                   <h3 className="text-lg md:text-xl font-bold text-soft-coral line-clamp-2">{blog.title}</h3>
                   {blog.excerpt && <p className="text-sm text-cool-gray line-clamp-3">{blog.excerpt}</p>}
                 </div>
-
                 <div className="flex items-center justify-between mt-4 text-sm text-cool-gray">
                   <span>{blog.publishedat && new Date(blog.publishedat).toLocaleDateString()}</span>
                   <span>{blog.readtime && `${blog.readtime} min read`}</span>
@@ -118,10 +138,7 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onView(blog)
-                      }}
+                      onClick={(e) => { e.stopPropagation(); onView(blog) }}
                       className="hover:bg-mint-green/20"
                     >
                       <Eye className="w-4 h-4" />
@@ -129,17 +146,85 @@ export function BlogList({ onEdit, onCreate, onView }: BlogListProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setBlogToDelete(blog)
-                      }}
+                      onClick={(e) => { e.stopPropagation(); setBlogToDelete(blog) }}
                       className="text-soft-coral hover:text-soft-coral hover:bg-soft-coral/20"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-
+                {blog.featured && (
+                  <Badge className="absolute top-4 right-4 bg-soft-coral text-white text-xs px-3 py-1 rounded-full shadow-md">
+                    Featured
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        /* ── GRID VIEW (2 columns) ── */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {blogs.map((blog) => (
+            <Card
+              key={blog.id}
+              className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col"
+              onClick={() => onEdit(blog)}
+            >
+              {blog.image && (
+                <div className="relative w-full h-44">
+                  <Image
+                    src={blog.image}
+                    alt={blog.title}
+                    fill
+                    className="object-cover rounded-t-3xl transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <CardContent className="p-4 flex flex-col flex-1 justify-between">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {blog.category && (
+                      <Badge className="bg-soft-blue/20 text-soft-blue text-xs px-2 py-0.5 rounded-full font-medium">
+                        {blog.category.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </Badge>
+                    )}
+                    {blog.tags?.slice(0, 2).map((tag) => (
+                      <Badge key={tag} className="bg-mint-green/20 text-dark-slate-gray text-xs px-2 py-0.5 rounded-full">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {blog.tags && blog.tags.length > 2 && (
+                      <span className="text-xs text-cool-gray">+{blog.tags.length - 2} more</span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-bold text-soft-coral line-clamp-2">{blog.title}</h3>
+                  {blog.excerpt && (
+                    <p className="text-sm text-cool-gray line-clamp-2">{blog.excerpt}</p>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-3 text-xs text-cool-gray">
+                  <span>{blog.publishedat && new Date(blog.publishedat).toLocaleDateString()}</span>
+                  <span>{blog.readtime && `${blog.readtime} min read`}</span>
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => { e.stopPropagation(); onView(blog) }}
+                      className="h-7 w-7 p-0 hover:bg-mint-green/20"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => { e.stopPropagation(); setBlogToDelete(blog) }}
+                      className="h-7 w-7 p-0 text-soft-coral hover:text-soft-coral hover:bg-soft-coral/20"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
                 {blog.featured && (
                   <Badge className="absolute top-4 right-4 bg-soft-coral text-white text-xs px-3 py-1 rounded-full shadow-md">
                     Featured
