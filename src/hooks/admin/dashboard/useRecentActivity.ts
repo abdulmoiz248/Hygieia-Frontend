@@ -24,10 +24,10 @@ export interface ActivityItem {
   id:        string
   type:      ActivityType
   label:     string
-  sub:       string          // e.g. role, email, subject
+  sub:       string
   timestamp: Date
-  icon:      string          // lucide icon name
-  color:     string          // tailwind/css color token
+  icon:      string
+  color:     string
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -46,16 +46,27 @@ function relativeTime(date: Date): string {
   return `${days}d ago`
 }
 
+/**
+ * Safely parse a timestamp string into a Date.
+ * Returns null if the value is falsy or results in an invalid date —
+ * so callers can decide to skip the item rather than show "just now".
+ */
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value) return null
+  const d = new Date(value)
+  return isNaN(d.getTime()) ? null : d
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useRecentActivity() {
-  const { data: blogPosts,    isLoading: loadingBlogs }         = useBlogPosts()
-  const { data: cvs,          isLoading: loadingCVs }           = useCVs()
-  const { data: newsletters,  isLoading: loadingNewsletters }   = useSentNewsletters()
-  const { data: doctors,      isLoading: loadingDoctors }       = useDoctors()
-  const { data: nutritionists,isLoading: loadingNutritionists } = useNutritionists()
-  const { data: pathologists, isLoading: loadingPathologists }  = usePathologists()
-  const { data: faqs,         isLoading: loadingFaqs }          = useFetchFaqs()
+  const { data: blogPosts,     isLoading: loadingBlogs }         = useBlogPosts()
+  const { data: cvs,           isLoading: loadingCVs }           = useCVs()
+  const { data: newsletters,   isLoading: loadingNewsletters }   = useSentNewsletters()
+  const { data: doctors,       isLoading: loadingDoctors }       = useDoctors()
+  const { data: nutritionists, isLoading: loadingNutritionists } = useNutritionists()
+  const { data: pathologists,  isLoading: loadingPathologists }  = usePathologists()
+  const { data: faqs,          isLoading: loadingFaqs }          = useFetchFaqs()
 
   const isLoading =
     loadingBlogs || loadingCVs || loadingNewsletters ||
@@ -66,29 +77,27 @@ export function useRecentActivity() {
 
     // ── Blog posts ──────────────────────────────────────────────────────────
     ;(blogPosts ?? []).forEach((post) => {
-      const createdAt = post.createdAt ? new Date(post.createdAt) : new Date()
+      const createdAt = parseDate(post.createdAt) ?? new Date()
 
-      // Submitted event (always)
       items.push({
         id:        `blog-submitted-${post.id}`,
         type:      "blog_submitted",
-        label:     `Blog post submitted`,
+        label:     "Blog post submitted",
         sub:       post.title ?? "Untitled",
         timestamp: createdAt,
         icon:      "FileText",
         color:     "text-soft-coral",
       })
 
-      // Verified event (only if verified)
       if (post.isVerified) {
         const rawPost = post as any
-        const verifiedAt = rawPost.updatedAt ?? rawPost.verifiedAt ?? rawPost.updated_at
+        const verifiedAt = parseDate(rawPost.updatedAt ?? rawPost.verifiedAt ?? rawPost.updated_at)
         items.push({
           id:        `blog-verified-${post.id}`,
           type:      "blog_verified",
-          label:     `Blog post verified`,
+          label:     "Blog post verified",
           sub:       post.title ?? "Untitled",
-          timestamp: verifiedAt ? new Date(verifiedAt) : createdAt,
+          timestamp: verifiedAt ?? createdAt,
           icon:      "CheckCircle2",
           color:     "text-mint-green",
         })
@@ -97,13 +106,13 @@ export function useRecentActivity() {
 
     // ── CVs ─────────────────────────────────────────────────────────────────
     ;(cvs ?? []).forEach((cv: any) => {
-      const ts = cv.createdAt ?? cv.submittedAt ?? cv.created_at
+      const timestamp = parseDate(cv.createdAt ?? cv.submittedAt ?? cv.created_at) ?? new Date()
       items.push({
         id:        `cv-${cv.id ?? cv._id}`,
         type:      "cv_submitted",
-        label:     `CV submitted for review`,
+        label:     "CV submitted for review",
         sub:       cv.name ?? cv.applicantName ?? cv.email ?? "",
-        timestamp: ts ? new Date(ts) : new Date(),
+        timestamp,
         icon:      "FileUser",
         color:     "text-soft-blue",
       })
@@ -131,13 +140,20 @@ export function useRecentActivity() {
     ]
 
     allWorkers.forEach((w: any) => {
-      const ts = w.createdAt ?? w.created_at
+      // Check both camelCase (mapped) and snake_case (raw) — order matters:
+      // mapLabTechnician writes created_at → camelCase createdAt, so w.createdAt
+      // is the primary. w.created_at is a safety net for any unmapped shape.
+      const timestamp = parseDate(w.createdAt ?? w.created_at)
+
+      // Skip workers with no parseable date rather than showing "just now"
+      if (!timestamp) return
+
       items.push({
         id:        `worker-${w._id ?? w.id}`,
         type:      "worker_registered",
         label:     `${w._role} registered`,
         sub:       w.name ?? w.email ?? "",
-        timestamp: ts ? new Date(ts) : new Date(),
+        timestamp,
         icon:      "UserPlus",
         color:     "text-mint-green",
       })
@@ -145,13 +161,13 @@ export function useRecentActivity() {
 
     // ── FAQs ────────────────────────────────────────────────────────────────
     ;(faqs ?? []).forEach((faq: any) => {
-      const ts = faq.createdAt ?? faq.created_at
+      const timestamp = parseDate(faq.createdAt ?? faq.created_at) ?? new Date()
       items.push({
         id:        `faq-${faq.id ?? faq._id}`,
         type:      "faq_added",
         label:     "FAQ added",
         sub:       faq.question ?? "",
-        timestamp: ts ? new Date(ts) : new Date(),
+        timestamp,
         icon:      "HelpCircle",
         color:     "text-soft-coral",
       })

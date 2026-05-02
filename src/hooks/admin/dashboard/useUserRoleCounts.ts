@@ -9,9 +9,22 @@ export interface RoleCount {
   count: number
 }
 
+export interface MonthlyTrend {
+  month: string  // e.g. "2026-03"
+  label: string  // e.g. "Mar 2026"
+  count: number
+}
+
+export interface RoleTrend {
+  role: string
+  total: number
+  monthlyTrends: MonthlyTrend[]
+}
+
 export interface UserRoleCountsData {
   totalUsers: number
   roleCounts: RoleCount[]
+  roleTrends: RoleTrend[]
 }
 
 async function fetchUserRoleCounts(

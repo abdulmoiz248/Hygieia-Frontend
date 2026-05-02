@@ -16,7 +16,7 @@ function mapLabTechnician(t: any): Worker {
   return {
     _id: t._id ?? t.id,
     id: t.id,
-    email: t.email ?? "", 
+    email: t.email ?? "",
     name: t.name ?? "",
     phone: t.phone ?? "",
     gender: t.gender ?? "",
@@ -32,7 +32,7 @@ function mapLabTechnician(t: any): Worker {
     consultationFee: 0,
     workingHours: [],
     rating: 0,
-    createdAt: "",
+    createdAt: t.created_at ?? "",   // ← was hardcoded "" — API returns snake_case
     role: "pathologist" as Role,
   }
 }
@@ -61,10 +61,6 @@ export async function fetchPathologists(): Promise<Worker[]> {
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
-
-// Matches RegisterWorkerDto exactly — backend derives everything else.
-// IMPORTANT: Only these three fields must be sent. Do NOT add extra fields
-// (like _frontendRole) — the backend DTO will reject unknown properties with 400.
 export interface RegisterWorkerPayload {
   name:          string
   role:          string   // "doctor" | "nutritionist" | "lab-technician"
@@ -76,7 +72,6 @@ export async function registerWorker(payload: RegisterWorkerPayload): Promise<{
   email: string
   role: string
 }> {
-  // Destructure only the known DTO fields so no accidental extras are forwarded
   const { name, role, personalEmail } = payload
   const res = await fetch(`${BASE}/auth/register-worker`, {
     method: "POST",
@@ -92,11 +87,6 @@ export async function registerWorker(payload: RegisterWorkerPayload): Promise<{
 }
 
 export interface DeleteWorkerPayload {
-  // FIX: The backend /auth/delete-worker expects the worker's *work* email
-  // (e.g. drsarahjohnson@hygieia.com), not their personal email.
-  // Make sure you're passing the correct field from the Worker object.
-  // In WorkerCard, `worker.personal_email` is actually the work email returned
-  // by the backend — confirm this with your backend team so the naming is clear.
   email: string
 }
 
