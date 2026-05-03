@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Star, FileText, Trash2, ShieldCheck, BadgeCheck, Briefcase } from "lucide-react"
+import { Star, FileText, Trash2, ShieldCheck, BadgeCheck, } from "lucide-react"
 import { Worker, Role, ROLE_CONFIG } from "@/types/admin/workers"
 import WorkerInfoModal from "./WorkerInfoModal"
 import { Button } from "@/components/ui/button"

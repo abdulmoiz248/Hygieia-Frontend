@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MessageSquare, Plus, Trash2, Edit2, Check, X, Loader2, MessageCircle } from "lucide-react"
+import { MessageSquare, Plus, Trash2, Edit2,   Loader2, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

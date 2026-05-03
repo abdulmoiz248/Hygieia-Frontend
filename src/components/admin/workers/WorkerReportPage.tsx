@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import {
-  ArrowLeft,
+  
   Download,
   Loader2,
   Calendar,
@@ -22,12 +21,11 @@ import {
   Star,
   TestTube,
   Pill,
-  Sparkles,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Worker } from "@/types/admin/workers"
@@ -68,7 +66,7 @@ interface WorkerReportPageProps {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function WorkerReportPage({ worker, report, isLoading }: WorkerReportPageProps) {
-  const router = useRouter()
+ 
   const cfg = ROLE_CONFIG[worker.role] || { label: worker.role }
   const RoleIcon = ROLE_ICONS[worker.role] ?? Stethoscope
   const [pdfLoading, setPdfLoading] = useState(false)
@@ -222,16 +220,16 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   let metric1Value = report?.metrics?.core?.totalAppointments ?? report?.metrics?.totalAppointments ?? 0
   let Metric1Icon = Target
   
-  let metric2Label = "Completed"
+  const metric2Label = "Completed"
   let metric2Value = report?.metrics?.core?.completedAppointments ?? report?.metrics?.completedAppointments ?? 0
   
-  let metric3Label = "Unique Patients"
-  let metric3Value = report?.metrics?.core?.uniquePatients ?? report?.metrics?.uniquePatients ?? report?.overview?.patients?.totalUniquePatients ?? 0
+  const metric3Label = "Unique Patients"
+  const metric3Value = report?.metrics?.core?.uniquePatients ?? report?.metrics?.uniquePatients ?? report?.overview?.patients?.totalUniquePatients ?? 0
   
   let metric4Label = "Avg Rating"
   let metric4Value = report?.metrics?.core?.averageRating ?? report?.metrics?.averageRating ?? "-"
   let Metric4Icon = Star
-//@ts-ignore
+//@ts-expect-error  just in case backend send different
   if (worker.role === "lab_technician" || worker.role === "pathologist") {
     metric1Label = "Lab Bookings"
     metric1Value = report?.metrics?.core?.totalLabBookings ?? report?.metrics?.totalLabBookings ?? 0

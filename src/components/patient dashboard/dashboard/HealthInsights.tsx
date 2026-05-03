@@ -6,14 +6,13 @@ import { Award, Dumbbell, FlaskConical, HeartPulse, Lightbulb, Moon, Pill, Refre
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import {
   getLatestPatientRecommendations,
-  predictModel,
+ 
   refreshPatientRecommendations,
-  type ModelType,
+ 
   type PatientRecommendation,
   type PredictionData,
 } from "@/api/patient/recommendationsApi"
@@ -53,13 +52,9 @@ export default function HealthInsights() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [predictionType, setPredictionType] = useState<ModelType>("acne")
-  const [predictionFile, setPredictionFile] = useState<File | null>(null)
-  const [predictionResult, setPredictionResult] = useState<PredictionData | null>(null)
-  const [predictionError, setPredictionError] = useState<string | null>(null)
-  const [predicting, setPredicting] = useState(false)
-  const [modelWarmingUp, setModelWarmingUp] = useState(false)
-  const predictionResultRef = useRef<HTMLDivElement | null>(null)
+ const [predictionResult] = useState<PredictionData | null>(null)
+
+const predictionResultRef = useRef<HTMLDivElement | null>(null)
 
   const patientId = profileId || getStoredPatientId()
 
@@ -68,37 +63,10 @@ export default function HealthInsights() {
     [recommendations]
   )
 
-  const probabilityEntries = useMemo(() => {
-    if (!predictionResult?.probabilities) {
-      return []
-    }
 
-    return Object.entries(predictionResult.probabilities).sort((a, b) => b[1] - a[1])
-  }, [predictionResult])
 
-  const detectedDisease = useMemo(() => {
-    if (predictionResult?.predicted_class) {
-      return predictionResult.predicted_class
-    }
-
-    if (probabilityEntries.length > 0) {
-      return probabilityEntries[0][0]
-    }
-
-    return "Unknown"
-  }, [predictionResult, probabilityEntries])
-
-  const confidencePercent = useMemo(() => {
-    if (typeof predictionResult?.confidence === "number") {
-      return (predictionResult.confidence * 100).toFixed(2)
-    }
-
-    if (probabilityEntries.length > 0) {
-      return (probabilityEntries[0][1] * 100).toFixed(2)
-    }
-
-    return "0.00"
-  }, [predictionResult, probabilityEntries])
+ 
+  
 
   useEffect(() => {
     if (!predictionResult) {
@@ -169,40 +137,7 @@ export default function HealthInsights() {
     }
   }
 
-  const handlePredict = async () => {
-    if (!predictionFile) {
-      setPredictionError("Image file is required.")
-      return
-    }
 
-    setPredicting(true)
-    setPredictionError(null)
-    setModelWarmingUp(false)
-
-    try {
-      const result = await predictModel(predictionType, predictionFile)
-      setPredictionResult(result)
-      toast({
-        title: "Prediction completed",
-        description: `${predictionType === "acne" ? "Acne" : "Dental"} detected: ${result.predicted_class} (${(result.confidence * 100).toFixed(2)}%)`,
-      })
-    } catch (err: any) {
-      const status = err?.response?.status
-      const message = err?.response?.data?.message || err?.message || "Prediction failed"
-      setPredictionResult(null)
-      setPredictionError(message)
-      setModelWarmingUp(status === 503)
-
-      toast({
-        title: "Prediction failed",
-        description: status === 503
-          ? "Model is warming up. Please retry in a moment."
-          : message,
-      })
-    } finally {
-      setPredicting(false)
-    }
-  }
 
   const getRecommendationIcon = (type: string) => {
     if (type === "fitness" || type === "exercise") return Dumbbell

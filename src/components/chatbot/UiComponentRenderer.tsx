@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Clock, CheckCircle2, AlertCircle, XCircle } from "lucide-react"
@@ -12,15 +12,10 @@ const formatDate = (dateStr?: string | null) => {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    const formatted = d.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    });
-    // Convert 'May' to 'may' if the user specifically requested lowercase, or just let 'May' be.
+    // Covert 'May' to 'may' if the user specifically requested lowercase, or just let 'May' be.
     // The user typed "23 may 2026" but "23 May 2026" is proper formatting. Let's return long month format.
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  } catch (e) {
+  } catch  {
     return dateStr;
   }
 };
@@ -75,7 +70,9 @@ export function UiComponentRenderer({ component }: Props) {
             <h4 className={`text-sm font-semibold ${isSuccess ? "text-mint-green" : "text-soft-coral"}`}>
               {data.title as string}
             </h4>
-            {data.body && (
+
+            {
+            data.body as string && (
               <p className="text-xs mt-1 text-dark-slate-gray/80">{data.body as string}</p>
             )}
           </div>
@@ -156,7 +153,7 @@ export function UiComponentRenderer({ component }: Props) {
       const slotsData = (data.slots as any[]) || []
       return (
         <div className="mt-3">
-          {data.message && <p className="text-sm mb-2 text-dark-slate-gray">{data.message as string}</p>}
+          {data.message as string && <p className="text-sm mb-2 text-dark-slate-gray">{data.message as string}</p>}
           <div className="flex flex-wrap gap-2">
             {slotsData.map((slot: any, idx: number) => (
               <Button
@@ -240,8 +237,8 @@ export function UiComponentRenderer({ component }: Props) {
               <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {formatDate(data.date as string)}</span>
               <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {data.time as string}</span>
             </div>
-            {data.status && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {data.status as string}</p>}
-            {data.mode && <p className="text-xs mt-1 capitalize text-dark-slate-gray/80">Mode: {data.mode as string}</p>}
+            {data.status as string && <p className="text-xs mt-1 font-medium capitalize text-soft-blue">Status: {data.status as string}</p>}
+            {data.mode as string  && <p className="text-xs mt-1 capitalize text-dark-slate-gray/80">Mode: {data.mode as string}</p>}
           </CardContent>
         </Card>
       )

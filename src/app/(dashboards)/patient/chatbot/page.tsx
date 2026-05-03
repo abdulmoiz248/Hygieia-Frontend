@@ -9,7 +9,7 @@ import { Menu, X } from "lucide-react"
 
 export default function ChatbotPage() {
   const { fetchInitialProfile, profile } = usePatientProfileStore()
-  const { startNewChat, activeConversationId } = useChatbotStore()
+  const { activeConversationId } = useChatbotStore()
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   // Ensure we have the profile loaded

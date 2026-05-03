@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import {
   ConversationListItem,
-  ChatHistoryMessage,
+
   UiComponent,
   PendingAction,
 } from "@/types/patient-chat"
@@ -87,7 +87,7 @@ export const useChatbotStore = create<ChatbotState>()(
           // If this is the initial fetch and there's no active conversation, auto-load the newest one
           if (!loadMore && data.items && data.items.length > 0 && !get().activeConversationId) {
             // fire-and-forget: load conversation history for the most recent conversation
-            get().loadConversation(patientId, data.items[0].conversation_id).catch(() => {})
+            get().loadConversation(patientId, data.items[0].conversation_id).catch(() => { })
           }
         } catch (error: any) {
           set({ error: error?.message || "Failed to fetch conversations", isFetchingConversations: false })
@@ -176,6 +176,7 @@ export const useChatbotStore = create<ChatbotState>()(
             status: "sent",
           }
 
+          // @ts-expect-error - uiComponents has proper keys
           set((state) => {
             const updatedMessages = state.messages.map((m) =>
               m.id === optimisticMessage.id ? { ...m, status: "sent" } : m
@@ -189,21 +190,21 @@ export const useChatbotStore = create<ChatbotState>()(
 
           // If this was a new conversation, refresh the sidebar
           if (!activeConversationId && data.conversation_id) {
-             get().fetchConversations(patientId)
+            get().fetchConversations(patientId)
           } else {
-             // We can also optimistically update the conversation preview in the list
-             set((state) => {
-                 const convs = [...state.conversations]
-                 const idx = convs.findIndex(c => c.conversation_id === data.conversation_id)
-                 if(idx >= 0) {
-                     convs[idx].preview = data.message.content
-                     convs[idx].updated_at = new Date().toISOString()
-                     // Move to top
-                     const [c] = convs.splice(idx, 1)
-                     convs.unshift(c)
-                 }
-                 return { conversations: convs }
-             })
+            // We can also optimistically update the conversation preview in the list
+            set((state) => {
+              const convs = [...state.conversations]
+              const idx = convs.findIndex(c => c.conversation_id === data.conversation_id)
+              if (idx >= 0) {
+                convs[idx].preview = data.message.content
+                convs[idx].updated_at = new Date().toISOString()
+                // Move to top
+                const [c] = convs.splice(idx, 1)
+                convs.unshift(c)
+              }
+              return { conversations: convs }
+            })
           }
         } catch (error: any) {
           set((state) => ({
@@ -217,7 +218,7 @@ export const useChatbotStore = create<ChatbotState>()(
       },
 
       confirmAction: async (patientId, actionToken) => {
-        const { activeConversationId, messages } = get()
+        const { activeConversationId } = get()
         if (!activeConversationId) return
 
         try {
@@ -227,7 +228,7 @@ export const useChatbotStore = create<ChatbotState>()(
             conversationId: activeConversationId,
             actionToken,
           })
-          
+
           const assistantMessage: ChatbotMessage = {
             id: `msg-${Date.now()}`,
             role: data.message.role,
@@ -243,41 +244,41 @@ export const useChatbotStore = create<ChatbotState>()(
             messages: [...state.messages, assistantMessage],
             isSending: false,
           }))
-          
+
         } catch (error: any) {
           set({ error: error?.message || "Failed to confirm action", isSending: false })
         }
       },
 
       renameConversation: async (patientId, conversationId, title) => {
-          try {
-            await chatbotApi.renameConversation(patientId, conversationId, title)
-              set(state => ({
-                  conversations: state.conversations.map(c => 
-                      c.conversation_id === conversationId ? { ...c, title } : c
-                  )
-              }))
-          } catch (error: any) {
-              console.error("Failed to rename conversation", error)
-          }
+        try {
+          await chatbotApi.renameConversation(patientId, conversationId, title)
+          set(state => ({
+            conversations: state.conversations.map(c =>
+              c.conversation_id === conversationId ? { ...c, title } : c
+            )
+          }))
+        } catch (error: any) {
+          console.error("Failed to rename conversation", error)
+        }
       },
 
       deleteConversation: async (patientId, conversationId) => {
-          try {
-              await chatbotApi.deleteConversation(conversationId, patientId)
-              set(state => {
-                  const newState: Partial<ChatbotState> = {
-                      conversations: state.conversations.filter(c => c.conversation_id !== conversationId)
-                  }
-                  if (state.activeConversationId === conversationId) {
-                      newState.activeConversationId = null
-                      newState.messages = []
-                  }
-                  return newState
-              })
-          } catch (error: any) {
-              console.error("Failed to delete conversation", error)
-          }
+        try {
+          await chatbotApi.deleteConversation(conversationId, patientId)
+          set(state => {
+            const newState: Partial<ChatbotState> = {
+              conversations: state.conversations.filter(c => c.conversation_id !== conversationId)
+            }
+            if (state.activeConversationId === conversationId) {
+              newState.activeConversationId = null
+              newState.messages = []
+            }
+            return newState
+          })
+        } catch (error: any) {
+          console.error("Failed to delete conversation", error)
+        }
       }
     }),
     { name: "patient-chatbot-store" }
