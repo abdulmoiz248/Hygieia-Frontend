@@ -11,6 +11,7 @@ import TodayGoal from "@/components/patient dashboard/fitness/TodayGoal"
 import Calories from "@/components/patient dashboard/fitness/Calories"
 import DietPlan from "@/components/patient dashboard/fitness/DietPlan"
 import MacroGraphToday from "@/components/patient dashboard/fitness/MacroGraph"
+import YearlyStats from "@/components/patient dashboard/fitness/YearlyStats"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import WorkoutDashboard from "@/components/patient dashboard/fitness/workout-dashboard"
@@ -68,6 +69,7 @@ export default function FitnessPage() {
       {/* Enhanced Calorie Tracking */}
     <Calories/>
     <MacroGraphToday/>
+      <YearlyStats/>
 
       {/* Enhanced Active Diet Plan */}
      

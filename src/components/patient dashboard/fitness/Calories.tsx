@@ -69,10 +69,10 @@ const handleGenerateCalories = async () => {
 
     addCalories({ 
       type, 
-      amount: generatedNutrition.calories, 
-      carbs: generatedNutrition.carbs, 
-      protein: generatedNutrition.protein, 
-      fat: generatedNutrition.fat 
+      amount: Math.round(generatedNutrition.calories), 
+      carbs: Math.round(generatedNutrition.carbs || 0), 
+      protein: Math.round(generatedNutrition.protein || 0), 
+      fat: Math.round(generatedNutrition.fat || 0)
     })
     patientSuccess("Calories and macros added successfully")
     setType("")
@@ -151,14 +151,14 @@ const handleGenerateCalories = async () => {
                     {loading ? "Thinking..." : "Ask AI"}
                   </Button>
 
-              {generatedNutrition && (
+                {generatedNutrition && (
   <div className="text-center text-soft-coral text-sm font-semibold space-y-1">
-    <div>Estimated Calories: {generatedNutrition.calories} kcal</div>
+    <div>Estimated Calories: {Math.round(generatedNutrition.calories)} kcal</div>
     {type === "consumed" && (
       <>
-        <div>Carbs: {generatedNutrition.carbs} g</div>
-        <div>Protein: {generatedNutrition.protein} g</div>
-        <div>Fat: {generatedNutrition.fat} g</div>
+        <div>Carbs: {Math.round(generatedNutrition.carbs)} g</div>
+        <div>Protein: {Math.round(generatedNutrition.protein)} g</div>
+        <div>Fat: {Math.round(generatedNutrition.fat)} g</div>
       </>
     )}
   </div>
@@ -182,11 +182,11 @@ const handleGenerateCalories = async () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-mint-green mb-2">{caloriesConsumed}</div>
+              <div className="text-3xl font-bold text-mint-green mb-2">{Math.round(caloriesConsumed)}</div>
               <p className="text-sm text-cool-gray">Consumed</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-soft-coral mb-2">{caloriesBurned}</div>
+              <div className="text-3xl font-bold text-soft-coral mb-2">{Math.round(caloriesBurned)}</div>
               <p className="text-sm text-cool-gray">Burned</p>
             </div>
             <div className="text-center">
@@ -197,7 +197,7 @@ const handleGenerateCalories = async () => {
                     : "text-mint-green"
                 }`}
               >
-                {caloriesConsumed - caloriesBurned}
+                {Math.round(caloriesConsumed - caloriesBurned)}
               </div>
               <p className="text-sm text-cool-gray">Net Calories</p>
             </div>
