@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { ResponsiveContainer, LineChart, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts"
+import { ResponsiveContainer,   XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts"
 import { format as formatDate } from "date-fns"
 import api from "@/lib/axios"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
@@ -42,7 +42,7 @@ export default function YearlyStats() {
   const [error, setError] = useState<string | null>(null)
   const [daily, setDaily] = useState<DailyRow[]>([])
   const [monthly, setMonthly] = useState<any[]>([])
-  const [totals, setTotals] = useState<FitnessMetrics | null>(null)
+  // const [ setTotals] = useState<FitnessMetrics | null>(null)
   const [averages, setAverages] = useState<FitnessMetrics | null>(null)
   const [range, setRange] = useState<string>("7d")
 
@@ -55,7 +55,7 @@ export default function YearlyStats() {
         const data = res.data
         setDaily(data.daily || [])
         setMonthly(data.monthly || [])
-        setTotals(data.totals || null)
+     //   setTotals(data.totals || null)
         setAverages(data.averages || null)
         setError(null)
       } catch (err: any) {
