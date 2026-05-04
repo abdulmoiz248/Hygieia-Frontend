@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
   const role = req.cookies.get('role')?.value
 
   // ── Protect role-specific routes ──────────────────────────────────────────
-const protectedRoutes = ['admin', 'doctor', 'pathologist', 'nutritionist']
+const protectedRoutes = ['admin', 'doctor', 'pathologist', 'nutritionist','patient']
 
 const matchedRoute = protectedRoutes.find(route =>
   url.pathname.startsWith(`/${route}`)
@@ -43,5 +43,6 @@ export const config = {
     '/pathologist/:path*',
     '/nutritionist/:path*',
     '/doctor/:path*',
+    '/patient/:path*',
   ],
 }
