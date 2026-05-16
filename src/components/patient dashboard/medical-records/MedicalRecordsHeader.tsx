@@ -24,7 +24,7 @@ import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-s
 interface MedicalRecordsHeaderProps {
   showUpload: boolean
   setShowUpload: (open: boolean) => void
-  onUploadRecord: (record: MedicalRecord) => void
+  onUploadRecord?: (record: MedicalRecord) => void
 }
 
 export function MedicalRecordsHeader({
@@ -65,7 +65,7 @@ export function MedicalRecordsHeader({
     try {
       await addRecord({ file, title, type })
       // store already updates state; keep callback for backwards compatibility
-      onUploadRecord({ file, title, type } as any)
+      if (onUploadRecord) onUploadRecord({ file, title, type } as any)
       patientSuccess(`${title} Report Uploaded Successfully`)
 
       // reset state

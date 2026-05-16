@@ -45,9 +45,6 @@ export default function MedicalRecordsPage() {
     fetchMedicalRecords()
   }, [fetchMedicalRecords])
 
-  const onUploadRecord = (record: any) => {
-    addRecord(record)
-  }
 
   const onDeleteRecord = (recordId: string) => {
     deleteRecord(recordId)
@@ -98,7 +95,6 @@ export default function MedicalRecordsPage() {
           <MedicalRecordsHeader
             showUpload={showUpload}
             setShowUpload={(show) => setShowUpload(show)}
-            onUploadRecord={onUploadRecord}
           />
         </motion.div>
 

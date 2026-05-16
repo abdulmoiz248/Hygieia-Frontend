@@ -48,51 +48,50 @@ export function MedicalRecordsGrid({
             key={record.id}
             className="group bg-white/40 border border-gray-100 rounded-xl shadow-sm hover:shadow-lg transition-all"
           >
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center">
-              {record.record_type &&
-                <Badge className={`${getTypeColor(record.record_type)} text-xs px-2 py-0.5 rounded-md`}>
-                  {record.record_type.replace("-", " ")}
-                </Badge>
-
-              }
-              </div>
-
-              <h3 className="font-semibold text-gray-800 text-base line-clamp-2">{record.title}</h3>
-
-              <div className="space-y-1 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-soft-blue" />
-                  <span>{formatDateOnly( record.date)}</span>
+            <CardContent className="p-4 flex flex-col h-full">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  {record.record_type && (
+                    <Badge className={`${getTypeColor(record.record_type)} text-xs px-2 py-0.5 rounded-md`}>
+                      {record.record_type.replace("-", " ")}
+                    </Badge>
+                  )}
                 </div>
-                {record.doctorName && (
+
+                <h3 className="font-semibold text-gray-800 text-base line-clamp-2">{record.title}</h3>
+
+                <div className="space-y-1 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-soft-blue" />
-                    <span>{record.doctorName}</span>
+                    <Calendar className="w-4 h-4 text-soft-blue" />
+                    <span>{formatDateOnly(record.date)}</span>
                   </div>
-                )}
+                  {record.doctorName && (
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-soft-blue" />
+                      <span>{record.doctorName}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex gap-2 pt-3">
+              <div className="mt-auto flex items-center gap-2 justify-end pt-3">
                 <Button
-                 
                   size="sm"
-                  className="flex-1 border border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white bg-transparent"
+                  className="border border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white bg-transparent px-3"
                   onClick={() => setViewingRecord(record)}
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View
                 </Button>
-              
-                  <Button
-                  onClick={()=>handleDownload(record.fileUrl || "",record.title)}
-                    variant="default"
-                    size="sm"
-                    className="bg-soft-coral hover:bg-soft-coral/90 text-white px-3"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-               
+
+                <Button
+                  onClick={() => handleDownload(record.fileUrl || "", record.title)}
+                  variant="default"
+                  size="sm"
+                  className="bg-soft-coral hover:bg-soft-coral/90 text-white px-3"
+                >
+                  <Download className="w-4 h-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
