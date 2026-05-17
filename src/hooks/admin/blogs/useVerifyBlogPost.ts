@@ -12,7 +12,7 @@ export function useVerifyBlogPost() {
       const res = await fetch(`${BASE_URL}/blogPost/${post.id}/verify`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ userId: adminId }),  // ✅ fixed
+        body:    JSON.stringify({ userId: adminId }), 
       })
       if (!res.ok) throw new Error("Failed to verify post")
       return post
