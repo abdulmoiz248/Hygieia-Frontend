@@ -10,6 +10,7 @@ import Faq from "@/components/landing-page/components/faq"
 import FloatingAvatar from "@/components/landing-page/components/floating-avatar"
 import Navbar from "@/components/layouts/landing-page/navbar"
 import Footer from "../layouts/landing-page/Footer"
+import ServicesSection from "@/components/landing-page/components/services-section"
 
 export default function LandingPage() {
   return (
@@ -19,7 +20,7 @@ export default function LandingPage() {
       <HistoricalTimeline />
       <MissionStats />
       <HowItWorks />
-   
+      <ServicesSection />
       <ClimateHealth />
       <DoctorQuiz />
       <Testimonials />
