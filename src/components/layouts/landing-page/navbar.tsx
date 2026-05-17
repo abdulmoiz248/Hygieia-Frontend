@@ -14,7 +14,6 @@ export default function Navbar() {
   const { scrollY } = useScroll()
 
   const backgroundColor = useTransform(scrollY, [0, 100], ["rgba(10, 37, 64, 0)", "rgb(30,30,34)"])
-
   const textColor = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"])
 
   useEffect(() => {
@@ -28,10 +27,12 @@ export default function Navbar() {
   const navItems = [
     { name: "Home", href: "/#home" },
     { name: "How It Works", href: "/#how-it-works" },
+    { name: "Services", href: "/#services" },
     { name: "Blogs", href: "/blogs" },
     { name: "Contact", href: "/#contact" },
   ]
-  const router=useRouter();
+
+  const router = useRouter()
 
   return (
     <motion.header
@@ -49,7 +50,13 @@ export default function Navbar() {
             className="flex items-center"
           >
             <div className="relative h-12 w-12 mr-3">
-              <Image width={30} height={30} src="/logo/logo-2.png" alt="Hygieia Logo"  className="h-full w-full object-contain" />
+              <Image
+                width={30}
+                height={30}
+                src="/logo/logo-2.png"
+                alt="Hygieia Logo"
+                className="h-full w-full object-contain"
+              />
             </div>
             <motion.span style={{ color: textColor }} className="text-2xl font-bold tracking-tight">
               HYGIEIA
@@ -80,8 +87,11 @@ export default function Navbar() {
             transition={{ duration: 0.3, delay: 0.6 }}
           >
             <Button
-                 onClick={() => router.push('/login')}
-            className="ml-4 bg-blue-500 hover:bg-blue-600 text-white">Get Started</Button>
+              onClick={() => router.push("/login")}
+              className="ml-4 bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              Get Started
+            </Button>
           </motion.div>
         </nav>
 
@@ -114,11 +124,12 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
-              <Button 
-                
-                onClick={() => router.push('//login')}
-            
-               className="bg-soft-blue hover:bg-blue-600 text-white">Get Started</Button>
+              <Button
+                onClick={() => router.push("/login")}
+                className="bg-soft-blue hover:bg-blue-600 text-white"
+              >
+                Get Started
+              </Button>
             </nav>
           </div>
         </motion.div>
