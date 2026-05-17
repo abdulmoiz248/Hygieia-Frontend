@@ -23,6 +23,7 @@ export enum AppointmentMode {
 
 export interface Appointment {
   id: string
+  doctorId: string  
   patient:ProfileType
   doctor: Doctor | NutritionistProfile
   date: string
@@ -67,7 +68,8 @@ export function mapAppointment(raw: BackendAppointment): Appointment {
     id: raw.id,
     patient: {
       id: raw.patientId,
-    } as ProfileType, // we only have ID for now, you can expand later
+    } as ProfileType,
+    doctorId: raw.doctorId,
     doctor: raw.doctorDetails
       ? raw.doctorDetails
       : ({
