@@ -12,6 +12,8 @@ import {
   Search,
   ChevronLeft,
   X,
+  ShieldAlert,
+  TestTube
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -23,12 +25,14 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
-  { icon: Users, label: "Manage Workers", href: "/workers" },
-  { icon: FileText, label: "Manage Blogs", href: "/blogs" },
-  { icon: Mail, label: "Review Newsletters", href: "/newsletters" },
-  { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
-  { icon: Search, label: "Manage CVs", href: "/cv" },
+  { icon: LayoutDashboard, label: "Overview",           href: "/dashboard"    },
+  { icon: Users,           label: "Manage Workers",     href: "/workers"      },
+  { icon: FileText,        label: "Manage Blogs",       href: "/blogs"        },
+  { icon: Mail,            label: "Review Newsletters", href: "/newsletters"  },
+  { icon: BookOpen,        label: "Manage FAQs",        href: "/faq"          },
+  { icon: Search,          label: "Manage CVs",         href: "/cv"           },
+  { icon: ShieldAlert,     label: "Reports",            href: "/reports"      },
+  { icon: TestTube,        label: "Lab Tests",          href: "/lab-tests"    }
 ]
 
 export function Sidebar({
@@ -38,8 +42,6 @@ export function Sidebar({
   onMobileToggle,
 }: SidebarProps) {
   const pathname = usePathname()
-
-  // ✅ BASE PATH FIX (IMPORTANT)
   const BASE_PATH = "/admin"
 
   const sidebarContent = (
