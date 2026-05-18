@@ -12,6 +12,7 @@ import {
   Search,
   ChevronLeft,
   X,
+  MessageSquare,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -29,6 +30,7 @@ const menuItems = [
   { icon: Mail, label: "Review Newsletters", href: "/newsletters" },
   { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
   { icon: Search, label: "Manage CVs", href: "/cv" },
+  { icon: MessageSquare, label: "Feedback Forms", href: "/feedback" },
 ]
 
 export function Sidebar({
