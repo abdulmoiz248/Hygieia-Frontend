@@ -5,19 +5,18 @@ import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 
 import DashboardStats from "@/components/patient dashboard/dashboard/DisplayStats"
-// import FolderApp from "@/components/patient dashboard/dashboard/FolderApp"
 import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSection"
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
+import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
+import PendingActions from "@/components/patient dashboard/dashboard/PendingActions"
 
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
-
 import { usePatientFitnessStore } from "@/store/patient/fitness-store"
 import { usePatientMedicineStore } from "@/store/patient/medicine-store"
 import { usePatientDashboardAnalyticsStore } from "@/store/patient/dashboard-analytics-store"
-import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,14 +29,10 @@ const containerVariants = {
 }
 
 function DashboardPageContent() {
-   const { fetchAppointments } =
-      usePatientAppointmentsStore()
-    
-   const {profile}= usePatientProfileStore()
-
-   const {fetchMedicalRecords}=usePatientMedicalRecordsStore()
-
-   const {fetchFitness}=usePatientFitnessStore()
+  const { fetchAppointments } = usePatientAppointmentsStore()
+  const { profile } = usePatientProfileStore()
+  const { fetchMedicalRecords } = usePatientMedicalRecordsStore()
+  const { fetchFitness } = usePatientFitnessStore()
   const { fetchPrescriptions } = usePatientMedicineStore()
   const { fetchDashboardAnalytics } = usePatientDashboardAnalyticsStore()
   const { toast } = useToast()
@@ -46,92 +41,73 @@ function DashboardPageContent() {
     const searchParams = new URLSearchParams(window.location.search)
     const fitbitStatus = searchParams.get("fitbit")
     const error = searchParams.get("error")
-    
-    if (fitbitStatus === 'connected') {
+
+    if (fitbitStatus === "connected") {
       toast({
         title: "Success!",
         description: "Fitbit connected successfully! Your data will be synced automatically.",
-      
       })
-      window.history.replaceState({}, '', window.location.pathname)
+      window.history.replaceState({}, "", window.location.pathname)
     }
-    
-    if (error === 'no_email') {
-      toast({
-        title: "Error",
-        description: "Email not provided. Please try again.",
-     
-      })
-    } else if (error === 'user_not_found') {
-      toast({
-        title: "Error",
-        description: "User not found. Please make sure you're logged in.",
- 
-      })
-    } else if (error === 'fitbit_save_failed') {
-      toast({
-        title: "Error",
-        description: "Failed to save Fitbit connection. Please try again.",
-     
-      })
+
+    if (error === "no_email") {
+      toast({ title: "Error", description: "Email not provided. Please try again." })
+    } else if (error === "user_not_found") {
+      toast({ title: "Error", description: "User not found. Please make sure you're logged in." })
+    } else if (error === "fitbit_save_failed") {
+      toast({ title: "Error", description: "Failed to save Fitbit connection. Please try again." })
     }
-    
+
     if (error) {
-      window.history.replaceState({}, '', window.location.pathname)
+      window.history.replaceState({}, "", window.location.pathname)
     }
   }, [toast])
 
   useEffect(() => {
-    const patientId = profile?.id || (typeof window !== "undefined" ? localStorage.getItem("id") || "" : "")
-    if (!patientId) {
-      return
-    }
+    const patientId =
+      profile?.id || (typeof window !== "undefined" ? localStorage.getItem("id") ?? "" : "")
+    if (!patientId) return
 
     fetchAppointments(patientId)
     fetchMedicalRecords()
     fetchFitness(patientId)
     fetchPrescriptions(patientId)
     fetchDashboardAnalytics(patientId)
-  }, [fetchAppointments, fetchDashboardAnalytics, fetchFitness, fetchMedicalRecords, fetchPrescriptions, profile?.id])
-
-
-
-  // if (loading || medicalRecordsLoading) {
-  //   return <Loader/>
-  // }
+  }, [
+    fetchAppointments,
+    fetchDashboardAnalytics,
+    fetchFitness,
+    fetchMedicalRecords,
+    fetchPrescriptions,
+    profile?.id,
+  ])
 
   return (
-    <motion.div 
-      variants={containerVariants} 
-      initial="hidden" 
-      animate="visible" 
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
       className="space-y-6 lg:space-y-8 w-full"
     >
-      {/* Welcome and Overview Section */}
+      {/* Welcome and Overview */}
       <div className="space-y-4 lg:space-y-6">
         <WelcomeSection />
         <DashboardStats />
       </div>
 
-      {/* Fitness and Progress Section */}
+      {/* Pending Actions — shown only when there's something to act on */}
+      <PendingActions />
+
+      {/* Fitness Progress */}
       <div className="space-y-4 lg:space-y-6">
         <FitnessProgressGauges />
-        {/* <FolderApp /> */}
       </div>
 
+      {/* AI-powered Insights */}
+      <HealthInsights />
 
-<HealthInsights/>
-      {/* Advanced Analytics Section */}
-   
-        <DashboardGraphs />
-  
-
-   
-       
-       
-
-
-  
+      {/* Analytics Charts */}
+      <DashboardGraphs />
     </motion.div>
   )
 }
