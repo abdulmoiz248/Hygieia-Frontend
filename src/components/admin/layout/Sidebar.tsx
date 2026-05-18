@@ -12,8 +12,7 @@ import {
   Search,
   ChevronLeft,
   X,
-  ShieldAlert,
-  TestTube
+  MessageSquare,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -25,13 +24,13 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview",           href: "/dashboard"    },
-  { icon: Users,           label: "Manage Workers",     href: "/workers"      },
-  { icon: FileText,        label: "Manage Blogs",       href: "/blogs"        },
-  { icon: Mail,            label: "Review Newsletters", href: "/newsletters"  },
-  { icon: BookOpen,        label: "Manage FAQs",        href: "/faq"          },
-  { icon: Search,          label: "Manage CVs",         href: "/cv"           },
-  { icon: TestTube,        label: "Manage Lab Tests",          href: "/lab-tests"    }
+  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+  { icon: Users, label: "Manage Workers", href: "/workers" },
+  { icon: FileText, label: "Manage Blogs", href: "/blogs" },
+  { icon: Mail, label: "Review Newsletters", href: "/newsletters" },
+  { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
+  { icon: Search, label: "Manage CVs", href: "/cv" },
+  { icon: MessageSquare, label: "Feedback Forms", href: "/feedback" },
 ]
 
 export function Sidebar({
