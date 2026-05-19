@@ -38,6 +38,7 @@ import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
 import { generateAIReport } from "./AiReport"
 import PreviousAppointmentsCard from "./PreviousAppointment"
 import useNutritionistStore from "@/store/nutritionist/userStore"
+import { FollowUpRequestDialog } from "@/components/nutritionist/appointments/id/FollowUpRequestDialog"
 
 
 type PrescriptionMedication = {
@@ -897,6 +898,12 @@ if (assignedDietPlan) {
 
     <DietPlanDialog patientName={patient.name} onAssign={handleAssignDietPlan} />
 
+    <FollowUpRequestDialog
+      patientId={patient.id}
+      patientName={patient.name}
+      providerId={user?.id || localStorage.getItem("id") || ""}
+    />
+
     <Button
       onClick={handleScrollToLabTests}
       className="border-soft-coral w-full bg-soft-coral hover:bg-soft-coral/90 hover:text-white text-white"
@@ -1117,7 +1124,7 @@ if (assignedDietPlan) {
     </CardContent>
 
     {/* Mark Appointment Done */}
-    {!appointmentDone && (
+    {!appointmentDone && appointment.status !== AppointmentStatus.Completed && (
       <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
         <Button
           className="bg-soft-coral text-white hover:bg-soft-coral/80"
@@ -1126,6 +1133,19 @@ if (assignedDietPlan) {
         >
           Mark Appointment Done
         </Button>
+      </div>
+    )}
+
+    {/* Follow-up request — visible once appointment is completed */}
+    {(appointmentDone || appointment.status === AppointmentStatus.Completed) && (
+      <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
+        <FollowUpRequestDialog
+          patientId={patient.id}
+          patientName={patient.name}
+          providerId={user?.id || localStorage.getItem("id") || ""}
+          variant="outline"
+          className="border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white"
+        />
       </div>
     )}
   </Card>

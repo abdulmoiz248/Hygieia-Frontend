@@ -38,6 +38,7 @@ import api from "@/lib/axios"
 import { completeAppointment } from "@/api/doctor/appointmentApi"
 import PreviousDoctorAppointmentsCard from "./PreviousDoctorAppointment"
 import useDoctorStore from "@/store/doctor/doctor-store"
+import { FollowUpRequestDialog } from "./FollowUpRequestDialog"
 
 export const fetchPatientAnalytics = async (patientId: string) => {
   const res = await api.get(`/analytics/${patientId}`)
@@ -526,7 +527,7 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
                 </CardContent>
 
                 {/* Mark Done */}
-                {!appointmentDone && (
+                {!appointmentDone && appointment.status !== AppointmentStatus.Completed && (
                   <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
                     <Button
                       className="bg-soft-coral text-white hover:bg-soft-coral/80"
@@ -535,6 +536,19 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
                     >
                       {isMarkingDone ? "Saving..." : "Mark Appointment Done"}
                     </Button>
+                  </div>
+                )}
+
+                {/* Follow-up for already-completed appointments */}
+                {(appointmentDone || appointment.status === AppointmentStatus.Completed) && patient?.id && (
+                  <div className="p-4 border-t border-accent/20 flex justify-end gap-3">
+                    <FollowUpRequestDialog
+                      patientId={patient.id}
+                      patientName={patient.name || "Patient"}
+                      providerId={user?.id || localStorage.getItem("id") || ""}
+                      variant="outline"
+                      className="border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white"
+                    />
                   </div>
                 )}
               </Card>
