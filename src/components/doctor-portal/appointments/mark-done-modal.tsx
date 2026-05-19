@@ -14,11 +14,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, FileText, Target, Plus, Trash2 } from "lucide-react"
+import { CheckCircle, FileText, Target, Plus, Trash2, CalendarIcon } from "lucide-react"
 import { useDoctorAppointmentStore } from "@/store/doctor/doctor-appointment-store"
 import { useDoctorPrescriptionStore } from "@/store/doctor/doctor-prescription-store"
 import { completeAppointment } from "@/api/doctor/appointmentApi"
 import { toast } from "sonner"
+import { useFollowUpRequest } from "@/hooks/doctor/useFollowUpRequest"
+import { CalendarComponent as Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface Medication {
   name: string
@@ -46,6 +51,11 @@ export function MarkDoneModal() {
   const [report, setReport] = useState("")
   const [nextAction, setNextAction] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // Follow-up fields
+  const [followUpReason, setFollowUpReason] = useState("")
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined)
+  const { mutate: requestFollowUp, isPending: isFollowUpPending } = useFollowUpRequest()
 
   // Prescription fields
   const [prescriptionNotes, setPrescriptionNotes] = useState("")
@@ -149,6 +159,18 @@ export function MarkDoneModal() {
       }
 
       markAppointmentDone(appointment.id)
+
+      // If follow-up was also requested, fire that separately
+      if (nextAction === "request-follow-up" && followUpReason.trim() && followUpDate) {
+        requestFollowUp({
+          patientId: appointment.patient?.id || "",
+          providerId: doctorId,
+          providerRole: "doctor",
+          reason: followUpReason.trim(),
+          suggestedDate: format(followUpDate, "yyyy-MM-dd"),
+        })
+      }
+
       handleClose()
     } catch (error) {
       console.error("Error completing appointment:", error)
@@ -162,6 +184,8 @@ export function MarkDoneModal() {
     setSelectedAppointment(null)
     setReport("")
     setNextAction("")
+    setFollowUpReason("")
+    setFollowUpDate(undefined)
     setPrescriptionNotes("")
     setStartDate(new Date().toISOString().split("T")[0])
     setEndDate(
@@ -174,9 +198,12 @@ export function MarkDoneModal() {
 
   const isSubmitDisabled =
     isLoading ||
+    isFollowUpPending ||
     !report.trim() ||
     (nextAction === "assign-prescription" &&
-      medications.some((m) => !m.name.trim()))
+      medications.some((m) => !m.name.trim())) ||
+    (nextAction === "request-follow-up" &&
+      (!followUpReason.trim() || !followUpDate))
 
   if (!appointment) return null
 
@@ -239,6 +266,9 @@ export function MarkDoneModal() {
               <SelectContent>
                 <SelectItem value="assign-prescription">
                   Assign Prescription
+                </SelectItem>
+                <SelectItem value="request-follow-up">
+                  Request Follow-up Appointment
                 </SelectItem>
                 <SelectItem value="no-action">
                   No Immediate Action Required
@@ -412,6 +442,67 @@ export function MarkDoneModal() {
             </div>
           )}
 
+          {/* Follow-up Form */}
+          {nextAction === "request-follow-up" && (
+            <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-soft-blue/20">
+              <div className="flex items-center space-x-2 mb-1">
+                <CalendarIcon
+                  className="h-4 w-4"
+                  style={{ color: "var(--color-soft-blue)" }}
+                />
+                <h4 className="font-medium">Follow-up Details</h4>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="follow-up-reason">
+                  Reason <span className="text-soft-coral">*</span>
+                </Label>
+                <textarea
+                  id="follow-up-reason"
+                  placeholder="e.g., Review blood test results, monitor treatment progress..."
+                  value={followUpReason}
+                  onChange={(e) => setFollowUpReason(e.target.value)}
+                  className="w-full p-3 border border-soft-blue/30 rounded-lg text-sm focus:ring-2 focus:ring-soft-blue outline-none min-h-[80px] resize-none bg-background"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>
+                  Suggested Date <span className="text-soft-coral">*</span>
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal rounded-lg border border-soft-blue/50",
+                        !followUpDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={followUpDate}
+                      onSelect={setFollowUpDate}
+                      disabled={(date) => {
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        return date < today
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
+
           {/* Patient Info Summary */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium mb-3">Patient Information</h4>
@@ -482,7 +573,9 @@ export function MarkDoneModal() {
               ? "Completing..."
               : nextAction === "assign-prescription"
                 ? "Complete & Assign Prescription"
-                : "Complete Appointment"}
+                : nextAction === "request-follow-up"
+                  ? "Complete & Request Follow-up"
+                  : "Complete Appointment"}
           </Button>
         </DialogFooter>
       </DialogContent>

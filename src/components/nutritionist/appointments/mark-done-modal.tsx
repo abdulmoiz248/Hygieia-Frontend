@@ -14,9 +14,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, FileText, Target, Plus } from "lucide-react"
+import { CheckCircle, FileText, Target, Plus, CalendarIcon } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
-import {  useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import { useDietPlanStore } from "@/store/nutritionist/diet-plan-store"
+import { useFollowUpRequest } from "@/hooks/nutritionist/useFollowUpRequest"
+import { CalendarComponent as Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 export function MarkDoneModal() {
   const { selectedAppointment, setSelectedAppointment, markAppointmentDone } = useAppointmentStore()
@@ -24,6 +29,11 @@ export function MarkDoneModal() {
   const [sessionNotes, setSessionNotes] = useState("")
   const [nextAction, setNextAction] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // Follow-up state
+  const [followUpReason, setFollowUpReason] = useState("")
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined)
+  const { mutate: requestFollowUp, isPending: isFollowUpPending } = useFollowUpRequest()
 
   const [planName, setPlanName] = useState("")
   const [planDuration, setPlanDuration] = useState("90")
@@ -43,6 +53,18 @@ export function MarkDoneModal() {
       console.log("[v0] Next action selected:", nextAction)
 
       markAppointmentDone(appointment.id)
+
+      // Fire follow-up request if selected
+      if (nextAction === "request-follow-up" && followUpReason.trim() && followUpDate) {
+        const nutritionistId = localStorage.getItem("id") || ""
+        requestFollowUp({
+          patientId: appointment.patient?.id || appointment.id,
+          providerId: nutritionistId,
+          providerRole: "nutritionist",
+          reason: followUpReason.trim(),
+          suggestedDate: format(followUpDate, "yyyy-MM-dd"),
+        })
+      }
 
       if (nextAction === "assign-diet-plan") {
         if (!planName.trim()) {
@@ -107,6 +129,8 @@ export function MarkDoneModal() {
     setSelectedAppointment(null)
     setSessionNotes("")
     setNextAction("")
+    setFollowUpReason("")
+    setFollowUpDate(undefined)
     setPlanName("")
     setPlanDuration("90")
     setCalorieTarget("2000")
@@ -156,6 +180,7 @@ export function MarkDoneModal() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="assign-diet-plan">Assign New Diet Plan</SelectItem>
+                <SelectItem value="request-follow-up">Request Follow-up Appointment</SelectItem>
                 <SelectItem value="no-action">No Immediate Action Required</SelectItem>
               </SelectContent>
             </Select>
@@ -218,6 +243,67 @@ export function MarkDoneModal() {
             </div>
           )}
 
+          {/* Follow-up Form */}
+          {nextAction === "request-follow-up" && (
+            <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-soft-blue/20">
+              <div className="flex items-center space-x-2 mb-1">
+                <CalendarIcon
+                  className="h-4 w-4"
+                  style={{ color: "var(--color-soft-blue)" }}
+                />
+                <h4 className="font-medium">Follow-up Details</h4>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="follow-up-reason">
+                  Reason <span className="text-soft-coral">*</span>
+                </Label>
+                <Textarea
+                  id="follow-up-reason"
+                  placeholder="e.g., Review diet plan progress, reassess nutritional targets..."
+                  value={followUpReason}
+                  onChange={(e) => setFollowUpReason(e.target.value)}
+                  className="min-h-[80px] resize-none rounded-lg"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>
+                  Suggested Date <span className="text-soft-coral">*</span>
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal rounded-lg border border-soft-blue/50",
+                        !followUpDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={followUpDate}
+                      onSelect={setFollowUpDate}
+                      disabled={(date) => {
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        return date < today
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
+
           {/* Patient Info */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium mb-3">Patient Information</h4>
@@ -273,14 +359,22 @@ export function MarkDoneModal() {
           </Button>
           <Button
             onClick={handleMarkDone}
-            disabled={isLoading || !sessionNotes.trim() || (nextAction === "assign-diet-plan" && !planName.trim())}
+            disabled={
+              isLoading ||
+              isFollowUpPending ||
+              !sessionNotes.trim() ||
+              (nextAction === "assign-diet-plan" && !planName.trim()) ||
+              (nextAction === "request-follow-up" && (!followUpReason.trim() || !followUpDate))
+            }
             className="bg-[var(--color-mint-green)] hover:bg-[var(--color-mint-green)]/90 w-full sm:w-auto"
           >
             {isLoading
               ? "Completing..."
               : nextAction === "assign-diet-plan"
                 ? "Complete & Assign Diet Plan"
-                : "Complete Appointment"}
+                : nextAction === "request-follow-up"
+                  ? "Complete & Request Follow-up"
+                  : "Complete Appointment"}
           </Button>
         </DialogFooter>
       </DialogContent>
