@@ -5,13 +5,13 @@ import { MedicalRecordsHeader } from "@/components/patient dashboard/medical-rec
 import { MedicalRecordsFilters } from "@/components/patient dashboard/medical-records/MedicalRecordsFilters"
 import { MedicalRecordsGrid } from "@/components/patient dashboard/medical-records/MedicalRecordsGrid"
 import { MedicalRecordViewerModal } from "@/components/patient dashboard/medical-records/MedicalRecordViewerModal"
-import { LabTestsSection } from "@/components/patient dashboard/medical-records/LabTestsSection"
+import { LabBookingsSection } from "@/components/patient dashboard/medical-records/LabBookingSection"
 
 import { useEffect } from "react"
 import { usePatientMedicalRecordsStore } from "@/store/patient/medical-records-store"
-
-
-
+import { useRouter } from "next/navigation"
+import { ArrowRight, FlaskConical } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,6 +24,8 @@ const itemVariants = {
 }
 
 export default function MedicalRecordsPage() {
+  const router = useRouter()
+
   const {
     records,
     typeFilter,
@@ -35,16 +37,12 @@ export default function MedicalRecordsPage() {
     setViewingRecord,
     setShowUpload,
     fetchMedicalRecords,
-    addRecord,
     deleteRecord,
   } = usePatientMedicalRecordsStore()
 
-
- 
   useEffect(() => {
     fetchMedicalRecords()
   }, [fetchMedicalRecords])
-
 
   const onDeleteRecord = (recordId: string) => {
     deleteRecord(recordId)
@@ -90,7 +88,6 @@ export default function MedicalRecordsPage() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
       {/* Medical Records Section */}
       <section className="space-y-6 pt-2">
-
         <motion.div variants={itemVariants}>
           <MedicalRecordsHeader
             showUpload={showUpload}
@@ -125,13 +122,40 @@ export default function MedicalRecordsPage() {
         />
       </section>
 
-      {/* Lab Tests Section */}
-      <section className="space-y-6">
-     
-      
+      {/* Book Lab Tests CTA */}
+      <motion.section variants={itemVariants}>
+        <div className="relative overflow-hidden rounded-2xl border border-cool-gray/20 bg-white/60 p-6 shadow-sm">
+          {/* Subtle left accent bar */}
+          <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-soft-blue to-mint-green" />
 
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 pl-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-soft-blue/10 border border-soft-blue/20">
+                <FlaskConical className="h-6 w-6 text-soft-blue" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-dark-slate-gray">Book a Lab Test</h2>
+                <p className="mt-0.5 text-sm text-cool-gray">
+                  Browse our full catalogue of diagnostic tests and book instantly.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => router.push("/lab-tests")}
+              className="shrink-0 bg-soft-blue hover:bg-soft-blue/90 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all"
+            >
+              Browse Lab Tests
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Lab Bookings Section */}
+      <section className="space-y-6">
         <motion.div variants={itemVariants}>
-          <LabTestsSection />
+          <LabBookingsSection />
         </motion.div>
       </section>
     </motion.div>

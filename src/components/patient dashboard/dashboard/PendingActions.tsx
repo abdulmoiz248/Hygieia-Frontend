@@ -19,6 +19,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
+import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
+import { LabTestBookingModal } from "@/components/patient dashboard/medical-records/LabTestBookingModal"
+import { useRouter } from "next/navigation"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +71,7 @@ async function fetchReferredTests(patientId: string): Promise<ReferredTest[]> {
 }
 
 async function dismissReferredTest(referralId: string, patientId: string): Promise<void> {
-  const res = await fetch(`${BASE}/appointments/reffered-tests/${referralId}/dismiss`, {
+  const res = await fetch(`${BASE}/appointments/referred-tests/${referralId}/dismiss`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -114,10 +117,12 @@ function ReferredTestCard({
   item,
   patientId,
   onDismiss,
+  onBook,
 }: {
   item: ReferredTest
   patientId: string
   onDismiss: (id: string) => void
+  onBook: (item: ReferredTest) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [dismissing, setDismissing] = useState(false)
@@ -166,7 +171,12 @@ function ReferredTestCard({
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" className="h-7 rounded-full bg-mint-green text-white hover:bg-mint-green/90 text-xs px-3">
+              {/* ✅ Book button — opens the booking modal with this test pre-filled */}
+              <Button
+                size="sm"
+                onClick={() => onBook(item)}
+                className="h-7 rounded-full bg-mint-green text-white hover:bg-mint-green/90 text-xs px-3"
+              >
                 <CalendarCheck className="mr-1 h-3 w-3" /> Book
               </Button>
               <Button
@@ -230,10 +240,12 @@ function FollowUpCard({
   item,
   patientId,
   onDismiss,
+  onAccept,
 }: {
   item: FollowUp
   patientId: string
   onDismiss: (id: string) => void
+  onAccept: (item: FollowUp) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [dismissing, setDismissing] = useState(false)
@@ -287,7 +299,12 @@ function FollowUpCard({
               <p className="text-xs text-dark-slate-gray/70 mb-3 line-clamp-2">{item.reason}</p>
             )}
             <div className="flex flex-wrap gap-2 mt-2">
-              <Button size="sm" className="h-7 rounded-full bg-soft-blue text-white hover:bg-soft-blue/90 text-xs px-3">
+              {/* ✅ Accept & Book — navigates to appointments page with pre-filled query params */}
+              <Button
+                size="sm"
+                onClick={() => onAccept(item)}
+                className="h-7 rounded-full bg-soft-blue text-white hover:bg-soft-blue/90 text-xs px-3"
+              >
                 <CalendarCheck className="mr-1 h-3 w-3" /> Accept & Book
               </Button>
               {item.notes && (
@@ -350,10 +367,15 @@ function AllClearState() {
 type LoadState = "idle" | "loading" | "done" | "error"
 
 export default function PendingActions() {
+  const router = useRouter()
+
   const profileId = usePatientProfileStore((state) => state.profile.id)
   const patientId =
     profileId ||
     (typeof window !== "undefined" ? localStorage.getItem("id") ?? "" : "")
+
+  const { setSelectedTest, setShowBookingModal, showBookingModal, selectedTest } =
+    usePatientLabTestsStore()
 
   const [tests, setTests]           = useState<ReferredTest[]>([])
   const [followUps, setFollowUps]   = useState<FollowUp[]>([])
@@ -396,169 +418,218 @@ export default function PendingActions() {
 
   useEffect(() => { load() }, [load])
 
+  // ── Lab test: open booking modal with the referred test pre-filled ────────────
+  const handleBookReferredTest = (item: ReferredTest) => {
+    // Map ReferredTest.test → LabTest shape expected by the store & modal
+    setSelectedTest({
+      id: item.test.id,
+      name: item.test.name,
+      description: item.test.description,
+      category: item.test.category,
+      price: item.test.price,
+      duration: item.test.duration,
+      preparation_instructions: item.test.preparation_instructions,
+    })
+    setShowBookingModal(true)
+  }
+
+  // ── Follow-up: navigate to appointments booking page with pre-filled params ───
+  const handleAcceptFollowUp = (item: FollowUp) => {
+    const referrer = item.requestedBy ?? item.referrer
+    const params = new URLSearchParams()
+
+    // Pass whatever context we have so the appointments page can pre-fill fields
+    if (referrer?.name)      params.set("doctorName",  referrer.name)
+    if (referrer?.role)      params.set("doctorRole",  referrer.role)
+    if (item.reason)         params.set("reason",      item.reason)
+    if (item.notes)          params.set("notes",       item.notes)
+    if (item.scheduledDate)  params.set("suggestedDate", item.scheduledDate)
+    // Pass the follow-up request ID so the appointments page can link them
+    const requestId = item.requestId ?? item.id
+    params.set("followUpRequestId", requestId)
+
+    router.push(`/patient/appointments/book?${params.toString()}`)
+  }
+
   const loadingTests     = testsState === "idle" || testsState === "loading"
   const loadingFollowUps = fuState    === "idle" || fuState    === "loading"
   const bothDone         = !loadingTests && !loadingFollowUps
   const totalPending     = tests.length + followUps.length
   const allClear         = bothDone && totalPending === 0 && testsState !== "error" && fuState !== "error"
 
+  if (bothDone && totalPending === 0 && testsState !== "error" && fuState !== "error") {
+    return null
+  }
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <Card className="bg-white/40 backdrop-blur-lg shadow-sm border border-white/20 rounded-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-soft-coral/10 to-soft-blue/10 border-b border-white/20 px-6 py-4">
-          <CardTitle className="flex items-center gap-3 text-dark-slate-gray/90">
-            <div className={`p-2 rounded-lg ${allClear ? "bg-mint-green/20" : "bg-soft-coral/20"}`}>
-              {allClear
-                ? <CheckCircle2 className="w-5 h-5 text-mint-green" />
-                : <AlertCircle className="w-5 h-5 text-soft-coral" />
-              }
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold leading-tight">Pending Actions</h3>
-              <p className="text-sm font-normal text-dark-slate-gray/60">
-                {allClear ? "Nothing needs your attention right now" : "Review requests from your care team"}
-              </p>
-            </div>
-            {totalPending > 0 && (
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-soft-coral text-white text-xs font-bold">
-                {totalPending}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
+    <>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <Card className="bg-white/40 backdrop-blur-lg shadow-sm border border-white/20 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-soft-coral/10 to-soft-blue/10 border-b border-white/20 px-6 py-4">
+            <CardTitle className="flex items-center gap-3 text-dark-slate-gray/90">
+              <div className={`p-2 rounded-lg ${allClear ? "bg-mint-green/20" : "bg-soft-coral/20"}`}>
+                {allClear
+                  ? <CheckCircle2 className="w-5 h-5 text-mint-green" />
+                  : <AlertCircle className="w-5 h-5 text-soft-coral" />
+                }
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold leading-tight">Pending Actions</h3>
+                <p className="text-sm font-normal text-dark-slate-gray/60">
+                  {allClear ? "Nothing needs your attention right now" : "Review requests from your care team"}
+                </p>
+              </div>
+              {totalPending > 0 && (
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-soft-coral text-white text-xs font-bold">
+                  {totalPending}
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
 
-        <CardContent className="p-6">
-          {/* All-clear empty state — no tabs needed */}
-          <AnimatePresence mode="wait">
-            {(loadingTests && loadingFollowUps) ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-8 justify-center"
-              >
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading pending actions…
-              </motion.div>
-            ) : allClear ? (
-              <AllClearState key="allclear" />
-            ) : (
-              <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-                {/* Tab pills */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setActiveTab("tests")}
-                    className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
-                      activeTab === "tests"
-                        ? "bg-mint-green text-white shadow-sm"
-                        : "bg-cool-gray/10 text-dark-slate-gray/70 hover:bg-cool-gray/20"
-                    }`}
-                  >
-                    <FlaskConical className="h-3 w-3" />
-                    Lab Tests
-                    {tests.length > 0 && (
-                      <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                        activeTab === "tests" ? "bg-white/30 text-white" : "bg-mint-green/20 text-mint-green"
-                      }`}>
-                        {tests.length}
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("followups")}
-                    className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
-                      activeTab === "followups"
-                        ? "bg-soft-blue text-white shadow-sm"
-                        : "bg-cool-gray/10 text-dark-slate-gray/70 hover:bg-cool-gray/20"
-                    }`}
-                  >
-                    <CalendarCheck className="h-3 w-3" />
-                    Follow-ups
-                    {followUps.length > 0 && (
-                      <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                        activeTab === "followups" ? "bg-white/30 text-white" : "bg-soft-blue/20 text-soft-blue"
-                      }`}>
-                        {followUps.length}
-                      </span>
-                    )}
-                  </button>
-                </div>
-
-                {/* Tab content */}
-                <AnimatePresence mode="wait">
-                  {activeTab === "tests" && (
-                    <motion.div
-                      key="tests"
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
-                      className="space-y-3"
+          <CardContent className="p-6">
+            <AnimatePresence mode="wait">
+              {(loadingTests && loadingFollowUps) ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-8 justify-center"
+                >
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading pending actions…
+                </motion.div>
+              ) : allClear ? (
+                <AllClearState key="allclear" />
+              ) : (
+                <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+                  {/* Tab pills */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setActiveTab("tests")}
+                      className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
+                        activeTab === "tests"
+                          ? "bg-mint-green text-white shadow-sm"
+                          : "bg-cool-gray/10 text-dark-slate-gray/70 hover:bg-cool-gray/20"
+                      }`}
                     >
-                      {loadingTests ? (
-                        <div className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-4">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Loading referred tests…
-                        </div>
-                      ) : testsState === "error" ? (
-                        <div className="flex flex-col items-center gap-2 py-8 text-center">
-                          <AlertCircle className="h-8 w-8 text-soft-coral/60" />
-                          <p className="text-sm text-dark-slate-gray/60">Could not load lab tests.</p>
-                        </div>
-                      ) : tests.length === 0 ? (
-                        <div className="flex flex-col items-center gap-2 py-6 text-center">
-                          <CheckCircle2 className="h-7 w-7 text-mint-green/60" />
-                          <p className="text-sm text-dark-slate-gray/60">No pending lab test referrals</p>
-                        </div>
-                      ) : (
-                        <AnimatePresence>
-                          {tests.map((t) => (
-                            <ReferredTestCard
-                              key={t.id} item={t} patientId={patientId}
-                              onDismiss={(id) => setTests((prev) => prev.filter((x) => x.id !== id))}
-                            />
-                          ))}
-                        </AnimatePresence>
+                      <FlaskConical className="h-3 w-3" />
+                      Lab Tests
+                      {tests.length > 0 && (
+                        <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                          activeTab === "tests" ? "bg-white/30 text-white" : "bg-mint-green/20 text-mint-green"
+                        }`}>
+                          {tests.length}
+                        </span>
                       )}
-                    </motion.div>
-                  )}
+                    </button>
 
-                  {activeTab === "followups" && (
-                    <motion.div
-                      key="followups"
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
-                      className="space-y-3"
+                    <button
+                      onClick={() => setActiveTab("followups")}
+                      className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
+                        activeTab === "followups"
+                          ? "bg-soft-blue text-white shadow-sm"
+                          : "bg-cool-gray/10 text-dark-slate-gray/70 hover:bg-cool-gray/20"
+                      }`}
                     >
-                      {loadingFollowUps ? (
-                        <div className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-4">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Loading follow-up requests…
-                        </div>
-                      ) : fuState === "error" ? (
-                        <div className="flex flex-col items-center gap-2 py-8 text-center">
-                          <AlertCircle className="h-8 w-8 text-soft-coral/60" />
-                          <p className="text-sm text-dark-slate-gray/60">Could not load follow-ups.</p>
-                        </div>
-                      ) : followUps.length === 0 ? (
-                        <div className="flex flex-col items-center gap-2 py-6 text-center">
-                          <CheckCircle2 className="h-7 w-7 text-soft-blue/60" />
-                          <p className="text-sm text-dark-slate-gray/60">No pending follow-up requests</p>
-                        </div>
-                      ) : (
-                        <AnimatePresence>
-                          {followUps.map((f) => (
-                            <FollowUpCard
-                              key={f.id} item={f} patientId={patientId}
-                              onDismiss={(id) => setFollowUps((prev) => prev.filter((x) => x.id !== id))}
-                            />
-                          ))}
-                        </AnimatePresence>
+                      <CalendarCheck className="h-3 w-3" />
+                      Follow-ups
+                      {followUps.length > 0 && (
+                        <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                          activeTab === "followups" ? "bg-white/30 text-white" : "bg-soft-blue/20 text-soft-blue"
+                        }`}>
+                          {followUps.length}
+                        </span>
                       )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
-    </motion.div>
+                    </button>
+                  </div>
+
+                  {/* Tab content */}
+                  <AnimatePresence mode="wait">
+                    {activeTab === "tests" && (
+                      <motion.div
+                        key="tests"
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
+                        className="space-y-3"
+                      >
+                        {loadingTests ? (
+                          <div className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-4">
+                            <Loader2 className="h-4 w-4 animate-spin" /> Loading referred tests…
+                          </div>
+                        ) : testsState === "error" ? (
+                          <div className="flex flex-col items-center gap-2 py-8 text-center">
+                            <AlertCircle className="h-8 w-8 text-soft-coral/60" />
+                            <p className="text-sm text-dark-slate-gray/60">Could not load lab tests.</p>
+                          </div>
+                        ) : tests.length === 0 ? (
+                          <div className="flex flex-col items-center gap-2 py-6 text-center">
+                            <CheckCircle2 className="h-7 w-7 text-mint-green/60" />
+                            <p className="text-sm text-dark-slate-gray/60">No pending lab test referrals</p>
+                          </div>
+                        ) : (
+                          <AnimatePresence>
+                            {tests.map((t) => (
+                              <ReferredTestCard
+                                key={t.id}
+                                item={t}
+                                patientId={patientId}
+                                onDismiss={(id) => setTests((prev) => prev.filter((x) => x.id !== id))}
+                                onBook={handleBookReferredTest}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {activeTab === "followups" && (
+                      <motion.div
+                        key="followups"
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
+                        className="space-y-3"
+                      >
+                        {loadingFollowUps ? (
+                          <div className="flex items-center gap-2 text-sm text-dark-slate-gray/60 py-4">
+                            <Loader2 className="h-4 w-4 animate-spin" /> Loading follow-up requests…
+                          </div>
+                        ) : fuState === "error" ? (
+                          <div className="flex flex-col items-center gap-2 py-8 text-center">
+                            <AlertCircle className="h-8 w-8 text-soft-coral/60" />
+                            <p className="text-sm text-dark-slate-gray/60">Could not load follow-ups.</p>
+                          </div>
+                        ) : followUps.length === 0 ? (
+                          <div className="flex flex-col items-center gap-2 py-6 text-center">
+                            <CheckCircle2 className="h-7 w-7 text-soft-blue/60" />
+                            <p className="text-sm text-dark-slate-gray/60">No pending follow-up requests</p>
+                          </div>
+                        ) : (
+                          <AnimatePresence>
+                            {followUps.map((f) => (
+                              <FollowUpCard
+                                key={f.id}
+                                item={f}
+                                patientId={patientId}
+                                onDismiss={(id) => setFollowUps((prev) => prev.filter((x) => x.id !== id))}
+                                onAccept={handleAcceptFollowUp}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* ✅ Lab test booking modal — rendered at this level so it overlays the dashboard */}
+      {showBookingModal && selectedTest && (
+        <LabTestBookingModal test={selectedTest} />
+      )}
+    </>
   )
 }

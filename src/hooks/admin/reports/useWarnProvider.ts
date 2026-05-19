@@ -34,7 +34,7 @@ async function warnProvider(
   return json.data
 }
 
-export function useWarnProvider() {
+export function useWarnWorker() {
   const { adminId } = useAdminStore()
   const queryClient = useQueryClient()
 

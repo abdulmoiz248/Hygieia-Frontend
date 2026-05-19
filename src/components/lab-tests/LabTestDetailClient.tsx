@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -8,25 +7,28 @@ import {
   Card, CardHeader, CardTitle, CardContent, CardDescription
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import Loader from '@/components/loader/loader'
+import Loader from "@/components/loader/loader"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
   DollarSign, Clock, Microscope, CheckCircle, AlertCircle,
   Calendar, FileText, Shield
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
+import { LabTestBookingModal } from "@/components/patient dashboard/medical-records/LabTestBookingModal"
 
 export default function LabTestDetailClient({ id }: { id: string }) {
-    const router=useRouter()
   const [test, setSelectedTest] = useState<LabTest | null>(null)
+
+  const { setShowBookingModal, setSelectedTest: setStoreTest, showBookingModal, selectedTest } =
+    usePatientLabTestsStore()
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedLabTest")
     if (stored) {
       localStorage.removeItem("selectedLabTest")
       const parsed: LabTest = JSON.parse(stored)
-      if (parsed.id == id) {
+      if (parsed.id === id) {
         setSelectedTest(parsed)
         return
       }
@@ -42,6 +44,13 @@ export default function LabTestDetailClient({ id }: { id: string }) {
     getData()
   }, [id])
 
+  // ✅ Open the booking modal via the Zustand store — no navigation needed
+  const handleBookTest = () => {
+    if (!test) return
+    setStoreTest(test)
+    setShowBookingModal(true)
+  }
+
   if (!test) return (
     <div className="flex items-center justify-center min-h-[400px]">
       <Loader />
@@ -49,38 +58,30 @@ export default function LabTestDetailClient({ id }: { id: string }) {
   )
 
   return (
-  <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
+    <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">
       <div className="relative pt-10 overflow-hidden border-b border-border/50 bg-gradient-to-r from-soft-blue/20 via-mint-green/10 to-soft-coral/20">
-  {/* background texture */}
-  <div className="absolute inset-0  opacity-10" />
-  {/* subtle overlay */}
-  <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/20 backdrop-blur-sm" />
+        <div className="absolute inset-0 opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/20 backdrop-blur-sm" />
 
-  <div className="relative container mx-auto px-4 py-16  items-center">
-    {/* Left side - text */}
-    <div className="space-y-6" >
-     
-      <div className="p-6 rounded-2xl w-full bg-white/70 shadow-lg backdrop-blur-sm border border-white/30 space-y-4">
-
-        <h1 className="text-4xl md:text-5xl font-bold text-dark-slate-gray">
-          {test.name}
-        </h1>
-        <p className="text-lg text-cool-gray leading-relaxed">
-          {test.description}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Badge className="bg-soft-blue/20 text-soft-blue">{test.category}</Badge>
-          <Badge className="bg-soft-coral/20 text-soft-coral flex items-center gap-1">
-            <Shield className="w-3 h-3" /> Certified Test
-          </Badge>
+        <div className="relative container mx-auto px-4 py-16 items-center">
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl w-full bg-white/70 shadow-lg backdrop-blur-sm border border-white/30 space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-dark-slate-gray">
+                {test.name}
+              </h1>
+              <p className="text-lg text-cool-gray leading-relaxed">
+                {test.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-soft-blue/20 text-soft-blue">{test.category}</Badge>
+                <Badge className="bg-soft-coral/20 text-soft-coral flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> Certified Test
+                </Badge>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-   
-  </div>
-</div>
-
 
       <div className="container mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -89,7 +90,7 @@ export default function LabTestDetailClient({ id }: { id: string }) {
             <Card className="border-border/50 bg-white/60">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-soft-blue">
-                  <FileText className="w-5 h-5 " />
+                  <FileText className="w-5 h-5" />
                   Test Overview
                 </CardTitle>
               </CardHeader>
@@ -119,10 +120,12 @@ export default function LabTestDetailClient({ id }: { id: string }) {
               <Card className="border-border/50 bg-white/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-soft-blue">
-                    <AlertCircle className="w-5 h-5 " />
+                    <AlertCircle className="w-5 h-5" />
                     Preparation Instructions
                   </CardTitle>
-                  <CardDescription>Please follow these instructions to ensure accurate test results.</CardDescription>
+                  <CardDescription>
+                    Please follow these instructions to ensure accurate test results.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -137,11 +140,11 @@ export default function LabTestDetailClient({ id }: { id: string }) {
               </Card>
             )}
 
-            {/* Additional Information */}
+            {/* What to Expect */}
             <Card className="border-border/50 bg-gradient-to-br from-card via-card to-card/80">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-soft-blue">
-                  <Shield className="w-5 h-5 " />
+                  <Shield className="w-5 h-5" />
                   What to Expect
                 </CardTitle>
               </CardHeader>
@@ -150,24 +153,24 @@ export default function LabTestDetailClient({ id }: { id: string }) {
                   <div>
                     <h4 className="font-semibold text-soft-coral mb-2">Sample Collection</h4>
                     <p className="text-cool-gray">
-                      A trained phlebotomist will collect your blood sample using sterile equipment. The process is
-                      quick and typically takes less than 5 minutes.
+                      A trained phlebotomist will collect your blood sample using sterile equipment.
+                      The process is quick and typically takes less than 5 minutes.
                     </p>
                   </div>
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-soft-coral mb-2">Processing Time</h4>
                     <p className="text-cool-gray">
-                      Your sample will be processed in our state-of-the-art laboratory. Results will be available within{" "}
-                      {test.duration} and sent to your healthcare provider.
+                      Your sample will be processed in our state-of-the-art laboratory. Results will
+                      be available within {test.duration} and sent to your healthcare provider.
                     </p>
                   </div>
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-soft-coral mb-2">Quality Assurance</h4>
                     <p className="text-cool-gray">
-                      All tests are performed using advanced equipment and follow strict quality control protocols to
-                      ensure accurate and reliable results.
+                      All tests are performed using advanced equipment and follow strict quality
+                      control protocols to ensure accurate and reliable results.
                     </p>
                   </div>
                 </div>
@@ -175,6 +178,7 @@ export default function LabTestDetailClient({ id }: { id: string }) {
             </Card>
           </div>
 
+          {/* Booking sidebar */}
           <div className="space-y-6">
             <Card className="border-primary/20 bg-cool-gray/10 sticky top-20">
               <CardHeader>
@@ -199,12 +203,9 @@ export default function LabTestDetailClient({ id }: { id: string }) {
                   </div>
                 </div>
 
+                {/* ✅ Opens the booking modal directly — no more redirect without booking */}
                 <Button
-                onClick={()=>{
-                  localStorage.setItem('booktest',JSON.stringify(test))
-                  router.push('/patient/medical-records') 
-
-                }}
+                  onClick={handleBookTest}
                   size="lg"
                   className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90 font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
                 >
@@ -217,11 +218,14 @@ export default function LabTestDetailClient({ id }: { id: string }) {
                 </p>
               </CardContent>
             </Card>
-
-           
           </div>
         </div>
       </div>
+
+      {/* ✅ Render the modal here — it reads showBookingModal & selectedTest from the store */}
+      {showBookingModal && selectedTest && (
+        <LabTestBookingModal test={selectedTest} />
+      )}
     </div>
   )
 }
