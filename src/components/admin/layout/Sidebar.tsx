@@ -31,8 +31,7 @@ const menuItems = [
   { icon: Mail,            label: "Review Newsletters", href: "/newsletters"  },
   { icon: BookOpen,        label: "Manage FAQs",        href: "/faq"          },
   { icon: Search,          label: "Manage CVs",         href: "/cv"           },
-  { icon: ShieldAlert,     label: "Reports",            href: "/reports"      },
-  { icon: TestTube,        label: "Lab Tests",          href: "/lab-tests"    }
+  { icon: TestTube,        label: "Manage Lab Tests",          href: "/lab-tests"    }
 ]
 
 export function Sidebar({

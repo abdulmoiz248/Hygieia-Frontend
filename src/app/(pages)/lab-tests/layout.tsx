@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import Navbar from "@/components/layouts/landing-page/navbar"
-import Footer from "@/components/layouts/landing-page/Footer"
+import { PatientToastContainer } from "@/toasts/PatientToast"
 import LabTestProviders from "@/components/lab-tests/labTestProvider"
 
 export const metadata: Metadata = {
@@ -8,22 +7,15 @@ export const metadata: Metadata = {
   description: "Browse, book, and manage diagnostic lab tests with clear instructions, pricing, and secure results.",
 }
 
-
-
-export default function RootLayout({
+export default function LabTestsLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>
-        <LabTestProviders>
-          <Navbar />
-          {children}
-          <Footer />
-        </LabTestProviders>
-      </body>
-    </html>
+    <LabTestProviders>
+      {children}
+      <PatientToastContainer />
+    </LabTestProviders>
   )
 }
