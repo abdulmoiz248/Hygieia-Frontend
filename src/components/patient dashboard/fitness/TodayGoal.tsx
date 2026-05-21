@@ -23,6 +23,7 @@ export default function TodayGoal() {
   }
 
   const goals = usePatientFitnessStore((state) => state.goals)
+  const loading = usePatientFitnessStore((state) => state.loading)
   const targets = usePatientProfileStore((store) => store.profile.limit)
 
   const getIcon = (type: string) => {
@@ -55,6 +56,17 @@ export default function TodayGoal() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {loading && (
+            <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+              Loading goals…
+            </div>
+          )}
+          {!loading && goals.length === 0 && (
+            <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+              No goals data available yet.
+            </div>
+          )}
+          {!loading && goals.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {goals.map((goal) => {
               const targetValue = Number(
@@ -102,6 +114,7 @@ export default function TodayGoal() {
               )
             })}
           </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
