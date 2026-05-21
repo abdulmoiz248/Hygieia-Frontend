@@ -105,14 +105,19 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-white overflow-hidden">
-              <div className="p-3 border-b">
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-80 bg-white p-0 flex flex-col"
+              style={{ maxHeight: "min(420px, calc(100vh - 80px))" }}
+            >
+              <div className="p-3 border-b flex-shrink-0">
                 <h3 className="font-semibold text-soft-blue">Notifications</h3>
                 <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
               </div>
-              <div className="max-h-96 overflow-y-auto">
+              <div className="overflow-y-auto flex-1 min-h-0">
                 {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer">
+                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer focus:bg-gray-50">
                     <div className="flex gap-3 w-full">
                       <div
                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
@@ -128,9 +133,9 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                   </DropdownMenuItem>
                 ))}
               </div>
-              <div className="p-2 border-t">
-                <Button  size="sm" className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90" onClick={() => markAllAsRead()}>
-                 Mark All As Read
+              <div className="p-2 border-t flex-shrink-0">
+                <Button size="sm" className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90" onClick={() => markAllAsRead()}>
+                  Mark All As Read
                 </Button>
               </div>
             </DropdownMenuContent>
