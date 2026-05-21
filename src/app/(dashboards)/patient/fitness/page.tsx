@@ -38,7 +38,7 @@ export default function FitnessPage() {
       if (profile.id) {
         fitnessStore.fetchFitness(profile.id)
       }
-  },[])
+  },[profile.id])
 
 
   return (

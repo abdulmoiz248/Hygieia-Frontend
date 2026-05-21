@@ -58,6 +58,8 @@ export default function WorkoutDashboard() {
 
 
 
+  const gymRoutines = routines.filter((r) => r.type === "gym")
+
 // create watermark dataUrl by drawing image to canvas with low alpha
 const createWatermarkDataUrl = async (url: string, opacity = 0.06, maxW = 600, maxH = 600) => {
   return await new Promise<string>(async (resolve, reject) => {
@@ -297,7 +299,6 @@ const handleDownloadPdf = async () => {
     setIsCompletionOpen(true)
   }
 
-  const gymRoutines = routines.filter((r) => r.type === "gym")
 
   return (
     <motion.div variants={itemVariants} className="mt-6">
