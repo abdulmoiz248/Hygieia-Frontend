@@ -1,7 +1,9 @@
+// app/nutritionist/layout.tsx
 import { DashboardLayout } from "@/components/nutritionist/layout/DashboardLayout"
 import ReactQueryProvider from "@/Providers/ReactQueryProvider"
 import type { Metadata } from "next"
 import AuthGuard from "@/components/auth/AuthGuard"
+import NutritionistProfileGuard from "@/components/auth/NutritionistProfileGuard"
 
 export const metadata: Metadata = {
   title: "Nutritionist | Hygieia",
@@ -14,12 +16,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <>
-      <ReactQueryProvider>
-        <AuthGuard>
-          <DashboardLayout>{children}</DashboardLayout>
-        </AuthGuard>
-      </ReactQueryProvider>
-    </>
+    <ReactQueryProvider>
+      <AuthGuard>
+        <DashboardLayout>
+          <NutritionistProfileGuard>{children}</NutritionistProfileGuard>
+        </DashboardLayout>
+      </AuthGuard>
+    </ReactQueryProvider>
   )
 }
