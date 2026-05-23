@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, Filter, FileText, File, MapPin, Link as LinkIcon, Flag } from "lucide-react"
+import { Calendar, Clock, FileText, File, MapPin, Link as LinkIcon, Flag } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CalendarComponent } from "@/components/ui/calendar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import Loader from "@/components/loader/loader"
-
+import { PatientAppointmentsList } from "@/components/patient dashboard/appointments/patient-appointments-list"
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { Appointment, AppointmentMode, AppointmentStatus } from "@/types/patient/appointment"
@@ -40,7 +39,6 @@ export default function AppointmentsPage() {
   const user = usePatientProfileStore((state) => state.profile)
   const router = useRouter()
 
-  const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
@@ -278,20 +276,6 @@ export default function AppointmentsPage() {
     document.body.removeChild(link)
   }
 
-  const filteredAppointments = appointments
-    .filter((appointment) => {
-      if (statusFilter === "all") return true
-      return appointment.status === statusFilter
-    })
-    .filter((appointment) => appointment.status !== "cancelled")
-    .sort((a, b) => {
-      if (a.status === "upcoming" && b.status !== "upcoming") return -1
-      if (a.status !== "upcoming" && b.status === "upcoming") return 1
-      const dateA = new Date(a.date).getTime()
-      const dateB = new Date(b.date).getTime()
-      return a.status === "upcoming" ? dateA - dateB : dateB - dateA
-    })
-
   const appointmentDates = appointments.map((apt) => new Date(apt.date))
 
   const getStatusColor = (status: string) => {
@@ -307,7 +291,6 @@ export default function AppointmentsPage() {
     }
   }
 
-  // Derive provider role from the doctor object on the appointment
   const getProviderRole = (appointment: Appointment): ReportProviderRole => {
     // NutritionistProfile has a `role` field set to "nutritionist"
     const doc = appointment.doctor as any
@@ -327,26 +310,16 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-snow-white">
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="all">
-                All Appointments
-              </SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="upcoming">
-                Upcoming
-              </SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="completed">
-                Completed
-              </SelectItem>
-              <SelectItem className="hover:bg-mint-green hover:text-snow-white" value="cancelled">
-                Cancelled
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <Button
+            size="sm"
+            className="w-full sm:w-auto text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
+            onClick={async () => {
+              await handleDownloadAppointmentSchedulePdf()
+            }}
+          >
+            <File className="w-4 h-4 mr-2" />
+            Download Schedule
+          </Button>
 
           <Button className="w-full sm:w-auto bg-mint-green hover:bg-mint-green/90 text-white" asChild>
             <Link href="/patient/appointments/new">New Appointment</Link>
@@ -448,156 +421,7 @@ export default function AppointmentsPage() {
 
       {/* Appointments List */}
       <motion.div variants={itemVariants}>
-        <Card className="bg-white/40">
-          <CardHeader>
-            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
-                <Clock className="w-5 h-5 text-mint-green" />
-                Your Appointments
-                <span className="text-mint-green">({filteredAppointments.length})</span>
-              </CardTitle>
-              <Button
-                size="sm"
-                className="text-snow-white bg-soft-blue border border-soft-blue hover:bg-soft-blue/90 hover:text-snow-white"
-                onClick={async () => {
-                  await handleDownloadAppointmentSchedulePdf()
-                }}
-              >
-                <File className="w-4 h-4 mr-2" />
-                Download Schedule
-              </Button>
-            </CardHeader>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {filteredAppointments.map((appointment) => (
-              <motion.div
-                key={appointment.id}
-                whileHover={{ scale: 1.02 }}
-                className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer bg-cool-gray/10"
-                onClick={() => setSelectedAppointment(appointment)}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div className="flex gap-4">
-                    <Avatar className="w-12 h-12 shrink-0">
-                      <AvatarImage src={appointment.doctor?.img || "/placeholder.svg"} />
-                      <AvatarFallback>
-                        {appointment.doctor.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="space-y-1 text-sm">
-                      <h3 className="font-semibold text-soft-blue text-base sm:text-lg">
-                        {appointment.doctor.name}
-                      </h3>
-                      <p className="text-soft-coral">{appointment.notes}</p>
-
-                      <div className="flex flex-wrap items-center gap-2 text-cool-gray mt-1">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4 text-mint-green" />
-                          {new Date(appointment.date).toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-mint-green" />
-                          {appointment.time.slice(0, 5)}
-                        </div>
-                        {appointment.mode === AppointmentMode.Physical && appointment.location && (
-                          <div className="flex items-center gap-1 text-mint-green">
-                            <MapPin className="w-4 h-4" />
-                            <span className="text-sm">{appointment.location}</span>
-                          </div>
-                        )}
-                        {appointment.mode === AppointmentMode.Online &&
-                          appointment.link &&
-                          appointment.status === "upcoming" && (
-                            <a
-                              href={appointment.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 text-soft-blue hover:text-soft-blue/80 transition-colors"
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                              <span className="text-sm font-medium underline">Join Meeting</span>
-                            </a>
-                          )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge className={getStatusColor(appointment.status)}>
-                          {appointment.status}
-                        </Badge>
-                        <Badge variant="outline">{appointment.type}</Badge>
-                        {appointment.report && (
-                          <Badge className="bg-soft-blue text-snow-white">
-                            <FileText className="w-3 h-3 mr-1" />
-                            Report Available
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card-level action buttons */}
-                  <div className="flex gap-2 sm:justify-end justify-start flex-wrap mt-2 sm:mt-0">
-                    {appointment.status === AppointmentStatus.Upcoming && (
-                      <>
-                        <Button
-                          className="bg-soft-blue text-snow-white hover:bg-soft-blue/90"
-                          size="sm"
-                        >
-                          Reschedule
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="text-white bg-soft-coral hover:bg-soft-coral/90 hover:text-black border-0"
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-
-                    {/* ── Report button — completed appointments only ── */}
-                    {appointment.status === AppointmentStatus.Completed && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation() // don't open the detail modal
-                          setReportTarget(appointment)
-                        }}
-                        className="inline-flex items-center gap-1.5 text-xs text-cool-gray hover:text-red-500 transition-colors duration-200 py-1 px-2 rounded-md hover:bg-red-50"
-                      >
-                        <Flag className="h-3.5 w-3.5" />
-                        Report
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-
-            {filteredAppointments.length === 0 && (
-              <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-soft-coral mx-auto mb-4" />
-                <p className="text-cool-gray">No appointments found</p>
-                <Button
-                  variant="outline"
-                  className="mt-2 bg-soft-blue text-snow-white hover:bg-soft-blue/90"
-                  asChild
-                >
-                  <Link href="/patient/appointments/new">Book Your First Appointment</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <PatientAppointmentsList onReport={setReportTarget} />
       </motion.div>
 
       {/* Appointment Details Modal */}

@@ -65,13 +65,18 @@ function CalendarComponent({
         table: "w-full border-collapse",
         weekdays: cn("flex mb-1 sm:mb-2", defaultClassNames.weekdays),
         weekday: cn(
-          "text-rose-500 flex-1   font-bold text-[10px] sm:text-xs select-none py-1 sm:py-2 text-center uppercase tracking-wider",
+          "text-rose-500 flex-1 font-bold text-[10px] sm:text-xs select-none py-1 sm:py-2 text-center uppercase tracking-wider",
           defaultClassNames.weekday,
         ),
-        week: cn("flex w-full gap-0  ", defaultClassNames.week),
-        day: cn("group/day relative flex-1 aspect-square select-none p-0.5", defaultClassNames.day),
+        week: cn("flex w-full gap-0", defaultClassNames.week),
+        // ↓ Added `flex items-center justify-center` so the button is always
+        //   perfectly centred inside its square cell — fixes the off-centre ring.
+        day: cn(
+          "group/day relative flex-1 aspect-square select-none p-0.5 flex items-center justify-center",
+          defaultClassNames.day,
+        ),
         today: cn(
-          "bg-gradient-to-br from-rose-100 to-blue-100 text-gray-800 font-bold rounded-2xl shadow-md ",
+          "bg-gradient-to-br from-rose-100 to-blue-100 text-gray-800 font-bold rounded-2xl shadow-md",
           defaultClassNames.today,
         ),
         outside: cn("text-gray-400/60", defaultClassNames.outside),
