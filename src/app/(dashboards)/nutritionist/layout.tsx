@@ -1,30 +1,25 @@
-import { DashboardLayout } from "@/components/nutritionist/layout/DashboardLayout";
-import ReactQueryProvider from "@/Providers/ReactQueryProvider";
-import type { Metadata } from "next";
-
-
-
+import { DashboardLayout } from "@/components/nutritionist/layout/DashboardLayout"
+import ReactQueryProvider from "@/Providers/ReactQueryProvider"
+import type { Metadata } from "next"
+import AuthGuard from "@/components/auth/AuthGuard"
 
 export const metadata: Metadata = {
   title: "Nutritionist | Hygieia",
   description: "Comprehensive nutritionist dashboard for managing diet plans, client progress, and consultations.",
 }
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-   <>
-
-<ReactQueryProvider>
-    <DashboardLayout>
-     {children}
-     </DashboardLayout>
-
-   </ReactQueryProvider>
+    <>
+      <ReactQueryProvider>
+        <AuthGuard>
+          <DashboardLayout>{children}</DashboardLayout>
+        </AuthGuard>
+      </ReactQueryProvider>
     </>
-  );
+  )
 }
