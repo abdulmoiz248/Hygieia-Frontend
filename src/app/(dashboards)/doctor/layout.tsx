@@ -1,7 +1,9 @@
+// app/doctor/layout.tsx
 import { DoctorDashboardLayout } from "@/components/doctor-portal/layout/DashboardLayout"
 import ReactQueryProvider from "@/Providers/ReactQueryProvider"
 import type { Metadata } from "next"
 import AuthGuard from "@/components/auth/AuthGuard"
+import DoctorProfileGuard from "@/components/auth/DoctorProfileGuard"
 
 export const metadata: Metadata = {
   title: "Doctor | Hygieia",
@@ -16,7 +18,9 @@ export default function DoctorRootLayout({
   return (
     <ReactQueryProvider>
       <AuthGuard>
-        <DoctorDashboardLayout>{children}</DoctorDashboardLayout>
+        <DoctorDashboardLayout>
+          <DoctorProfileGuard>{children}</DoctorProfileGuard>
+        </DoctorDashboardLayout>
       </AuthGuard>
     </ReactQueryProvider>
   )
