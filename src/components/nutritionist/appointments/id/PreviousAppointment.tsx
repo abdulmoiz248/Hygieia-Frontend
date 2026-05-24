@@ -205,21 +205,70 @@ export default function PreviousAppointmentsCard({
             const diet =
               appt.diet_plan && appt.diet_plan.length > 0 ? appt.diet_plan[0] : null
 
+            const formattedDate = (() => {
+              try {
+                return new Intl.DateTimeFormat("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                }).format(new Date(appt.date))
+              } catch {
+                return appt.date
+              }
+            })()
+
+            const formattedTime = (() => {
+              try {
+                const [h, m] = appt.time.split(":")
+                const d = new Date()
+                d.setHours(Number(h), Number(m))
+                return new Intl.DateTimeFormat("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                }).format(d)
+              } catch {
+                return appt.time
+              }
+            })()
+
+            const typeColor =
+              appt.type === "follow-up"
+                ? "bg-mint-green"
+                : appt.type === "consultation"
+                ? "bg-soft-blue"
+                : "bg-soft-coral"
+
+            const statusStyle =
+              appt.status === "completed"
+                ? "bg-mint-green/15 text-mint-green border border-mint-green/30"
+                : appt.status === "cancelled"
+                ? "bg-soft-coral/15 text-soft-coral border border-soft-coral/30"
+                : "bg-soft-blue/15 text-soft-blue border border-soft-blue/30"
+
             return (
               <AccordionItem
                 key={appt.id}
                 value={`item-${i}`}
-                className="border border-cool-gray/20 rounded-xl"
+                className="border border-cool-gray/20 rounded-xl overflow-hidden"
               >
-                <AccordionTrigger className="text-soft-blue hover:text-soft-coral px-3 py-2">
-                  <div className="flex flex-col items-start w-full text-left">
-                    <p className="font-semibold text-base text-soft-coral">
-                      {appt.date} at {appt.time}
-                    </p>
-                    <p className="text-sm text-cool-gray">
-                      {appt.type.charAt(0).toUpperCase() + appt.type.slice(1)} •{" "}
-                      {appt.mode} • {appt.status}
-                    </p>
+                <AccordionTrigger className="hover:no-underline px-0 py-0 [&>svg]:mr-3 [&>svg]:text-cool-gray [&>svg]:flex-shrink-0">
+                  <div className="flex items-stretch w-full text-left">
+                    {/* Colored left stripe by type */}
+                    <div className={`w-1 flex-shrink-0 ${typeColor}`} />
+                    <div className="flex-1 px-3 py-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <p className="font-semibold text-sm text-soft-coral leading-tight">
+                          {formattedDate}
+                        </p>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>
+                          {appt.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-cool-gray mt-1">
+                        {formattedTime} · {appt.type.charAt(0).toUpperCase() + appt.type.slice(1)} · {appt.mode}
+                      </p>
+                    </div>
                   </div>
                 </AccordionTrigger>
 
