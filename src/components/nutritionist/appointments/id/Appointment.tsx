@@ -219,7 +219,7 @@ if (assignedDietPlan) {
     patientName: appointment?.patient.name
   })
 }
-    router.push('/nutritionist/appointments')
+    router.push('/nutritionist/appointments?tab=completed')
 
   }
 
@@ -827,16 +827,16 @@ if (assignedDietPlan) {
                     <Heart className="w-4 h-4" />
                     Medical Info
                   </h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-cool-gray/10">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-cool-gray/10">
                       <span className="text-sm text-soft-blue">Blood Type</span>
                       <Badge variant="outline" className="bg-soft-coral text-cool-gray">{patient.bloodType}</Badge>
                     </div>
-                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                    <div className="p-3 rounded-lg bg-cool-gray/10">
                       <p className="text-sm text-soft-blue mb-1">Allergies</p>
                       <p className="text-sm text-cool-gray">{patient.allergies}</p>
                     </div>
-                    <div className="p-2 rounded-lg bg-cool-gray/10">
+                    <div className="p-3 rounded-lg bg-cool-gray/10">
                       <p className="text-sm text-soft-blue mb-1">Conditions</p>
                       <p className="text-sm text-cool-gray">{patient.conditions}</p>
                     </div>
@@ -879,7 +879,7 @@ if (assignedDietPlan) {
     </CardTitle>
   </CardHeader>
 
-  <CardContent className="p-6 py-0 space-y-3">
+  <CardContent className="p-6 space-y-3 pb-6">
     <Button
       onClick={handleGenerateAIReport}
       disabled={isGeneratingAIReport || isDownloadingReport}
@@ -980,62 +980,62 @@ if (assignedDietPlan) {
         Other Health Details
       </h4>
 
-      <div className="space-y-2">
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+      <div className="space-y-3">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Medications</p>
           <p className="text-sm text-cool-gray">{patient.medications || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Ongoing Medications</p>
           <p className="text-sm text-cool-gray">{patient.ongoingMedications || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Surgery History</p>
           <p className="text-sm text-cool-gray">{patient.surgeryHistory || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Implants</p>
           <p className="text-sm text-cool-gray">{patient.implants || "N/A"}</p>
         </div>
 
         {patient.gender === "Female" && (
           <>
-            <div className="p-2 rounded-lg bg-cool-gray/10">
+            <div className="p-3 rounded-lg bg-cool-gray/10">
               <p className="text-sm text-soft-blue mb-1">Pregnancy Status</p>
               <p className="text-sm text-cool-gray">{patient.pregnancyStatus || "N/A"}</p>
             </div>
 
-            <div className="p-2 rounded-lg bg-cool-gray/10">
+            <div className="p-3 rounded-lg bg-cool-gray/10">
               <p className="text-sm text-soft-blue mb-1">Menstrual Cycle</p>
               <p className="text-sm text-cool-gray">{patient.menstrualCycle || "N/A"}</p>
             </div>
           </>
         )}
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Mental Health</p>
           <p className="text-sm text-cool-gray">{patient.mentalHealth || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Family History</p>
           <p className="text-sm text-cool-gray">{patient.familyHistory || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Organ Donor</p>
           <p className="text-sm text-cool-gray">{patient.organDonor || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Disabilities</p>
           <p className="text-sm text-cool-gray">{patient.disabilities || "N/A"}</p>
         </div>
 
-        <div className="p-2 rounded-lg bg-cool-gray/10">
+        <div className="p-3 rounded-lg bg-cool-gray/10">
           <p className="text-sm text-soft-blue mb-1">Lifestyle</p>
           <p className="text-sm text-cool-gray">{patient.lifestyle || "N/A"}</p>
         </div>
@@ -1055,8 +1055,7 @@ if (assignedDietPlan) {
 
 
 
-{(assignedDietPlan || referredTests.length > 0 || doctorReport) && (
-  <Card
+<Card
     className={`hover-lift bg-white border-accent/30 shadow-md rounded-2xl overflow-hidden transition-all ${
       appointmentDone ? "opacity-60 pointer-events-none" : ""
     }`}
@@ -1150,7 +1149,6 @@ if (assignedDietPlan) {
       </div>
     )}
   </Card>
-)}
 
 
 
