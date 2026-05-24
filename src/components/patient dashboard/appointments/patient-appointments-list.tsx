@@ -17,11 +17,25 @@ import {
   CheckCircle2,
   BanIcon,
   Flag,
+  Star,
 } from "lucide-react"
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import type { Appointment } from "@/types/patient/appointment"
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
+
+// ── Auth helper (mirrors ReviewForm logic) ────────────────────────────────────
+function getPatientAuthStatus(): "ok" | "unauthenticated" | "incomplete" {
+  try {
+    const role = localStorage.getItem("role")
+    const id   = localStorage.getItem("id")
+    if (!role || (!id && role !== "patient")) return "unauthenticated"
+    if (role === "patient" && !id)            return "incomplete"
+    return "ok"
+  } catch {
+    return "unauthenticated"
+  }
+}
 import {
   Dialog,
   DialogContent,
@@ -50,11 +64,9 @@ const STATUS_TABS = [
   { label: "Cancelled", value: AppointmentStatus.Cancelled },
 ] as const
 
-interface PatientAppointmentsListProps {
-  onReport?: (appointment: Appointment) => void
-}
+interface PatientAppointmentsListProps {}
 
-export function PatientAppointmentsList({ onReport }: PatientAppointmentsListProps) {
+export function PatientAppointmentsList({}: PatientAppointmentsListProps) {
   const { appointments, cancelAppointment } = usePatientAppointmentsStore()
   const router = useRouter()
 
@@ -113,6 +125,25 @@ export function PatientAppointmentsList({ onReport }: PatientAppointmentsListPro
   const handleReschedule = (id: string) => {
     localStorage.setItem("reschedule", id)
     router.push("/patient/appointments/new")
+  }
+
+  const handleWriteReview = (appointmentId: string) => {
+    const status = getPatientAuthStatus()
+    if (status === "unauthenticated") {
+      toast.error("Login Required", {
+        description: "You must be logged in as a patient to write a review.",
+      })
+      router.push("/login")
+      return
+    }
+    if (status === "incomplete") {
+      toast.error("Session Incomplete", {
+        description: "Your session is missing required info. Please log in again.",
+      })
+      router.push("/login")
+      return
+    }
+    router.push(`/patient/appointments/${appointmentId}/review`)
   }
 
   const handleCancelConfirm = async () => {
@@ -375,35 +406,38 @@ export function PatientAppointmentsList({ onReport }: PatientAppointmentsListPro
                               </div>
                             )}
 
-                            {/* Completed — follow-up + report */}
+                            {/* Completed — review + follow-up + report */}
                             {activeTab === AppointmentStatus.Completed && (
                               <div className="mt-auto flex flex-col gap-2">
-                                <Button
+                                <button
+                                  type="button"
+                                  onClick={() => handleWriteReview(appointment.id)}
+                                  className="w-full rounded-lg py-2 text-xs font-medium border border-soft-blue/40 text-soft-blue hover:bg-soft-blue hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
+                                >
+                                  <Star className="h-3.5 w-3.5" />
+                                  Write a Review
+                                </button>
+
+                                <button
+                                  type="button"
                                   onClick={() => {
                                     localStorage.setItem("appointment", appointment.id)
                                     router.push("/patient/appointments/new")
                                   }}
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full rounded-lg text-xs border-soft-blue/30 text-soft-blue hover:bg-soft-blue hover:text-white"
+                                  className="w-full rounded-lg py-2 text-xs font-medium border border-mint-green/50 text-mint-green hover:bg-mint-green hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
                                 >
-                                  <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+                                  <CalendarDays className="h-3.5 w-3.5" />
                                   Book Follow-up
-                                </Button>
+                                </button>
 
-                                {onReport && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      onReport(appointment)
-                                    }}
-                                    className="w-full rounded-lg py-2 text-xs font-medium border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition-colors duration-200 flex items-center justify-center gap-1.5"
-                                  >
-                                    <Flag className="h-3.5 w-3.5" />
-                                    Report Provider
-                                  </button>
-                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => router.push(`/patient/appointments/${appointment.id}/report`)}
+                                  className="w-full rounded-lg py-2 text-xs font-medium border border-soft-coral/40 text-soft-coral hover:bg-soft-coral hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
+                                >
+                                  <Flag className="h-3.5 w-3.5" />
+                                  Report Provider
+                                </button>
                               </div>
                             )}
                           </div>

@@ -3,9 +3,20 @@
 import type React from "react"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Star, Heart, CheckCircle, Calendar, User, Sparkles, Monitor, ThumbsUp } from "lucide-react"
+import {
+  Star,
+  Heart,
+  CheckCircle,
+  Calendar,
+  User,
+  Sparkles,
+  Monitor,
+  ThumbsUp,
+  LogIn,
+  AlertTriangle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -14,45 +25,97 @@ import { cn } from "@/lib/utils"
 import StarRating from "./star-rating"
 import { Appointment } from "@/types/patient/appointment"
 
+// ─── Auth helpers ────────────────────────────────────────────────────────────
 
+type AuthStatus =
+  | { state: "loading" }
+  | { state: "unauthenticated" }           // no role key at all
+  | { state: "incomplete"; role: string }  // role=patient but no id
+  | { state: "ok"; patientId: string }
+
+function getAuthStatus(): AuthStatus {
+  try {
+    const role = localStorage.getItem("role")
+    const id   = localStorage.getItem("id")
+
+    if (!role) return { state: "unauthenticated" }
+    if (role === "patient" && !id) return { state: "incomplete", role }
+    if (!id)   return { state: "unauthenticated" }
+
+    return { state: "ok", patientId: id }
+  } catch {
+    // localStorage not available (SSR safety)
+    return { state: "loading" }
+  }
+}
+
+// ─── Props ───────────────────────────────────────────────────────────────────
 
 interface ReviewFormProps {
   appointment: Appointment
   onReviewSubmitted?: (reviewData: unknown) => void
 }
 
-export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFormProps) {
-  const [rating, setRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
-  const [comment, setComment] = useState("")
-  const [improvement, setImprovement] = useState("")
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function ReviewForm({ appointment, onReviewSubmitted }: ReviewFormProps) {
+  const router = useRouter()
+
+  // Auth state — resolved client-side only
+  const [authStatus, setAuthStatus] = useState<AuthStatus>({ state: "loading" })
+
+  useEffect(() => {
+    setAuthStatus(getAuthStatus())
+  }, [])
+
+  // Form state
+  const [rating, setRating]               = useState(0)
+  const [hoverRating, setHoverRating]     = useState(0)
+  const [comment, setComment]             = useState("")
+  const [improvement, setImprovement]     = useState("")
 
   // Doctor-related questions
-  const [doctorProfessionalism, setDoctorProfessionalism] = useState("")
-  const [doctorCommunication, setDoctorCommunication] = useState("")
-  const [diagnosisClarity, setDiagnosisClarity] = useState("")
-  const [treatmentExplanation, setTreatmentExplanation] = useState("")
+  const [doctorProfessionalism, setDoctorProfessionalism]   = useState("")
+  const [doctorCommunication, setDoctorCommunication]       = useState("")
+  const [diagnosisClarity, setDiagnosisClarity]             = useState("")
+  const [treatmentExplanation, setTreatmentExplanation]     = useState("")
 
   // Platform-related questions
-  const [bookingEase, setBookingEase] = useState("")
+  const [bookingEase, setBookingEase]         = useState("")
   const [platformUsability, setPlatformUsability] = useState("")
-  const [videoQuality, setVideoQuality] = useState("")
-  const [paymentProcess, setPaymentProcess] = useState("")
+  const [videoQuality, setVideoQuality]       = useState("")
+  const [paymentProcess, setPaymentProcess]   = useState("")
 
   // Overall satisfaction
   const [overallSatisfaction, setOverallSatisfaction] = useState("")
-  const [recommendPlatform, setRecommendPlatform] = useState("")
+  const [recommendPlatform, setRecommendPlatform]     = useState("")
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const router = useRouter()
+  const [isSubmitted, setIsSubmitted]   = useState(false)
+  const [submitError, setSubmitError]   = useState<string | null>(null)
+
+  // ── Submit handler ──────────────────────────────────────────────────────────
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitError(null)
+
+    // Re-check auth at submit time (session might have been cleared)
+    const currentAuth = getAuthStatus()
+    if (currentAuth.state !== "ok") {
+      setSubmitError(
+        currentAuth.state === "incomplete"
+          ? "Your session appears incomplete. Please log in again to submit your review."
+          : "You must be logged in as a patient to submit a review.",
+      )
+      return
+    }
+
     setIsSubmitting(true)
 
     const reviewData = {
       appointmentId: appointment.id,
+      patientId: currentAuth.patientId,
       rating,
       comment,
       improvement,
@@ -69,19 +132,25 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
       submittedAt: new Date().toISOString(),
     }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      // TODO: replace with your real API call, e.g.:
+      // await api.post("/reviews", reviewData)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    console.log("Review submitted:", reviewData)
-    onReviewSubmitted?.(reviewData)
+      console.log("Review submitted:", reviewData)
+      onReviewSubmitted?.(reviewData)
 
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-
-    setTimeout(() => {
-      setIsSubmitted(false)
-      router.push("/patient/dashboard")
-    }, 3000)
+      setIsSubmitted(true)
+      setTimeout(() => {
+        setIsSubmitted(false)
+        router.push("/patient/appointments")
+      }, 3000)
+    } catch (err) {
+      console.error("Review submission failed:", err)
+      setSubmitError("Something went wrong while submitting your review. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isFormValid =
@@ -93,6 +162,88 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
     bookingEase &&
     platformUsability &&
     overallSatisfaction
+
+  // ── Loading splash ──────────────────────────────────────────────────────────
+
+  if (authStatus.state === "loading") {
+    return (
+      <div className="min-h-screen custom-gradient flex items-center justify-center p-4">
+        <div className="w-8 h-8 border-4 border-soft-blue border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  // ── Not authenticated at all ────────────────────────────────────────────────
+
+  if (authStatus.state === "unauthenticated") {
+    return (
+      <div className="min-h-screen custom-gradient flex items-center justify-center p-4">
+        <Card className="w-full max-w-md mx-auto shadow-2xl bg-white">
+          <CardContent className="p-8 text-center space-y-5">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-soft-coral/10 mx-auto">
+              <LogIn className="w-8 h-8 text-soft-coral" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-dark-slate-gray mb-2">Login Required</h2>
+              <p className="text-cool-gray text-sm leading-relaxed">
+                You need to be logged in as a patient to leave a review.
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/login")}
+              className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Go to Login
+            </Button>
+            <button
+              onClick={() => router.back()}
+              className="text-sm text-cool-gray hover:text-soft-blue underline underline-offset-2 transition-colors"
+            >
+              Go back
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // ── Role is patient but no id in localStorage ───────────────────────────────
+
+  if (authStatus.state === "incomplete") {
+    return (
+      <div className="min-h-screen custom-gradient flex items-center justify-center p-4">
+        <Card className="w-full max-w-md mx-auto shadow-2xl bg-white">
+          <CardContent className="p-8 text-center space-y-5">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mx-auto">
+              <AlertTriangle className="w-8 h-8 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-dark-slate-gray mb-2">Session Incomplete</h2>
+              <p className="text-cool-gray text-sm leading-relaxed">
+                Your session is missing required information. Please log in again to continue.
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/login")}
+              className="w-full bg-soft-blue hover:bg-soft-blue/90 text-snow-white"
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Log In Again
+            </Button>
+            <button
+              onClick={() => router.back()}
+              className="text-sm text-cool-gray hover:text-soft-blue underline underline-offset-2 transition-colors"
+            >
+              Go back
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // ── Success state ───────────────────────────────────────────────────────────
 
   if (isSubmitted) {
     return (
@@ -117,6 +268,8 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
       </div>
     )
   }
+
+  // ── Main form (authStatus.state === "ok") ───────────────────────────────────
 
   return (
     <div className="min-h-screen custom-gradient">
@@ -144,12 +297,8 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                 </div>
                 <div className="flex items-center gap-2 text-cool-gray">
                   <Sparkles className="w-4 h-4 text-soft-blue" />
-                  {/* <span>
-                    {appointment.doctor.} • {appointment.doctor.experience} yrs
-                  </span> */}
                 </div>
                 <div className="text-sm text-cool-gray">
-                  {/* <span className="text-soft-blue">Location:</span> {appointment.doctor.location} */}
                   <span className="text-soft-coral"> • Fee:</span> ${appointment.doctor.consultationFee}
                 </div>
                 <div className="flex items-center gap-1 text-amber-400">
@@ -219,7 +368,7 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                     </div>
 
                     <div className="space-y-3">
-                      <Label className="text-soft-blue font-medium">How clear was the doctor&aposs communication?</Label>
+                      <Label className="text-soft-blue font-medium">How clear was the doctor&apos;s communication?</Label>
                       <div className="flex gap-2 flex-wrap">
                         {["Very Clear", "Clear", "Somewhat Clear", "Unclear"].map((val) => (
                           <Button
@@ -479,10 +628,28 @@ export default function ReviewForm({ appointment , onReviewSubmitted }: ReviewFo
                   </div>
                 </div>
 
+                {/* Submission error banner */}
+                {submitError && (
+                  <div className="flex items-start gap-3 rounded-xl border border-soft-coral/40 bg-soft-coral/5 px-4 py-3">
+                    <AlertTriangle className="h-5 w-5 text-soft-coral shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <p className="text-sm text-soft-coral font-medium">{submitError}</p>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/login")}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-soft-blue hover:text-soft-blue/80 underline underline-offset-2 transition-colors"
+                      >
+                        <LogIn className="h-3 w-3" />
+                        Go to login
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className='bg-soft-blue text-snow-white hover:bg-soft-blue w-full text-xl py-7'
+                  className="bg-soft-blue text-snow-white hover:bg-soft-blue w-full text-xl py-7"
                   disabled={!isFormValid || isSubmitting}
                 >
                   {isSubmitting ? (
