@@ -52,7 +52,7 @@ const useNutritionistStore = create<NutritionistStore>((set) => {
     profile: null,
    
     notifications: [],
-    loading: true,
+    loading: false,
     setProfile: async (profileData) => {
       const role = 'nutritionist'
       await api.post(`/auth/user?role=${role}`, { profileData })
@@ -61,7 +61,7 @@ const useNutritionistStore = create<NutritionistStore>((set) => {
    
     setProfileData: (profileData: NutritionistProfile) => {
       set({ profile: profileData })
-     
+     set({ profile: profileData, loading: false })
     },
 
     updateProfileField: (field, value) =>

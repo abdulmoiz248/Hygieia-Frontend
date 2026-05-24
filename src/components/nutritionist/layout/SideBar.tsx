@@ -20,11 +20,12 @@ interface SidebarProps {
   onMobileToggle: () => void
 }
 
+// ✅ No leading slash — the template literal in the Link adds the separator
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
-  { icon: Calendar, label: "Appointments", href: "/appointments" },
-  { icon: FileText, label: "Diet Plan", href: "/diet-plan" },
-  { icon: BookOpen, label: "Blogs", href: "/blogs" },
+  { icon: LayoutDashboard, label: "Overview",     href: "dashboard"    },
+  { icon: Calendar,        label: "Appointments", href: "appointments" },
+  { icon: FileText,        label: "Diet Plan",    href: "diet-plan"    },
+  { icon: BookOpen,        label: "Blogs",        href: "blogs"        },
 ]
 
 export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }: SidebarProps) {
@@ -43,7 +44,7 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               className="flex items-center gap-3"
             >
               <div className="w-10 h-10 bg-transparent from-soft-blue to-mint-green rounded-xl flex items-center justify-center shadow-lg">
-                <img src='/logo/logo.png' alt="logo" className="text-white font-bold text-lg"></img>
+                <img src="/logo/logo.png" alt="logo" className="text-white font-bold text-lg" />
               </div>
               <div>
                 <span className="font-bold text-xl text-soft-blue">Hygieia</span>
@@ -51,13 +52,12 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
               </div>
             </motion.div>
           )}
-         
         </AnimatePresence>
 
-        {/* Toggle button - always visible on desktop */}
+        {/* Toggle button — desktop only */}
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg  transition-colors md:block hidden bg-soft-blue/10 hover:bg-soft-blue/20 flex-shrink-0"
+          className="p-2 rounded-lg transition-colors md:block hidden bg-soft-blue/10 hover:bg-soft-blue/20 flex-shrink-0"
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <motion.div animate={{ rotate: collapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -65,8 +65,11 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
           </motion.div>
         </button>
 
-        {/* Close button for mobile */}
-        <button onClick={onMobileToggle} className="p-1 rounded-lg hover:bg-gray-100 transition-colors md:hidden">
+        {/* Close button — mobile only */}
+        <button
+          onClick={onMobileToggle}
+          className="p-1 rounded-lg hover:bg-gray-100 transition-colors md:hidden"
+        >
           <X className="w-5 h-5" />
         </button>
       </div>
@@ -74,15 +77,23 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item, index) => {
-        const isActive = pathname === `/nutritionist${item.href}`;
+          // ✅ Both the Link href and the isActive check use the same full path
+          const fullPath = `/nutritionist/${item.href}`
+          const isActive = pathname === fullPath || pathname?.startsWith(`${fullPath}/`)
           const Icon = item.icon
 
           return (
-            <Link key={`${item.href}-${index}`} href={`/nutritionist/${item.href}`} onClick={() => mobileMenuOpen && onMobileToggle()}>
+            <Link
+              key={`${item.href}-${index}`}
+              href={fullPath}
+              onClick={() => mobileMenuOpen && onMobileToggle()}
+            >
               <motion.div
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer",
-                  isActive ? "bg-soft-blue/20 border-l-4 border-mint-green" : "hover:bg-gray-50",
+                  isActive
+                    ? "bg-soft-blue/20 border-l-4 border-mint-green"
+                    : "hover:bg-gray-50",
                 )}
                 whileHover={{ x: collapsed ? 0 : 2 }}
                 title={collapsed ? item.label : undefined}
@@ -102,7 +113,10 @@ export function Sidebar({ collapsed, mobileMenuOpen, onToggle, onMobileToggle }:
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
-                      className={cn("font-medium transition-colors", isActive ? "text-soft-blue" : "text-cool-gray")}
+                      className={cn(
+                        "font-medium transition-colors",
+                        isActive ? "text-soft-blue" : "text-cool-gray",
+                      )}
                     >
                       {item.label}
                     </motion.span>

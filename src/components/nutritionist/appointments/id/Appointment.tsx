@@ -743,6 +743,7 @@ if (assignedDietPlan) {
   }
 
   const { patient, date, time, type, notes, dataShared } = appointment
+  const nutritionistId = user?.id?.trim() || localStorage.getItem("id") || ""
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent">
@@ -1043,7 +1044,7 @@ if (assignedDietPlan) {
   </CardContent>
 </Card>
 
-<PreviousAppointmentsCard nutritionistId={user?.id || ""} patientId={patient.id} />
+          <PreviousAppointmentsCard nutritionistId={nutritionistId} patientId={patient.id} />
 
            
           </div>
