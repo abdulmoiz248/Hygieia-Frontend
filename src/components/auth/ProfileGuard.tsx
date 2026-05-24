@@ -1,16 +1,13 @@
 "use client"
 
-// components/auth/ProfileGuard.tsx
-// Uses isProfileCompleteForRole() — edit lib/patient/profileCompleteness.ts to change required fields.
-
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import {
   isProfileCompleteForRole,
-  getMissingFieldsForRole,
   type Role,
   type AnyProfile,
 } from "@/lib/patient/ProfileCompleteness"
+import { AlertCircle } from "lucide-react"
 
 interface ProfileGuardProps {
   children: React.ReactNode
@@ -32,39 +29,29 @@ export default function ProfileGuard({
   const router     = useRouter()
   const pathname   = usePathname()
   const redirected = useRef(false)
-  const [showBanner, setShowBanner] = useState(false)
 
   const isOnProfilePage   = pathname === profileRoute || pathname?.startsWith(profileRoute)
   const profileIncomplete = !loading && (!profile || !isProfileCompleteForRole(role, profile))
 
+  // On first load, redirect to profile page if incomplete
   useEffect(() => {
     if (loading || isOnProfilePage) return
     if (profileIncomplete && !redirected.current) {
       redirected.current = true
-      sessionStorage.setItem(`${role}_profile_prompt`, "1")
       router.replace(profileRoute)
     }
-  }, [loading, profileIncomplete, isOnProfilePage, profileRoute, role, router])
+  }, [loading, profileIncomplete, isOnProfilePage, profileRoute, router])
 
-  useEffect(() => {
-    if (!isOnProfilePage) return
-    const key = `${role}_profile_prompt`
-    if (sessionStorage.getItem(key)) {
-      setShowBanner(true)
-      sessionStorage.removeItem(key)
-    }
-  }, [isOnProfilePage, role])
-
+  // Still show nothing during loading (avoids flash)
   if (loading && !isOnProfilePage) return null
-  if (profileIncomplete && !isOnProfilePage) return null
 
   return (
     <>
-      {showBanner && profile && (
-        <ProfileSetupBanner
+      {profileIncomplete && (
+        <IncompleteProfileBanner
           roleName={roleName}
-          missingFields={getMissingFieldsForRole(role, profile).map((f) => f.label)}
-          onDismiss={() => setShowBanner(false)}
+          profileRoute={profileRoute}
+          isOnProfilePage={isOnProfilePage}
         />
       )}
       {children}
@@ -72,45 +59,41 @@ export default function ProfileGuard({
   )
 }
 
-function ProfileSetupBanner({
+function IncompleteProfileBanner({
   roleName,
-  missingFields,
-  onDismiss,
+  profileRoute,
+  isOnProfilePage,
 }: {
   roleName: string
-  missingFields: string[]
-  onDismiss: () => void
+  profileRoute: string
+  isOnProfilePage: boolean
 }) {
+  const router = useRouter()
+
   return (
     <div
       role="alert"
-      className="relative flex items-start gap-3 rounded-xl border border-soft-blue/30 bg-soft-blue/10 px-4 py-3 text-sm text-dark-slate-gray shadow-sm mx-6 mt-4"
+      className="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm mx-6 mt-4"
     >
-      <span className="mt-0.5 text-soft-blue text-lg select-none">👋</span>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-soft-blue">
-          Welcome! Please complete your {roleName} profile.
-        </p>
-        <p className="text-cool-gray mt-0.5 mb-2">
-          The following required fields are missing:
-        </p>
-        <ul className="space-y-0.5">
-          {missingFields.map((label) => (
-            <li key={label} className="flex items-center gap-1.5 text-xs text-dark-slate-gray/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-soft-blue/60 shrink-0" />
-              {label}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <button
-        type="button"
-        onClick={onDismiss}
-        aria-label="Dismiss"
-        className="shrink-0 text-cool-gray hover:text-dark-slate-gray transition-colors text-base leading-none mt-0.5"
-      >
-        ✕
-      </button>
+      <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+      <p className="flex-1 font-medium">
+        Your <span className="font-semibold">{roleName}</span> profile is incomplete.{" "}
+        {!isOnProfilePage && (
+          <span>
+            Some features may be limited until you{" "}
+            <button
+              onClick={() => router.push(profileRoute)}
+              className="underline font-semibold hover:text-amber-700 transition-colors"
+            >
+              complete your profile
+            </button>
+            .
+          </span>
+        )}
+        {isOnProfilePage && (
+          <span>Please fill in the required fields below.</span>
+        )}
+      </p>
     </div>
   )
 }

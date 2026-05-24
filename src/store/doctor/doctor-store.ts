@@ -48,11 +48,11 @@ export interface DoctorStore {
 const useDoctorStore = create<DoctorStore>((set) => ({
   profile: null,
   notifications: [],
-  loading: true,
+  loading: false,
 
   setProfile: async (profileData) => {
     await api.post(`/auth/user?role=doctor`, { profileData })
-    set({ profile: profileData })
+     set({ profile: profileData, loading: false }) 
   },
 
   setProfileData: (profileData: DoctorProfile) => {
