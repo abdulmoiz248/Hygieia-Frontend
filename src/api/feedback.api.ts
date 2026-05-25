@@ -1,3 +1,5 @@
+import api from "@/lib/axios"
+
 export const BASE_FEEDBACK_URL = "http://localhost:4000/feedback-forms"
 
 export type QuestionType = "rating" | "multiple_choice" | "text"
@@ -71,37 +73,19 @@ function mapFeedbackResult(r: any): FeedbackResult {
 
 // Admin Endpoints
 export async function createFeedbackForm(payload: CreateFeedbackFormPayload): Promise<FeedbackForm> {
-  const res = await fetch(`${BASE_FEEDBACK_URL}/admin/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) throw new Error("Failed to create feedback form")
-  const data = await res.json()
+  const { data } = await api.post(`${BASE_FEEDBACK_URL}/admin/create`, payload)
   const form = data.data || data.form || data
   return mapFeedbackForm(form)
 }
 
 export async function listFeedbackForms(userId: string): Promise<FeedbackForm[]> {
-  const res = await fetch(`${BASE_FEEDBACK_URL}/admin/list`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-  })
-  if (!res.ok) throw new Error("Failed to list feedback forms")
-  const data = await res.json()
+  const { data } = await api.post(`${BASE_FEEDBACK_URL}/admin/list`, { userId })
   const arr = Array.isArray(data) ? data : data.data || data.forms || []
   return arr.map(mapFeedbackForm)
 }
 
 export async function getFeedbackResults(formId: string, userId: string): Promise<FeedbackResult[]> {
-  const res = await fetch(`${BASE_FEEDBACK_URL}/admin/${formId}/results`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-  })
-  if (!res.ok) throw new Error("Failed to get feedback results")
-  const data = await res.json()
+  const { data } = await api.post(`${BASE_FEEDBACK_URL}/admin/${formId}/results`, { userId })
   const arr = Array.isArray(data) ? data : data.data || data.results || []
   return arr.map(mapFeedbackResult)
 }
