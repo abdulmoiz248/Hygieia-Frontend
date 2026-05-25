@@ -31,11 +31,23 @@ export function ChatArea() {
 
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [loadingStateIdx, setLoadingStateIdx] = useState(0)
+  const isMounted = useRef(false)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  const scrollToBottom = (smooth = true) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    container.scrollTop = smooth && isMounted.current
+      ? container.scrollHeight
+      : container.scrollHeight
   }
+
+  useEffect(() => {
+    // After first paint, mark as mounted so subsequent scrolls can be smooth
+    const timer = setTimeout(() => { isMounted.current = true }, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
@@ -78,7 +90,7 @@ export function ChatArea() {
 
             <div>
               <h2 className="text-sm font-bold leading-tight">
-                <span className="text-soft-coral">Health</span>{" "}
+                <span className="text-soft-blue">Health</span>{" "}
                 <span className="text-soft-coral">Assistant</span>
               </h2>
 
@@ -103,7 +115,7 @@ export function ChatArea() {
       <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-mint-green/10 rounded-full blur-3xl pointer-events-none z-0" />
 
       {/* Scroll Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 sm:px-6 sm:pb-4 scrollbar-none relative z-10">
+      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 sm:px-6 sm:pb-4 scrollbar-none relative z-10">
 
         {isFetchingHistory ? (
           <div className="flex justify-center items-center h-full pt-6">
@@ -252,6 +264,10 @@ export function ChatArea() {
                 disabled={isSending || isFetchingHistory}
               />
             </div>
+
+            <span className="hidden sm:inline-block text-[9px] text-cool-gray/40 font-medium leading-none pr-3 shrink-0 max-w-[140px] text-right">
+              <span className="text-soft-blue/60">Hygieia AI</span> may make mistakes
+            </span>
 
             <div className="pr-1.5 py-1.5 shrink-0">
               <Button
