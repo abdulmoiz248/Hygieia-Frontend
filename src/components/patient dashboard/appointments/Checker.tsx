@@ -17,7 +17,6 @@ type ShareDataCheckboxProps = {
 }
 
 export default function ShareDataCheckbox({ checked, onChange }: ShareDataCheckboxProps) {
-  const router  = useRouter()
   const profile = usePatientProfileStore((s) => s.profile)
 
   const complete      = isPatientProfileComplete(profile)

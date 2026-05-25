@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react"
 import { getFeedbackForm, submitFeedbackForm, FeedbackForm } from "@/api/feedback.api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Star, CheckCircle } from "lucide-react"
 import Loader from "@/components/loader/loader"
-import { useToast } from "@/hooks/use-toast"
 
 export default function PublicFeedbackFormPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params)
@@ -18,8 +17,8 @@ export default function PublicFeedbackFormPage({ params }: { params: Promise<{ i
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const { toast } = useToast()
 
   const [email, setEmail] = useState("")
   const [hygieiaReview, setHygieiaReview] = useState("")
@@ -48,14 +47,14 @@ export default function PublicFeedbackFormPage({ params }: { params: Promise<{ i
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form) return
+    setFormError(null)
 
-    // Validation
     if (!email) {
-      toast({ variant: "destructive", title: "Error", description: "Email is required." })
+      setFormError("Email address is required.")
       return
     }
     if (!hygieiaReview) {
-      toast({ variant: "destructive", title: "Error", description: "Hygieia review is required." })
+      setFormError("Hygieia review is required.")
       return
     }
 
@@ -68,7 +67,7 @@ export default function PublicFeedbackFormPage({ params }: { params: Promise<{ i
       })
       setIsSubmitted(true)
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message })
+      setFormError(err?.message || "Something went wrong while submitting your feedback.")
     } finally {
       setSubmitting(false)
     }
@@ -124,6 +123,16 @@ export default function PublicFeedbackFormPage({ params }: { params: Promise<{ i
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {formError && (
+            <div
+              className="rounded-lg border border-soft-coral bg-soft-coral/10 px-4 py-3 text-sm text-soft-coral"
+              role="alert"
+              aria-live="polite"
+            >
+              {formError}
+            </div>
+          )}
+
           <Card className="shadow-md border-t-4 border-t-soft-blue">
             <CardHeader>
               <CardTitle className="text-lg">Your Information</CardTitle>

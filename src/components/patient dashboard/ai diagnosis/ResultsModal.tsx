@@ -2,7 +2,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog'
 import Progress from "./Progress";
-import Badge from "./Badge";
 import { CheckCircle, AlertTriangle, CalendarPlus, RotateCcw } from "lucide-react";
 
 interface DiagnosisResult {

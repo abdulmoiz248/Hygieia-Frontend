@@ -61,7 +61,7 @@ async function submitProviderReport(payload: ProviderReportPayload): Promise<Pro
         "data": typeof data === 'string' ? data : JSON.stringify(data),
       })
       
-      let backendMessage = 
+      const backendMessage = 
         data?.message ||                         // Standard message field
         data?.error?.message ||                  // Nested error.message
         data?.error ||                           // Just error field

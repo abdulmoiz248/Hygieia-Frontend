@@ -244,7 +244,7 @@ export function ChatSidebar() {
           <DialogHeader>
             <DialogTitle className="text-dark-slate-gray text-base">Delete chat</DialogTitle>
             <DialogDescription className="text-cool-gray text-sm">
-              Permanently removes "{selectedConversationTitle}" and all its messages.
+              Permanently removes &quot;{selectedConversationTitle}&quot; and all its messages.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

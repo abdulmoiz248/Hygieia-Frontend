@@ -13,7 +13,6 @@ import {
   Tag,
   FlaskConical,
   ScanLine,
-  Loader2,
   ChevronDown,
   Banknote,
   Ruler,
@@ -129,6 +128,7 @@ interface FiltersProps {
   filtered:    LabTest[]
 }
 
+// @ts-ignore
 function Filters({ tests, typeTab, onTypeTab, search, onSearch, catFilter, onCatFilter, filtered }: FiltersProps) {
   const tabCounts: Record<RecordTab, number> = {
     all:  tests.length,

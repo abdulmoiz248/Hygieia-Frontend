@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, Loader2, Sparkles, Activity, ShieldCheck, HeartPulse } from "lucide-react"
+import { Send, Loader2, Sparkles, HeartPulse } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
