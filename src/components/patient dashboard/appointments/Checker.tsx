@@ -1,7 +1,6 @@
 "use client"
 
 
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react"

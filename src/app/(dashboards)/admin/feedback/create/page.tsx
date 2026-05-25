@@ -102,8 +102,7 @@ export default function CreateFeedbackFormPage() {
       toast({ title: "Success", description: "Feedback form created successfully." })
       router.push("/admin/feedback")
     } catch (error: any) {
-
-      toast({ variant: "destructive", title: "Error", description: error.message })
+      toast({ title: "Error", description: error.message || "Failed to create feedback form." })
     } finally {
       setSubmitting(false)
     }

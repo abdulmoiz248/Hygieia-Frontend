@@ -50,7 +50,7 @@ export default function LabTestDeleteModal({
           >
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "var(--color-soft-coral)" }} />
             <p className="text-sm text-[var(--color-cool-gray)] leading-relaxed">
-              <span className="font-semibold text-[var(--color-dark-slate-gray)]">"{testName}"</span> will be permanently deleted. This cannot be undone.
+              <span className="font-semibold text-[var(--color-dark-slate-gray)]">“{testName}”</span> will be permanently deleted. This cannot be undone.
             </p>
           </div>
         </div>

@@ -125,11 +125,9 @@ interface FiltersProps {
   onSearch:    (v: string) => void
   catFilter:   string
   onCatFilter: (c: string) => void
-  filtered:    LabTest[]
 }
 
-// @ts-ignore
-function Filters({ tests, typeTab, onTypeTab, search, onSearch, catFilter, onCatFilter, filtered }: FiltersProps) {
+function Filters({ tests, typeTab, onTypeTab, search, onSearch, catFilter, onCatFilter }: FiltersProps) {
   const tabCounts: Record<RecordTab, number> = {
     all:  tests.length,
     lab:  tests.filter((t) => t.record_type === "lab").length,
@@ -502,7 +500,6 @@ export default function LabTestsPage() {
           onSearch={setSearch}
           catFilter={catFilter}
           onCatFilter={setCatFilter}
-          filtered={filtered}
         />
 
         {/* ── Error ── */}

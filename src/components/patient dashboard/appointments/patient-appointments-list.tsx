@@ -48,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from "sonner"
+import type { Appointment } from "@/types/patient/appointment"
 
 const CANCELLATION_REASONS = [
   { id: "schedule-conflict", label: "Schedule Conflict" },
@@ -65,9 +66,12 @@ const STATUS_TABS = [
 ] as const
 
 // @ts-nocheck // (for now, to avoid type headaches around the doctor object which is currently very inconsistent across appointments. Will be fixed once we have a proper API and can standardize the data shape)
-interface PatientAppointmentsListProps {}
 
-export function PatientAppointmentsList({}: PatientAppointmentsListProps) {
+type PatientAppointmentsListProps = {
+  onReport?: (appointment: Appointment) => void
+}
+
+export function PatientAppointmentsList({ onReport }: PatientAppointmentsListProps) {
   const { appointments, cancelAppointment } = usePatientAppointmentsStore()
   const router = useRouter()
 
@@ -433,7 +437,13 @@ export function PatientAppointmentsList({}: PatientAppointmentsListProps) {
 
                                 <button
                                   type="button"
-                                  onClick={() => router.push(`/patient/appointments/${appointment.id}/report`)}
+                                  onClick={() => {
+                                    if (onReport) {
+                                      onReport(appointment)
+                                      return
+                                    }
+                                    router.push(`/patient/appointments/${appointment.id}/report`)
+                                  }}
                                   className="w-full rounded-lg py-2 text-xs font-medium border border-soft-coral/40 text-soft-coral hover:bg-soft-coral hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
                                 >
                                   <Flag className="h-3.5 w-3.5" />

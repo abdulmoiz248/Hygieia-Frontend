@@ -1,6 +1,6 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion, type Variants } from "framer-motion"
 import { useEffect, useState, useCallback } from "react"
 import {
   FlaskConical,
@@ -109,7 +109,7 @@ async function dismissFollowUp(requestId: string, patientId: string): Promise<vo
 
 // ─── Card animation ───────────────────────────────────────────────────────────
 
-const cardVariants = {
+const cardVariants: Variants = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
   exit:    { opacity: 0, x: 40, transition: { duration: 0.25, ease: "easeIn" } },
