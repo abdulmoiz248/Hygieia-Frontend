@@ -108,8 +108,8 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
             <DropdownMenuContent
               align="end"
               sideOffset={8}
-              className="w-80 bg-white p-0 flex flex-col"
-              style={{ maxHeight: "min(420px, calc(100vh - 80px))" }}
+              className="w-[22rem] max-w-[calc(100vw-1rem)] bg-white p-0 flex flex-col overflow-hidden shadow-lg rounded-2xl"
+              style={{ maxHeight: "min(70vh, calc(100vh - 80px))" }}
             >
               <div className="p-3 border-b flex-shrink-0">
                 <h3 className="font-semibold text-soft-blue">Notifications</h3>
@@ -117,7 +117,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
               </div>
               <div className="overflow-y-auto flex-1 min-h-0">
                 {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer focus:bg-gray-50">
+                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer focus:bg-gray-50 whitespace-normal h-auto items-start text-left">
                     <div className="flex gap-3 w-full">
                       <div
                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
@@ -126,7 +126,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-sm text-cool-gray line-clamp-2">{notification.notification_msg}</p>
+                        <p className="text-sm text-cool-gray whitespace-normal break-words">{notification.notification_msg}</p>
                         <p className="text-xs text-cool-gray mt-1">{timeAgo(notification.created_at)}</p>
                       </div>
                     </div>

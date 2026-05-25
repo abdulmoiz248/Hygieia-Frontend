@@ -103,20 +103,21 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
   <DropdownMenuContent
     align="end"
-    className="w-80 bg-white p-0 overflow-hidden shadow-lg rounded-2xl"
+    className="w-[22rem] max-w-[calc(100vw-1rem)] bg-white p-0 flex flex-col overflow-hidden shadow-lg rounded-2xl"
     sideOffset={8}
+    style={{ maxHeight: "min(70vh, calc(100vh - 80px))" }}
   >
     <div className="sticky top-0 z-10 bg-white p-3 border-b">
       <h3 className="font-semibold text-soft-blue">Notifications</h3>
       <p className="text-sm text-cool-gray">{unreadCount} unread notifications</p>
     </div>
 
-    <div className="max-h-[60vh] overflow-y-auto">
+    <div className="overflow-y-auto flex-1 min-h-0">
       {notifications?.length ? (
         notifications.map((notification) => (
           <DropdownMenuItem
             key={notification.id}
-            className="p-4 cursor-pointer focus:bg-mint-green/10"
+            className="p-4 cursor-pointer focus:bg-mint-green/10 whitespace-normal h-auto items-start text-left"
           >
             <div className="flex gap-3 w-full">
               <div
@@ -143,7 +144,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
       )}
     </div>
 
-    <div className="sticky bottom-0  p-2 border-t">
+    <div className="sticky bottom-0 z-10 bg-white p-2 border-t flex-shrink-0">
       <Button
      
         size="sm"
