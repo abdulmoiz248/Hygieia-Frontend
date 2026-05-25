@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import {
-  
   Download,
   Loader2,
   Calendar,
@@ -21,6 +21,8 @@ import {
   Star,
   TestTube,
   Pill,
+  ChevronRight,
+  Link2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -56,6 +58,20 @@ function completionBadgeClass(rate: number) {
 
 function Skel({ w = "w-16", h = "h-5", className = "" }: { w?: string; h?: string; className?: string }) {
   return <Skeleton className={`${w} ${h} rounded-md ${className}`} />
+}
+
+function formatCardDate(value?: string) {
+  if (!value) return "No date"
+  const date = new Date(value)
+  if (isNaN(date.getTime())) return "No date"
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+}
+
+function formatCardDateTime(value?: string) {
+  if (!value) return "No time"
+  const date = new Date(value)
+  if (isNaN(date.getTime())) return "No time"
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " • " + date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
 }
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -245,6 +261,12 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
     Metric1Icon = Pill
     metric2Value = report?.metrics?.core?.completedPrescriptions ?? report?.metrics?.completedPrescriptions ?? 0
   }
+
+  const recentAppointments = report?.recentActivity?.appointments ?? []
+  const recentPrescriptions = report?.recentActivity?.prescriptions ?? []
+  const recentReviews = report?.recentActivity?.reviews ?? []
+  const recentLabBookings = report?.recentActivity?.labBookings ?? []
+  const appointmentsById = Object.fromEntries(recentAppointments.map((appointment) => [appointment.id, appointment]))
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent fade-in pb-12">
@@ -480,122 +502,217 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
             {/* Recent Activity */}
             {(!isLoading && report?.recentActivity) && (
-              <div className="space-y-4 max-w-2xl mx-auto w-full">
-                {report.recentActivity.appointments && report.recentActivity.appointments.length > 0 && (
-                  <Card className="hover-lift border-secondary/20 overflow-hidden shadow-md rounded-2xl">
-                    <CardHeader className="bg-cool-gray/5 border-b">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                          <Calendar className="w-5 h-5" />
-                          Recent Appointments
-                        </CardTitle>
-                        <Badge variant="outline" className="border-secondary text-soft-blue">
-                          {report.recentActivity.appointments.length}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-cool-gray/10">
-                        {report.recentActivity.appointments.map((apt) => (
-                          <div key={apt.id} className="flex items-center justify-between p-4 hover:bg-cool-gray/5 transition-colors">
-                            <div className="flex items-center gap-4">
-                              <div className="bg-white p-2 rounded-lg shadow-sm border border-cool-gray/10 text-center shrink-0 w-14">
-                                <p className="text-[10px] text-soft-coral font-bold uppercase">{new Date(apt.date).toLocaleDateString("en-US", { month: "short" })}</p>
-                                <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(apt.date).getDate()}</p>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-soft-blue capitalize text-sm">{apt.type}</p>
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                                  <Clock className="w-3 h-3" /> {apt.time}
+              <div className="space-y-6 max-w-5xl mx-auto w-full">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-semibold text-soft-coral">Recent Activity</h2>
+                    <p className="text-sm text-muted-foreground">Appointments, prescriptions, and linked patient reviews</p>
+                  </div>
+                  <Badge variant="outline" className="border-secondary text-soft-blue rounded-full px-3 py-1">
+                    {recentAppointments.length + recentPrescriptions.length + recentReviews.length + recentLabBookings.length} items
+                  </Badge>
+                </div>
+
+                <div className="grid gap-6 xl:grid-cols-2">
+                  {recentAppointments.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-soft-blue/15 shadow-sm bg-white">
+                      <CardHeader className="bg-gradient-to-r from-soft-blue/10 to-transparent border-b border-soft-blue/10 pb-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
+                            <Calendar className="w-5 h-5" />
+                            Appointments
+                          </CardTitle>
+                          <Badge className="bg-soft-blue/10 text-soft-blue hover:bg-soft-blue/15 rounded-full">
+                            {recentAppointments.length}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-cool-gray/10">
+                          {recentAppointments.map((apt) => (
+                            <div key={apt.id} id={`appointment-${apt.id}`} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                              <div className="flex items-start gap-4">
+                                <div className="w-14 shrink-0 rounded-2xl bg-soft-blue/10 border border-soft-blue/15 p-2 text-center">
+                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">{formatCardDate(apt.date).split(" ")[0]}</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(apt.date).getDate()}</p>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                      <p className="font-semibold text-soft-blue capitalize text-sm sm:text-base">{apt.type}</p>
+                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(apt.date)} • {apt.time}</p>
+                                    </div>
+                                    <Badge className={apt.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : apt.status === "upcoming" ? "bg-soft-blue/15 text-soft-blue hover:bg-soft-blue/20 rounded-full px-3" : "bg-soft-coral/15 text-soft-coral hover:bg-soft-coral/20 rounded-full px-3"}>
+                                      {apt.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Appointment ID: {apt.id}</span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                            <Badge className={apt.status === "completed" ? "bg-mint-green/20 text-mint-green hover:bg-mint-green/30" : apt.status === "upcoming" ? "bg-soft-blue/20 text-soft-blue hover:bg-soft-blue/30" : "bg-soft-coral/20 text-soft-coral hover:bg-soft-coral/30"}>
-                              {apt.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                {report.recentActivity.labBookings && report.recentActivity.labBookings.length > 0 && (
-                  <Card className="hover-lift border-secondary/20 overflow-hidden shadow-md rounded-2xl">
-                    <CardHeader className="bg-cool-gray/5 border-b">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                          <TestTube className="w-5 h-5 text-mint-green" />
-                          Recent Lab Bookings
-                        </CardTitle>
-                        <Badge variant="outline" className="border-secondary text-soft-blue">
-                          {report.recentActivity.labBookings.length}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-cool-gray/10">
-                        {report.recentActivity.labBookings.map((booking) => (
-                          <div key={booking.id} className="flex items-center justify-between p-4 hover:bg-cool-gray/5 transition-colors">
-                            <div className="flex items-center gap-4">
-                              <div className="bg-white p-2 rounded-lg shadow-sm border border-cool-gray/10 text-center shrink-0 w-14">
-                                <p className="text-[10px] text-soft-coral font-bold uppercase">{new Date(booking.scheduled_date).toLocaleDateString("en-US", { month: "short" })}</p>
-                                <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(booking.scheduled_date).getDate()}</p>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-soft-blue text-sm">Lab Test #{booking.test_id.slice(0, 6)}</p>
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                                  <Clock className="w-3 h-3" /> {booking.scheduled_time}
+                  {recentPrescriptions.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-soft-coral/15 shadow-sm bg-white">
+                      <CardHeader className="bg-gradient-to-r from-soft-coral/10 to-transparent border-b border-soft-coral/10 pb-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
+                            <Pill className="w-5 h-5 text-soft-coral" />
+                            Prescriptions
+                          </CardTitle>
+                          <Badge className="bg-soft-coral/10 text-soft-coral hover:bg-soft-coral/15 rounded-full">
+                            {recentPrescriptions.length}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-cool-gray/10">
+                          {recentPrescriptions.map((rx) => (
+                            <div key={rx.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                              <div className="flex items-start gap-4">
+                                <div className="w-14 shrink-0 rounded-2xl bg-soft-coral/10 border border-soft-coral/15 p-2 text-center">
+                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">Start</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(rx.start_date).getDate()}</p>
                                 </div>
-                                <p className="text-[11px] text-muted-foreground mt-0.5 truncate max-w-[150px] sm:max-w-xs">{booking.location}</p>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                      <p className="font-semibold text-soft-blue text-sm sm:text-base">Prescription #{rx.id.slice(0, 8)}</p>
+                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(rx.start_date)} → {formatCardDate(rx.end_date)}</p>
+                                    </div>
+                                    <Badge className={rx.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : "bg-soft-blue/15 text-soft-blue hover:bg-soft-blue/20 rounded-full px-3"}>
+                                      {rx.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Valid till {formatCardDate(rx.end_date)}</span>
+                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Prescription ID: {rx.id}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <Badge className={booking.status === "completed" ? "bg-mint-green/20 text-mint-green hover:bg-mint-green/30" : "bg-yellow-400/20 text-yellow-600 hover:bg-yellow-400/30"}>
-                              {booking.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                {report.recentActivity.prescriptions && report.recentActivity.prescriptions.length > 0 && (
-                  <Card className="hover-lift border-secondary/20 overflow-hidden shadow-md rounded-2xl">
-                    <CardHeader className="bg-cool-gray/5 border-b">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                          <Pill className="w-5 h-5 text-soft-coral" />
-                          Recent Prescriptions
-                        </CardTitle>
-                        <Badge variant="outline" className="border-secondary text-soft-blue">
-                          {report.recentActivity.prescriptions.length}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-cool-gray/10">
-                        {report.recentActivity.prescriptions.map((rx) => (
-                          <div key={rx.id} className="flex items-center justify-between p-4 hover:bg-cool-gray/5 transition-colors">
-                            <div className="flex items-center gap-4">
-                              <div className="bg-white p-2 rounded-lg shadow-sm border border-cool-gray/10 text-center shrink-0 w-14">
-                                <p className="text-[10px] text-soft-coral font-bold uppercase">{new Date(rx.start_date).toLocaleDateString("en-US", { month: "short" })}</p>
-                                <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(rx.start_date).getDate()}</p>
+                  {recentLabBookings.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-mint-green/15 shadow-sm bg-white xl:col-span-2">
+                      <CardHeader className="bg-gradient-to-r from-mint-green/10 to-transparent border-b border-mint-green/10 pb-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
+                            <TestTube className="w-5 h-5 text-mint-green" />
+                            Lab Bookings
+                          </CardTitle>
+                          <Badge className="bg-mint-green/10 text-mint-green hover:bg-mint-green/15 rounded-full">
+                            {recentLabBookings.length}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-cool-gray/10">
+                          {recentLabBookings.map((booking) => (
+                            <div key={booking.id} className="flex items-center justify-between gap-4 p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                              <div className="flex items-center gap-4 min-w-0">
+                                <div className="w-14 shrink-0 rounded-2xl bg-mint-green/10 border border-mint-green/15 p-2 text-center">
+                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">Lab</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(booking.scheduled_date).getDate()}</p>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-soft-blue text-sm sm:text-base">Lab Test #{booking.test_id.slice(0, 6)}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">{formatCardDate(booking.scheduled_date)} • {booking.scheduled_time}</p>
+                                  <p className="text-[11px] text-muted-foreground mt-2 truncate max-w-[240px] sm:max-w-md">{booking.location}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-semibold text-soft-blue text-sm">Prescription #{rx.id.slice(0, 8)}</p>
-                                <p className="text-xs text-muted-foreground mt-1">Valid till: {new Date(rx.end_date).toLocaleDateString()}</p>
-                              </div>
+                              <Badge className={booking.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : "bg-yellow-400/15 text-yellow-700 hover:bg-yellow-400/20 rounded-full px-3"}>
+                                {booking.status}
+                              </Badge>
                             </div>
-                            <Badge className={rx.status === "completed" ? "bg-mint-green/20 text-mint-green hover:bg-mint-green/30" : "bg-soft-blue/20 text-soft-blue hover:bg-soft-blue/30"}>
-                              {rx.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {recentReviews.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-yellow-400/20 shadow-sm bg-white xl:col-span-2">
+                      <CardHeader className="bg-gradient-to-r from-yellow-400/10 to-transparent border-b border-yellow-400/10 pb-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
+                            <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                            Patient Reviews
+                          </CardTitle>
+                          <Badge className="bg-yellow-400/10 text-yellow-700 hover:bg-yellow-400/15 rounded-full">
+                            {recentReviews.length}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-cool-gray/10">
+                          {recentReviews.map((review) => {
+                            const relatedAppointment = review.appointment_id ? appointmentsById[review.appointment_id] : undefined
+                            return (
+                              <div key={review.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                                <div className="flex flex-col gap-4">
+                                  <div className="flex items-start justify-between gap-4">
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <Badge className="bg-yellow-400/15 text-yellow-700 hover:bg-yellow-400/20 rounded-full capitalize">
+                                          {review.provider_role || worker.role}
+                                        </Badge>
+                                        <Badge className="bg-soft-blue/10 text-soft-blue hover:bg-soft-blue/15 rounded-full">
+                                          {review.rating}/5
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mt-2">{formatCardDateTime(review.created_at)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-xs text-muted-foreground break-all">Review ID: {review.id.slice(0, 8)}</p>
+                                      <p className="text-xs text-muted-foreground break-all mt-1">Patient ID: {review.patient_id || "-"}</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="rounded-2xl border border-cool-gray/10 bg-snow-white p-4 text-sm text-dark-slate-gray whitespace-pre-wrap leading-relaxed">
+                                    {review.review_text || "No review text provided."}
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-soft-blue/5 border border-soft-blue/10 px-4 py-3">
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-soft-blue">Linked appointment</p>
+                                      {relatedAppointment ? (
+                                        <p className="text-sm text-dark-slate-gray mt-1">
+                                          {relatedAppointment.type} • {formatCardDate(relatedAppointment.date)} • {relatedAppointment.time}
+                                        </p>
+                                      ) : (
+                                        <p className="text-sm text-muted-foreground mt-1">{review.appointment_id ? `Appointment ${review.appointment_id}` : "No appointment linked"}</p>
+                                      )}
+                                    </div>
+
+                                    {review.appointment_id && (
+                                      <Link
+                                        href={`#appointment-${review.appointment_id}`}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-medium text-soft-blue border border-soft-blue/15 shadow-sm hover:bg-soft-blue/5"
+                                      >
+                                        View appointment <Link2 className="h-3.5 w-3.5" />
+                                      </Link>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             )}
 

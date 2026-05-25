@@ -6,6 +6,16 @@ const BASE_URL = "http://localhost:4000"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface WorkerReview {
+  id: string
+  appointment_id?: string
+  patient_id?: string
+  provider_role?: "doctor" | "nutritionist"
+  rating: number
+  review_text?: string
+  created_at: string
+}
+
 export interface WorkerReport {
   worker?: {
     id: string
@@ -87,7 +97,7 @@ export interface WorkerReport {
     notifications?: { id: string; title: string; notification_msg: string; created_at: string }[]
     appointments?: { id: string; date: string; time: string; status: string; type: string }[]
     dietPlans?: { id: string; start_date: string; end_date: string; daily_calories: string }[]
-    reviews?: { id: string; rating: number; created_at: string }[]
+    reviews?: WorkerReview[]
     labBookings?: { id: string; test_id: string; scheduled_date: string; scheduled_time: string; status: string; location: string }[]
     prescriptions?: { id: string; start_date: string; end_date: string; status: string; created_at: string }[]
     referredTests?: any[]
@@ -112,6 +122,31 @@ export interface WorkerReport {
 
 // ─── Fetcher ──────────────────────────────────────────────────────────────────
 
+function mapWorkerReview(review: any): WorkerReview {
+  return {
+    ...review,
+    id: review.id,
+    appointment_id: review.appointment_id || review.appointmentId,
+    patient_id: review.patient_id || review.patientId,
+    provider_role: review.provider_role || review.providerRole,
+    rating: review.rating,
+    review_text: review.review_text || review.reviewText,
+    created_at: review.created_at || review.createdAt,
+  }
+}
+
+function mapWorkerReport(data: any): WorkerReport {
+  return {
+    ...data,
+    recentActivity: {
+      ...data.recentActivity,
+      reviews: Array.isArray(data?.recentActivity?.reviews)
+        ? data.recentActivity.reviews.map(mapWorkerReview)
+        : data?.recentActivity?.reviews,
+    },
+  }
+}
+
 async function fetchWorkerReport(
   userId: string,
   workerId: string,
@@ -128,7 +163,7 @@ async function fetchWorkerReport(
   console.log("[worker-report] response →", json)
 
   if (!res.ok) throw new Error(json.message || "Failed to generate report")
-  return json.data as WorkerReport
+  return mapWorkerReport(json.data)
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
