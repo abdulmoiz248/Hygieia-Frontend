@@ -133,4 +133,3 @@ export function MessageBubble({ message, isLatest }: Props) {
     </motion.div>
   )
 }
-
