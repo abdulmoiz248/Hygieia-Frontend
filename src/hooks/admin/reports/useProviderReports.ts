@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAdminStore } from "@/store/admin/useAdminStore"
+import api from "@/lib/axios"
 
 export interface ProviderReport {
   id: string
@@ -30,19 +31,20 @@ async function fetchProviderReports(
   userId: string,
   reportedProviderId: string
 ): Promise<ProviderReportsResponse> {
-  const res = await fetch("/provider-report/list", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, reportedProviderId }),
+
+  const res= await api.post("/provider-report/list", {
+    userId,
+    reportedProviderId,
   })
+ 
+if (!res || !res.data) {
+  console.error("[fetchProviderReports] No response or empty data received for provider ID:", reportedProviderId)
+  throw new Error("No data received from server.")  
+}
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err.message?.[0] ?? "Failed to fetch provider reports.")
-  }
+console.log("[fetchProviderReports] Received response for provider ID:", reportedProviderId, res.data)
 
-  const json = await res.json()
-  return json.data
+return res.data as any
 }
 
 export function useProviderReports(reportedProviderId: string | null) {

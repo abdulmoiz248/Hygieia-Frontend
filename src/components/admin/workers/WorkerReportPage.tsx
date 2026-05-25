@@ -32,7 +32,7 @@ import type { Worker } from "@/types/admin/workers"
 import type { WorkerReport } from "@/hooks/admin/workers/useWorkerReport"
 import { ROLE_CONFIG } from "@/types/admin/workers"
 import { WorkerAnalyticsCharts } from "./WorkerAnalyticsCharts"
-import { PatientReportsSection } from "./PatientReportsSection"
+// import { PatientReportsSection } from "./PatientReportsSection"
 
 // ─── Role icon map ────────────────────────────────────────────────────────────
 const ROLE_ICONS: Record<string, React.ElementType> = {
@@ -600,7 +600,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
             )}
 
             {/* ── Patient Reports & Warn ──────────────────────────────────────── */}
-            <PatientReportsSection workerId={worker.id} workerName={worker.name} />
+            {/* <PatientReportsSection workerId={worker.id} workerName={worker.name} /> */}
 
           </div>
         </div>
