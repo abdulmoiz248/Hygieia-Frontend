@@ -21,7 +21,7 @@ export default function ChatbotPage() {
   }, [activeConversationId])
 
   return (
-    <div className="relative flex h-full min-h-0 flex-row rounded-2xl border border-gray-100/60 shadow-sm bg-snow-white">
+    <div className="relative flex h-full min-h-0 flex-row rounded-2xl border border-gray-100/60 shadow-sm bg-snow-white overflow-hidden">
 
       {/* Chat body */}
       <div className="flex flex-1 min-h-0 flex-row overflow-hidden relative">

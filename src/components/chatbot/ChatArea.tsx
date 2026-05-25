@@ -63,7 +63,7 @@ export function ChatArea() {
   const isInitial = !activeConversationId && messages.length === 0
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden bg-gradient-to-b from-white/40 to-white/80 relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-gradient-to-b from-white/40 to-white/80 relative">
 
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 shrink-0 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
@@ -72,13 +72,14 @@ export function ChatArea() {
         {/* FIXED HEADER HEIGHT */}
         <div className="px-5 h-[60px] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-soft-blue to-mint-green flex items-center justify-center shadow-sm">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-soft-blue via-mint-green to-soft-coral flex items-center justify-center shadow-sm">
               <HeartPulse className="w-3.5 h-3.5 text-white" />
             </div>
 
             <div>
-              <h2 className="text-sm font-bold text-soft-coral leading-tight">
-                Health Assistant
+              <h2 className="text-sm font-bold leading-tight">
+                <span className="text-soft-coral">Health</span>{" "}
+                <span className="text-soft-coral">Assistant</span>
               </h2>
 
               <p className="text-[10px] text-cool-gray/60 leading-none">
@@ -102,10 +103,10 @@ export function ChatArea() {
       <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-mint-green/10 rounded-full blur-3xl pointer-events-none z-0" />
 
       {/* Scroll Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-2 sm:px-6 sm:pt-6 sm:pb-4 scrollbar-none relative z-10">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 sm:px-6 sm:pb-4 scrollbar-none relative z-10">
 
         {isFetchingHistory ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex justify-center items-center h-full pt-6">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
@@ -143,7 +144,7 @@ export function ChatArea() {
               <div className="space-y-3 px-2 sm:px-0">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-dark-slate-gray tracking-tight leading-tight">
                   Welcome back,{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-soft-blue to-mint-green">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral">
                     {profile.name}
                   </span>
                 </h1>
@@ -156,7 +157,8 @@ export function ChatArea() {
             </motion.div>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto w-full flex flex-col space-y-8 pb-2 pt-2">
+          <div className="max-w-4xl mx-auto w-full flex flex-col space-y-8 pb-4">
+            <div className="h-2 w-full shrink-0" />{/* top spacer - prevents first message clip */}
             {messages.map((message, idx) => (
               <MessageBubble
                 key={message.id}
@@ -196,13 +198,13 @@ export function ChatArea() {
                     />
 
                     <motion.div
-                      className="w-1.5 h-1.5 bg-soft-blue rounded-full"
+                      className="w-1.5 h-1.5 bg-mint-green rounded-full"
                       animate={{ y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
                     />
 
                     <motion.div
-                      className="w-1.5 h-1.5 bg-soft-blue rounded-full"
+                      className="w-1.5 h-1.5 bg-soft-coral rounded-full"
                       animate={{ y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                     />
@@ -217,7 +219,7 @@ export function ChatArea() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.2 }}
-                      className="text-sm font-medium text-soft-blue"
+                      className="text-sm font-medium text-soft-coral"
                     >
                       {loadingStates[loadingStateIdx]}
                     </motion.span>
@@ -232,7 +234,7 @@ export function ChatArea() {
       </div>
 
       {/* Input */}
-      <div className="shrink-0 mt-auto px-3 pt-2 pb-2 sm:px-4 bg-white/80 backdrop-blur-xl border-t border-white/40 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-20">
+      <div className="shrink-0 px-3 pt-2 pb-2 sm:px-4 bg-white/80 backdrop-blur-xl border-t border-white/40 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-20">
         <div className="max-w-4xl mx-auto">
           <div className="relative flex items-center bg-white rounded-[28px] shadow-sm border border-gray-200/60 focus-within:border-soft-blue/40 focus-within:shadow-md transition-all duration-300 overflow-hidden">
             <div className="pl-4 py-3 flex-1 relative">
@@ -251,17 +253,13 @@ export function ChatArea() {
               />
             </div>
 
-            <span className="hidden sm:inline-block text-[9px] text-cool-gray/40 font-medium leading-none pr-3 shrink-0 max-w-[140px] text-right">
-              <span className="text-soft-blue/60">Hygieia AI</span> may make mistakes
-            </span>
-
             <div className="pr-1.5 py-1.5 shrink-0">
               <Button
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isSending || isFetchingHistory}
                 className={`rounded-full h-10 w-10 p-0 transition-all duration-300 shadow-sm ${
                   inputValue.trim() && !isSending
-                    ? "bg-gradient-to-r from-soft-blue to-mint-green hover:shadow-md hover:scale-105 text-white"
+                    ? "bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral hover:shadow-md hover:scale-105 text-white"
                     : "bg-gray-100 text-cool-gray"
                 }`}
               >

@@ -22,6 +22,12 @@ export function QuickReplies({ replies, disabled }: QuickRepliesProps) {
     }
   }
 
+  const colorVariants = [
+    "border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white",
+    "border-mint-green text-mint-green hover:bg-mint-green hover:text-white",
+    "border-soft-coral text-soft-coral hover:bg-soft-coral hover:text-white",
+  ]
+
   return (
     <div className="flex flex-wrap gap-2 mt-3">
       {replies.map((reply, index) => (
@@ -36,7 +42,7 @@ export function QuickReplies({ replies, disabled }: QuickRepliesProps) {
             size="sm"
             onClick={() => handleReply(reply.send)}
             disabled={disabled}
-            className="rounded-full border-soft-blue text-soft-blue hover:bg-soft-blue hover:text-white transition-colors"
+            className={`rounded-full transition-colors ${colorVariants[index % colorVariants.length]}`}
           >
             {reply.label}
           </Button>
