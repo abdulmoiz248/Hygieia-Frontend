@@ -1,8 +1,9 @@
 "use client"
 
-import {  useEffect, useState } from "react"
+import {  useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, User, FileText, MapPin } from "lucide-react"
+import { useParams, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,9 +41,8 @@ const itemVariants = {
 }
 
 export default function NewAppointmentPage() {
-
-  
   const user = usePatientProfileStore((store) => store.profile)
+  const searchParams = useSearchParams()
   const { appointments, createAppointment, updateAppointment } = usePatientAppointmentsStore()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -59,6 +59,18 @@ export default function NewAppointmentPage() {
   const { data: nutritionists=[], isLoading, isError } = useNutritionists()
   const {data: doctorsList=[], isLoading: doctorsLoading, isError: doctorsError} = useDoctors()
 
+  const storedPrefillDoctorId = typeof window !== "undefined" ? localStorage.getItem("appointment_prefill_doctor_id") || "" : ""
+  const storedPrefillDoctorName = typeof window !== "undefined" ? localStorage.getItem("appointment_prefill_doctor_name") || "" : ""
+  const storedPrefillType = typeof window !== "undefined" ? localStorage.getItem("appointment_prefill_type") || "" : ""
+  const storedPrefillReason = typeof window !== "undefined" ? localStorage.getItem("appointment_prefill_reason") || "" : ""
+
+  const prefillDoctorId = searchParams.get("doctorId") || storedPrefillDoctorId
+  const prefillDoctorName = searchParams.get("doctorName") || storedPrefillDoctorName
+  const prefillType = searchParams.get("type") || storedPrefillType
+  const prefillReason = searchParams.get("reason") || storedPrefillReason
+
+  const allDoctors = useMemo(() => [...nutritionists, ...doctorsList], [nutritionists, doctorsList])
+
   useEffect(()=>{
     const appointmentId=localStorage.getItem("appointment")
     if(appointmentId){
@@ -72,6 +84,27 @@ export default function NewAppointmentPage() {
 
     }
   },[])
+
+
+  useEffect(() => {
+    if (prefillType) setAppointmentType(prefillType)
+  }, [prefillType])
+
+  useEffect(() => {
+    if (prefillReason) setReason(prefillReason)
+  }, [prefillReason])
+
+  useEffect(() => {
+    if (prefillDoctorId) {
+      setSelectedDoctor(prefillDoctorId)
+      return
+    }
+
+    if (prefillDoctorName) {
+      const match = allDoctors.find((doctor) => doctor.name.toLowerCase() === prefillDoctorName.toLowerCase())
+      if (match) setSelectedDoctor(match.id)
+    }
+  }, [prefillDoctorId, prefillDoctorName, allDoctors])
 
 
 

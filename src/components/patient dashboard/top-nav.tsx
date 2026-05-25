@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
 import { BellRing } from "../ui/BellRing"
+import { useRouter } from "next/navigation"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { useNotifications } from "@/hooks/patient/useNotifications"
 import { timeAgo } from "@/helpers/formatTimeAgo"
@@ -31,9 +32,83 @@ interface TopNavProps {
 export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
   
+  const router = useRouter()
   const user = usePatientProfileStore((state) => state.profile)
-  const { notifications } = useNotifications(user.id)
+  const { notifications, markAsRead } = useNotifications(user.id)
   const [unreadCount, setUnreadCount] = useState(notifications ? notifications.filter(n => !n.is_read).length : 0)
+
+  const parseAction = (action: string | null) => {
+    if (!action) return null
+
+    try {
+      const parsed = JSON.parse(action)
+      return parsed && typeof parsed === "object" ? parsed : null
+    } catch {
+      const normalized = action.toLowerCase().replace(/[\s_-]+/g, "")
+      if (normalized.includes("labtest")) return { type: "lab-test" }
+      if (normalized.includes("followup")) return { type: "follow-up" }
+      return { type: action }
+    }
+  }
+
+  const extractQuotedText = (text: string) => text.match(/"([^"]+)"/)?.[1] ?? ""
+
+  const handleNotificationClick = (notification: (typeof notifications)[number]) => {
+    markAsRead(notification.id)
+
+    const action = parseAction(notification.action)
+    const combinedText = `${notification.title} ${notification.notification_msg}`.toLowerCase()
+
+    const isLabTest =
+      action?.type === "lab-test" ||
+      action?.type === "lab_test" ||
+      combinedText.includes("lab test") ||
+      combinedText.includes("test referred")
+
+    if (isLabTest) {
+      const testName =
+        action?.testName ||
+        action?.test_name ||
+        action?.name ||
+        extractQuotedText(notification.notification_msg) ||
+        extractQuotedText(notification.title)
+
+      const testId = action?.testId || action?.test_id || action?.id || "notification"
+
+      if (testName) localStorage.setItem("notification_lab_test_name", String(testName))
+      localStorage.setItem("notification_booking_source", "lab-test-notification")
+
+      const params = new URLSearchParams()
+      if (testName) params.set("testName", String(testName))
+      params.set("source", "notification")
+      router.push(`/patient/lab-tests/book/${encodeURIComponent(String(testId))}?${params.toString()}`)
+      return
+    }
+
+    const isFollowUp =
+      action?.type === "follow-up" ||
+      action?.type === "follow_up" ||
+      combinedText.includes("follow-up") ||
+      combinedText.includes("follow up")
+
+    if (isFollowUp) {
+      const params = new URLSearchParams()
+      const doctorId = action?.doctorId || action?.doctor_id || action?.providerId || action?.provider_id || ""
+      const doctorName = action?.doctorName || action?.doctor_name || action?.providerName || action?.provider_name || ""
+
+      if (doctorId) params.set("doctorId", String(doctorId))
+      if (doctorName) params.set("doctorName", String(doctorName))
+      params.set("type", "follow-up")
+      params.set("reason", action?.reason || "Follow-up requested")
+
+      localStorage.setItem("appointment_prefill_type", "follow-up")
+      localStorage.setItem("appointment_prefill_reason", action?.reason || "Follow-up requested")
+      if (doctorId) localStorage.setItem("appointment_prefill_doctor_id", String(doctorId))
+      if (doctorName) localStorage.setItem("appointment_prefill_doctor_name", String(doctorName))
+
+      router.push(`/patient/appointments/new?${params.toString()}`)
+    }
+  }
 
 
     const markAllAsRead = async () => {
@@ -96,8 +171,8 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger className=" rounded-5" asChild>
-              <Button  variant="ghost" size="icon" className="relative">
-               <BellRing className="w-5 h-5 "/>
+              <Button variant="ghost" size="icon" className="relative">
+                <BellRing className="w-5 h-5 " />
                 {unreadCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-soft-coral text-white text-xs">
                     {unreadCount}
@@ -117,7 +192,11 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
               </div>
               <div className="overflow-y-auto flex-1 min-h-0">
                 {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-4 cursor-pointer focus:bg-gray-50 whitespace-normal h-auto items-start text-left">
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className="p-4 cursor-pointer focus:bg-gray-50 whitespace-normal h-auto items-start text-left"
+                    onSelect={() => handleNotificationClick(notification)}
+                  >
                     <div className="flex gap-3 w-full">
                       <div
                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
@@ -126,7 +205,9 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-sm text-cool-gray whitespace-normal break-words">{notification.notification_msg}</p>
+                        <p className="text-sm text-cool-gray whitespace-normal break-words">
+                          {notification.notification_msg}
+                        </p>
                         <p className="text-xs text-cool-gray mt-1">{timeAgo(notification.created_at)}</p>
                       </div>
                     </div>
@@ -134,7 +215,11 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
                 ))}
               </div>
               <div className="p-2 border-t flex-shrink-0">
-                <Button size="sm" className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90" onClick={() => markAllAsRead()}>
+                <Button
+                  size="sm"
+                  className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90"
+                  onClick={() => markAllAsRead()}
+                >
                   Mark All As Read
                 </Button>
               </div>

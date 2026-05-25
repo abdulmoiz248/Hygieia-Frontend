@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, MapPin, AlertCircle, FileText, TestTube, Home, Building2, Map, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,11 @@ const itemVariants = {
 export default function BookLabTestPage() {
   const params = useParams()
   const router = useRouter()
-  const testId = Array.isArray(params.id) ? params.id[0] : params.id || ""
+  const searchParams = useSearchParams()
+  const routeTestId = Array.isArray(params.id) ? params.id[0] : params.id || ""
+  const storedPrefillTestName = typeof window !== "undefined" ? localStorage.getItem("notification_lab_test_name") || "" : ""
+  const prefillTestName = searchParams.get("testName") || storedPrefillTestName
+  const testId = searchParams.get("testId") || routeTestId
   
   const profile = usePatientProfileStore((state) => state.profile)
   const { availableTests, fetchLabTests, bookLabTest } = usePatientLabTestsStore()
@@ -41,7 +45,16 @@ export default function BookLabTestPage() {
 
     localStorage.removeItem("booktest")
   },[])
-  const test = availableTests.find((t) => t.id === testId)
+
+  const test = useMemo(() => {
+    const byId = availableTests.find((t) => t.id === testId)
+    if (byId) return byId
+
+    const normalizedName = prefillTestName.trim().toLowerCase()
+    if (!normalizedName) return undefined
+
+    return availableTests.find((t) => t.name.toLowerCase() === normalizedName || t.name.toLowerCase().includes(normalizedName))
+  }, [availableTests, testId, prefillTestName])
 
   useEffect(() => {
     if (!availableTests || availableTests.length === 0) {
