@@ -88,7 +88,7 @@ export function ChatSidebar() {
   }
 
   return (
-    <div className="w-72 h-full min-h-0 flex flex-col border-r border-gray-100 bg-white/70 backdrop-blur-xl">
+    <div className="w-72 h-full min-h-0 flex flex-col border-r border-gray-100 bg-white/70 backdrop-blur-xl overflow-hidden">
 
       {/* Header */}
       <div className="relative flex-shrink-0">
@@ -96,7 +96,7 @@ export function ChatSidebar() {
         <div className="px-4 border-b border-gray-100/80 h-[60px] flex items-center">
           <button
             onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl bg-gradient-to-r from-soft-blue to-mint-green text-white text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-soft-blue/20 hover:-translate-y-0.5 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral text-white text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-soft-blue/20 hover:-translate-y-0.5 transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -165,7 +165,7 @@ export function ChatSidebar() {
                       <p className="text-[11px] text-cool-gray/60 truncate mt-0.5 leading-tight">
                         {conv.preview || "No messages yet"}
                       </p>
-                      <p className={`text-[10px] mt-1.5 font-medium ${isActive ? "text-soft-blue/50" : "text-cool-gray/40"}`}>
+                      <p className={`text-[10px] mt-1.5 font-medium ${isActive ? "text-soft-coral/60" : "text-cool-gray/40"}`}>
                         {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
                       </p>
                     </div>
