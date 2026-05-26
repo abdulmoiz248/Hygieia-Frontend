@@ -94,7 +94,20 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
     if (isFollowUp) {
       const params = new URLSearchParams()
       const doctorId = action?.doctorId || action?.doctor_id || action?.providerId || action?.provider_id || ""
-      const doctorName = action?.doctorName || action?.doctor_name || action?.providerName || action?.provider_name || ""
+      let doctorName = action?.doctorName || action?.doctor_name || action?.providerName || action?.provider_name || ""
+
+      // If backend didn't provide a name, try to extract it from the notification message/title
+      if (!doctorId && !doctorName) {
+        const msg = notification.notification_msg || ""
+        const title = notification.title || ""
+        const nameMatch = msg.match(/(?:doctor|nutritionist)\s+(.+?)\s+(?:has|has requested|requested|wants|would)/i)
+        if (nameMatch && nameMatch[1]) {
+          doctorName = nameMatch[1].replace(/[".]/g, "").trim()
+        } else {
+          const quoted = extractQuotedText(msg) || extractQuotedText(title)
+          if (quoted) doctorName = quoted
+        }
+      }
 
       if (doctorId) params.set("doctorId", String(doctorId))
       if (doctorName) params.set("doctorName", String(doctorName))
@@ -105,6 +118,20 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
       localStorage.setItem("appointment_prefill_reason", action?.reason || "Follow-up requested")
       if (doctorId) localStorage.setItem("appointment_prefill_doctor_id", String(doctorId))
       if (doctorName) localStorage.setItem("appointment_prefill_doctor_name", String(doctorName))
+
+      try {
+        // eslint-disable-next-line no-console
+        console.debug("[notification] follow-up prefill", {
+          parsedAction: action,
+          doctorId: doctorId,
+          doctorName: doctorName,
+          params: params.toString(),
+          title: notification.title,
+          message: notification.notification_msg,
+          stored_doctor_id: typeof window !== 'undefined' ? localStorage.getItem('appointment_prefill_doctor_id') : null,
+          stored_doctor_name: typeof window !== 'undefined' ? localStorage.getItem('appointment_prefill_doctor_name') : null,
+        })
+      } catch (e) {}
 
       router.push(`/patient/appointments/new?${params.toString()}`)
     }

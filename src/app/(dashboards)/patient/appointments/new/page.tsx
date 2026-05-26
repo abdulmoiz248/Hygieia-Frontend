@@ -95,14 +95,79 @@ export default function NewAppointmentPage() {
   }, [prefillReason])
 
   useEffect(() => {
+    try {
+      // Debug logs to trace prefill behavior
+      // eslint-disable-next-line no-console
+      console.debug('[appointments.new] prefill read', {
+        prefillDoctorId,
+        prefillDoctorName,
+        storedPrefillDoctorId,
+        storedPrefillDoctorName,
+        allDoctorsCount: allDoctors.length,
+      })
+    } catch (e) {}
+
     if (prefillDoctorId) {
-      setSelectedDoctor(prefillDoctorId)
+      const id = String(prefillDoctorId).trim()
+      // eslint-disable-next-line no-console
+      console.debug('[appointments.new] setting selectedDoctor from id', { id })
+      setSelectedDoctor(id)
       return
     }
 
     if (prefillDoctorName) {
-      const match = allDoctors.find((doctor) => doctor.name.toLowerCase() === prefillDoctorName.toLowerCase())
-      if (match) setSelectedDoctor(match.id)
+      // Don't call backend — decode and search locally
+      const raw = String(prefillDoctorName || "")
+      // URLSearchParams may leave plus signs for spaces; convert them
+      const decodedPlus = raw.replace(/\+/g, " ")
+      // Decode any percent-encoding
+      let decoded = decodedPlus
+      try {
+        decoded = decodeURIComponent(decodedPlus)
+      } catch (e) {
+        decoded = decodedPlus
+      }
+
+      const normalize = (s: string) =>
+        s
+          .toLowerCase()
+          .replace(/\b(ch|dr|dr\.|prof|mr|mrs|ms)\b/g, "") // remove common titles
+          .replace(/[.,"'()]/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+
+      const target = normalize(decoded)
+      // eslint-disable-next-line no-console
+      console.debug('[appointments.new] prefill name decoded', { raw, decoded, target })
+
+      if (!target) return
+
+      // Try exact normalized match first
+      let match = allDoctors.find((doctor) => normalize(doctor.name) === target)
+
+      // Try contains match (partial)
+      if (!match) {
+        match = allDoctors.find((doctor) => normalize(doctor.name).includes(target) || target.includes(normalize(doctor.name)))
+      }
+
+      // Try startsWith on tokens
+      if (!match) {
+        match = allDoctors.find((doctor) => normalize(doctor.name).startsWith(target) || target.startsWith(normalize(doctor.name)))
+      }
+
+      // As a last resort, try matching by last name token
+      if (!match) {
+        const tokens = target.split(' ')
+        const last = tokens[tokens.length - 1]
+        if (last) {
+          match = allDoctors.find((doctor) => normalize(doctor.name).endsWith(last))
+        }
+      }
+
+      // eslint-disable-next-line no-console
+      console.debug('[appointments.new] match result', { matchId: match?.id, matchName: match?.name })
+
+      if (match) setSelectedDoctor(String(match.id).trim())
     }
   }, [prefillDoctorId, prefillDoctorName, allDoctors])
 
