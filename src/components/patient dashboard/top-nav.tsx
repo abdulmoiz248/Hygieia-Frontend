@@ -131,7 +131,7 @@ export function TopNav({ onMobileMenuToggle }: TopNavProps) {
           stored_doctor_id: typeof window !== 'undefined' ? localStorage.getItem('appointment_prefill_doctor_id') : null,
           stored_doctor_name: typeof window !== 'undefined' ? localStorage.getItem('appointment_prefill_doctor_name') : null,
         })
-      } catch (e) {}
+      } catch  {}
 
       router.push(`/patient/appointments/new?${params.toString()}`)
     }

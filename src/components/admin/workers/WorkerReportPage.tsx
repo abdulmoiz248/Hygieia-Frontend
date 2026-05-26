@@ -21,7 +21,7 @@ import {
   Star,
   TestTube,
   Pill,
-  ChevronRight,
+  
   Link2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"

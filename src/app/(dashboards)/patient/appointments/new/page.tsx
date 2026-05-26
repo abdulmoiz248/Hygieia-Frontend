@@ -3,7 +3,7 @@
 import {  useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Clock, User, FileText, MapPin } from "lucide-react"
-import { useParams, useSearchParams } from "next/navigation"
+import {  useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -105,7 +105,7 @@ export default function NewAppointmentPage() {
         storedPrefillDoctorName,
         allDoctorsCount: allDoctors.length,
       })
-    } catch (e) {}
+    } catch {}
 
     if (prefillDoctorId) {
       const id = String(prefillDoctorId).trim()
@@ -124,7 +124,7 @@ export default function NewAppointmentPage() {
       let decoded = decodedPlus
       try {
         decoded = decodeURIComponent(decodedPlus)
-      } catch (e) {
+      } catch  {
         decoded = decodedPlus
       }
 

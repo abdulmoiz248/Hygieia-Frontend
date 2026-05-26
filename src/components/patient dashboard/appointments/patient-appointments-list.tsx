@@ -16,26 +16,14 @@ import {
   RefreshCw,
   CheckCircle2,
   BanIcon,
-  Flag,
-  Star,
+  
 } from "lucide-react"
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 
 import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
 
-// ── Auth helper (mirrors ReviewForm logic) ────────────────────────────────────
-function getPatientAuthStatus(): "ok" | "unauthenticated" | "incomplete" {
-  try {
-    const role = localStorage.getItem("role")
-    const id   = localStorage.getItem("id")
-    if (!role || (!id && role !== "patient")) return "unauthenticated"
-    if (role === "patient" && !id)            return "incomplete"
-    return "ok"
-  } catch {
-    return "unauthenticated"
-  }
-}
+
 import {
   Dialog,
   DialogContent,
@@ -71,7 +59,7 @@ type PatientAppointmentsListProps = {
   onReport?: (appointment: Appointment) => void
 }
 
-export function PatientAppointmentsList({ onReport }: PatientAppointmentsListProps) {
+export function PatientAppointmentsList({  }: PatientAppointmentsListProps) {
   const { appointments, cancelAppointment } = usePatientAppointmentsStore()
   const router = useRouter()
 
@@ -132,24 +120,6 @@ export function PatientAppointmentsList({ onReport }: PatientAppointmentsListPro
     router.push("/patient/appointments/new")
   }
 
-  const handleWriteReview = (appointmentId: string) => {
-    const status = getPatientAuthStatus()
-    if (status === "unauthenticated") {
-      toast.error("Login Required", {
-        description: "You must be logged in as a patient to write a review.",
-      })
-      router.push("/login")
-      return
-    }
-    if (status === "incomplete") {
-      toast.error("Session Incomplete", {
-        description: "Your session is missing required info. Please log in again.",
-      })
-      router.push("/login")
-      return
-    }
-    router.push(`/patient/appointments/${appointmentId}/review`)
-  }
 
   const handleCancelConfirm = async () => {
     if (!selectedAppointmentId || !cancellationReason) return
