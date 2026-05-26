@@ -14,14 +14,11 @@ import {
   DollarSign, Clock, Microscope, CheckCircle, AlertCircle,
   Calendar, FileText, Shield
 } from "lucide-react"
-import { usePatientLabTestsStore } from "@/store/patient/lab-tests-store"
-import { LabTestBookingModal } from "@/components/patient dashboard/medical-records/LabTestBookingModal"
+import { useRouter } from "next/navigation"
 
 export default function LabTestDetailClient({ id }: { id: string }) {
+  const router = useRouter()
   const [test, setSelectedTest] = useState<LabTest | null>(null)
-
-  const { setShowBookingModal, setSelectedTest: setStoreTest, showBookingModal, selectedTest } =
-    usePatientLabTestsStore()
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedLabTest")
@@ -44,11 +41,11 @@ export default function LabTestDetailClient({ id }: { id: string }) {
     getData()
   }, [id])
 
-  // ✅ Open the booking modal via the Zustand store — no navigation needed
+  // Redirect to booking page instead of opening modal
   const handleBookTest = () => {
     if (!test) return
-    setStoreTest(test)
-    setShowBookingModal(true)
+    localStorage.setItem("selectedLabTest", JSON.stringify(test))
+    router.push(`/patient/lab-tests/book/${encodeURIComponent(test.id)}`)
   }
 
   if (!test) return (
@@ -203,7 +200,7 @@ export default function LabTestDetailClient({ id }: { id: string }) {
                   </div>
                 </div>
 
-                {/* ✅ Opens the booking modal directly — no more redirect without booking */}
+                {/* ✅ Redirect to booking page — no modal */}
                 <Button
                   onClick={handleBookTest}
                   size="lg"
@@ -221,11 +218,6 @@ export default function LabTestDetailClient({ id }: { id: string }) {
           </div>
         </div>
       </div>
-
-      {/* ✅ Render the modal here — it reads showBookingModal & selectedTest from the store */}
-      {showBookingModal && selectedTest && (
-        <LabTestBookingModal test={selectedTest} />
-      )}
     </div>
   )
 }

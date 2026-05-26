@@ -124,30 +124,36 @@ export default function MedicalRecordsPage() {
 
       {/* Book Lab Tests CTA */}
       <motion.section variants={itemVariants}>
-        <div className="relative overflow-hidden rounded-2xl border border-cool-gray/20 bg-white/60 p-6 shadow-sm">
-          {/* Subtle left accent bar */}
-          <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-soft-blue to-mint-green" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-soft-blue/95 via-soft-blue/90 to-mint-green/85 p-8 md:p-12 shadow-lg border border-soft-blue/20">
+          {/* Decorative background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -right-20 -top-20 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute -left-10 bottom-0 w-32 h-32 bg-mint-green/20 rounded-full blur-3xl" />
+          </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 pl-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-soft-blue/10 border border-soft-blue/20">
-                <FlaskConical className="h-6 w-6 text-soft-blue" />
+          {/* Content */}
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex items-center gap-5 flex-1">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0">
+                  <FlaskConical className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Book a Lab Test</h2>
+                  <p className="text-white/80 text-sm md:text-base">
+                    Browse our comprehensive catalogue of diagnostic tests and book your appointment instantly.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-dark-slate-gray">Book a Lab Test</h2>
-                <p className="mt-0.5 text-sm text-cool-gray">
-                  Browse our full catalogue of diagnostic tests and book instantly.
-                </p>
-              </div>
+
+              <Button
+                onClick={() => router.push("/lab-tests")}
+                className="shrink-0 bg-white hover:bg-white/95 text-soft-blue font-semibold px-8 py-3 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg"
+              >
+                Browse Lab Tests
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
-
-            <Button
-              onClick={() => router.push("/lab-tests")}
-              className="shrink-0 bg-soft-blue hover:bg-soft-blue/90 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all"
-            >
-              Browse Lab Tests
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
         </div>
       </motion.section>

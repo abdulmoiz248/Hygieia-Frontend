@@ -93,6 +93,10 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
   const handleClose = () => {
     setShowBookingModal(false)
     setSelectedTest(null)
+    setShowConfirmation(false)
+    setSelectedDate(new Date(Date.now() + 86400 * 1000))
+    setSelectedTime("")
+    setNotes("")
   }
 
   const handleGoToBookings = () => {
@@ -102,7 +106,10 @@ export function LabTestBookingModal({ test }: LabTestBookingModalProps) {
     setSelectedDate(new Date(Date.now() + 86400 * 1000))
     setSelectedTime("")
     setNotes("")
-    router.push("/patient/medical-records")
+    // Only redirect after all state is cleared
+    setTimeout(() => {
+      router.push("/patient/medical-records")
+    }, 100)
   }
 
   if (!showBookingModal) return null
