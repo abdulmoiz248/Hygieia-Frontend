@@ -414,15 +414,7 @@ export function PatientAppointmentsList({ onReport }: PatientAppointmentsListPro
                             {/* Completed — review + follow-up + report */}
                             {activeTab === AppointmentStatus.Completed && (
                               <div className="mt-auto flex flex-col gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleWriteReview(appointment.id)}
-                                  className="w-full rounded-lg py-2 text-xs font-medium border border-soft-blue/40 text-soft-blue hover:bg-soft-blue hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
-                                >
-                                  <Star className="h-3.5 w-3.5" />
-                                  Write a Review
-                                </button>
-
+                               
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -435,20 +427,7 @@ export function PatientAppointmentsList({ onReport }: PatientAppointmentsListPro
                                   Book Follow-up
                                 </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (onReport) {
-                                      onReport(appointment)
-                                      return
-                                    }
-                                    router.push(`/patient/appointments/${appointment.id}/report`)
-                                  }}
-                                  className="w-full rounded-lg py-2 text-xs font-medium border border-soft-coral/40 text-soft-coral hover:bg-soft-coral hover:text-white transition-colors duration-200 flex items-center justify-center gap-1.5"
-                                >
-                                  <Flag className="h-3.5 w-3.5" />
-                                  Report Provider
-                                </button>
+                             
                               </div>
                             )}
                           </div>
