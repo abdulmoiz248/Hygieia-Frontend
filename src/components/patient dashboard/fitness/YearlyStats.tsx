@@ -11,7 +11,7 @@ import {
   Bar,
   Legend,
 } from "recharts"
-import { format as formatDate } from "date-fns"
+import { format as formatDate, startOfWeek } from "date-fns"
 import api from "@/lib/axios"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -125,9 +125,34 @@ export default function YearlyStats() {
     [monthly, cutoff]
   )
 
+  // Weekly aggregates for 3m view (group daily into weeks)
+  const weeklyData = useMemo(() => {
+    if (range !== "3m") return []
+    const groups = new Map()
+    daily
+      .filter((d) => new Date(d.created_at) >= cutoff)
+      .forEach((d) => {
+        const wkStart = startOfWeek(new Date(d.created_at), { weekStartsOn: 1 })
+        const key = wkStart.toISOString().slice(0, 10)
+        const curr = groups.get(key) || { steps: 0, calories_burned: 0, calories_intake: 0 }
+        curr.steps += Math.round(d.steps || 0)
+        curr.calories_burned += Math.round(d.calories_burned || 0)
+        curr.calories_intake += Math.round(d.calories_intake || 0)
+        groups.set(key, curr)
+      })
+    return Array.from(groups.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => ({
+        label: formatDate(new Date(k), "dd MMM"),
+        steps: v.steps,
+        calories_burned: v.calories_burned,
+        calories_intake: v.calories_intake,
+      }))
+  }, [daily, cutoff, range])
+
   // Pick the right dataset based on range
-  const chartData = USE_DAILY_FOR.has(range) ? filteredDaily : filteredMonthly
-  const xLabel = USE_DAILY_FOR.has(range) ? "Daily" : "Monthly"
+  const chartData = range === "3m" ? weeklyData : (USE_DAILY_FOR.has(range) ? filteredDaily : filteredMonthly)
+  const xLabel = range === "3m" ? "Weekly" : (USE_DAILY_FOR.has(range) ? "Daily" : "Monthly")
 
   // Totals for the sidebar summary (always from filtered daily rows)
   const totalSteps         = filteredDaily.reduce((s, r) => s + r.steps, 0)

@@ -82,7 +82,7 @@ const ANALYSIS_TYPES: {
 ]
 
 export default function AIDiagnosisPage() {
-  const [selectedType, setSelectedType] = useState<AnalysisType | null>(null)
+  const [selectedType, setSelectedType] = useState<AnalysisType | null>(ANALYSIS_TYPES[0].id)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
