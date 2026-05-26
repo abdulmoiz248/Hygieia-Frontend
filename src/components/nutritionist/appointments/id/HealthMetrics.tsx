@@ -88,8 +88,8 @@ export default function HealthMetrics({ avgSteps, stepsChange, avgWater, avgSlee
               <div>
                 <p className="text-sm text-cool-gray">Calorie Balance</p>
                 <p className="text-2xl font-bold text-cool-gray">
-                  {avgCaloriesIntake - avgCaloriesBurned > 0 ? "+" : ""}
-                  <CountUp from={0} to={avgCaloriesIntake - avgCaloriesBurned} duration={1} className="text-cool-gray" />
+                  {Math.round(avgCaloriesIntake - avgCaloriesBurned) > 0 ? "+" : ""}
+                  <CountUp from={0} to={Math.round(avgCaloriesIntake - avgCaloriesBurned)} duration={1} className="text-cool-gray" />
                 </p>
                 <p className="text-xs text-cool-gray">Intake - Burned</p>
               </div>

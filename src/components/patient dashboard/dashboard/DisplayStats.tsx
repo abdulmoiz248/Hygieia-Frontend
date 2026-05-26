@@ -73,7 +73,7 @@ export default function DashboardStats() {
       {
         id: 'calories',
         title: 'Calories Burned',
-        value: calories.caloriesBurned,
+        value: Math.round(calories.caloriesBurned),
         subtitle: 'Today',
         icon: 'flame',
         color: 'soft-coral'
