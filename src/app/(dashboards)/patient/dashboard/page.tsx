@@ -9,7 +9,7 @@ import WelcomeSection from "@/components/patient dashboard/dashboard/WelcomeSect
 import FitnessProgressGauges from "@/components/patient dashboard/dashboard/FitnessStats"
 import DashboardGraphs from "@/components/patient dashboard/dashboard/DashboardGraphs"
 import HealthInsights from "@/components/patient dashboard/dashboard/HealthInsights"
-import PendingActions from "@/components/patient dashboard/dashboard/PendingActions"
+// import PendingActions from "@/components/patient dashboard/dashboard/PendingActions"
 
 import { usePatientAppointmentsStore } from "@/store/patient/appointments-store"
 import { usePatientProfileStore } from "@/store/patient/profile-store"
@@ -96,7 +96,7 @@ function DashboardPageContent() {
       </div>
 
       {/* Pending Actions — shown only when there's something to act on */}
-      <PendingActions />
+      {/* <PendingActions /> */}
 
       {/* Fitness Progress */}
       <div className="space-y-4 lg:space-y-6">
