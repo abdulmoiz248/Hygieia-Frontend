@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Mail, AlertCircle, Check, X, Loader2 } from "lucide-react"
+import { Mail, AlertCircle, Check,  Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,7 +62,7 @@ export default function UnsubscribeNewsletterPage() {
             Unsubscribe from Newsletter
           </CardTitle>
           <p className="text-sm text-mint-green animate-slide-in-right delay-100">
-            Enter the email you used to subscribe — we'll remove it from the list.
+            Enter the email you used to subscribe to our newsletter.
           </p>
         </CardHeader>
         <CardContent>
