@@ -5,13 +5,21 @@ import type { NextRequest } from 'next/server'
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone()
   const token = req.cookies.get('token')?.value
-  const role = req.cookies.get('role')?.value
+  const rawRole = req.cookies.get('role')?.value
+
+  const normalizeRole = (role?: string) => {
+    if (!role) return role
+    const value = role.toLowerCase()
+    return value.includes('lab') ? 'pathologist' : value
+  }
+
+  const role = normalizeRole(rawRole)
 
   // ── Protect role-specific routes ──────────────────────────────────────────
 const protectedRoutes = ['admin', 'doctor', 'pathologist', 'nutritionist','patient']
 
 const matchedRoute = protectedRoutes.find(route =>
-  url.pathname.startsWith(`/${route}`)
+  url.pathname.startsWith(`/${route}`) || (route === 'pathologist' && url.pathname.startsWith('/lab-tech'))
 )
 
 if (matchedRoute) {
@@ -28,7 +36,7 @@ if (matchedRoute) {
 
   // ── Redirect logged-in users away from login/signup ───────────────────────
   if ((url.pathname === '/login' || url.pathname === '/signup') && token && role) {
-    url.pathname = role ? `/${role}/dashboard` : '/login'
+    url.pathname = `/${role}/dashboard`
     return NextResponse.redirect(url)
   }
 

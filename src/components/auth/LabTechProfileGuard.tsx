@@ -14,7 +14,7 @@ export default function LabTechProfileGuard({ children }: { children: React.Reac
       profile={profile as any}
       loading={loading}
       role="lab-technician"
-      profileRoute="/lab-tech/profile"
+      profileRoute="/pathologist/profile"
       roleName="Pathologist"
     >
       {children}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/layouts/landing-page/navbar";
 import Footer from "@/components/layouts/landing-page/Footer";
+import AuthPagesGuard from "@/components/auth/AuthPagesGuard";
 
 
 
@@ -16,10 +17,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+   <AuthPagesGuard>
    <>
       <Navbar/>
      {children}
       <Footer/>
    </>
+   </AuthPagesGuard>
   );
 }
