@@ -11,14 +11,23 @@ export interface AiCalorieEstimateResult {
   fat: number
 }
 
-export async function AiCalorieEstimate(description: string): Promise<AiCalorieEstimateResult> {
+export async function AiCalorieEstimate(
+  description: string,
+  portionSize?: string
+): Promise<AiCalorieEstimateResult> {
+  const portionLine = portionSize?.trim()
+    ? `Portion size: ${portionSize.trim()}`
+    : "Portion size: not provided"
+
   const prompt = `
 You are a health and fitness assistant.
-Estimate the nutritional info in the following description.
+Estimate the nutritional info in the following entry.
+Use the provided portion size to scale calories and macros whenever available.
 Respond ONLY with a JSON object containing integers for calories, carbs (grams), protein (grams), and fat (grams).
 No extra text, no units, just the JSON.
 
 Description: ${description}
+${portionLine}
 Answer:
   `.trim()
 

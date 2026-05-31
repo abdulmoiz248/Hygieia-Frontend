@@ -30,6 +30,7 @@ export default function Calories() {
 
   const [type, setType] = useState<"consumed" | "burned" | "">("")
   const [desc, setDesc] = useState("")
+  const [portionSize, setPortionSize] = useState("")
   const [generatedNutrition, setGeneratedNutrition] = useState<NutritionInfo | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -42,10 +43,14 @@ export default function Calories() {
 };
 
 const handleGenerateCalories = async () => {
-  if (!desc.trim()) return;
+  const trimmedDesc = desc.trim()
+  const trimmedPortionSize = portionSize.trim()
+
+  if (!trimmedDesc) return;
+  if (type === "consumed" && !trimmedPortionSize) return;
   setLoading(true);
 
-  const nutrition: NutritionInfo = await AiCalorieEstimate(desc) || { 
+  const nutrition: NutritionInfo = await AiCalorieEstimate(trimmedDesc, trimmedPortionSize) || { 
     calories: 0, carbs: 0, protein: 0, fat: 0 
   };
 
@@ -77,6 +82,7 @@ const handleGenerateCalories = async () => {
     patientSuccess("Calories and macros added successfully")
     setType("")
     setDesc("")
+    setPortionSize("")
     setGeneratedNutrition(null)
     setShowCalorieTracker(false)
   }
@@ -141,11 +147,25 @@ const handleGenerateCalories = async () => {
                       }}
                     />
                   </div>
+
+                  {type === "consumed" && (
+                    <div>
+                      <label className="text-sm font-medium text-soft-blue">Portion Size</label>
+                      <Input
+                        placeholder="e.g. 1 bowl, 200g, 2 slices"
+                        value={portionSize}
+                        onChange={e => {
+                          setPortionSize(e.target.value)
+                          setGeneratedNutrition(null)
+                        }}
+                      />
+                    </div>
+                  )}
                   <Button
                     type="button"
                     className="w-full bg-soft-blue text-snow-white hover:bg-soft-blue/90"
                     onClick={handleGenerateCalories}
-                    disabled={loading || !desc.trim() || !type}
+                    disabled={loading || !desc.trim() || !type || (type === "consumed" && !portionSize.trim())}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     {loading ? "Thinking..." : "Ask AI"}
