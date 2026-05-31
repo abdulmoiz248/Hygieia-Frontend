@@ -53,6 +53,14 @@ function getCategoryStyle(category: string) {
   return CATEGORY_COLORS[category] ?? { color: "var(--color-cool-gray)", bg: "oklch(0.96 0.01 0)" }
 }
 
+function normalizeRecordType(value?: string) {
+  return value === "scan" ? "scan" : "report"
+}
+
+function getRecordTypeLabel(value?: string) {
+  return normalizeRecordType(value) === "scan" ? "Scan" : "Report"
+}
+
 // ─── Stat Cards (BlogStatCards style) ────────────────────────────────────────
 
 const itemVariants = {
@@ -62,12 +70,12 @@ const itemVariants = {
 
 function StatCards({ tests }: { tests: LabTest[] }) {
   const total    = tests.length
-  const labCount = tests.filter((t) => t.record_type === "lab").length
-  const scanCount = tests.filter((t) => t.record_type === "scan").length
+  const reportCount = tests.filter((t) => normalizeRecordType(t.record_type) === "report").length
+  const scanCount = tests.filter((t) => normalizeRecordType(t.record_type) === "scan").length
 
   const cards = [
     { id: "total", title: "Total Tests",  value: total,     icon: BarChart3,    color: "var(--color-soft-blue)",  colorClass: "soft-blue"  },
-    { id: "lab",   title: "Lab Tests",    value: labCount,  icon: FlaskConical, color: "var(--color-soft-coral)", colorClass: "soft-coral" },
+    {id: "report",   title: "Report Tests",    value: reportCount,  icon: FlaskConical, color: "var(--color-soft-coral)", colorClass: "soft-coral" },
     { id: "scan",  title: "Scan Tests",   value: scanCount, icon: ScanLine,     color: "var(--color-mint-green)", colorClass: "mint-green" },
   ]
 
@@ -109,12 +117,12 @@ function StatCards({ tests }: { tests: LabTest[] }) {
 
 // ─── Filters (BlogFilters style) ─────────────────────────────────────────────
 
-type RecordTab = "all" | "lab" | "scan"
+type RecordTab = "all" | "report" | "scan"
 
 const RECORD_TABS: { key: RecordTab; label: string }[] = [
-  { key: "all",  label: "All"  },
-  { key: "lab",  label: "Lab"  },
-  { key: "scan", label: "Scan" },
+  { key: "all",    label: "All"    },
+  { key: "report", label: "Report" },
+  { key: "scan",   label: "Scan"   },
 ]
 
 interface FiltersProps {
@@ -130,8 +138,8 @@ interface FiltersProps {
 function Filters({ tests, typeTab, onTypeTab, search, onSearch, catFilter, onCatFilter }: FiltersProps) {
   const tabCounts: Record<RecordTab, number> = {
     all:  tests.length,
-    lab:  tests.filter((t) => t.record_type === "lab").length,
-    scan: tests.filter((t) => t.record_type === "scan").length,
+    report: tests.filter((t) => normalizeRecordType(t.record_type) === "report").length,
+    scan: tests.filter((t) => normalizeRecordType(t.record_type) === "scan").length,
   }
 
   const categories = useMemo(
@@ -240,7 +248,8 @@ interface LabTestCardProps {
 function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
   const [expanded, setExpanded] = useState(false)
   const { color, bg } = getCategoryStyle(test.category)
-  const isScan = test.record_type === "scan"
+  const recordType = normalizeRecordType(test.record_type)
+  const isScan = recordType === "scan"
 
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full">
@@ -276,7 +285,7 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
                 className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold capitalize"
                 style={{ color, background: bg }}
               >
-                {test.record_type}
+                {getRecordTypeLabel(recordType)}
               </span>
             </div>
           </div>
@@ -410,7 +419,7 @@ export default function LabTestsPage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return tests.filter((t) => {
-      const matchType   = typeTab === "all" || t.record_type === typeTab
+      const matchType   = typeTab === "all" || normalizeRecordType(t.record_type) === typeTab
       const matchCat    = catFilter === "all" || t.category === catFilter
       const matchSearch = !q || t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
       return matchType && matchCat && matchSearch

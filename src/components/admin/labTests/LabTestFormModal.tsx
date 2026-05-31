@@ -27,9 +27,13 @@ interface LabTestFormModalProps {
 }
 
 const RECORD_TYPES: { value: RecordType; label: string; icon: React.ElementType }[] = [
-  { value: "lab",  label: "Lab",  icon: FlaskConical },
-  { value: "scan", label: "Scan", icon: ScanLine     },
+  { value: "report",  label: "Report",  icon: FlaskConical },
+  { value: "scan",    label: "Scan",    icon: ScanLine     },
 ]
+
+function normalizeRecordType(value?: string): RecordType {
+  return value === "scan" ? "scan" : "report"
+}
 
 function Field({
   label,
@@ -78,7 +82,8 @@ export default function LabTestFormModal({
           preparation_instructions: initial.preparation_instructions,
           unit: initial.unit,
           optimal_range: initial.optimal_range,
-          record_type: initial.record_type,
+          // map legacy backend values to the supported UI values
+          record_type: normalizeRecordType(initial.record_type),
         }
       : { ...EMPTY_LAB_TEST_FORM }
   )

@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   X,
   MessageSquare,
+  FlaskConical,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -29,6 +30,7 @@ const menuItems = [
   { icon: FileText, label: "Manage Blogs", href: "/blogs" },
   { icon: Mail, label: "Review Newsletters", href: "/newsletters" },
   { icon: BookOpen, label: "Manage FAQs", href: "/faq" },
+  { icon: FlaskConical, label: "Lab Tests", href: "/lab-tests" },
   { icon: Search, label: "Manage CVs", href: "/cv" },
   { icon: MessageSquare, label: "Feedback Forms", href: "/feedback" },
 ]

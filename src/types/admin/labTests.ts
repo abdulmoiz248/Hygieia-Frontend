@@ -1,4 +1,4 @@
-export type RecordType = "lab" | "scan"
+export type RecordType = "report" | "scan"
 
 export interface LabTest {
   id: string
@@ -24,7 +24,7 @@ export const EMPTY_LAB_TEST_FORM: LabTestFormData = {
   preparation_instructions: [],
   unit: "",
   optimal_range: "",
-  record_type: "lab",
+  record_type: "report",
 }
 
 // Common lab test categories for suggestions

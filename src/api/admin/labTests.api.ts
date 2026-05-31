@@ -1,34 +1,59 @@
+import api from '@/lib/axios'
 import { LabTest, LabTestFormData } from "@/types/admin/labTests"
 
-const BASE = "http://localhost:4000"
+type BackendRecordType = "lab" | "scan"
+
+function toBackendRecordType(value: LabTestFormData["record_type"]): BackendRecordType {
+  return value === "scan" ? "scan" : "lab"
+}
+
+function fromBackendRecordType(value?: string): LabTest["record_type"] {
+  return value === "scan" ? "scan" : "report"
+}
+
+function normalizeLabTest(test: LabTest & { record_type?: string }): LabTest {
+  return {
+    ...test,
+    record_type: fromBackendRecordType(test.record_type),
+  }
+}
 
 export async function fetchLabTests(): Promise<LabTest[]> {
-  const res = await fetch(`${BASE}/lab-tests`)
-  if (!res.ok) throw new Error("Failed to fetch lab tests.")
-  return res.json()
+  const res = await api.get<LabTest[]>('/lab-tests')
+  return res.data.map((test) => normalizeLabTest(test))
 }
 
 export async function fetchLabTestById(id: string): Promise<LabTest> {
-  const res = await fetch(`${BASE}/lab-tests/${id}`)
-  if (!res.ok) throw new Error("Failed to fetch lab test.")
-  return res.json()
+  const res = await api.get<LabTest>(`/lab-tests/${id}`)
+  return normalizeLabTest(res.data)
+}
+
+function extractError(e: unknown, fallback = 'Request failed') {
+  try {
+    // axios errors may have response.data.message
+    const anyErr: any = e
+    return (anyErr?.response?.data?.message) || anyErr?.message || fallback
+  } catch {
+    return fallback
+  }
 }
 
 export async function createLabTest(
   userId: string,
   data: LabTestFormData
 ): Promise<LabTest> {
-  const res = await fetch(`${BASE}/lab-tests`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, ...data }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err?.message ?? "Failed to create lab test.")
+  try {
+    const payload = {
+      userId,
+      ...data,
+      record_type: toBackendRecordType(data.record_type),
+    }
+    const res = await api.post('/lab-tests', payload)
+    const created = (res.data && (res.data.data ?? res.data)) as LabTest
+    return normalizeLabTest(created)
+  } catch (e) {
+    throw new Error(extractError(e, 'Failed to create lab test.'))
   }
-  const json = await res.json()
-  return json.data ?? json
 }
 
 export async function updateLabTest(
@@ -36,27 +61,24 @@ export async function updateLabTest(
   userId: string,
   data: Partial<LabTestFormData>
 ): Promise<LabTest> {
-  const res = await fetch(`${BASE}/lab-tests/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, ...data }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err?.message ?? "Failed to update lab test.")
+  try {
+    const payload = {
+      userId,
+      ...data,
+      record_type: data.record_type ? toBackendRecordType(data.record_type) : undefined,
+    }
+    const res = await api.patch(`/lab-tests/${id}`, payload)
+    const updated = (res.data && (res.data.data ?? res.data)) as LabTest
+    return normalizeLabTest(updated)
+  } catch (e) {
+    throw new Error(extractError(e, 'Failed to update lab test.'))
   }
-  const json = await res.json()
-  return json.data ?? json
 }
 
 export async function deleteLabTest(id: string, userId: string): Promise<void> {
-  const res = await fetch(`${BASE}/lab-tests/${id}`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err?.message ?? "Failed to delete lab test.")
+  try {
+    await api.delete(`/lab-tests/${id}`, { data: { userId } })
+  } catch (e) {
+    throw new Error(extractError(e, 'Failed to delete lab test.'))
   }
 }
