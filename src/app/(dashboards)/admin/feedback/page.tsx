@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowUpRight, CalendarClock, Clock, FileText, Plus } from "lucide-react"
+import { ArrowUpRight, CalendarClock, Clock, FileText, Plus, Sparkles } from "lucide-react"
 import { useAdminStore } from "@/store/admin/useAdminStore"
 import { listFeedbackForms, FeedbackForm } from "@/api/feedback.api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -134,34 +134,60 @@ export default function FeedbackFormsPage() {
             return (
               <Card
                 key={form._id}
-                className="group cursor-pointer border-border/60 transition-all hover:-translate-y-1 hover:shadow-xl"
+                className="group cursor-pointer overflow-hidden border-border/60 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-2xl"
                 onClick={() => router.push(`/admin/feedback/${form._id}/results`)}
               >
-                <CardHeader className="space-y-3">
+                <div className="h-1.5 w-full bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral" />
+                <CardContent className="space-y-4 p-5">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg line-clamp-1 transition-colors group-hover:text-soft-blue">{form.title}</CardTitle>
-                      <CardDescription className="mt-1 line-clamp-2">{form.description}</CardDescription>
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-soft-blue/10 to-mint-green/10 ring-1 ring-soft-blue/10">
+                        <FileText className="h-5 w-5 text-soft-blue" />
+                      </div>
+
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="line-clamp-1 text-lg transition-colors group-hover:text-soft-blue">
+                            {form.title}
+                          </CardTitle>
+                          {status.expired ? (
+                            <span className="rounded-full bg-soft-coral/10 px-2 py-0.5 text-[11px] font-medium text-soft-coral">
+                              Expired
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-mint-green/10 px-2 py-0.5 text-[11px] font-medium text-mint-green">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <CardDescription className="line-clamp-2 text-sm leading-relaxed">
+                          {form.description}
+                        </CardDescription>
+                      </div>
                     </div>
+
                     <ArrowUpRight className="mt-1 h-5 w-5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-soft-blue" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
+
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={status.tone}>{status.label}</Badge>
-                    <Badge variant="outline" className="border-mint-green/30 bg-mint-green/5 text-mint-green">
+                    <Badge variant="outline" className="border-soft-blue/20 bg-soft-blue/5 text-soft-blue">
                       {form.questions.length} questions
                     </Badge>
+                    <Badge variant={status.tone}>{status.label}</Badge>
                   </div>
 
-                  <div className="space-y-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
+                  <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-3">
+                    <div className="flex items-center gap-2 text-sm">
                       <Clock className={`h-4 w-4 ${status.expired ? "text-soft-coral" : "text-soft-blue"}`} />
-                      <span className={status.expired ? "font-medium text-soft-coral" : ""}>
+                      <span className={status.expired ? "font-medium text-soft-coral" : "text-foreground"}>
                         {status.expired
                           ? `Expired ${form.expiresAt && !isNaN(new Date(form.expiresAt).getTime()) ? format(new Date(form.expiresAt), "MMM d, yyyy h:mm a") : ""}`
                           : status.label}
                       </span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 text-mint-green" />
+                      <span>Open results to review patient responses and trends</span>
                     </div>
                   </div>
                 </CardContent>
