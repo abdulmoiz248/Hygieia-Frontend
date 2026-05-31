@@ -28,7 +28,7 @@ export default function Calories() {
   const { caloriesConsumed, caloriesBurned, addCalories } = usePatientFitnessStore()
   const [showCalorieTracker, setShowCalorieTracker] = useState(false)
 
-  const [type, setType] = useState<"consumed" | "burned" | "">("")
+  const [type, setType] = useState<"consumed" | "burned" | "">("consumed")
   const [desc, setDesc] = useState("")
   const [portionSize, setPortionSize] = useState("")
   const [generatedNutrition, setGeneratedNutrition] = useState<NutritionInfo | null>(null)
@@ -80,7 +80,7 @@ const handleGenerateCalories = async () => {
       fat: Math.round(generatedNutrition.fat || 0)
     })
     patientSuccess("Calories and macros added successfully")
-    setType("")
+    setType("consumed")
     setDesc("")
     setPortionSize("")
     setGeneratedNutrition(null)
@@ -137,9 +137,11 @@ const handleGenerateCalories = async () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-soft-blue">What did you do / eat?</label>
+                    <label className="text-sm font-medium text-soft-blue">
+                      {type === "burned" ? "What activity did you do?" : "What did you eat?"}
+                    </label>
                     <Input
-                      placeholder="e.g. Briyani..."
+                      placeholder={type === "burned" ? "e.g. 30 min brisk walk" : "e.g. Biryani"}
                       value={desc}
                       onChange={e => {
                         setDesc(e.target.value)
