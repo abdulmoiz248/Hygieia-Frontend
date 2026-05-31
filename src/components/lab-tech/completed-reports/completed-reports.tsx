@@ -106,7 +106,7 @@ const handleDownload = (fileUrl: string, patientName: string) => {
         setSortBy={setSortBy}
       />
       {/* Completed Reports List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid w-full grid-cols-1 gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
         {filteredReports.length > 0 ? (
           filteredReports.map((report, index) => (
             <Card
