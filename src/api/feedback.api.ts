@@ -24,7 +24,7 @@ export interface FeedbackForm {
   _id: string
   title: string
   description: string
-  percentageOfUsers: number
+  percentageOfUsers?: number
   durationHours: number
   questions: FeedbackQuestion[]
   createdBy: string
@@ -55,8 +55,8 @@ function mapFeedbackForm(f: any): FeedbackForm {
     createdAt: f.createdAt || f.created_at,
     expiresAt: f.expiresAt || f.expiry_date,
     createdBy: f.createdBy || f.created_by,
-    percentageOfUsers: f.percentageOfUsers || f.percentage_of_users,
-    durationHours: f.durationHours || f.duration_hours,
+    percentageOfUsers: f.percentageOfUsers ?? f.percentage_of_users,
+    durationHours: f.durationHours ?? f.duration_hours,
   }
 }
 
