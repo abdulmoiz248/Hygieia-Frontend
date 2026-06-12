@@ -40,28 +40,28 @@ export interface LabTechnicianStore {
 const useLabTechnicianStore = create<LabTechnicianStore>((set) => {
 
   const setData = (profile: any) => {
-    set({ profile: profile})
+    // FIX: also flip loading to false so ProfileGuard stops blocking
+    set({ profile, loading: false })
   }
 
   return {
     setData,
     profile: null,
     notifications: [],
-    loading: false,
-   setProfile: async(profileData) => {
-    const role=localStorage.getItem('role')
-   
-        await api.post(`/auth/user?role=${role}`, {profileData})
-    set({ profile: profileData })
+    // FIX: default true so ProfileGuard waits for data before evaluating completeness
+    loading: true,
 
-   },
-
+    setProfile: async (profileData) => {
+      const role = localStorage.getItem('role')
+      await api.post(`/auth/user?role=${role}`, { profileData })
+      set({ profile: profileData })
+    },
 
     updateProfileField: (field, value) =>
       set((state) => ({
         profile: state.profile ? { ...state.profile, [field]: value } : null,
       })),
-    resetProfile: () => set({ profile: null }),
+    resetProfile: () => set({ profile: null, loading: true }),
     addNotification: (notification) =>
       set((state) => ({
         notifications: [{ ...notification, unread: true }, ...state.notifications],
@@ -79,6 +79,5 @@ const useLabTechnicianStore = create<LabTechnicianStore>((set) => {
     clearNotifications: () => set({ notifications: [] }),
   }
 })
-
 
 export default useLabTechnicianStore

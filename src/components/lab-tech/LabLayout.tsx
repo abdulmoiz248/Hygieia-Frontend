@@ -13,46 +13,41 @@ import useLabTechnicianStore from "@/store/lab-tech/userStore"
 
 export default function LabLayout({ children }: { children: React.ReactNode }) {
 
-  const [id,setId]=useState<string>('')
-  const [userRole,setUserRole]=useState<string>('')
-  const { data: profile, isLoading:loading, isError:error } = useFetchProfile(id, userRole)
-  const {setData}=useLabTechnicianStore()
+  const [id, setId] = useState<string>('')
+  const [userRole, setUserRole] = useState<string>('')
+  const { data: profile, isLoading: loading, isError: error } = useFetchProfile(id, userRole)
+  const { setData } = useLabTechnicianStore()
+  // FIX: also read the store's loading flag so we know when setData has been called
+  const storeLoading = useLabTechnicianStore((s) => s.loading)
   const { data, isLoading, isError } = useLabTechData(id)
   const setLabData = useLabStore((state) => state.setLabData)
 
   useEffect(() => {
     if (data) {
-
       setLabData(data)
     }
   }, [data])
 
-
   useEffect(() => {
-   
-     if (profile) {
+    if (profile) {
       setData(profile)
     }
   }, [profile])
-  
 
-  useEffect(()=>{
+  useEffect(() => {
     const storedId = localStorage.getItem('id');
     const storedRole = localStorage.getItem('role');
-    if(storedId)setId(storedId);
-    if(storedRole)setUserRole(storedRole);
-  },[])
-
+    if (storedId) setId(storedId);
+    if (storedRole) setUserRole(storedRole);
+  }, [])
 
   const activeTab = useLabStore((state) => state.activeTab)
   const setActiveTab = useLabStore((state) => state.setActiveTab)
 
-
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const isAppLoading = isLoading || loading || !profile || !data
+  const isAppLoading = isLoading || loading || storeLoading || !profile || !data
 
   useEffect(() => {
     setMounted(true)
@@ -63,7 +58,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleEsc)
   }, [])
 
-  if (!mounted || isAppLoading) return <Loader/>
+  if (!mounted || isAppLoading) return <Loader />
   if (error || isError) throw new Error('Failed to load data')
 
   return (
