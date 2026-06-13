@@ -126,10 +126,6 @@ export default function CreateFeedbackFormPage() {
           >
             Design a patient survey with clean targeting, clear questions, and fast publishing.
           </span>
-
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1">
-            Build and publish feedback forms from a polished admin workspace.
-          </p>
         </div>
 
         <Button

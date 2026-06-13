@@ -70,10 +70,6 @@ export default function FeedbackFormsPage() {
           >
             Build surveys, track targeting, and review patient responses
           </span>
-
-          <p className="text-sm text-[var(--color-cool-gray)] mt-1">
-            Manage feedback forms from a clean, centralized dashboard.
-          </p>
         </div>
 
         <Button onClick={() => router.push("/admin/feedback/create")} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium shadow-md hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] transition-all duration-200 self-start sm:self-auto" style={{ background: "var(--gradient-primary)" }}>
@@ -82,7 +78,7 @@ export default function FeedbackFormsPage() {
       </div>
 
       <div className="mt-2 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Card className="border-white/50 bg-white/70 shadow-sm backdrop-blur">
+          <Card className="border-soft-blue/20 bg-gradient-to-br from-soft-blue/10 to-soft-blue/5 shadow-sm">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Total forms</p>
               <div className="mt-2 flex items-end justify-between">
@@ -91,7 +87,7 @@ export default function FeedbackFormsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-white/50 bg-white/70 shadow-sm backdrop-blur">
+          <Card className="border-mint-green/20 bg-gradient-to-br from-mint-green/10 to-mint-green/5 shadow-sm">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Active forms</p>
               <div className="mt-2 flex items-end justify-between">
@@ -100,7 +96,7 @@ export default function FeedbackFormsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-white/50 bg-white/70 shadow-sm backdrop-blur">
+          <Card className="border-soft-coral/20 bg-gradient-to-br from-soft-coral/10 to-soft-coral/5 shadow-sm">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Expired forms</p>
               <div className="mt-2 flex items-end justify-between">
@@ -121,7 +117,7 @@ export default function FeedbackFormsPage() {
             <CardDescription className="mt-2 max-w-md">
               Create your first feedback form to gather patient insights and track response quality.
             </CardDescription>
-            <Button onClick={() => router.push("/admin/feedback/create")} className="mt-6 bg-soft-blue hover:bg-mint-green">
+            <Button onClick={() => router.push("/admin/feedback/create")} className="mt-6 rounded-xl bg-soft-blue hover:bg-mint-green">
               <Plus className="mr-2 h-4 w-4" /> Create Form
             </Button>
           </CardContent>
