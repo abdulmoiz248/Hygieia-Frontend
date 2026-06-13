@@ -194,6 +194,8 @@ const Signup = () => {
                   I agree to Hygieia&apos;s{' '}
                   <Link
                     href="/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-semibold text-mint-green underline-offset-4 hover:underline"
                   >
                     Privacy Policy
@@ -201,6 +203,8 @@ const Signup = () => {
                   and{' '}
                   <Link
                     href="/terms-of-service"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-semibold text-mint-green underline-offset-4 hover:underline"
                   >
                     Terms of Service
