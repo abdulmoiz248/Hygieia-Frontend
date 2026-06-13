@@ -207,7 +207,7 @@ export function ChatArea() {
       </div>
 
       {/* Input */}
-      <div className="shrink-0 px-3 pt-2 pb-2 sm:px-4 bg-white/80 backdrop-blur-xl border-t border-white/40 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-20">
+      <div className="z-20 shrink-0 border-t border-white/40 bg-gradient-to-b from-snow-white/70 via-white/75 to-snow-white/90 px-3 pb-2 pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:px-4">
         <div className="max-w-4xl mx-auto">
           <div className="relative flex items-center bg-white rounded-[28px] shadow-sm border border-gray-200/60 focus-within:border-soft-blue/40 focus-within:shadow-md transition-all duration-300 overflow-hidden">
             <div className="pl-4 py-3 flex-1 relative">
