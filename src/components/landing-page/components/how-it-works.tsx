@@ -126,8 +126,8 @@ const lineVariants: Variants = {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-mint-green/20 rounded-full blur-3xl opacity-30"
-          initial={{ x: "-50%", y: "50%", scale: 0.8 }}
+          className="absolute bottom-24 left-8 w-1/3 h-1/3 bg-mint-green/20 rounded-full blur-3xl opacity-20"
+          initial={{ x: "-35%", y: "35%", scale: 0.8 }}
           animate={{
             scale: [0.8, 1.2, 0.8],
             rotate: [0, -10, 0],

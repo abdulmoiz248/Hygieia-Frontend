@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff, Mail, Lock,  AlertCircle, Loader2, Check, X } from 'lucide-react'
 import {  useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -18,6 +19,7 @@ const Signup = () => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [acceptedLegal, setAcceptedLegal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -47,6 +49,10 @@ const Signup = () => {
     }
     if (!validateEmail(email)) {
       setError('Please enter a valid email.')
+      return
+    }
+    if (!acceptedLegal) {
+      setError('Please accept the Privacy Policy and Terms of Service to continue.')
       return
     }
     setLoading(true)
@@ -172,6 +178,37 @@ const Signup = () => {
                 )}
               </div>
 
+              <div className="flex items-start gap-3 rounded-lg border border-gray-700 bg-white/5 p-3 animate-slide-in-right delay-500">
+                <Checkbox
+                  id="acceptedLegal"
+                  checked={acceptedLegal}
+                  onCheckedChange={(checked) => {
+                    setAcceptedLegal(checked === true)
+                    if (checked === true && error === 'Please accept the Privacy Policy and Terms of Service to continue.') {
+                      setError('')
+                    }
+                  }}
+                  className="mt-0.5 border-gray-500 data-[state=checked]:border-soft-blue data-[state=checked]:bg-soft-blue data-[state=checked]:text-white"
+                />
+                <label htmlFor="acceptedLegal" className="text-xs leading-5 text-gray-300">
+                  I agree to Hygieia&apos;s{' '}
+                  <Link
+                    href="/privacy-policy"
+                    className="font-semibold text-mint-green underline-offset-4 hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="/terms-of-service"
+                    className="font-semibold text-mint-green underline-offset-4 hover:underline"
+                  >
+                    Terms of Service
+                  </Link>
+                  .
+                </label>
+              </div>
+
               {error && (
                 <div className="flex items-center gap-2 text-sm text-red-400 bg-white/10 px-3 py-2 rounded-md">
                   <AlertCircle size={16} />
@@ -181,7 +218,7 @@ const Signup = () => {
 
               <Button
                 type="submit"
-                disabled={loading || !allChecksMet || !email}
+                disabled={loading || !allChecksMet || !email || !acceptedLegal}
                 className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white animate-slide-in-right delay-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

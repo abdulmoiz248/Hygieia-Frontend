@@ -255,19 +255,19 @@ export default function ClimateHealth() {
           </p>
         </motion.div>
 
-        <div className="flex flex-col md:flex-row gap-12">
+        <div className="flex flex-col items-stretch gap-12 md:flex-row">
           {/* Weather Banner */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
-            className="w-full md:w-1/2"
+            className="flex w-full md:w-1/2"
           >
-            <Card className="overflow-hidden border-0 shadow-lg">
+            <Card className="h-full w-full overflow-hidden border-0 shadow-lg">
               {locationPermission === false ? (
-                <div className="p-8 bg-snow-white/50">
-                  <div className="text-center py-8">
+                <div className="flex h-full min-h-[560px] items-center justify-center bg-snow-white/50 p-8">
+                  <div className="text-center">
                     <AlertTriangle className="w-12 h-12 text-soft-coral mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Location Access Required</h3>
                     <p className="text-cool-gray mb-4">
@@ -282,22 +282,22 @@ export default function ClimateHealth() {
                   </div>
                 </div>
               ) : loading ? (
-                <div className="p-8 bg-snow-white/50 flex items-center justify-center" style={{ minHeight: "300px" }}>
+                <div className="flex h-full min-h-[560px] items-center justify-center bg-snow-white/50 p-8">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-cool-gray">Fetching weather data...</p>
                   </div>
                 </div>
               ) : error ? (
-                <div className="p-8 bg-snow-white/50">
-                  <div className="text-center py-8">
+                <div className="flex h-full min-h-[560px] items-center justify-center bg-snow-white/50 p-8">
+                  <div className="text-center">
                     <AlertTriangle className="w-12 h-12 text-soft-coral mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-dark-slate-gray mb-2">Couldn&apos;t Load Weather Data</h3>
                     <p className="text-cool-gray">{error}</p>
                   </div>
                 </div>
               ) : weatherData ? (
-                <div className="p-8 relative overflow-hidden bg-snow-white">
+                <div className="relative h-full min-h-[560px] overflow-hidden bg-snow-white p-8">
                   {/* Weather Header */}
                   <div className="flex items-center mb-6">
                     <div
@@ -399,10 +399,10 @@ export default function ClimateHealth() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
-            className="w-full md:w-1/2"
+            className="flex w-full md:w-1/2"
           >
-            <Card className="overflow-hidden border-0 shadow-lg h-full">
-              <div className="p-8">
+            <Card className="h-full w-full overflow-hidden border-0 shadow-lg">
+              <div className="h-full min-h-[560px] p-8">
                 <h3 className="text-2xl font-bold text-dark-slate-gray mb-6">Explore Your Body</h3>
 
                 <div className="relative h-[400px] bg-snow-white/50 rounded-xl overflow-hidden border border-cool-gray/10">

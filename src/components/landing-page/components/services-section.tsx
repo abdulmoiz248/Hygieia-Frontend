@@ -114,15 +114,16 @@ export default function ServicesSection() {
     >
       {/* Background blobs matching HowItWorks style */}
       <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-snow-white via-snow-white/95 to-transparent" />
         <motion.div
-          className="absolute top-0 right-0 w-1/3 h-1/3 bg-soft-blue/20 rounded-full blur-3xl opacity-30"
-          initial={{ x: "50%", y: "-50%", scale: 0.8 }}
+          className="absolute top-28 right-6 w-1/3 h-1/3 bg-soft-blue/20 rounded-full blur-3xl opacity-20"
+          initial={{ x: "35%", y: "-20%", scale: 0.8 }}
           animate={{ scale: [0.8, 1.2, 0.8], rotate: [0, 10, 0] }}
           transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-mint-green/20 rounded-full blur-3xl opacity-30"
-          initial={{ x: "-50%", y: "50%", scale: 0.8 }}
+          className="absolute bottom-16 left-8 w-1/3 h-1/3 bg-mint-green/20 rounded-full blur-3xl opacity-25"
+          initial={{ x: "-35%", y: "35%", scale: 0.8 }}
           animate={{ scale: [0.8, 1.2, 0.8], rotate: [0, -10, 0] }}
           transition={{ duration: 15, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
         />
@@ -146,7 +147,7 @@ export default function ServicesSection() {
 
         {/* Cards — identical structure/animation to HowItWorks steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative">
-          {services.map((service) => {
+          {services.map((service, index) => {
             const config   = SERVICE_CONFIG[service.id]
             const isActive = activeService === service.id
             const Icon     = config.icon
@@ -155,25 +156,25 @@ export default function ServicesSection() {
               <motion.div
                 key={service.id}
                 initial="hidden"
-                animate={isActive ? "active" : "inactive"}
+                animate={isSectionInView ? (isActive ? "active" : "inactive") : "hidden"}
                 variants={{
-                  hidden: { y: 50, opacity: 0 },
+                  hidden: { y: 24, opacity: 0, scale: 0.98 },
                   inactive: {
                     y: 0,
                     opacity: 1,
                     scale: 1,
-                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
-                    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                    boxShadow: "0 8px 18px -14px rgba(15, 40, 64, 0.35)",
+                    transition: { duration: 0.55, delay: isSectionInView ? index * 0.08 : 0, ease: [0.25, 0.1, 0.25, 1] },
                   },
                   active: {
                     y: 0,
                     opacity: 1,
-                    scale: 1.05,
-                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
-                    transition: { type: "spring", stiffness: 300, damping: 15 },
+                    scale: 1.025,
+                    boxShadow: "0 18px 32px -20px rgba(15, 40, 64, 0.38)",
+                    transition: { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] },
                   },
                 }}
-                className={`rounded-xl p-5 transition-all duration-500 transform border relative cursor-pointer ${
+                className={`rounded-xl p-5 transition-colors duration-300 transform border relative cursor-pointer ${
                   isActive
                     ? `${config.bgActive} ${config.borderActive}`
                     : `${config.bgInactive} border-cool-gray/10`
@@ -187,8 +188,8 @@ export default function ServicesSection() {
                   className={`w-16 h-16 rounded-full ${
                     isActive ? "bg-snow-white/20" : config.iconBg
                   } flex items-center justify-center mb-3 mx-auto`}
-                  animate={isActive ? { scale: [1, 1.1, 1], rotate: [0, 5, 0] } : { scale: 1, rotate: 0 }}
-                  transition={{ duration: 0.5 }}
+                  animate={isActive ? { scale: 1.06, rotate: 3 } : { scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <Icon size={28} className={isActive ? "text-snow-white" : ""} />
                 </motion.div>

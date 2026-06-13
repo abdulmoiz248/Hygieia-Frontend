@@ -17,8 +17,7 @@ const sections = [
     content: (
       <>
         <p>
-          By accessing, registering for, or using the Hygieia platform (&quot;Platform,&quot; &quot;Service,&quot;
-          &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), you agree to be bound by these Terms of Service. If
+          By accessing, registering for, or using the Hygieia platform, you agree to be bound by these Terms of Service. If
           you do not agree to these Terms, you must not use the Platform.
         </p>
         <p>

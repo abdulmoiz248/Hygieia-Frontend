@@ -16,7 +16,7 @@ const sections = [
     content: (
       <>
         <p>
-          Welcome to Hygieia (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; or the &quot;Platform&quot;).
+          Welcome to Hygieia Platform.
           Hygieia is a healthcare management platform that connects patients with doctors, nutritionists, and lab
           technicians to provide comprehensive health services.
         </p>
