@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Loader,Bell, Lock, Shield } from "lucide-react"
+import { Loader2, Bell, Lock, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                       >
                         {isLoading ? (
     <>
-      <Loader /> Sending OTP...
+      <Loader2 className="w-4 h-4 animate-spin" /> Sending OTP...
     </>
   ) : (
     "Send OTP"
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                       >
                        {isLoading ? (
     <>
-      <Loader /> Verifying...
+      <Loader2 className="w-4 h-4 animate-spin" /> Verifying...
     </>
   ) : (
     "Verify OTP"
@@ -307,7 +307,7 @@ export default function SettingsPage() {
                       >
                        {isLoading ? (
     <>
-      <Loader /> Updating Password...
+      <Loader2 className="w-4 h-4 animate-spin" /> Updating Password...
     </>
   ) : (
     "Update Password"

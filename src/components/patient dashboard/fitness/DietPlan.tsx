@@ -4,8 +4,6 @@ import type React from "react"
 import { ChefHat, Target, Utensils, Sparkles,  TrendingUp, Zap, Apple, File, Loader2, Trash2, AlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import Loader from "@/components/loader/loader"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -659,7 +657,7 @@ const handleConfirmReplace = () => {
                       >
                         {isLoadingMeals  ? (
     <>
-      <Loader /> Generating...
+      <Loader2 className="w-4 h-4 animate-spin" /> Generating...
     </>
   ) : (
     <>

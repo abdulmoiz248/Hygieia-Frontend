@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, Loader2, Sparkles, HeartPulse } from "lucide-react"
+import { Send, Loader2, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -75,47 +75,10 @@ export function ChatArea() {
   const isInitial = !activeConversationId && messages.length === 0
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-gradient-to-b from-white/40 to-white/80 relative">
-
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-30 shrink-0 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
-        <div className="h-[3px] w-full bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral" />
-
-        {/* FIXED HEADER HEIGHT */}
-        <div className="px-5 h-[60px] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-soft-blue via-mint-green to-soft-coral flex items-center justify-center shadow-sm">
-              <HeartPulse className="w-3.5 h-3.5 text-white" />
-            </div>
-
-            <div>
-              <h2 className="text-sm font-bold leading-tight">
-                <span className="text-soft-blue">Health</span>{" "}
-                <span className="text-soft-coral">Assistant</span>
-              </h2>
-
-              <p className="text-[10px] text-cool-gray/60 leading-none">
-                AI-powered health companion
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 bg-mint-green/10 border border-mint-green/20 rounded-full px-2 py-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-mint-green animate-pulse" />
-
-            <span className="text-[10px] font-semibold text-mint-green">
-              Online
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Decorative background */}
-      <div className="absolute top-[10%] left-[-10%] w-[40%] h-[40%] bg-soft-blue/10 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-mint-green/10 rounded-full blur-3xl pointer-events-none z-0" />
+    <div className="relative flex h-full min-h-0 flex-1 flex-col bg-gradient-to-b from-snow-white/70 via-white/75 to-snow-white/90">
 
       {/* Scroll Area */}
-      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 sm:px-6 sm:pb-4 scrollbar-none relative z-10">
+      <div ref={scrollContainerRef} className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pb-2 sm:px-6 sm:pb-4 scrollbar-none">
 
         {isFetchingHistory ? (
           <div className="flex justify-center items-center h-full pt-6">
@@ -127,17 +90,15 @@ export function ChatArea() {
             </motion.div>
           </div>
         ) : isInitial ? (
-          <div className="flex min-h-full items-center justify-center py-4 sm:py-8">
+          <div className="flex min-h-full items-center justify-center py-6 sm:py-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="w-full max-w-3xl space-y-6 sm:space-y-8 text-center"
+              className="w-full max-w-3xl space-y-5 text-center"
             >
               <div className="relative inline-block mx-auto">
-                <div className="absolute inset-0 bg-soft-blue/20 blur-2xl rounded-full" />
-
-                <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-xl bg-white p-2 relative z-10">
+                <Avatar className="relative z-10 mx-auto h-20 w-20 border-4 border-white bg-white p-2 shadow-lg">
                   <AvatarImage src="/logo/logo.png" className="object-contain" />
 
                   <AvatarFallback className="bg-soft-blue/10 text-soft-blue">
@@ -154,14 +115,14 @@ export function ChatArea() {
               </div>
 
               <div className="space-y-3 px-2 sm:px-0">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-dark-slate-gray tracking-tight leading-tight">
+                <h2 className="text-2xl font-bold leading-tight tracking-tight text-dark-slate-gray sm:text-3xl">
                   Welcome back,{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral">
+                  <span className="text-soft-coral">
                     {profile.name}
                   </span>
-                </h1>
+                </h2>
 
-                <p className="text-cool-gray text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+                <p className="mx-auto max-w-xl text-sm leading-relaxed text-cool-gray sm:text-base">
                   Your AI health companion is ready. Ask about your appointments,
                   lab results, or general health concerns.
                 </p>
@@ -253,7 +214,7 @@ export function ChatArea() {
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault()
                     handleSend()
@@ -275,7 +236,7 @@ export function ChatArea() {
                 disabled={!inputValue.trim() || isSending || isFetchingHistory}
                 className={`rounded-full h-10 w-10 p-0 transition-all duration-300 shadow-sm ${
                   inputValue.trim() && !isSending
-                    ? "bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral hover:shadow-md hover:scale-105 text-white"
+                    ? "bg-soft-blue text-white hover:scale-105 hover:bg-soft-blue/90 hover:shadow-md"
                     : "bg-gray-100 text-cool-gray"
                 }`}
               >

@@ -26,6 +26,7 @@ import {
   Target,
   ClipboardList,
   Video,
+  Loader2,
 } from "lucide-react"
 import { AppointmentMode, AppointmentStatus, type Appointment } from "@/types/patient/appointment"
 import { EnhancedFitnessCharts, FitnessData } from "@/components/nutritionist/appointments/id/enhanced-fitness-charts"
@@ -890,7 +891,7 @@ if (assignedDietPlan) {
         "Generating..."
       ) : isDownloadingReport ? (
         <>
-          <Loader /> Downloading...
+          <Loader2 className="w-4 h-4 animate-spin" /> Downloading...
         </>
       ) : (
         "Generate AI report"

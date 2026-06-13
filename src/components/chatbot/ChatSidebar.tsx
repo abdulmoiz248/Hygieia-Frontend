@@ -88,15 +88,14 @@ export function ChatSidebar() {
   }
 
   return (
-    <div className="w-72 h-full min-h-0 flex flex-col border-r border-gray-100 bg-white/70 backdrop-blur-xl overflow-hidden">
+    <div className="flex h-full min-h-0 w-80 flex-col overflow-hidden border-r border-soft-blue/20 bg-gradient-to-b from-snow-white/70 via-white/75 to-snow-white/90 backdrop-blur-xl shadow-[8px_0_24px_-24px_rgba(72,148,168,0.45)]">
 
       {/* Header */}
       <div className="relative flex-shrink-0">
-        <div className="h-[3px] w-full bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral" />
-        <div className="px-4 border-b border-gray-100/80 h-[60px] flex items-center">
+        <div className="flex h-[61px] items-center border-b border-white/50 px-3">
           <button
             onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl bg-gradient-to-r from-soft-blue via-mint-green to-soft-coral text-white text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-soft-blue/20 hover:-translate-y-0.5 transition-all duration-200"
+            className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-soft-blue text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-soft-blue/90 hover:shadow-md hover:shadow-soft-blue/20"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -105,8 +104,8 @@ export function ChatSidebar() {
       </div>
 
       {/* Chat list */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 scrollbar-none space-y-0.5">
-        <p className="text-[10px] font-bold text-soft-blue/50 uppercase tracking-widest px-2 pb-2">
+      <div className="flex-1 space-y-1 overflow-y-auto px-3 py-3 scrollbar-none">
+        <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-soft-blue/60">
           Chat History
         </p>
 
@@ -138,10 +137,10 @@ export function ChatSidebar() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -6 }}
                   transition={{ duration: 0.15 }}
-                  className={`group relative p-3 rounded-xl cursor-pointer transition-all duration-150 ${
+                  className={`group relative cursor-pointer rounded-xl p-3 transition-all duration-200 ${
                     isActive
-                      ? "bg-soft-blue/6 border border-soft-blue/15"
-                      : "border border-transparent hover:bg-gray-50 hover:border-gray-100"
+                      ? "border border-soft-blue/20 bg-soft-blue/10 shadow-sm"
+                      : "border border-transparent hover:border-white/70 hover:bg-white/60"
                   }`}
                   onClick={() => patientId && loadConversation(patientId, conv.conversation_id)}
                 >
@@ -149,8 +148,8 @@ export function ChatSidebar() {
                     {/* Icon */}
                     <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center mt-0.5 transition-colors ${
                       isActive
-                        ? "bg-gradient-to-br from-soft-blue to-mint-green text-white"
-                        : "bg-gray-100 text-cool-gray/60 group-hover:bg-soft-blue/10 group-hover:text-soft-blue/70"
+                        ? "bg-soft-blue text-white"
+                        : "bg-white/80 text-cool-gray/60 group-hover:bg-soft-blue/10 group-hover:text-soft-blue/70"
                     }`}>
                       <MessageSquare className="w-3.5 h-3.5" />
                     </div>
@@ -175,14 +174,14 @@ export function ChatSidebar() {
                   <div className="absolute right-2 top-2.5 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-opacity">
                     <button
                       onClick={(e) => handleRename(e, conv.conversation_id, conv.title)}
-                      className="p-1.5 text-cool-gray/50 hover:text-soft-blue hover:bg-soft-blue/8 rounded-lg transition-colors"
+                      className="rounded-lg p-1.5 text-cool-gray/50 transition-colors hover:bg-soft-blue/10 hover:text-soft-blue"
                       title="Rename"
                     >
                       <Edit2 className="w-3 h-3" />
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, conv.conversation_id, conv.title)}
-                      className="p-1.5 text-cool-gray/50 hover:text-soft-coral hover:bg-soft-coral/8 rounded-lg transition-colors"
+                      className="rounded-lg p-1.5 text-cool-gray/50 transition-colors hover:bg-soft-coral/10 hover:text-soft-coral"
                       title="Delete"
                     >
                       <Trash2 className="w-3 h-3" />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Loader, Lock, Shield } from "lucide-react"
+import { Loader2, Lock, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -185,7 +185,7 @@ setactiveTab('')
                       >
                         {isLoading ? (
                           <>
-                            <Loader /> Sending OTP...
+                            <Loader2 className="w-4 h-4 animate-spin" /> Sending OTP...
                           </>
                         ) : (
                           "Send OTP"
@@ -211,7 +211,7 @@ setactiveTab('')
                       >
                         {isLoading ? (
                           <>
-                            <Loader /> Verifying...
+                            <Loader2 className="w-4 h-4 animate-spin" /> Verifying...
                           </>
                         ) : (
                           "Verify OTP"
@@ -248,7 +248,7 @@ setactiveTab('')
                       >
                         {isLoading ? (
                           <>
-                            <Loader /> Updating Password...
+                            <Loader2 className="w-4 h-4 animate-spin" /> Updating Password...
                           </>
                         ) : (
                           "Update Password"
