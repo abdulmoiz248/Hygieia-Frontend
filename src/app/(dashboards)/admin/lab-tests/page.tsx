@@ -10,14 +10,12 @@ import {
   Pencil,
   Trash2,
   Clock,
-  Tag,
   FlaskConical,
   ScanLine,
   ChevronDown,
   Banknote,
-  Ruler,
-  ListChecks,
   BarChart3,
+  ClipboardList,
 } from "lucide-react"
 import {
   useLabTests,
@@ -250,6 +248,7 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
   const { color, bg } = getCategoryStyle(test.category)
   const recordType = normalizeRecordType(test.record_type)
   const isScan = recordType === "scan"
+  const prepInstructions = test.preparation_instructions?.filter((item) => item?.trim()) ?? []
 
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full">
@@ -260,7 +259,7 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
         style={{ background: `linear-gradient(90deg, ${color}, oklch(0.72 0.11 178))` }}
       />
 
-      <div className="p-5 flex flex-col flex-1 gap-4">
+      <div className="p-5 flex flex-col flex-1 gap-3">
 
         {/* ── Header: icon + name + record-type badge ── */}
         <div className="flex items-start gap-3">
@@ -310,22 +309,16 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
         </div>
 
         {/* ── Description ── */}
-        {test.description && (
-          <p className="text-xs text-[var(--color-cool-gray)] leading-relaxed line-clamp-2 -mt-1">
-            {test.description}
-          </p>
-        )}
-
         {/* ── Key info: price + duration side by side ── */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-100">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-mint-green/10 border border-mint-green/15">
             <Banknote className="w-3.5 h-3.5 text-[var(--color-mint-green)] flex-shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] text-[var(--color-cool-gray)] leading-none mb-0.5">Price</p>
               <p className="text-xs font-bold text-[var(--color-dark-slate-gray)] truncate">Rs. {test.price.toLocaleString()}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-100">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-soft-blue/10 border border-soft-blue/15">
             <Clock className="w-3.5 h-3.5 text-[var(--color-soft-blue)] flex-shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] text-[var(--color-cool-gray)] leading-none mb-0.5">Duration</p>
@@ -336,23 +329,16 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
 
         {/* ── Unit + Range (only if present) ── */}
         {(test.unit || test.optimal_range) && (
-          <div className="flex items-center gap-4 px-1">
+          <div className="flex flex-wrap gap-2">
             {test.unit && (
-              <div className="flex items-center gap-1.5">
-                <Ruler className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                <span className="text-[11px] text-[var(--color-cool-gray)]">
-                  <span className="font-semibold text-[var(--color-dark-slate-gray)]">{test.unit}</span>
-                </span>
-              </div>
+              <span className="rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-[var(--color-cool-gray)]">
+                Unit: <span className="text-[var(--color-dark-slate-gray)]">{test.unit}</span>
+              </span>
             )}
-            {test.unit && test.optimal_range && <span className="w-px h-3 bg-gray-200" />}
             {test.optimal_range && (
-              <div className="flex items-center gap-1.5">
-                <Tag className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                <span className="text-[11px] text-[var(--color-cool-gray)]">
-                  <span className="font-semibold text-[var(--color-dark-slate-gray)]">{test.optimal_range}</span>
-                </span>
-              </div>
+              <span className="rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-[var(--color-cool-gray)]">
+                Range: <span className="text-[var(--color-dark-slate-gray)]">{test.optimal_range}</span>
+              </span>
             )}
           </div>
         )}
@@ -361,27 +347,27 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
         <div className="flex-1" />
 
         {/* ── Prep instructions expandable ── */}
-        {test.preparation_instructions.length > 0 && (
-          <div className="border-t border-gray-100 pt-3 -mb-1">
+        {prepInstructions.length > 0 && (
+          <div className="border-t border-gray-100 pt-2">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:opacity-80 active:scale-95 w-full"
+              className="flex w-full items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:opacity-80 active:scale-95"
               style={{ color }}
             >
-              <ListChecks className="w-3.5 h-3.5" />
-              {test.preparation_instructions.length} Prep Instruction{test.preparation_instructions.length !== 1 ? "s" : ""}
+              <ClipboardList className="h-3.5 w-3.5" />
+              Prep Instructions
               <ChevronDown
-                className="w-3.5 h-3.5 ml-auto transition-transform duration-200"
+                className="ml-auto h-3.5 w-3.5 transition-transform duration-200"
                 style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
               />
             </button>
 
             {expanded && (
-              <ul className="mt-2.5 space-y-1.5">
-                {test.preparation_instructions.map((instr, i) => (
+              <ul className="mt-2 space-y-1.5">
+                {prepInstructions.map((instr, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-[var(--color-cool-gray)]">
                     <span
-                      className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5"
+                      className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
                       style={{ background: bg, color }}
                     >
                       {i + 1}
