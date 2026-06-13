@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { motion, useInView, useScroll, useTransform } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { Stethoscope, Apple, FlaskConical, ArrowRight, Users, Brain, Activity } from "lucide-react"
+import { Stethoscope, Apple, FlaskConical, ArrowRight } from "lucide-react"
 import { useDoctors } from "@/hooks/useDoctors"
 import { useNutritionists } from "@/hooks/useNutritionist"
 import { useLabTests } from "@/hooks/useLabTests"
@@ -53,9 +53,7 @@ const SERVICE_CONFIG = {
 export default function ServicesSection() {
   const router = useRouter()
   const sectionRef = useRef<HTMLElement>(null)
-  const ref = useRef<HTMLDivElement>(null)
   const isSectionInView = useInView(sectionRef, { once: false, amount: 0.2 })
-  const isInView = useInView(ref, { once: true, amount: 0.15 })
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -107,7 +105,11 @@ export default function ServicesSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green overflow-hidden"
+      className="relative py-20 px-4 md:px-10 overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(to bottom, var(--color-snow-white) 0%, var(--color-snow-white) 14%, var(--color-mint-green) 100%)",
+      }}
       id="services"
     >
       {/* Background blobs matching HowItWorks style */}
@@ -143,8 +145,8 @@ export default function ServicesSection() {
         </motion.div>
 
         {/* Cards — identical structure/animation to HowItWorks steps */}
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative">
-          {services.map((service, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative">
+          {services.map((service) => {
             const config   = SERVICE_CONFIG[service.id]
             const isActive = activeService === service.id
             const Icon     = config.icon

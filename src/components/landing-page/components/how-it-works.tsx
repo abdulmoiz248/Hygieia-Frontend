@@ -102,7 +102,11 @@ const lineVariants: Variants = {
   return (
     <section
       ref={sectionRef}
-      className="py-20 bg-gradient-to-b from-mint-green to-snow-white relative overflow-hidden"
+      className="py-20 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-snow-white) 88%, var(--color-snow-white) 100%)",
+      }}
       id="how-it-works"
     >
       {/* Background elements */}
