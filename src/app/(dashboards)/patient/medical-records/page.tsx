@@ -124,23 +124,23 @@ export default function MedicalRecordsPage() {
 
       {/* Book Lab Tests CTA */}
       <motion.section variants={itemVariants}>
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-soft-blue/95 via-soft-blue/90 to-mint-green/85 p-8 md:p-12 shadow-lg border border-soft-blue/20">
+        <div className="relative overflow-hidden rounded-3xl border border-white/45 bg-white/45 p-8 shadow-sm backdrop-blur-lg md:p-10">
           {/* Decorative background elements */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -right-20 -top-20 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute -left-10 bottom-0 w-32 h-32 bg-mint-green/20 rounded-full blur-3xl" />
+            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-soft-blue/10 blur-3xl" />
+            <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-mint-green/15 blur-3xl" />
           </div>
 
           {/* Content */}
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="flex items-center gap-5 flex-1">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0">
-                  <FlaskConical className="h-8 w-8 text-white" />
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-soft-blue/15 bg-soft-blue/10">
+                  <FlaskConical className="h-8 w-8 text-soft-blue" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Book a Lab Test</h2>
-                  <p className="text-white/80 text-sm md:text-base">
+                  <h2 className="mb-1 text-2xl font-bold text-soft-coral md:text-3xl">Book a Lab Test</h2>
+                  <p className="text-sm text-cool-gray md:text-base">
                     Browse our comprehensive catalogue of diagnostic tests and book your appointment instantly.
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export default function MedicalRecordsPage() {
 
               <Button
                 onClick={() => router.push("/lab-tests")}
-                className="shrink-0 bg-white hover:bg-white/95 text-soft-blue font-semibold px-8 py-3 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg"
+                className="shrink-0 rounded-xl bg-soft-blue px-8 py-3 font-semibold text-white shadow-sm transition-all duration-300 hover:bg-soft-blue/90 hover:shadow-md"
               >
                 Browse Lab Tests
                 <ArrowRight className="ml-2 h-5 w-5" />

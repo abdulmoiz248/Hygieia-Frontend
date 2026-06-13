@@ -270,10 +270,10 @@ export function LabBookingsSection() {
                 {pendingTests.map((test) => (
                   <div
                     key={test.id}
-                    className="flex flex-col md:flex-row md:items-start justify-between gap-4 p-4 bg-cool-gray/10 rounded-lg border border-blue-200"
+                    className="flex flex-col md:flex-row md:items-start justify-between gap-5 p-5 bg-cool-gray/10 rounded-lg border border-blue-200"
                   >
                     {/* Left: test info */}
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-3">
                       <h4 className="font-semibold text-soft-blue">{test.testName}</h4>
 
                       <div className="flex flex-wrap items-center gap-4 text-sm text-dark-slate-gray">
@@ -293,11 +293,11 @@ export function LabBookingsSection() {
 
                       {/* ── Preparation instructions (actually rendered) ── */}
                       {Array.isArray(test.instructions) && test.instructions.filter((i: string) => i?.trim()).length > 0 && (
-                        <div className="mt-2 rounded-lg bg-mint-green/10 border border-mint-green/30 p-3">
-                          <p className="text-sm font-semibold text-mint-green mb-1">
+                        <div className="mt-4 rounded-xl bg-mint-green/10 border border-mint-green/30 px-4 py-4">
+                          <p className="text-sm font-semibold text-mint-green mb-2">
                             Preparation Instructions
                           </p>
-                          <ul className="list-disc list-inside space-y-0.5">
+                          <ul className="list-disc list-inside space-y-1.5 pl-1">
                             {test.instructions.filter((i: string) => i?.trim()).map((instruction: string, index: number) => (
                               <li key={index} className="text-sm text-dark-slate-gray">
                                 {instruction}
