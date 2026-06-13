@@ -12,10 +12,10 @@ import {
   Clock,
   FlaskConical,
   ScanLine,
-  ChevronDown,
   Banknote,
   BarChart3,
   ClipboardList,
+  Eye,
 } from "lucide-react"
 import {
   useLabTests,
@@ -239,16 +239,15 @@ function Filters({ tests, typeTab, onTypeTab, search, onSearch, catFilter, onCat
 
 interface LabTestCardProps {
   test: LabTest
+  onView: (t: LabTest) => void
   onEdit: (t: LabTest) => void
   onDelete: (t: LabTest) => void
 }
 
-function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
-  const [expanded, setExpanded] = useState(false)
+function LabTestCard({ test, onView, onEdit, onDelete }: LabTestCardProps) {
   const { color, bg } = getCategoryStyle(test.category)
   const recordType = normalizeRecordType(test.record_type)
   const isScan = recordType === "scan"
-  const prepInstructions = test.preparation_instructions?.filter((item) => item?.trim()) ?? []
 
   return (
     <div className="rounded-2xl border border-[var(--color-cool-gray)]/15 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full">
@@ -328,63 +327,152 @@ function LabTestCard({ test, onEdit, onDelete }: LabTestCardProps) {
         </div>
 
         {/* ── Unit + Range (only if present) ── */}
-        {(test.unit || test.optimal_range) && (
-          <div className="flex flex-wrap gap-2">
-            {test.unit && (
-              <span className="rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-[var(--color-cool-gray)]">
-                Unit: <span className="text-[var(--color-dark-slate-gray)]">{test.unit}</span>
-              </span>
-            )}
-            {test.optimal_range && (
-              <span className="rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-[var(--color-cool-gray)]">
-                Range: <span className="text-[var(--color-dark-slate-gray)]">{test.optimal_range}</span>
-              </span>
-            )}
-          </div>
-        )}
-
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* ── Prep instructions expandable ── */}
-        {prepInstructions.length > 0 && (
-          <div className="border-t border-gray-100 pt-2">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="flex w-full items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:opacity-80 active:scale-95"
-              style={{ color }}
-            >
-              <ClipboardList className="h-3.5 w-3.5" />
-              Prep Instructions
-              <ChevronDown
-                className="ml-auto h-3.5 w-3.5 transition-transform duration-200"
-                style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
-              />
-            </button>
-
-            {expanded && (
-              <ul className="mt-2 space-y-1.5">
-                {prepInstructions.map((instr, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-[var(--color-cool-gray)]">
-                    <span
-                      className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
-                      style={{ background: bg, color }}
-                    >
-                      {i + 1}
-                    </span>
-                    {instr}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+        <div className="border-t border-gray-100 pt-3">
+          <button
+            onClick={() => onView(test)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold transition-all duration-200 hover:opacity-80 active:scale-95"
+            style={{ color }}
+          >
+            <Eye className="h-3.5 w-3.5" />
+            View Details
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+
+function LabTestDetailsModal({
+  test,
+  onClose,
+}: {
+  test: LabTest | null
+  onClose: () => void
+}) {
+  if (!test) return null
+
+  const { color, bg } = getCategoryStyle(test.category)
+  const recordType = normalizeRecordType(test.record_type)
+  const prepInstructions = test.preparation_instructions?.filter((item) => item?.trim()) ?? []
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose() }}
+    >
+      <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+        <div className="h-1 w-full flex-shrink-0" style={{ background: "var(--gradient-primary)" }} />
+
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-100 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div>
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-xl"
+                style={{ background: "oklch(0.95 0.05 210)" }}
+              >
+                {recordType === "scan" ? (
+                  <ScanLine className="h-4.5 w-4.5 text-[var(--color-soft-blue)]" />
+                ) : (
+                  <FlaskConical className="h-4.5 w-4.5 text-[var(--color-soft-blue)]" />
+                )}
+              </div>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--color-dark-slate-gray)]">{test.name}</h2>
+              <p className="mt-0.5 text-xs text-[var(--color-cool-gray)]">
+                {test.category} · {getRecordTypeLabel(recordType)}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-gray-100">
+            <X className="h-4 w-4 text-[var(--color-cool-gray)]" />
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Price</p>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+                Rs. {test.price.toLocaleString()}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Duration</p>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+                {test.duration}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Record Type</p>
+              <div
+                className="rounded-xl border px-3.5 py-2.5 text-sm font-semibold capitalize"
+                style={{ background: bg, borderColor: `${color}30`, color }}
+              >
+                {getRecordTypeLabel(recordType)}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Description</p>
+            <div className="min-h-24 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm leading-relaxed text-[var(--color-cool-gray)]">
+              {test.description || "No description provided."}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Unit</p>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+                {test.unit || "-"}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 block text-xs font-semibold text-[var(--color-cool-gray)]">Optimal Range</p>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-semibold text-[var(--color-dark-slate-gray)]">
+                {test.optimal_range || "-"}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-1.5 flex items-center gap-2 text-xs font-semibold text-[var(--color-cool-gray)]">
+              <ClipboardList className="h-3.5 w-3.5 text-[var(--color-soft-blue)]" />
+              Preparation Instructions
+            </p>
+            {prepInstructions.length > 0 ? (
+              <ul className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+                {prepInstructions.map((instruction, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-[var(--color-cool-gray)]">
+                    <span
+                      className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                      style={{ background: bg, color }}
+                    >
+                      {index + 1}
+                    </span>
+                    {instruction}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-[var(--color-cool-gray)]">
+                No preparation instructions provided.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function LabTestsPage() {
   const { data: tests = [], isLoading, isError, error } = useLabTests()
@@ -398,6 +486,7 @@ export default function LabTestsPage() {
   const [typeTab,      setTypeTab]      = useState<RecordTab>("all")
   const [catFilter,    setCatFilter]    = useState("all")
   const [formOpen,     setFormOpen]     = useState(false)
+  const [viewTarget,   setViewTarget]   = useState<LabTest | null>(null)
   const [editTarget,   setEditTarget]   = useState<LabTest | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<LabTest | null>(null)
 
@@ -544,6 +633,7 @@ export default function LabTestsPage() {
               <LabTestCard
                 key={test.id}
                 test={test}
+                onView={setViewTarget}
                 onEdit={(t) => { setEditTarget(t); setFormOpen(true) }}
                 onDelete={setDeleteTarget}
               />
@@ -555,6 +645,11 @@ export default function LabTestsPage() {
       </div>
 
       {/* ── Modals ── */}
+      <LabTestDetailsModal
+        test={viewTarget}
+        onClose={() => setViewTarget(null)}
+      />
+
       {formOpen && (
         <LabTestFormModal
           initial={editTarget ?? undefined}
