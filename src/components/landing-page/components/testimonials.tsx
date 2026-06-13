@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 export default function Testimonials() {
   const router=useRouter()
   return (
-    <section className="py-24 bg-gradient-to-b from-snow-white to-mint-green relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-b from-mint-green to-snow-white relative overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -16,8 +16,8 @@ export default function Testimonials() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-dark-slate-gray mb-4">What Our Users Say</h2>
-          <p className="text-lg text-cool-gray max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">What Our Users Say</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Real stories from people who have transformed their health journey with our platform
           </p>
         </motion.div>

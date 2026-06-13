@@ -6,23 +6,31 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { User, ArrowRight, Heart, Brain, Activity, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTotalUsers } from "@/hooks/useTotalUsers"
 
 export default function MissionStats() {
   const heartbeatRef = useRef<SVGSVGElement>(null)
   const [dashOffset, setDashOffset] = useState(1000)
+  const { data: totalUsers } = useTotalUsers()
 
   useEffect(() => {
-    // Use CSS animations instead of anime.js
     const interval = setInterval(() => {
       setDashOffset((prev) => (prev === 1000 ? 0 : 1000))
     }, 2000)
-
     return () => clearInterval(interval)
   }, [])
 
-  const router=useRouter();
+  const router = useRouter()
+
+  // Format the live user count for display
+  const userDisplayValue = totalUsers !== undefined
+    ? totalUsers >= 1000
+      ? `${(totalUsers / 1000).toFixed(1)}K+`
+      : `${totalUsers}+`
+    : "5M+"
+
   return (
-    <section className="py-20  px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-12">
           {/* Mission Statement */}
@@ -34,14 +42,14 @@ export default function MissionStats() {
             className="w-full md:w-1/2 relative"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-6">Democratizing AI-Driven Healthcare</h2>
-            <p className="text-lg text-gray-700 mb-8">
+            <p className="text-lg text-gray-600 mb-8">
               At Hygieia, we believe that quality healthcare should be accessible to everyone, regardless of location or
               economic status. By combining ancient wisdom with cutting-edge AI technology, we&apos;re creating a future
               where personalized healthcare is just a tap away.
             </p>
 
             {/* Heartbeat SVG */}
-            <div className="relative h-20 mb-8 ">
+            <div className="relative h-20 mb-8">
               <svg
                 ref={heartbeatRef}
                 width="100%"
@@ -60,8 +68,7 @@ export default function MissionStats() {
                   fill="none"
                   strokeDasharray="1000"
                   strokeDashoffset={dashOffset}
-                  style={{ transition: "stroke-dashoffset  1.5s ease-in-out" }}
-                
+                  style={{ transition: "stroke-dashoffset 1.5s ease-in-out" }}
                 />
               </svg>
             </div>
@@ -123,7 +130,7 @@ export default function MissionStats() {
                     <p className="text-gray-600 mb-2">Join our network of top doctors</p>
                   </div>
                 </div>
-                <Button  onClick={() => router.push('/join-us')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
+                <Button onClick={() => router.push('/join-us')} className="w-full mt-4 bg-soft-blue hover:bg-[#1a3a5f] text-white">
                   Join Hygieia <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Card>
@@ -141,10 +148,10 @@ export default function MissionStats() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-6">
               {[
-                { label: "Diagnoses", value: "2M+", color: "#34C759", icon: <Activity className="w-6 h-6" /> },
-                { label: "Accuracy", value: "95%", color: "#ff6f61", icon: <Brain className="w-6 h-6" /> },
-                { label: "Countries", value: "120+", color: "#2A5C82", icon: <Users className="w-6 h-6" /> },
-                { label: "Users", value: "5M+", color: "#2c3e50", icon: <User className="w-6 h-6" /> },
+                { label: "Diagnoses",  value: "2M+",           color: "#34C759", icon: <Activity className="w-6 h-6" /> },
+                { label: "Accuracy",   value: "85%",           color: "#ff6f61", icon: <Brain className="w-6 h-6" />, isStatic: true },
+                { label: "Features",   value: "10+",           color: "#2A5C82", icon: <Users className="w-6 h-6" />,  isStatic: true },
+                { label: "Users",      value: userDisplayValue, color: "#2c3e50", icon: <User className="w-6 h-6" />,   isLive: true },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -160,7 +167,13 @@ export default function MissionStats() {
                   >
                     {stat.icon}
                   </div>
-                  <CountUp value={stat.value} color={stat.color} delay={index * 0.2} />
+                  {stat.isStatic || stat.isLive ? (
+                    <div className="text-4xl font-bold" style={{ color: stat.color }}>
+                      {stat.value}
+                    </div>
+                  ) : (
+                    <CountUp value={stat.value} color={stat.color} delay={index * 0.2} />
+                  )}
                   <p className="text-gray-600 mt-2">{stat.label}</p>
                 </motion.div>
               ))}
@@ -172,10 +185,10 @@ export default function MissionStats() {
 
               <div className="space-y-4">
                 {[
-                  { label: "Early Disease Detection", percentage: 65, color: "#34C759" },
+                  { label: "Early Disease Detection",   percentage: 65, color: "#34C759" },
                   { label: "Healthcare Cost Reduction", percentage: 40, color: "#2A5C82" },
-                  { label: "Remote Area Coverage", percentage: 85, color: "#8A2BE2" },
-                  { label: "User Health Improvement", percentage: 72, color: "#FF9500" },
+                  { label: "Remote Area Coverage",      percentage: 85, color: "#8A2BE2" },
+                  { label: "User Health Improvement",   percentage: 72, color: "#FF9500" },
                 ].map((item, index) => (
                   <div key={index} className="space-y-1">
                     <div className="flex justify-between text-sm">
@@ -192,7 +205,7 @@ export default function MissionStats() {
                         viewport={{ once: true }}
                         className="h-full rounded-full"
                         style={{ backgroundColor: item.color }}
-                      ></motion.div>
+                      />
                     </div>
                   </div>
                 ))}
@@ -201,12 +214,12 @@ export default function MissionStats() {
 
             {/* CTA Buttons */}
             <div className="space-y-4 mt-8">
-              <Button  onClick={() => router.push('/login')} className="w-full py-6 bg-soft-blue text-white text-lg relative overflow-hidden group">
+              <Button onClick={() => router.push('/login')} className="w-full py-6 bg-soft-blue text-white text-lg relative overflow-hidden group">
                 <span>Login / Register</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
 
-              <Button  onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-cool-gray text-white text-lg relative overflow-hidden group">
+              <Button onClick={() => router.push('/e-commerce')} className="w-full py-6 bg-cool-gray text-white text-lg relative overflow-hidden group">
                 <span>Track Your Fitness Now</span>
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </Button>
@@ -218,7 +231,6 @@ export default function MissionStats() {
   )
 }
 
-
 function CountUp({ value, color, delay = 0 }: { value: string; color: string; delay?: number }) {
   const [count, setCount] = useState(0)
   const finalValue = Number.parseInt(value.replace(/\D/g, "")) || 100
@@ -227,23 +239,17 @@ function CountUp({ value, color, delay = 0 }: { value: string; color: string; de
     let startTime: number
     let animationFrame: number
 
-    // Delay the animation start
     const timer = setTimeout(() => {
       const animate = (timestamp: number) => {
         if (!startTime) startTime = timestamp
-        const progress = Math.min((timestamp - startTime) / 2000, 1) // 2 seconds duration
-
-        // Easing function (ease-out)
+        const progress = Math.min((timestamp - startTime) / 2000, 1)
         const easedProgress = 1 - Math.pow(1 - progress, 3)
-
         const currentCount = Math.floor(easedProgress * finalValue)
         setCount(currentCount)
-
         if (progress < 1) {
           animationFrame = requestAnimationFrame(animate)
         }
       }
-
       animationFrame = requestAnimationFrame(animate)
     }, delay * 1000)
 

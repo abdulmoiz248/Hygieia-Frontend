@@ -50,7 +50,7 @@ export default function HowItWorks() {
   })
 
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-  const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, 100])
+  // y transform removed for consistent heading spacing
 
   useEffect(() => {
     if (isInView) {
@@ -102,7 +102,7 @@ const lineVariants: Variants = {
   return (
     <section
       ref={sectionRef}
-      className="py-24  bg-gradient-to-b from-mint-green to-snow-white relative overflow-hidden"
+      className="py-20 bg-gradient-to-b from-mint-green to-snow-white relative overflow-hidden"
       id="how-it-works"
     >
       {/* Background elements */}
@@ -137,15 +137,15 @@ const lineVariants: Variants = {
         />
       </div>
 
-      <motion.div style={{ opacity, y }} className="container mx-auto px-4 max-w-6xl relative z-10">
+      <motion.div style={{ opacity }} className="container mx-auto px-4 max-w-6xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-dark-slate-gray mb-4">How It Works</h2>
-          <p className="text-lg md:text-xl text-soft-blue max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">How It Works</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             4 Steps to Smarter Health – No Waiting Rooms, No Delays
           </p>
         </motion.div>

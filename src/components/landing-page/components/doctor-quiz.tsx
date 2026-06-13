@@ -215,7 +215,7 @@ const itemVariants: Variants = {
   }
 
   return (
-    <section className="py-20 min-h-screen bg-gradient-to-b from-mint-green to-snow-white">
+    <section className="py-20 min-h-screen bg-gradient-to-b from-snow-white to-mint-green">
       <div className="container mx-auto px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -235,10 +235,10 @@ const itemVariants: Variants = {
               <Stethoscope className="h-14 w-14 text-snow-white" />
             </motion.div>
           </div>
-          <h2 className="text-4xl py-2 md:text-6xl font-extrabold text-dark-slate-gray mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">
             Interactive Diagnosis Game
           </h2>
-          <p className="text-xl text-dark-slate-gray max-w-2xl mx-auto font-medium">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Test your medical knowledge with our &quot;Play Doctor&quot; mini-game
           </p>
         </motion.div>

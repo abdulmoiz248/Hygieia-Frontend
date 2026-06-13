@@ -240,7 +240,7 @@ export default function ClimateHealth() {
 
  
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
+    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-mint-green to-snow-white">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -250,7 +250,7 @@ export default function ClimateHealth() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-dark-slate-gray mb-4">Climate & Health Connection</h2>
-          <p className="text-lg text-cool-gray max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Discover how environmental factors affect your health and get personalized recommendations
           </p>
         </motion.div>
