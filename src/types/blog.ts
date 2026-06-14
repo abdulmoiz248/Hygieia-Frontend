@@ -6,11 +6,16 @@ export interface BlogPost {
   author: string
   publishedat: string
   readTime: number
+  readtime?: number
   category: string
   tags: string[]
   image: string
   featured: boolean
+  isFeatured?: boolean
   verified?: boolean
+  isVerified?: boolean
+  isverified?: boolean
+  status?: string
 }
 
 export interface BlogCategory {

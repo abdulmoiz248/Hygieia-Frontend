@@ -37,8 +37,13 @@ export default function BlogNewsletter() {
   }, [blogCategories])
 
   const featuredPosts = useMemo(() => {
-    const shuffled = [...blogPosts].sort(() => 0.5 - Math.random())
-    return shuffled.slice(0, 3)
+    return [...blogPosts]
+      .filter((post) => post.verified)
+      .sort((a, b) => {
+        if (a.featured !== b.featured) return a.featured ? -1 : 1
+        return new Date(b.publishedat).getTime() - new Date(a.publishedat).getTime()
+      })
+      .slice(0, 3)
   }, [blogPosts])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,7 +102,7 @@ export default function BlogNewsletter() {
                     <div className="relative h-40 overflow-hidden">
                       <Image
                         fill
-                        src={post.image}
+                        src={post.image || "/placeholder.svg"}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                       />

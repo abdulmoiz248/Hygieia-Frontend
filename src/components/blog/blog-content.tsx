@@ -2,17 +2,26 @@ import type { BlogPost } from "@/types/blog"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Calendar, User } from "lucide-react"
 import Image from "next/image"
+import { useMemo } from "react"
+import { normalizeEscapedText, renderBlogContent } from "@/lib/blog-markdown"
 
 interface BlogContentProps {
   post: BlogPost
 }
 
 export function BlogContent({ post }: BlogContentProps) {
+  const renderedContent = useMemo(() => {
+    const content = removeLeadingDuplicateTitle(post.content, post.title)
+    if (!content) return ""
+    return renderBlogContent(content)
+  }, [post.content, post.title])
+
+  const excerpt = normalizeEscapedText(post.excerpt)
+
   return (
     <article className="relative">
-      {/* Featured Image - Full Bleed */}
+      {/* Featured Image */}
       <div className="relative overflow-hidden aspect-[21/9] md:aspect-[21/8]">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-dark-slate-gray/60 z-10" />
         <Image
           src={post.image || "/placeholder.svg"}
           alt={post.title}
@@ -20,31 +29,26 @@ export function BlogContent({ post }: BlogContentProps) {
           className="object-cover"
           priority
         />
-        
-        {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 p-6 sm:p-8 md:p-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="outline" className="text-snow-white bg-soft-blue/90 backdrop-blur-sm border-soft-blue/50 px-3 py-1 text-sm font-semibold">
-                {post.category.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-              </Badge>
-              {post.featured && (
-                <Badge className="bg-soft-coral/90 backdrop-blur-sm text-snow-white border-soft-coral/50 px-3 py-1 text-sm font-semibold">
-                  Featured
-                </Badge>
-              )}
-            </div>
-            
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-snow-white mb-4 leading-tight drop-shadow-2xl">
-              {post.title}
-            </h1>
-          </div>
-        </div>
       </div>
 
       {/* Content Container */}
       <div className="px-6 sm:px-8 md:px-12 py-10">
         <div className="max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            <Badge variant="outline" className="text-soft-blue bg-soft-blue/10 border-soft-blue/30 px-3 py-1 text-sm font-semibold">
+              {post.category.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+            </Badge>
+            {post.featured && (
+              <Badge className="bg-soft-coral text-snow-white border-soft-coral px-3 py-1 text-sm font-semibold">
+                Featured
+              </Badge>
+            )}
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-dark-slate-gray mb-6 leading-tight">
+            {post.title}
+          </h1>
+
           {/* Meta Information */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-8 mb-8 border-b border-soft-blue/10">
             <div className="flex items-center gap-2">
@@ -76,56 +80,34 @@ export function BlogContent({ post }: BlogContentProps) {
 
           {/* Excerpt */}
           <div className="mb-10 p-6 bg-gradient-to-br from-mint-green/10 to-soft-blue/10 rounded-2xl border-l-4 border-soft-blue">
-            <p className="text-lg md:text-xl text-dark-slate-gray leading-relaxed font-medium italic">
-              {post.excerpt}
+            <p className="text-lg md:text-xl text-dark-slate-gray leading-relaxed font-medium italic whitespace-pre-line">
+              {excerpt}
             </p>
           </div>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="max-w-none">
             <div
-              className="text-cool-gray leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: (() => {
-                  let content = post.content
-
-                  // Bold first
-                  content = content.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-dark-slate-gray">$1</strong>')
-
-                  // Headings
-                  content = content
-                    .replace(/^# (.*)$/gm, '<h1 class="text-4xl font-bold text-dark-slate-gray mb-6 mt-12 pb-3 border-b-2 border-soft-blue/20">$1</h1>')
-                    .replace(/^## (.*)$/gm, '<h2 class="text-3xl font-bold text-dark-slate-gray mb-5 mt-10">$1</h2>')
-                    .replace(/^### (.*)$/gm, '<h3 class="text-2xl font-semibold text-dark-slate-gray mb-4 mt-8">$1</h3>')
-
-                  // Bullet list
-                  const lines = content.split('\n')
-                  let inList = false
-                  const resultLines: string[] = []
-
-                  lines.forEach((line) => {
-                    if (/^- /.test(line)) {
-                      if (!inList) {
-                        inList = true
-                        resultLines.push('<ul class="ml-6 space-y-2 mb-6 list-none">')
-                      }
-                      resultLines.push(`<li class="flex items-start gap-3 text-cool-gray"><span class="inline-block w-2 h-2 rounded-full bg-soft-blue mt-2 flex-shrink-0"></span><span>${line.replace(/^- /, '')}</span></li>`)
-                    } else {
-                      if (inList) {
-                        inList = false
-                        resultLines.push('</ul>')
-                      }
-                      if (line.trim() !== '') {
-                        resultLines.push(`<p class="mb-6 text-base leading-relaxed">${line}</p>`)
-                      }
-                    }
-                  })
-
-                  if (inList) resultLines.push('</ul>')
-
-                  return resultLines.join('\n')
-                })(),
-              }}
+              className="
+                text-base md:text-lg leading-relaxed text-cool-gray
+                [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-10 [&_h1]:mb-5 [&_h1]:text-dark-slate-gray
+                [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-9 [&_h2]:mb-4 [&_h2]:text-dark-slate-gray
+                [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-dark-slate-gray
+                [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-6 [&_h4]:mb-2 [&_h4]:text-dark-slate-gray
+                [&_p]:mb-6 [&_p]:leading-relaxed
+                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6 [&_ul]:space-y-2
+                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6 [&_ol]:space-y-2
+                [&_li]:leading-relaxed
+                [&_strong]:font-semibold [&_strong]:text-dark-slate-gray
+                [&_em]:italic
+                [&_code]:bg-soft-blue/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-soft-blue [&_code]:text-sm [&_code]:font-mono
+                [&_pre]:bg-dark-slate-gray [&_pre]:text-snow-white [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:mb-6 [&_pre]:text-sm
+                [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-inherit
+                [&_blockquote]:border-l-4 [&_blockquote]:border-soft-blue [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-dark-slate-gray [&_blockquote]:mb-6
+                [&_a]:text-soft-blue [&_a]:underline [&_a]:underline-offset-2
+                [&_hr]:border-soft-blue/20 [&_hr]:my-8
+              "
+              dangerouslySetInnerHTML={{ __html: renderedContent }}
             />
           </div>
 
@@ -148,4 +130,23 @@ export function BlogContent({ post }: BlogContentProps) {
       </div>
     </article>
   )
+}
+
+function removeLeadingDuplicateTitle(content: string, title: string): string {
+  const normalized = normalizeEscapedText(content).trimStart()
+  const lines = normalized.split("\n")
+  const firstMeaningfulLineIndex = lines.findIndex((line) => line.trim())
+
+  if (firstMeaningfulLineIndex === -1) return ""
+
+  const firstLine = lines[firstMeaningfulLineIndex]
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/<[^>]+>/g, "")
+    .trim()
+
+  if (firstLine.toLowerCase() !== title.trim().toLowerCase()) {
+    return normalized
+  }
+
+  return lines.slice(firstMeaningfulLineIndex + 1).join("\n").trimStart()
 }

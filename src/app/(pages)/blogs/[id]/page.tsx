@@ -17,8 +17,10 @@ export default function BlogPostPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
 
-  const posts = data?.posts || []
-  const post = useMemo(() => posts.find((p) => p.id === id), [posts, id])
+  const post = useMemo(
+    () => data?.posts.find((p) => p.id === id && p.verified),
+    [data?.posts, id]
+  )
 
   useEffect(() => {
     if (!isLoading && !post) {
@@ -58,7 +60,7 @@ export default function BlogPostPage() {
 
   if (!post) return null
 
-  const postUrl = `/blog/${post.id}`
+  const postUrl = `/blogs/${post.id}`
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-mint-green via-snow-white to-mint-green">

@@ -1,136 +1,10 @@
 import { motion } from "framer-motion"
 import { BookOpen } from "lucide-react"
 import { useMemo } from "react"
+import { markdownToHtml } from "@/lib/blog-markdown"
 
 interface BlogDetailBodyProps {
   content: string
-}
-
-function markdownToHtml(raw: string): string {
-  // Normalise escape sequences and line endings
-  const md = raw
-    .replace(/\\n/g, "\n")
-    .replace(/\r\n/g, "\n")
-
-  const lines = md.split("\n")
-  const output: string[] = []
-  let i = 0
-
-  while (i < lines.length) {
-    const line = lines[i]
-
-    // Blank line — paragraph break
-    if (line.trim() === "") {
-      i++
-      continue
-    }
-
-    // Fenced code block (``` or ~~~)
-    if (/^(`{3,}|~{3,})/.test(line.trim())) {
-      const fence  = line.trim().match(/^(`{3,}|~{3,})/)?.[1] ?? "```"
-      const lang   = line.trim().slice(fence.length).trim()
-      i++
-      const codeLines: string[] = []
-      while (i < lines.length && !lines[i].trim().startsWith(fence)) {
-        codeLines.push(
-          lines[i]
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-        )
-        i++
-      }
-      i++ // consume closing fence
-      const langAttr = lang ? ` class="language-${lang}"` : ""
-      output.push(`<pre><code${langAttr}>${codeLines.join("\n")}</code></pre>`)
-      continue
-    }
-
-    // Headings h1–h6
-    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
-    if (headingMatch) {
-      const level = headingMatch[1].length
-      output.push(`<h${level}>${inline(headingMatch[2])}</h${level}>`)
-      i++
-      continue
-    }
-
-    // Horizontal rule
-    if (/^[-*_]{3,}$/.test(line.trim())) {
-      output.push("<hr />")
-      i++
-      continue
-    }
-
-    // Blockquote
-    if (line.trimStart().startsWith("> ")) {
-      const quoteLines: string[] = []
-      while (i < lines.length && lines[i].trimStart().startsWith("> ")) {
-        quoteLines.push(lines[i].replace(/^\s*>\s?/, ""))
-        i++
-      }
-      output.push(`<blockquote><p>${inline(quoteLines.join(" "))}</p></blockquote>`)
-      continue
-    }
-
-    // Unordered list — trim() before testing so leading spaces don't break detection
-    if (/^[-*+]\s+/.test(line.trim())) {
-      const items: string[] = []
-      while (i < lines.length && /^[-*+]\s+/.test(lines[i].trim())) {
-        items.push(`<li>${inline(lines[i].trim().replace(/^[-*+]\s+/, ""))}</li>`)
-        i++
-      }
-      output.push(`<ul>${items.join("")}</ul>`)
-      continue
-    }
-
-    // Ordered list
-    if (/^\d+\.\s+/.test(line.trim())) {
-      const items: string[] = []
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
-        items.push(`<li>${inline(lines[i].trim().replace(/^\d+\.\s+/, ""))}</li>`)
-        i++
-      }
-      output.push(`<ol>${items.join("")}</ol>`)
-      continue
-    }
-
-    // Paragraph — collect consecutive non-blank, non-block lines.
-    // Single newlines within a paragraph become <br /> so they're visible.
-    const paraLines: string[] = []
-    while (
-      i < lines.length &&
-      lines[i].trim() !== "" &&
-      !/^#{1,6}\s/.test(lines[i]) &&
-      !/^[-*+]\s+/.test(lines[i].trim()) &&
-      !/^\d+\.\s+/.test(lines[i].trim()) &&
-      !/^\s*>\s/.test(lines[i]) &&
-      !/^[-*_]{3,}$/.test(lines[i].trim()) &&
-      !/^(`{3,}|~{3,})/.test(lines[i].trim())
-    ) {
-      paraLines.push(lines[i])
-      i++
-    }
-    if (paraLines.length) {
-      output.push(`<p>${inline(paraLines.join("<br />"))}</p>`)
-    }
-  }
-
-  return output.join("\n")
-}
-
-/** Inline markdown: bold, italic, strikethrough, code, links */
-function inline(text: string): string {
-  return text
-    .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
-    .replace(/\*\*(.+?)\*\*/g,     "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g,         "<em>$1</em>")
-    .replace(/___(.+?)___/g,       "<strong><em>$1</em></strong>")
-    .replace(/__(.+?)__/g,         "<strong>$1</strong>")
-    .replace(/_(.+?)_/g,           "<em>$1</em>")
-    .replace(/~~(.+?)~~/g,         "<del>$1</del>")
-    .replace(/`([^`]+)`/g,         "<code>$1</code>")
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
 }
 
 export function BlogDetailBody({ content }: BlogDetailBodyProps) {
@@ -147,11 +21,6 @@ export function BlogDetailBody({ content }: BlogDetailBodyProps) {
       transition={{ duration: 0.5, delay: 0.15 }}
     >
       {content ? (
-        /*
-          Using arbitrary Tailwind child-element selectors ([&_tag]) instead of
-          @tailwindcss/typography prose classes — this works even if the prose
-          plugin is not installed, and gives us direct control over every element.
-        */
         <div
           className={`
             text-sm leading-relaxed text-[var(--color-dark-slate-gray)]
