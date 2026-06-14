@@ -46,6 +46,24 @@ export const fetchPatientAnalytics = async (patientId: string) => {
   return res.data
 }
 
+type PrescriptionMedication = {
+  name: string
+  time?: string
+  dosage?: string
+  duration?: string
+  frequency?: string
+  instructions?: string
+}
+
+type PatientPrescription = {
+  id: string
+  notes?: string | null
+  start_date?: string | null
+  end_date?: string | null
+  status?: string | null
+  medications?: PrescriptionMedication[]
+}
+
 export default function DoctorAppointment({ appointmentId }: { appointmentId: string }) {
   const user = useDoctorStore().profile
 
@@ -54,6 +72,7 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
   const [isMarkingDone, setIsMarkingDone] = useState(false)
   const [fitnessData, setFitnessData] = useState<FitnessData[]>([])
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
+  const [prescriptions, setPrescriptions] = useState<PatientPrescription[]>([])
   const [assignedPrescription, setAssignedPrescription] = useState<PrescriptionFormData | null>(null)
   const [referredTests, setReferredTests] = useState<any[]>([])
   const [doctorReport, setDoctorReport] = useState("")
@@ -71,6 +90,7 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
       const data = await fetchPatientAnalytics(appointment.patient.id)
       setFitnessData(data.fitness)
       setMedicalRecords(data.medicalRecords)
+      setPrescriptions(data.prescriptions ?? [])
     }
     if (appointment?.dataShared) getData()
   }, [appointment])
@@ -157,6 +177,26 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
   }
 
   const { patient, date, time, type, notes, dataShared } = appointment
+
+  const formatDisplayDate = (dateString?: string | null) => {
+    if (!dateString) return "N/A"
+    const parsed = new Date(dateString)
+    if (Number.isNaN(parsed.getTime())) return "N/A"
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "2-digit",
+    }).format(parsed)
+  }
+
+  const getPrescriptionStatusStyle = (status?: string | null) => {
+    if (!status) return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
+    const normalized = status.toLowerCase()
+    if (normalized === "completed") return "bg-mint-green/20 text-mint-green border border-mint-green/30"
+    if (normalized === "active") return "bg-soft-coral/15 text-soft-coral border border-soft-coral/30"
+    if (normalized === "cancelled") return "bg-red-100 text-red-600 border border-red-200"
+    return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent">
@@ -656,6 +696,88 @@ export default function DoctorAppointment({ appointmentId }: { appointmentId: st
                             <ExternalLink className="w-4 h-4" />
                             View
                           </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {dataShared && (
+              <Card className="hover-lift border-secondary/20 overflow-hidden">
+                <CardHeader className="border-b">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
+                        <Pill className="w-6 h-6" />
+                        Prescriptions
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Medication plans and patient instructions
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-secondary text-mint-green">
+                      {prescriptions.length} Prescriptions
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  {prescriptions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                      <Pill className="w-10 h-10 mb-3 text-soft-blue/70" />
+                      <p className="text-sm">No prescriptions available yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {prescriptions.map((prescription, index) => (
+                        <div
+                          key={prescription.id}
+                          className="group rounded-xl border border-secondary/20 bg-cool-gray/10 p-4 transition-all duration-200"
+                        >
+                          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-soft-coral">
+                                Prescription {index + 1}
+                              </p>
+                              <p className="text-sm text-soft-blue">
+                                {formatDisplayDate(prescription.start_date)} - {formatDisplayDate(prescription.end_date)}
+                              </p>
+                            </div>
+                            <Badge className={getPrescriptionStatusStyle(prescription.status)}>
+                              {prescription.status || "active"}
+                            </Badge>
+                          </div>
+
+                          <div className="grid gap-2">
+                            {(prescription.medications ?? []).length === 0 ? (
+                              <p className="text-sm text-muted-foreground">No medication items listed.</p>
+                            ) : (
+                              (prescription.medications ?? []).map((medication, idx) => (
+                                <div
+                                  key={`${prescription.id}-${medication.name}-${idx}`}
+                                  className="rounded-lg border border-soft-blue/20 bg-white px-3 py-2"
+                                >
+                                  <p className="text-sm font-semibold text-soft-blue">
+                                    {medication.name}
+                                    {medication.dosage ? ` (${medication.dosage})` : ""}
+                                  </p>
+                                  <p className="mt-1 text-xs text-muted-foreground">
+                                    {[medication.frequency, medication.time, medication.duration].filter(Boolean).join(" | ") || "No schedule details"}
+                                  </p>
+                                  {medication.instructions && (
+                                    <p className="mt-1 text-xs text-cool-gray">{medication.instructions}</p>
+                                  )}
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          {prescription.notes && (
+                            <p className="mt-4 border-l-2 border-soft-coral/30 pl-3 text-sm text-cool-gray">
+                              {prescription.notes}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>

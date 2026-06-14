@@ -116,6 +116,7 @@ export async function completeNutritionistAppointment(
 export default function Appointment({appointmentId}:{appointmentId:string}) {
     
     const { addDietPlan } = useDietPlanStore.getState()
+    const dietPlans = useDietPlanStore((s) => s.dietPlans)
     const user=useNutritionistStore().profile
     
 
@@ -745,6 +746,7 @@ if (assignedDietPlan) {
 
   const { patient, date, time, type, notes, dataShared } = appointment
   const nutritionistId = user?.id?.trim() || localStorage.getItem("id") || ""
+  const patientDietPlans = dietPlans.filter((plan) => plan.patientId === patient.id)
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent">
@@ -1273,50 +1275,74 @@ if (assignedDietPlan) {
 
             {dataShared && (
               <Card className="hover-lift border-secondary/20 overflow-hidden">
-                <CardHeader className="border-b bg-gradient-to-r from-secondary/5 via-soft-blue/5 to-secondary/10">
+                <CardHeader className="border-b">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                       <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
                         <FileText className="w-6 h-6" />
-                        Prescriptions
+                        Diet Plans
                       </CardTitle>
-                      <CardDescription className="text-base">Medication plans and instructions</CardDescription>
+                      <CardDescription className="text-base">Nutrition targets and meal guidance</CardDescription>
                     </div>
                     <Badge variant="outline" className="border-secondary text-mint-green">
-                      {prescriptions.length} Prescriptions
+                      {patientDietPlans.length} Plans
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 pt-0">
-                  {prescriptions.length === 0 ? (
+                  {patientDietPlans.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                       <FileText className="w-10 h-10 mb-3 text-soft-blue/70" />
-                      <p className="text-sm">No prescriptions available yet.</p>
+                      <p className="text-sm">No diet plans available yet.</p>
                     </div>
                   ) : (
                     <div className="grid gap-4">
-                      {prescriptions.map((prescription) => (
+                      {patientDietPlans.map((prescription: any, index) => (
                         <div
-                          key={prescription.id}
-                          className="group p-5 border border-secondary/20 rounded-2xl bg-gradient-to-br from-white to-cool-gray/10 shadow-sm hover:shadow-md transition-all duration-200"
+                          key={prescription.id ?? `${prescription.patientId}-${index}`}
+                          className="group rounded-xl border border-secondary/20 bg-cool-gray/10 p-4 transition-all duration-200"
                         >
-                          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="font-semibold text-soft-coral">Prescription #{prescription.id.slice(0, 8)}</p>
-                              <p className="text-xs text-muted-foreground">Treatment window</p>
+                              <p className="font-semibold text-soft-coral">Diet Plan {index + 1}</p>
+                              <p className="text-sm text-soft-blue">
+                                {formatDisplayDate(prescription.startDate?.toString())} - {formatDisplayDate(prescription.endDate?.toString())}
+                              </p>
                             </div>
-                            <Badge className={getPrescriptionStatusStyle(prescription.status)}>
-                              {prescription.status || "active"}
+                            <Badge className="border border-mint-green/30 bg-mint-green/20 text-mint-green">
+                              {prescription.endDate && new Date(prescription.endDate) <= new Date() ? "completed" : "active"}
                             </Badge>
                           </div>
-                          <p className="text-sm text-soft-blue mb-4">
-                            {formatDisplayDate(prescription.start_date)} - {formatDisplayDate(prescription.end_date)}
-                          </p>
-                          <div className="grid gap-2">
+                          <div className="grid gap-3 sm:grid-cols-4">
+                            {[
+                              ["Calories", prescription.dailyCalories],
+                              ["Protein", `${prescription.protein}g`],
+                              ["Carbs", `${prescription.carbs}g`],
+                              ["Fat", `${prescription.fat}g`],
+                            ].map(([label, value]) => (
+                              <div key={label} className="rounded-lg border border-soft-blue/20 bg-white px-3 py-2">
+                                <p className="text-xs text-muted-foreground">{label}</p>
+                                <p className="text-sm font-semibold text-soft-blue">{value || "N/A"}</p>
+                              </div>
+                            ))}
+                          </div>
+                          {prescription.deficiency && (
+                            <p className="mt-4 text-sm text-cool-gray">
+                              <span className="font-semibold text-soft-coral">Focus: </span>
+                              {prescription.deficiency}
+                            </p>
+                          )}
+                          {prescription.exercise && (
+                            <p className="mt-2 text-sm text-cool-gray">
+                              <span className="font-semibold text-soft-coral">Exercise: </span>
+                              {prescription.exercise}
+                            </p>
+                          )}
+                          <div className="hidden">
                             {(prescription.medications ?? []).length === 0 ? (
                               <p className="text-sm text-muted-foreground">No medication items listed.</p>
                             ) : (
-                              (prescription.medications ?? []).map((medication, idx) => (
+                              (prescription.medications ?? []).map((medication: PrescriptionMedication, idx: number) => (
                                 <div
                                   key={`${prescription.id}-${medication.name}-${idx}`}
                                   className="rounded-xl border border-soft-blue/20 bg-soft-blue/5 px-3 py-2"
@@ -1348,7 +1374,7 @@ if (assignedDietPlan) {
 
             {dataShared && (
               <Card className="hover-lift border-secondary/20 overflow-hidden">
-                <CardHeader className="border-b bg-gradient-to-r from-secondary/5 via-soft-coral/5 to-secondary/10">
+                <CardHeader className="border-b">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                       <CardTitle className="text-soft-coral flex items-center gap-2 text-xl">
@@ -1373,7 +1399,7 @@ if (assignedDietPlan) {
                       {journalEntries.map((entry) => (
                         <div
                           key={entry._id}
-                          className="group p-5 border border-secondary/20 rounded-2xl bg-gradient-to-br from-white to-cool-gray/10 shadow-sm hover:shadow-md transition-all duration-200"
+                          className="group rounded-xl border border-secondary/20 bg-cool-gray/10 p-4 transition-all duration-200"
                         >
                           <div className="flex flex-wrap items-center gap-2 mb-3">
                             {entry.alertLevel && (

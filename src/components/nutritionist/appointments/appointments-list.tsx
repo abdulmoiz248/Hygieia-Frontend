@@ -293,14 +293,14 @@ export function AppointmentsList() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 justify-items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {monthAppointments.map((appointment) => {
                   const canMarkDone = isTimeReached(appointment.date, appointment.time)
 
                   return (
                     <Card
                       key={appointment.id}
-                      className="border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
+                      className="w-full max-w-[30rem] border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
                     >
                       <CardContent className="p-0">
                         <div className="relative h-full flex flex-col">
