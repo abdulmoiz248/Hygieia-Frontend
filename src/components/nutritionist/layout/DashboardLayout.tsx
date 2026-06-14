@@ -29,6 +29,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/nutritionist/chat")
+  const isProfilePage = pathname?.startsWith("/nutritionist/profile")
 
   //tanstack hook profile
   const { setAppointments ,setLoading} = useAppointmentStore()
@@ -100,10 +101,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [DashboardData]) 
  
 
-  if (isLoadingProfile || isLoading || isLoadingDietPlan || !profile || !dietPlans || !appointments || isLoadingDashboard ) return   <Loader />
-  
+  if (error2) throw new Error("Failed to load profile")
 
-  if (error1 || error2 || error3 || error4) throw new Error("Failed to load data")
+  const isAppLoading = isProfilePage
+    ? isLoadingProfile || !profile
+    : isLoadingProfile ||
+      isLoading ||
+      isLoadingDietPlan ||
+      isLoadingDashboard ||
+      !profile ||
+      !dietPlans ||
+      !appointments
+
+  if (isAppLoading) return <Loader />
+
+  if (!isProfilePage && (error1 || error3 || error4)) throw new Error("Failed to load data")
 
 
   return (

@@ -28,6 +28,7 @@ export function DoctorDashboardLayout({ children }: DoctorDashboardLayoutProps) 
 
   const pathname = usePathname()
   const isChatPage = pathname?.startsWith("/doctor/chat")
+  const isProfilePage = pathname?.startsWith("/doctor/profile")
 
   // Read from localStorage once on mount
   useEffect(() => {
@@ -95,25 +96,30 @@ export function DoctorDashboardLayout({ children }: DoctorDashboardLayoutProps) 
   }, [dashboardData])
 
   // ── Guards ────────────────────────────────────────────────────
-  if (error1 || error2 || error3 || error4){
+  if (error1){
     console.log("Profile error:", error1)
-  console.log("Appointments error:", error2)
-  console.log("Prescriptions error:", error3)
-  console.log("Dashboard error:", error4)
-  return <div>Failed to load doctor data</div>
+    return <div>Failed to load doctor profile</div>
+  }
+
+  if (!isProfilePage && (error2 || error3 || error4)){
+    console.log("Appointments error:", error2)
+    console.log("Prescriptions error:", error3)
+    console.log("Dashboard error:", error4)
+    return <div>Failed to load doctor data</div>
 
   }
-  
 
-  if (
-    isLoadingProfile ||
-    isLoadingAppointments ||
-    isLoadingPrescriptions ||
-    isLoadingDashboard ||
-    !profile ||
-    !appointments ||
-    !prescriptions
-  )
+  const isAppLoading = isProfilePage
+    ? isLoadingProfile || !profile
+    : isLoadingProfile ||
+      isLoadingAppointments ||
+      isLoadingPrescriptions ||
+      isLoadingDashboard ||
+      !profile ||
+      !appointments ||
+      !prescriptions
+
+  if (isAppLoading)
     return <Loader />
 
   return (

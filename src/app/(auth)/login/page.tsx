@@ -11,6 +11,10 @@ import { useRouter } from 'next/navigation'
 import api from '@/lib/axios'
 
 import Cookies from 'js-cookie'
+import {
+  isProfileCompleteForRole,
+  type Role as ProfileRole,
+} from '@/lib/patient/ProfileCompleteness'
 
 // Rate limiting constants
 const MAX_ATTEMPTS = 5
@@ -94,6 +98,47 @@ export default  function Login() {
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
+  const getProfileRoute = (role: string) => {
+    switch (role) {
+      case 'doctor':
+        return '/doctor/profile'
+      case 'nutritionist':
+        return '/nutritionist/profile'
+      case 'patient':
+        return '/patient/profile'
+      case 'pathologist':
+        return '/pathologist/profile'
+      default:
+        return `/${role}/dashboard`
+    }
+  }
+
+  const getProfileGuardRole = (role: string): ProfileRole | null => {
+    if (role === 'pathologist') return 'lab-technician'
+    if (role === 'doctor' || role === 'nutritionist' || role === 'patient') return role
+    return null
+  }
+
+  const getPostLoginRoute = async (role: string, id: string) => {
+    if (role === 'admin') return '/admin/dashboard'
+
+    const profileRole = getProfileGuardRole(role)
+    if (!profileRole) return `/${role}/dashboard`
+
+    try {
+      const profileRes = await api.get(`/auth/user?id=${id}&role=${role}`)
+      const profile = profileRes.data?.data ?? null
+
+      if (!profile || !isProfileCompleteForRole(profileRole, profile)) {
+        return getProfileRoute(role)
+      }
+    } catch {
+      return getProfileRoute(role)
+    }
+
+    return `/${role}/dashboard`
+  }
+
  
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
@@ -145,7 +190,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       localStorage.setItem('id',data.id)
       localStorage.setItem('role',role)
 
-      router.push(`/${role}/dashboard`)
+      const nextRoute = await getPostLoginRoute(role, data.id)
+      router.push(nextRoute)
     }
 
   } catch (err: any) {

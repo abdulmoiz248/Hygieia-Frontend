@@ -4,6 +4,7 @@ import ReactQueryProvider from "@/Providers/ReactQueryProvider"
 import type { Metadata } from "next"
 import AuthGuard from "@/components/auth/AuthGuard"
 import NutritionistProfileGuard from "@/components/auth/NutritionistProfileGuard"
+import DashboardSessionGuard from "@/components/auth/DashboardSessionGuard"
 
 export const metadata: Metadata = {
   title: "Nutritionist | Hygieia",
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <ReactQueryProvider>
       <AuthGuard>
-        <DashboardLayout>
-          <NutritionistProfileGuard>{children}</NutritionistProfileGuard>
-        </DashboardLayout>
+        <DashboardSessionGuard expectedRole="nutritionist">
+          <DashboardLayout>
+            <NutritionistProfileGuard>{children}</NutritionistProfileGuard>
+          </DashboardLayout>
+        </DashboardSessionGuard>
       </AuthGuard>
     </ReactQueryProvider>
   )

@@ -30,7 +30,7 @@ export default function ProfileGuard({
   const pathname   = usePathname()
   const redirected = useRef(false)
 
-  const isOnProfilePage   = pathname === profileRoute || pathname?.startsWith(profileRoute)
+  const isOnProfilePage   = pathname === profileRoute || pathname?.startsWith(`${profileRoute}/`)
   const profileIncomplete = !loading && (!profile || !isProfileCompleteForRole(role, profile))
 
   // On first load, redirect to profile page if incomplete
@@ -73,7 +73,7 @@ function IncompleteProfileBanner({
   return (
     <div
       role="alert"
-      className="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm mx-6 mt-4"
+      className="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm mx-6 mt-4 mb-6"
     >
       <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
       <p className="flex-1 font-medium">

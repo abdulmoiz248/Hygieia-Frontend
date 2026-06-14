@@ -52,23 +52,22 @@ const useNutritionistStore = create<NutritionistStore>((set) => {
     profile: null,
    
     notifications: [],
-    loading: false,
+    loading: true,
     setProfile: async (profileData) => {
       const role = 'nutritionist'
       await api.post(`/auth/user?role=${role}`, { profileData })
-      set({ profile: profileData })
+      set({ profile: profileData, loading: false })
     },
    
     setProfileData: (profileData: NutritionistProfile) => {
-      set({ profile: profileData })
-     set({ profile: profileData, loading: false })
+      set({ profile: profileData, loading: false })
     },
 
     updateProfileField: (field, value) =>
       set((state) => ({
         profile: state.profile ? { ...state.profile, [field]: value } : null,
       })),
-    resetProfile: () => set({ profile: null }),
+    resetProfile: () => set({ profile: null, loading: true }),
     addNotification: (notification) =>
       set((state) => ({
         notifications: [{ ...notification, unread: true }, ...state.notifications],

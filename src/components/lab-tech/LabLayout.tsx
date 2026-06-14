@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import LabSidebar from "@/components/lab-tech/dashboard/LabSidebar"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
 import { useLabStore } from "@/store/lab-tech/labTech"
@@ -14,6 +15,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
 
   const [id, setId] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('')
+  const pathname = usePathname()
   const { data: profile, isLoading: loading, isError: error } = useFetchProfile(id, userRole)
   const { setData } = useLabTechnicianStore()
   // FIX: also read the store's loading flag so we know when setData has been called
@@ -46,7 +48,10 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const isAppLoading = isLoading || loading || storeLoading || !profile || !data
+  const isProfilePage = pathname?.startsWith("/pathologist/profile")
+  const isAppLoading = isProfilePage
+    ? loading || storeLoading || !profile
+    : isLoading || loading || storeLoading || !profile || !data
 
   useEffect(() => {
     setMounted(true)
@@ -58,7 +63,8 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (!mounted || isAppLoading) return <Loader />
-  if (error || isError) throw new Error('Failed to load data')
+  if (error) throw new Error('Failed to load profile')
+  if (!isProfilePage && isError) throw new Error('Failed to load data')
 
   return (
     <div className="flex h-screen bg-snow-white">

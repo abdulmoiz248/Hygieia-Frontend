@@ -5,6 +5,7 @@ import { PatientProvider } from "@/Providers/PatientProvider"
 import { PatientToastContainer } from "@/toasts/PatientToast"
 import AuthGuard from "@/components/auth/AuthGuard"
 import PatientProfileGuard from "@/components/auth/PatientProfileGuard"
+import DashboardSessionGuard from "@/components/auth/DashboardSessionGuard"
 
 export const metadata: Metadata = {
   title: "Patient | Hygieia",
@@ -17,13 +18,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <PatientProvider>
-      <PatientToastContainer />
-      <AuthGuard>
-        <DashboardLayout>
-          <PatientProfileGuard>{children}</PatientProfileGuard>
-        </DashboardLayout>
-      </AuthGuard>
-    </PatientProvider>
+    <AuthGuard>
+      <DashboardSessionGuard expectedRole="patient">
+        <PatientProvider>
+          <PatientToastContainer />
+          <DashboardLayout>
+            <PatientProfileGuard>{children}</PatientProfileGuard>
+          </DashboardLayout>
+        </PatientProvider>
+      </DashboardSessionGuard>
+    </AuthGuard>
   )
 }
