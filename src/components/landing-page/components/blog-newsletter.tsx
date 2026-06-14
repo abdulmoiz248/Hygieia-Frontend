@@ -59,7 +59,13 @@ export default function BlogNewsletter() {
   }
 
   return (
-    <section className="py-20 px-4 md:px-10 bg-gradient-to-b from-snow-white to-mint-green">
+    <section
+      className="py-20 px-4 md:px-10"
+      style={{
+        background:
+          "linear-gradient(to bottom, var(--color-snow-white) 0%, var(--color-snow-white) 8%, var(--color-mint-green) 88%, var(--color-mint-green) 100%)",
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-12">
           <motion.div

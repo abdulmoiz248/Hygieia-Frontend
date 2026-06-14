@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation"
 export default function Testimonials() {
   const router=useRouter()
   return (
-    <section className="py-20 bg-gradient-to-b from-mint-green to-snow-white relative overflow-hidden">
+    <section
+      className="py-20 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-mint-green) 12%, var(--color-snow-white) 88%, var(--color-snow-white) 100%)",
+      }}
+    >
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

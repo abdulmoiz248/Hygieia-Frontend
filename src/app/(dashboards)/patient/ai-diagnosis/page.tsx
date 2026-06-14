@@ -1,9 +1,20 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useRef, useState } from "react"
 import { motion } from "framer-motion"
 import {
-  Upload, Sparkles, Shield, Zap, Camera, X, ScanLine, Brain,
+  BadgeCheck,
+  Camera,
+  CircleCheck,
+  FileImage,
+  ImagePlus,
+  Info,
+  ScanLine,
+  ShieldCheck,
+  Sparkles,
+  Stethoscope,
+  Upload,
+  X,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import AnalysisProgressModal from "@/components/patient dashboard/ai diagnosis/AnalysisProgressModal"
@@ -11,10 +22,11 @@ import ResultsModal from "@/components/patient dashboard/ai diagnosis/ResultsMod
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 }
+
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0 },
 }
 
@@ -29,60 +41,42 @@ interface DiagnosisResult {
   nextSteps: string[]
 }
 
-const ANALYSIS_TYPES: {
-  id: AnalysisType
-  emoji: string
-  label: string
-  category: string
-  description: string
-  features: { icon: string; text: string }[]
-  accent: string
-  accentBorder: string
-  iconBg: string
-  dotColor: string
-  gradientFrom: string
-  gradientTo: string
-}[] = [
+const ANALYSIS_TYPES = [
   {
-    id: "dental",
-    emoji: "🦷",
+    id: "dental" as const,
     label: "Dental Analysis",
     category: "Oral Health",
-    description: "Detect cavities, gum disease, fractures and other dental conditions from photos.",
-    features: [
-      { icon: "🔍", text: "Cavity detection" },
-      { icon: "🦠", text: "Gum disease screening" },
-      { icon: "💥", text: "Fracture analysis" },
-    ],
+    description: "Screen dental photos for cavities, gum concerns, and visible oral health issues.",
+    Icon: Stethoscope,
     accent: "text-soft-blue",
-    accentBorder: "border-soft-blue",
-    iconBg: "bg-soft-blue/10 border-soft-blue/20",
-    dotColor: "bg-soft-blue",
-    gradientFrom: "from-soft-blue/10",
-    gradientTo: "to-soft-blue/5",
+    border: "border-soft-blue",
+    panel: "bg-soft-blue/6",
+    iconPanel: "bg-soft-blue/10 border-soft-blue/20",
+    features: ["Cavity screening", "Gum review"],
   },
   {
-    id: "acne",
-    emoji: "✨",
+    id: "acne" as const,
     label: "Skin Analysis",
     category: "Dermatology",
-    description: "Identify acne type, severity and get personalised skincare recommendations.",
-    features: [
-      { icon: "📊", text: "Acne classification" },
-      { icon: "⚡", text: "Severity grading" },
-      { icon: "💆", text: "Skincare advice" },
-    ],
+    description: "Review skin photos for acne patterns, visible severity, and care suggestions.",
+    Icon: Sparkles,
     accent: "text-mint-green",
-    accentBorder: "border-mint-green",
-    iconBg: "bg-mint-green/10 border-mint-green/20",
-    dotColor: "bg-mint-green",
-    gradientFrom: "from-mint-green/10",
-    gradientTo: "to-mint-green/5",
+    border: "border-mint-green",
+    panel: "bg-mint-green/8",
+    iconPanel: "bg-mint-green/10 border-mint-green/20",
+    features: ["Acne type", "Severity guide", "Care advice"],
   },
 ]
 
+const PHOTO_TIPS = [
+  { Icon: Camera, label: "Use bright natural light" },
+  { Icon: ScanLine, label: "Keep the subject centered" },
+  { Icon: FileImage, label: "Avoid blur or heavy filters" },
+  { Icon: ShieldCheck, label: "Upload only your own image" },
+]
+
 export default function AIDiagnosisPage() {
-  const [selectedType, setSelectedType] = useState<AnalysisType | null>(ANALYSIS_TYPES[0].id)
+  const [selectedType, setSelectedType] = useState<AnalysisType | null>("dental")
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
@@ -93,6 +87,7 @@ export default function AIDiagnosisPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
     const reader = new FileReader()
     reader.onload = (ev) => setUploadedImage(ev.target?.result as string)
     reader.readAsDataURL(file)
@@ -100,8 +95,10 @@ export default function AIDiagnosisPage() {
 
   const handleAnalyze = () => {
     if (!selectedType || !uploadedImage) return
+
     setShowProgress(true)
     setAnalysisProgress(0)
+
     const interval = setInterval(() => {
       setAnalysisProgress((prev) => {
         if (prev >= 100) {
@@ -124,19 +121,27 @@ export default function AIDiagnosisPage() {
           setShowResults(true)
           return 100
         }
+
         return prev + 2
       })
     }, 60)
   }
 
   const resetDiagnosis = () => {
-    setSelectedType(null)
+    setSelectedType("dental")
     setUploadedImage(null)
     setResult(null)
     setAnalysisProgress(0)
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
-  const canAnalyze = selectedType && uploadedImage
+  const removeImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    setUploadedImage(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const canAnalyze = Boolean(selectedType && uploadedImage)
 
   return (
     <>
@@ -144,145 +149,94 @@ export default function AIDiagnosisPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6 lg:space-y-8 w-full"
+        className="w-full space-y-6"
       >
-        {/* ── Page header ── */}
         <motion.div variants={itemVariants}>
-          <h1 className="text-3xl font-bold text-soft-coral">AI Diagnosis</h1>
-          <p className="text-cool-gray mt-1">
-            Upload a photo and get instant AI-powered health insights in seconds.
-          </p>
-          <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs text-cool-gray">
-              <Zap className="w-3.5 h-3.5 text-soft-blue" />
-              <span>Fast results</span>
-              <span className="font-semibold text-soft-blue">&lt; 10s</span>
-            </div>
-            <span className="text-cool-gray/30">·</span>
-            <div className="flex items-center gap-1.5 text-xs text-cool-gray">
-              <Shield className="w-3.5 h-3.5 text-mint-green" />
-              <span>Secure &amp; private</span>
-              <span className="font-semibold text-mint-green">100%</span>
-            </div>
-            <span className="text-cool-gray/30">·</span>
-            <div className="flex items-center gap-1.5 text-xs text-cool-gray">
-              <ScanLine className="w-3.5 h-3.5 text-soft-coral" />
-              <span>AI accuracy</span>
-              <span className="font-semibold text-soft-coral">High</span>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-soft-coral">AI Diagnosis</h1>
+            <p className="mt-1 whitespace-nowrap text-sm leading-6 text-cool-gray">
+              Upload a photo for quick AI guidance.
+            </p>
           </div>
         </motion.div>
 
-        {/* ── Main two-column layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-stretch">
-
-          {/* LEFT — choose analysis type */}
-          <motion.div variants={itemVariants} className="flex flex-col gap-0">
-            <Card className="bg-white/40 backdrop-blur-lg shadow-sm border border-white/20 rounded-2xl overflow-hidden flex flex-col flex-1">
-              {/* card header */}
-              <CardHeader className="border-b border-white/20 py-3 px-4 sm:px-5">
-                <CardTitle className="flex items-center gap-2 text-sm sm:text-base font-medium text-dark-slate-gray/80">
-                  <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-soft-coral opacity-80" />
+        <motion.div variants={itemVariants} className="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-[0.78fr_1.22fr]">
+          <Card className="flex h-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex h-full min-h-0 w-full flex-col">
+              <CardHeader className="shrink-0 border-b border-gray-100 px-5 py-3.5">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold text-dark-slate-gray">
+                  <ScanLine className="h-5 w-5 text-soft-coral" />
                   Choose Analysis Type
                 </CardTitle>
               </CardHeader>
+              <CardContent className="grid flex-1 grid-rows-2 gap-3 p-4">
+                {ANALYSIS_TYPES.map((type) => {
+                  const selected = selectedType === type.id
+                  const Icon = type.Icon
 
-              {/* ↓ pt-2 instead of p-4 to remove extra gap under header */}
-              <CardContent className="px-4 sm:px-5 !pt-0 pb-4 sm:pb-5 flex flex-col gap-4 flex-1">
-                {ANALYSIS_TYPES.map((t) => {
-                  const isSelected = selectedType === t.id
                   return (
-                    <div
-                      key={t.id}
-                      onClick={() => setSelectedType(isSelected ? null : t.id)}
-                      className={`
-                        relative cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 flex-1 flex flex-col
-                        bg-gradient-to-br ${t.gradientFrom} ${t.gradientTo}
-                        ${isSelected
-                          ? `${t.accentBorder} shadow-md`
-                          : "border-white/40 hover:border-cool-gray/40 hover:shadow-sm"
-                        }
-                      `}
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => setSelectedType(type.id)}
+                      className={`h-full w-full rounded-2xl border p-4 text-left transition-all ${
+                        selected
+                          ? `${type.border} ${type.panel} shadow-sm`
+                          : "border-gray-100 bg-snow-white hover:border-soft-blue/25 hover:bg-soft-blue/5"
+                      }`}
                     >
-                      {/* ── Radio circle — top-right, always visible ── */}
-                      <div
-                        className={`
-                          absolute top-3.5 right-3.5 w-5 h-5 rounded-full border-2 flex items-center justify-center
-                          transition-all duration-200
-                          ${isSelected
-                            ? `${t.accentBorder} bg-soft-blue`
-                            : "border-cool-gray/40 bg-white"
-                          }
-                          ${t.id === "acne" && isSelected ? "bg-mint-green border-mint-green" : ""}
-                        `}
-                      >
-                        {isSelected && (
-                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-
-                      {/* card body */}
-                      <div className="flex items-start gap-3 pr-6">
-                        {/* emoji icon box */}
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl border ${t.iconBg} shrink-0`}>
-                          {t.emoji}
+                      <div className="flex items-start gap-4">
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${type.iconPanel}`}>
+                          <Icon className={`h-6 w-6 ${type.accent}`} />
                         </div>
-
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-[10px] font-bold uppercase tracking-widest ${t.accent}`}>
-                            {t.category}
-                          </span>
-                          <h3 className="text-sm font-bold text-dark-slate-gray mt-0.5">{t.label}</h3>
-                          <p className="text-xs text-cool-gray mt-1 leading-relaxed">{t.description}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className={`text-xs font-bold uppercase tracking-wide ${type.accent}`}>{type.category}</p>
+                              <h2 className="mt-0.5 text-base font-bold text-dark-slate-gray">{type.label}</h2>
+                            </div>
+                            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
+                              selected ? `${type.border} bg-white` : "border-gray-200 bg-white"
+                            }`}>
+                              {selected && <CircleCheck className={`h-4 w-4 ${type.accent}`} />}
+                            </div>
+                          </div>
+                          <p className="mt-2 text-sm leading-relaxed text-cool-gray">{type.description}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {type.features.map((feature) => (
+                              <span
+                                key={feature}
+                                className="rounded-full border border-gray-100 bg-white px-2.5 py-1 text-xs font-medium text-dark-slate-gray/70"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-
-                      {/* feature chips */}
-                      <div className="flex flex-wrap gap-2 mt-3 pl-14">
-                        {t.features.map((f) => (
-                          <span
-                            key={f.text}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-dark-slate-gray/70 bg-white/60 border border-white/60 rounded-full px-2.5 py-1"
-                          >
-                            <span>{f.icon}</span>
-                            {f.text}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                    </button>
                   )
                 })}
               </CardContent>
-            </Card>
-          </motion.div>
+            </div>
+          </Card>
 
-          {/* RIGHT — upload + analyse */}
-          <motion.div variants={itemVariants} className="flex flex-col gap-0">
-            <Card className="bg-white/40 backdrop-blur-lg shadow-sm border border-white/20 rounded-2xl overflow-hidden flex flex-col flex-1">
-              <CardHeader className="border-b border-white/20 py-3 px-4 sm:px-5">
-                <CardTitle className="flex items-center gap-2 text-sm sm:text-base font-medium text-dark-slate-gray/80">
-                  <Upload className="w-4 h-4 sm:w-5 sm:h-5 text-soft-coral opacity-80" />
+          <Card className="flex h-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex min-h-0 w-full flex-col">
+              <CardHeader className="shrink-0 border-b border-gray-100 px-5 py-3.5">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold text-dark-slate-gray">
+                  <Upload className="h-5 w-5 text-soft-coral" />
                   Upload Photo
                 </CardTitle>
               </CardHeader>
-
-              {/* ↓ pt-2 instead of pt-4 to remove extra gap under header */}
-              <CardContent className="px-4 sm:px-5 !pt-0 pb-4 sm:pb-5 flex flex-col gap-4 flex-1">
-
-                {/* upload dropzone — flex-1 so it fills space */}
+              <CardContent className="grid flex-1 items-stretch gap-5 p-4 lg:grid-cols-[minmax(0,1.45fr)_240px]">
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`
-                    relative rounded-xl border-2 border-dashed transition-all duration-200
-                    cursor-pointer group overflow-hidden flex-1 flex items-center justify-center
-                    ${uploadedImage
+                  className={`relative flex h-full min-h-[360px] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
+                    uploadedImage
                       ? "border-soft-blue/40 bg-soft-blue/5"
-                      : "border-cool-gray/30 bg-white/30 hover:border-soft-blue/40 hover:bg-soft-blue/5"
-                    }
-                  `}
-                  style={{ minHeight: 220 }}
+                      : "border-gray-200 bg-snow-white hover:border-soft-blue/40 hover:bg-soft-blue/5"
+                  }`}
                 >
                   <input
                     ref={fileInputRef}
@@ -294,84 +248,74 @@ export default function AIDiagnosisPage() {
 
                   {uploadedImage ? (
                     <>
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded"
-                        className="w-full h-full object-cover rounded-xl"
-                        style={{ maxHeight: 280 }}
-                      />
+                      <img src={uploadedImage} alt="Uploaded for AI diagnosis" className="h-full max-h-[460px] w-full object-contain" />
                       <button
-                        onClick={(e) => { e.stopPropagation(); setUploadedImage(null) }}
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-dark-slate-gray shadow-sm transition-colors hover:bg-gray-50"
+                        aria-label="Remove uploaded image"
                       >
-                        <X className="w-4 h-4 text-dark-slate-gray" />
+                        <X className="h-4 w-4" />
                       </button>
                     </>
                   ) : (
-                    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-                      <div className="w-14 h-14 rounded-2xl bg-soft-blue/10 border border-soft-blue/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Upload className="w-6 h-6 text-soft-blue" />
+                    <div className="flex max-w-sm flex-col items-center px-6 text-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-soft-blue/15 bg-soft-blue/8">
+                        <ImagePlus className="h-8 w-8 text-soft-blue" />
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-dark-slate-gray">Click to upload a photo</p>
-                        <p className="text-xs text-cool-gray mt-1">PNG, JPG or WEBP · Max 10 MB</p>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-cool-gray/50">
-                        <span className="flex items-center gap-1"><Camera className="w-3 h-3" /> Camera photo</span>
-                        <span>·</span>
-                        <span className="flex items-center gap-1"><Upload className="w-3 h-3" /> File upload</span>
-                      </div>
+                      <h2 className="mt-4 text-lg font-bold text-dark-slate-gray">Drop in a clear photo</h2>
+                      <p className="mt-2 text-sm leading-relaxed text-cool-gray">
+                        Upload a JPG, PNG, or WEBP image. Clear, close-up photos produce better guidance.
+                      </p>
+                      <span className="mt-4 rounded-full bg-soft-blue px-4 py-2 text-sm font-semibold text-white">
+                        Select Image
+                      </span>
                     </div>
                   )}
                 </div>
 
-                {/* photo tips grid — always shown, compact */}
-                <div className="rounded-xl border border-white/40 bg-cool-gray/5 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-cool-gray/60 mb-2">Photo Tips</p>
-                  <div className="grid grid-cols-2 gap-y-1.5 gap-x-4">
-                    {[
-                      { icon: "💡", tip: "Good lighting" },
-                      { icon: "📐", tip: "Clear focus" },
-                      { icon: "🔍", tip: "Close-up shot" },
-                      { icon: "🎯", tip: "Centred subject" },
-                    ].map((tip) => (
-                      <div key={tip.tip} className="flex items-center gap-1.5 text-xs text-cool-gray">
-                        <span>{tip.icon}</span>
-                        <span>{tip.tip}</span>
-                      </div>
-                    ))}
+                <aside className="grid h-full min-h-[360px] grid-rows-[1fr_auto_auto] gap-4">
+                  <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-snow-white p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-cool-gray/70">Photo Checklist</p>
+                    <div className="mt-3 grid content-start gap-3">
+                      {PHOTO_TIPS.map(({ Icon, label }) => (
+                        <div key={label} className="flex items-center gap-3 text-sm text-dark-slate-gray">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-green/10">
+                            <Icon className="h-4 w-4 text-mint-green" />
+                          </div>
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* analyse button */}
-                <button
-                  onClick={handleAnalyze}
-                  disabled={!canAnalyze}
-                  className={`
-                    w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm
-                    transition-all duration-200
-                    ${canAnalyze
-                      ? "bg-soft-blue hover:bg-soft-blue/90 text-white shadow-sm hover:shadow-md"
-                      : "bg-cool-gray/15 text-cool-gray/40 cursor-not-allowed"
-                    }
-                  `}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {canAnalyze ? "Analyse Now" : "Select a type and upload a photo"}
-                </button>
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="flex items-start gap-3">
+                      <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                      <p className="text-xs leading-relaxed text-amber-800">
+                        AI diagnosis is informational only. It should support, not replace, care from a qualified clinician.
+                      </p>
+                    </div>
+                  </div>
 
-                {/* disclaimer */}
-                <div className="rounded-xl border border-amber-200/60 bg-amber-50/80 p-3">
-                  <p className="text-xs text-amber-800 leading-relaxed">
-                    <strong>Disclaimer:</strong> AI results are for informational purposes only and do not replace professional medical advice. Always consult a qualified healthcare provider.
-                  </p>
-                </div>
-
+                  <button
+                    type="button"
+                    onClick={handleAnalyze}
+                    disabled={!canAnalyze}
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all ${
+                      canAnalyze
+                        ? "bg-soft-blue text-white shadow-sm hover:bg-soft-blue/90 hover:shadow-md"
+                        : "cursor-not-allowed bg-gray-100 text-cool-gray/50"
+                    }`}
+                  >
+                    <BadgeCheck className="h-4 w-4" />
+                    {canAnalyze ? "Analyze Photo" : "Choose type and photo"}
+                  </button>
+                </aside>
               </CardContent>
-            </Card>
-          </motion.div>
-
-        </div>
+            </div>
+          </Card>
+        </motion.div>
       </motion.div>
 
       <AnalysisProgressModal

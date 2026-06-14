@@ -105,7 +105,7 @@ const lineVariants: Variants = {
       className="py-20 relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-snow-white) 88%, var(--color-snow-white) 100%)",
+          "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-mint-green) 12%, var(--color-snow-white) 88%, var(--color-snow-white) 100%)",
       }}
       id="how-it-works"
     >

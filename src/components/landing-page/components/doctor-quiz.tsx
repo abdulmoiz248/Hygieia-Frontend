@@ -215,7 +215,13 @@ const itemVariants: Variants = {
   }
 
   return (
-    <section className="py-20 min-h-screen bg-gradient-to-b from-snow-white to-mint-green">
+    <section
+      className="py-20 min-h-screen"
+      style={{
+        background:
+          "linear-gradient(to bottom, var(--color-snow-white) 0%, var(--color-snow-white) 8%, var(--color-mint-green) 88%, var(--color-mint-green) 100%)",
+      }}
+    >
       <div className="container mx-auto px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: -30 }}

@@ -108,7 +108,7 @@ export default function ServicesSection() {
       className="relative py-20 px-4 md:px-10 overflow-hidden"
       style={{
         background:
-          "linear-gradient(to bottom, var(--color-snow-white) 0%, var(--color-snow-white) 14%, var(--color-mint-green) 100%)",
+          "linear-gradient(to bottom, var(--color-snow-white) 0%, var(--color-snow-white) 12%, var(--color-mint-green) 88%, var(--color-mint-green) 100%)",
       }}
       id="services"
     >
