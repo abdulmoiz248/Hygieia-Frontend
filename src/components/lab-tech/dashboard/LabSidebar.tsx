@@ -47,11 +47,14 @@ const handleTabChange = (tab: string) => {
       initial={false}
       animate={{ width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="h-screen fixed left-0 top-0 flex-shrink-0 bg-white border-r border-gray-200 z-40"
+      className={cn(
+        onMobileClose ? "block" : "hidden md:block",
+        "h-full flex-shrink-0 bg-white border-r border-gray-200"
+      )}
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 min-h-[73px]">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 h-[73px]">
           <AnimatePresence mode="wait">
             {!collapsed && (
               <motion.div

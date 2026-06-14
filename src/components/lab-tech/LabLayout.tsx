@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import LabSidebar from "@/components/lab-tech/dashboard/LabSidebar"
 import { LabHeader } from "@/components/lab-tech/dashboard/LabHeader"
-import { cn } from "@/lib/utils"
 import { useLabStore } from "@/store/lab-tech/labTech"
 import { useLabTechData } from "@/hooks/lab-tech/useLabTechData"
 import { useFetchProfile } from "@/hooks/lab-tech/useLabTechProfile"
@@ -62,21 +61,17 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   if (error || isError) throw new Error('Failed to load data')
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <LabHeader onMobileMenuClick={() => setMobileOpen(true)} />
-      <div className="flex flex-1">
-        <div className="hidden md:block">
-          <LabSidebar
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-        </div>
+    <div className="flex h-screen bg-snow-white">
+      <LabSidebar
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
         {mobileOpen && (
           <div className="fixed inset-0 z-50 flex">
-            <div className="relative z-50 w-64 bg-white shadow-lg">
+            <div className="relative z-50 w-80 bg-white shadow-lg">
               <LabSidebar
                 collapsed={false}
                 setCollapsed={setCollapsed}
@@ -95,12 +90,10 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main
-          className={cn(
-            "flex-1 transition-all duration-300 bg-snow-white",
-            collapsed ? "md:ml-[80px]" : "md:ml-[280px]"
-          )}
-        >
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
+        <LabHeader onMobileMenuClick={() => setMobileOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto transition-all duration-300 ease-in-out bg-snow-white">
           {children}
         </main>
       </div>

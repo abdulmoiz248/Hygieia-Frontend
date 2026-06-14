@@ -64,8 +64,8 @@ const userInitials = (safeProfile.name || "user")
 
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-5 flex-shrink-0 sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-full">
-      <div className="flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 h-[73px] flex items-center flex-shrink-0 w-full">
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
