@@ -323,6 +323,7 @@ export default function TermsOfServicePage() {
       lastUpdated={lastUpdated}
       effectiveDate={effectiveDate}
       sections={sections}
+      scrollableToc
     />
   )
 }

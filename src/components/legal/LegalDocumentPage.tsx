@@ -17,6 +17,7 @@ type LegalDocumentPageProps = {
   lastUpdated: string
   effectiveDate: string
   sections: LegalSection[]
+  scrollableToc?: boolean
 }
 
 export default function LegalDocumentPage({
@@ -26,6 +27,7 @@ export default function LegalDocumentPage({
   lastUpdated,
   effectiveDate,
   sections,
+  scrollableToc = false,
 }: LegalDocumentPageProps) {
   return (
     <>
@@ -46,7 +48,7 @@ export default function LegalDocumentPage({
             Back to Home
           </Link>
 
-          <div className="overflow-hidden rounded-lg border border-soft-blue/10 bg-snow-white/95 shadow-lg shadow-soft-blue/5">
+          <div className="rounded-lg border border-soft-blue/10 bg-snow-white/95 shadow-lg shadow-soft-blue/5">
             <header className="border-b border-soft-blue/10 px-6 py-9 text-center md:px-10">
               <p className="text-sm font-semibold uppercase tracking-widest text-soft-blue">Hygieia Healthcare Platform</p>
               <h1 className="mx-auto mt-3 text-balance text-4xl font-bold text-soft-coral md:text-5xl">
@@ -65,10 +67,14 @@ export default function LegalDocumentPage({
             </header>
 
             <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
-              <aside className="hidden border-r border-soft-blue/10 bg-mint-green/10 lg:block">
-                <div className="sticky top-24 p-6">
+              <aside
+                className={`hidden self-start border-r border-soft-blue/10 bg-mint-green/10 lg:sticky lg:top-20 lg:block ${
+                  scrollableToc ? "lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto" : ""
+                }`}
+              >
+                <div className="px-6 pb-6 pt-6">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-soft-blue">On this page</p>
-                  <nav className="space-y-1">
+                  <nav className="space-y-1 pb-1">
                     {sections.map((section) => (
                       <a
                         key={section.id}
