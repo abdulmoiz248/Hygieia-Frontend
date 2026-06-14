@@ -19,10 +19,13 @@ export const useAdminStore = create<AdminState>((set) => ({
   initAuth: () => {
     const token = Cookies.get("token")
     const id    = Cookies.get("id")
-    const role  = Cookies.get("role")
+    const rawRole  = Cookies.get("role")
+    const role = rawRole?.toLowerCase()
 
     if (token && id && role === "admin") {
       set({ token, adminId: id, role, isAuthenticated: true })
+    } else {
+      set({ token: null, adminId: null, role: null, isAuthenticated: false })
     }
   },
 

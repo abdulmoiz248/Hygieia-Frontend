@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import {
   Download,
   Loader2,
@@ -21,8 +20,6 @@ import {
   Star,
   TestTube,
   Pill,
-  
-  Link2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -30,6 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import type { Worker } from "@/types/admin/workers"
 import type { WorkerReport } from "@/hooks/admin/workers/useWorkerReport"
 import { ROLE_CONFIG } from "@/types/admin/workers"
@@ -60,21 +58,87 @@ function Skel({ w = "w-16", h = "h-5", className = "" }: { w?: string; h?: strin
   return <Skeleton className={`${w} ${h} rounded-md ${className}`} />
 }
 
+function parseReportDate(value?: string) {
+  if (!value) return null
+
+  const trimmed = value.trim()
+  const slashDate = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+
+  if (slashDate) {
+    const first = Number(slashDate[1])
+    const second = Number(slashDate[2])
+    const year = Number(slashDate[3])
+    const day = first > 12 ? first : second > 12 ? second : first
+    const month = first > 12 ? second : second > 12 ? first : second
+    const parsed = new Date(year, month - 1, day)
+
+    return isNaN(parsed.getTime()) ? null : parsed
+  }
+
+  const parsed = new Date(trimmed)
+  return isNaN(parsed.getTime()) ? null : parsed
+}
+
 function formatCardDate(value?: string) {
-  if (!value) return "No date"
-  const date = new Date(value)
-  if (isNaN(date.getTime())) return "No date"
+  const date = parseReportDate(value)
+  if (!date) return "No date"
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
 function formatCardDateTime(value?: string) {
-  if (!value) return "No time"
-  const date = new Date(value)
-  if (isNaN(date.getTime())) return "No time"
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " • " + date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+  const date = parseReportDate(value)
+  if (!date) return "No time"
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " - " + date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
 }
 
 // ─── Props ────────────────────────────────────────────────────────────────────
+function formatDayNumber(value?: string) {
+  return parseReportDate(value)?.getDate() ?? "-"
+}
+
+function formatMonthLabel(value?: string) {
+  const date = parseReportDate(value)
+  return date ? date.toLocaleDateString("en-US", { month: "short" }) : "Date"
+}
+
+function formatInsightText(insight: unknown) {
+  const cleanText = (text: string) =>
+    text
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/<\/?[^>]+>/g, " ")
+      .replace(/(^|\s)&\/?p\b/gi, " ")
+      .replace(/&\s*\/?\s*p;?/gi, " ")
+      .replace(/^[\s\p{Extended_Pictographic}\uFE0F\u200D★⭐⚠✅❌🔸🔹•-]+/u, "")
+      .replace(/\s+/g, " ")
+      .trim()
+
+  if (typeof insight === "string") return cleanText(insight)
+  if (!insight || typeof insight !== "object") return String(insight ?? "")
+
+  const value = insight as Record<string, unknown>
+  const candidate =
+    value.insight ??
+    value.message ??
+    value.text ??
+    value.title ??
+    value.description ??
+    value.recommendation ??
+    value.content ??
+    value.value ??
+    value.children ??
+    value.p
+
+  if (typeof candidate === "string") return cleanText(candidate)
+
+  return cleanText(Object.entries(value)
+    .filter(([, entry]) => entry !== null && entry !== undefined && typeof entry !== "object")
+    .map(([key, entry]) => `${key}: ${entry}`)
+    .join("; "))
+}
+
 interface WorkerReportPageProps {
   worker: Worker
   report: WorkerReport | null
@@ -87,6 +151,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   const cfg = ROLE_CONFIG[worker.role] || { label: worker.role }
   const RoleIcon = ROLE_ICONS[worker.role] ?? Stethoscope
   const [pdfLoading, setPdfLoading] = useState(false)
+  const isNutritionist = worker.role === "nutritionist"
 
   // Handle nested or flat metrics
   const compRate = report?.metrics?.efficiency?.completionRatePercentage ?? report?.metrics?.completionRate ?? 0
@@ -94,7 +159,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   // Details
   const workerName = report?.detailed?.profile?.name || worker.name
   const workerAvatar = report?.detailed?.profile?.img || worker.img || ""
-  const workerPhone = report?.detailed?.profile?.phone
+  const workerPhone = report?.detailed?.profile?.phone || worker.phone || "-"
 
   // Unread notifications
   const unreadCount = report?.overview?.notifications?.unread ?? report?.overview?.unreadNotifications ?? 0
@@ -105,7 +170,9 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
     setPdfLoading(true)
     try {
       const { default: jsPDF } = await import("jspdf")
-      const autoTable = (await import("jspdf-autotable")).default
+      const autoTableModule = await import("jspdf-autotable")
+      const autoTable = autoTableModule.default ?? autoTableModule.autoTable
+      if (!autoTable) throw new Error("PDF table generator could not be loaded.")
       const doc = new jsPDF({ unit: "pt", format: "a4" })
       const jsDoc = doc as any
       const pageWidth = doc.internal.pageSize.getWidth()
@@ -130,8 +197,9 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
         logoDataUrl = await getBase64("/logo/logo.png")
       } catch {}
 
-      const nowDate = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-      const nowTime = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+      const now = new Date()
+      const nowDate = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      const nowTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
 
       const drawHeader = (d: any) => {
         if (logoDataUrl) d.addImage(logoDataUrl, "PNG", M.left, 44, 56, 56)
@@ -153,7 +221,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
         d.setFont("helvetica", "normal")
         d.setFontSize(10)
         d.setTextColor(100)
-        d.text(`Generated: ${nowDate} • ${nowTime}`, pageWidth - M.right, 80, { align: "right" })
+        d.text(`Generated: ${nowDate} - ${nowTime}`, pageWidth - M.right, 80, { align: "right" })
         d.setDrawColor(...primaryColor)
         d.setLineWidth(2)
         d.line(M.left, 120, pageWidth - M.right, 120)
@@ -211,15 +279,131 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
       cursorY = jsDoc.lastAutoTable.finalY + 30
 
       if (report.insights && report.insights.length > 0) {
+        const numberColumnWidth = 40
+        const tableWidth = pageWidth - M.left - M.right
+        const textColumnWidth = tableWidth - numberColumnWidth
+        const rowPadding = 8
+        const lineHeight = 14
+
+        const drawInsightTableHeader = () => {
+          doc.setFillColor(...primaryColor)
+          doc.rect(M.left, cursorY, tableWidth, 28, "F")
+          doc.setFont("helvetica", "bold")
+          doc.setFontSize(11)
+          doc.setTextColor(255, 255, 255)
+          doc.text("#", M.left + 10, cursorY + 18)
+          doc.text("AI Insight", M.left + numberColumnWidth + 10, cursorY + 18)
+          cursorY += 28
+        }
+
+        const ensureInsightSpace = (height: number) => {
+          if (cursorY + height <= pageHeight - M.bottom - 10) return
+          doc.addPage()
+          drawHeader(doc)
+          drawFooter(doc, jsDoc.internal.getCurrentPageInfo().pageNumber, jsDoc.internal.getNumberOfPages())
+          cursorY = M.top
+          drawInsightTableHeader()
+        }
+
+        ensureInsightSpace(70)
+        drawInsightTableHeader()
+
+        report.insights.forEach((insight, i) => {
+          const insightText = formatInsightText(insight) || "No insight text provided."
+          const lines = doc.splitTextToSize(insightText, textColumnWidth - rowPadding * 2)
+          const rowHeight = Math.max(30, lines.length * lineHeight + rowPadding * 2)
+
+          ensureInsightSpace(rowHeight)
+          doc.setDrawColor(220, 220, 220)
+          doc.setFillColor(i % 2 === 0 ? 255 : 245, i % 2 === 0 ? 255 : 245, i % 2 === 0 ? 255 : 245)
+          doc.rect(M.left, cursorY, tableWidth, rowHeight, "FD")
+          doc.line(M.left + numberColumnWidth, cursorY, M.left + numberColumnWidth, cursorY + rowHeight)
+          doc.setFont("helvetica", "normal")
+          doc.setFontSize(10)
+          doc.setTextColor(...grayText)
+          doc.text(String(i + 1), M.left + 10, cursorY + rowPadding + 10)
+          doc.text(lines, M.left + numberColumnWidth + rowPadding, cursorY + rowPadding + 10)
+          cursorY += rowHeight
+        })
+
+        cursorY += 30
+      }
+
+      if (recentAppointments.length > 0) {
         autoTable(doc, {
           startY: cursorY,
           theme: "grid",
-          styles: { fontSize: 11, cellPadding: 6 },
+          styles: { fontSize: 10, cellPadding: 6 },
           headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
           alternateRowStyles: { fillColor: [245, 245, 245] },
           margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
-          head: [["#", "AI Insight"]],
-          body: report.insights.map((ins, i) => [String(i + 1), ins]),
+          head: [["Appointment", "Date", "Time", "Status", "Reviews"]],
+          body: recentAppointments.map((apt) => [
+            apt.type || "Appointment",
+            formatCardDate(apt.date),
+            apt.time || "-",
+            apt.status || "-",
+            String(reviewsByAppointmentId[apt.id]?.length ?? 0),
+          ]),
+          didDrawPage: hook,
+        })
+        cursorY = jsDoc.lastAutoTable.finalY + 30
+      }
+
+      if (visiblePrescriptions.length > 0) {
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 10, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+          head: [["Prescription", "Start Date", "End Date", "Status"]],
+          body: visiblePrescriptions.map((rx) => [
+            "Prescription",
+            formatCardDate(rx.start_date),
+            formatCardDate(rx.end_date),
+            rx.status || "-",
+          ]),
+          didDrawPage: hook,
+        })
+        cursorY = jsDoc.lastAutoTable.finalY + 30
+      }
+
+      if (recentDietPlans.length > 0) {
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 10, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+          head: [["Diet Plan", "Start Date", "End Date", "Daily Calories"]],
+          body: recentDietPlans.map((plan) => [
+            "Diet Plan",
+            formatCardDate(plan.start_date),
+            formatCardDate(plan.end_date),
+            plan.daily_calories || "-",
+          ]),
+          didDrawPage: hook,
+        })
+        cursorY = jsDoc.lastAutoTable.finalY + 30
+      }
+
+      if (recentReviews.length > 0) {
+        autoTable(doc, {
+          startY: cursorY,
+          theme: "grid",
+          styles: { fontSize: 10, cellPadding: 6 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: M.top, bottom: M.bottom + 50, left: M.left, right: M.right },
+          head: [["Rating", "Date", "Review"]],
+          body: recentReviews.map((review) => [
+            `${review.rating}/5`,
+            formatCardDateTime(review.created_at),
+            review.review_text || "No review text provided.",
+          ]),
           didDrawPage: hook,
         })
       }
@@ -237,7 +421,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
   let metric1Value = report?.metrics?.core?.totalAppointments ?? report?.metrics?.totalAppointments ?? 0
   let Metric1Icon = Target
   
-  const metric2Label = "Completed"
+  let metric2Label = "Completed"
   let metric2Value = report?.metrics?.core?.completedAppointments ?? report?.metrics?.completedAppointments ?? 0
   
   const metric3Label = "Unique Patients"
@@ -256,17 +440,32 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
     metric4Value = report?.metrics?.core?.pendingBookings ?? report?.metrics?.pendingBookings ?? 0
     Metric4Icon = Clock
   } else if (worker.role === "doctor") {
-    metric1Label = "Prescriptions"
-    metric1Value = report?.metrics?.core?.totalPrescriptions ?? report?.metrics?.totalPrescriptions ?? 0
-    Metric1Icon = Pill
-    metric2Value = report?.metrics?.core?.completedPrescriptions ?? report?.metrics?.completedPrescriptions ?? 0
+    metric1Label = "Appointments"
+    metric1Value = report?.metrics?.core?.totalAppointments ?? report?.metrics?.totalAppointments ?? 0
+    Metric1Icon = Calendar
+    metric2Label = "Active Prescriptions"
+    metric2Value = report?.metrics?.core?.activePrescriptions ?? report?.metrics?.activePrescriptions ?? 0
   }
 
   const recentAppointments = report?.recentActivity?.appointments ?? []
   const recentPrescriptions = report?.recentActivity?.prescriptions ?? []
+  const recentDietPlans = report?.recentActivity?.dietPlans ?? []
   const recentReviews = report?.recentActivity?.reviews ?? []
   const recentLabBookings = report?.recentActivity?.labBookings ?? []
-  const appointmentsById = Object.fromEntries(recentAppointments.map((appointment) => [appointment.id, appointment]))
+  const visiblePrescriptions = isNutritionist ? [] : recentPrescriptions
+  const activityItemCount =
+    recentAppointments.length +
+    visiblePrescriptions.length +
+    recentDietPlans.length +
+    recentReviews.length +
+    recentLabBookings.length
+  const appointmentIds = new Set(recentAppointments.map((appointment) => appointment.id))
+  const reviewsByAppointmentId = recentReviews.reduce<Record<string, typeof recentReviews>>((acc, review) => {
+    if (!review.appointment_id) return acc
+    acc[review.appointment_id] = [...(acc[review.appointment_id] ?? []), review]
+    return acc
+  }, {})
+  const unlinkedReviews = recentReviews.filter((review) => !review.appointment_id || !appointmentIds.has(review.appointment_id))
 
   return (
     <div className="min-h-screen bg-gradient-to-br bg-transparent fade-in pb-12">
@@ -287,10 +486,10 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-stretch">
           
           {/* ── Left Column (Profile & Action) ────────────────────────────────────── */}
-          <div className="xl:col-span-1 space-y-6">
+          <div className="xl:col-span-1 flex h-full flex-col gap-4">
             
             {/* Worker Profile Card */}
             <Card className="hover-lift bg-white overflow-hidden shadow-md border-t-4 border-t-soft-blue rounded-2xl">
@@ -316,8 +515,8 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                       <Skel w="w-3/4" h="h-4" className="mx-auto" />
                     ) : (
                       <>
-                        <p className="text-sm text-muted-foreground break-all">{report?.worker?.email || report?.workerDetails?.profile?.email}</p>
-                        {workerPhone && <p className="text-sm text-muted-foreground">{workerPhone}</p>}
+                        <p className="text-sm text-muted-foreground break-all">{report?.worker?.email || report?.workerDetails?.profile?.email || worker.email || "-"}</p>
+                        <p className="text-sm text-muted-foreground">{workerPhone}</p>
                       </>
                     )}
 
@@ -333,83 +532,38 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
             </Card>
 
             {/* Quick Actions */}
-            <Card className="hover-lift border-accent/20 rounded-2xl shadow-sm">
-              <CardHeader className="bg-accent/5 pb-4 border-b border-accent/10">
-                <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                  <Download className="w-5 h-5" />
+            <Card className="hover-lift border-accent/20 rounded-xl shadow-sm min-h-[132px] w-full">
+              <CardContent className="flex h-full min-h-[132px] flex-col justify-between gap-5 p-4">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-soft-coral">
+                  <Download className="w-4 h-4" />
                   Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+                </div>
                 <Button
                   onClick={handleDownloadPdf}
                   disabled={pdfLoading || isLoading || !report}
-                  className="w-full bg-soft-coral hover:bg-soft-coral/90 text-snow-white flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                  className="w-full bg-soft-coral hover:bg-soft-coral/90 text-snow-white flex items-center justify-center gap-2 h-10 rounded-lg transition-all"
                 >
                   {pdfLoading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> <span>Generating...</span></>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> <span>Generating...</span></>
                   ) : (
-                    <><Download className="w-5 h-5" /> <span>Download PDF Report</span></>
+                    <><Download className="w-4 h-4" /> <span>Download PDF Report</span></>
                   )}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Completion Progress & Alerts */}
-            <Card className="hover-lift rounded-2xl shadow-sm">
-              <CardHeader className="bg-white pb-2">
-                <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                  <Activity className="w-5 h-5" />
-                  Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 pt-4 space-y-6">
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-soft-blue font-medium flex items-center gap-2 whitespace-nowrap">
-                      <TrendingUp className="h-4 w-4 shrink-0" />
-                      <span className="text-sm">Completion Rate</span>
-                    </span>
-                    {isLoading ? <Skel w="w-10" /> : <span className="font-bold text-soft-coral text-base">{Number(compRate).toFixed(1)}%</span>}
-                  </div>
-                  <Progress value={isLoading ? 0 : compRate} className="h-2.5 text-soft-blue rounded-full" />
-                  <div>
-                    {isLoading ? (
-                      <Skel w="w-24" h="h-6" />
-                    ) : (
-                      <Badge className={`text-xs px-3 py-1 ${completionBadgeClass(compRate)}`}>
-                        {compRate >= 80 ? "Excellent" : compRate >= 50 ? "On Track" : "Needs Attention"}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {!isLoading && report && unreadCount > 0 && (
-                  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-red-50 border border-soft-coral/20">
-                    <AlertTriangle className="h-5 w-5 mt-0.5 text-soft-coral shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-soft-coral">Unread Notifications</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Worker has {unreadCount} pending alerts.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
           {/* ── Right Column (Analytics & Detailed Metrics) ──────────────────────── */}
           <div className="xl:col-span-3 space-y-8">
 
             {/* Summary Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="border-l-4 border-l-soft-blue bg-white shadow-sm hover-lift rounded-xl">
-                <CardContent className="p-4 sm:p-6 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <Card className="border-l-4 border-l-soft-blue bg-white shadow-sm hover-lift rounded-xl h-full">
+                <CardContent className="min-h-32 p-4 sm:p-6 text-center flex flex-col items-center justify-center gap-3">
+                  <div className="flex min-h-10 items-center justify-center gap-2">
                     <Metric1Icon className="h-4 w-4 text-soft-blue" />
-                    <span className="text-sm font-medium text-dark-slate-gray whitespace-nowrap">{metric1Label}</span>
+                    <span className="text-sm font-medium text-dark-slate-gray leading-tight">{metric1Label}</span>
                   </div>
                   {isLoading ? (
                     <Skel w="w-12" h="h-8" className="mx-auto" />
@@ -419,11 +573,11 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-mint-green bg-white shadow-sm hover-lift rounded-xl">
-                <CardContent className="p-4 sm:p-6 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
+              <Card className="border-l-4 border-l-mint-green bg-white shadow-sm hover-lift rounded-xl h-full">
+                <CardContent className="min-h-32 p-4 sm:p-6 text-center flex flex-col items-center justify-center gap-3">
+                  <div className="flex min-h-10 items-center justify-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-mint-green" />
-                    <span className="text-sm font-medium text-dark-slate-gray whitespace-nowrap">{metric2Label}</span>
+                    <span className="text-sm font-medium text-dark-slate-gray leading-tight">{metric2Label}</span>
                   </div>
                   {isLoading ? (
                     <Skel w="w-12" h="h-8" className="mx-auto" />
@@ -433,11 +587,11 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-soft-coral bg-white shadow-sm hover-lift rounded-xl">
-                <CardContent className="p-4 sm:p-6 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
+              <Card className="border-l-4 border-l-soft-coral bg-white shadow-sm hover-lift rounded-xl h-full">
+                <CardContent className="min-h-32 p-4 sm:p-6 text-center flex flex-col items-center justify-center gap-3">
+                  <div className="flex min-h-10 items-center justify-center gap-2">
                     <Users className="h-4 w-4 text-soft-coral" />
-                    <span className="text-sm font-medium text-dark-slate-gray whitespace-nowrap">{metric3Label}</span>
+                    <span className="text-sm font-medium text-dark-slate-gray leading-tight">{metric3Label}</span>
                   </div>
                   {isLoading ? (
                     <Skel w="w-12" h="h-8" className="mx-auto" />
@@ -447,11 +601,11 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-yellow-400 bg-white shadow-sm hover-lift rounded-xl">
-                <CardContent className="p-4 sm:p-6 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
+              <Card className="border-l-4 border-l-yellow-400 bg-white shadow-sm hover-lift rounded-xl h-full">
+                <CardContent className="min-h-32 p-4 sm:p-6 text-center flex flex-col items-center justify-center gap-3">
+                  <div className="flex min-h-10 items-center justify-center gap-2">
                     <Metric4Icon className={`h-4 w-4 ${Metric4Icon === Star ? "text-yellow-500 fill-current" : "text-yellow-500"}`} />
-                    <span className="text-sm font-medium text-dark-slate-gray whitespace-nowrap">{metric4Label}</span>
+                    <span className="text-sm font-medium text-dark-slate-gray leading-tight">{metric4Label}</span>
                   </div>
                   {isLoading ? (
                     <Skel w="w-12" h="h-8" className="mx-auto" />
@@ -467,56 +621,99 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
               <WorkerAnalyticsCharts analytics={report.analytics} />
             )}
 
-            {/* AI Insights & Recommendations (Minimalistic) */}
-         <Card className="hover-lift border-accent/10 shadow-sm rounded-xl">
-                <CardHeader className="pb-3 border-b border-cool-gray/10">
-                  <CardTitle className="text-soft-blue flex items-center gap-2 text-base">
-                    <Lightbulb className="w-5 h-5 text-soft-blue" />
-                    AI Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-stretch">
+          <Card className="hover-lift rounded-xl shadow-sm h-full">
+            <CardContent className="h-full p-4 space-y-4">
+              <div className="text-soft-coral flex items-center gap-2 text-base font-semibold">
+                <Activity className="w-4 h-4" />
+                Status
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-soft-blue font-medium flex items-center gap-2 whitespace-nowrap">
+                    <TrendingUp className="h-4 w-4 shrink-0" />
+                    <span className="text-sm">Completion Rate</span>
+                  </span>
+                  {isLoading ? <Skel w="w-10" /> : <span className="font-bold text-soft-coral text-base">{Number(compRate).toFixed(1)}%</span>}
+                </div>
+                <Progress value={isLoading ? 0 : compRate} className="h-2.5 text-soft-blue rounded-full" />
+                <div>
                   {isLoading ? (
-                    <div className="space-y-3">
-                      <Skel w="w-full" h="h-4" />
-                      <Skel w="w-5/6" h="h-4" />
-                      <Skel w="w-4/5" h="h-4" />
-                    </div>
-                  ) : report?.insights && report.insights.length > 0 ? (
-                    <ul className="space-y-3">
-                      {report.insights.map((insight, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-dark-slate-gray">
-                          <span className="text-soft-blue mt-0.5">•</span>
-                          <span>{insight}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <Skel w="w-24" h="h-6" />
                   ) : (
-                    <p className="text-sm text-muted-foreground">No insights available.</p>
+                    <Badge className={`text-xs px-3 py-1 ${completionBadgeClass(compRate)}`}>
+                      {compRate >= 80 ? "Excellent" : compRate >= 50 ? "On Track" : "Needs Attention"}
+                    </Badge>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-            
-           
+              {!isLoading && report && unreadCount > 0 && (
+                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-50 border border-soft-coral/20">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 text-soft-coral shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-soft-coral">Unread Notifications</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Worker has {unreadCount} pending alerts.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Recent Activity */}
+          <Card className="hover-lift border-accent/10 shadow-sm rounded-xl h-full xl:col-span-3">
+            <CardHeader className="pb-3 border-b border-cool-gray/10">
+              <CardTitle className="text-soft-blue flex items-center gap-2 text-base">
+                <Lightbulb className="w-5 h-5 text-soft-blue" />
+                AI Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {isLoading ? (
+                <div className="space-y-3">
+                  <Skel w="w-full" h="h-4" />
+                  <Skel w="w-5/6" h="h-4" />
+                  <Skel w="w-4/5" h="h-4" />
+                </div>
+              ) : report?.insights && report.insights.length > 0 ? (
+                <div className="space-y-3">
+                  {report.insights.map((insight, i) => (
+                    <p key={i} className="text-sm text-dark-slate-gray leading-relaxed">
+                      {formatInsightText(insight)}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No insights available.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity */}
             {(!isLoading && report?.recentActivity) && (
-              <div className="space-y-6 max-w-5xl mx-auto w-full">
+              <div className="space-y-6 w-full">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h2 className="text-xl font-semibold text-soft-coral">Recent Activity</h2>
-                    <p className="text-sm text-muted-foreground">Appointments, prescriptions, and linked patient reviews</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isNutritionist ? "Appointments, diet plans, and linked patient reviews" : "Appointments, prescriptions, and linked patient reviews"}
+                    </p>
                   </div>
                   <Badge variant="outline" className="border-secondary text-soft-blue rounded-full px-3 py-1">
-                    {recentAppointments.length + recentPrescriptions.length + recentReviews.length + recentLabBookings.length} items
+                    {activityItemCount} items
                   </Badge>
                 </div>
 
                 <div className="grid gap-6 xl:grid-cols-2">
                   {recentAppointments.length > 0 && (
-                    <Card className="overflow-hidden rounded-3xl border border-soft-blue/15 shadow-sm bg-white">
-                      <CardHeader className="bg-gradient-to-r from-soft-blue/10 to-transparent border-b border-soft-blue/10 pb-4">
+                    <Card className={`overflow-hidden rounded-3xl border border-soft-blue/15 shadow-sm bg-white ${isNutritionist && recentDietPlans.length === 0 ? "xl:col-span-2" : ""}`}>
+                      <CardHeader className="border-b border-soft-blue/10 bg-white py-4">
                         <div className="flex items-center justify-between gap-3">
                           <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
                             <Calendar className="w-5 h-5" />
@@ -528,26 +725,94 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        <div className="divide-y divide-cool-gray/10">
+                        <div className="divide-y divide-cool-gray/10 [&>*:first-child]:pt-2 sm:[&>*:first-child]:pt-3">
                           {recentAppointments.map((apt) => (
                             <div key={apt.id} id={`appointment-${apt.id}`} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
                               <div className="flex items-start gap-4">
                                 <div className="w-14 shrink-0 rounded-2xl bg-soft-blue/10 border border-soft-blue/15 p-2 text-center">
-                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">{formatCardDate(apt.date).split(" ")[0]}</p>
-                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(apt.date).getDate()}</p>
+                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">{formatMonthLabel(apt.date)}</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{formatDayNumber(apt.date)}</p>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center justify-between gap-3">
                                     <div>
                                       <p className="font-semibold text-soft-blue capitalize text-sm sm:text-base">{apt.type}</p>
-                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(apt.date)} • {apt.time}</p>
+                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(apt.date)} - {apt.time}</p>
                                     </div>
                                     <Badge className={apt.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : apt.status === "upcoming" ? "bg-soft-blue/15 text-soft-blue hover:bg-soft-blue/20 rounded-full px-3" : "bg-soft-coral/15 text-soft-coral hover:bg-soft-coral/20 rounded-full px-3"}>
                                       {apt.status}
                                     </Badge>
                                   </div>
-                                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Appointment ID: {apt.id}</span>
+                                  {(reviewsByAppointmentId[apt.id]?.length ?? 0) > 0 && (
+                                    <Accordion type="single" collapsible className="mt-4 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 px-3">
+                                      <AccordionItem value="reviews" className="border-0">
+                                        <AccordionTrigger className="py-3 text-xs font-semibold text-yellow-700 hover:no-underline">
+                                          <span className="flex items-center gap-2">
+                                            <Star className="h-4 w-4 fill-current" />
+                                            {reviewsByAppointmentId[apt.id].length} review{reviewsByAppointmentId[apt.id].length === 1 ? "" : "s"}
+                                          </span>
+                                        </AccordionTrigger>
+                                        <AccordionContent className="space-y-3 pb-3">
+                                          {reviewsByAppointmentId[apt.id].map((review) => (
+                                            <div key={review.id} className="rounded-xl bg-white border border-yellow-400/15 p-3">
+                                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <Badge className="bg-yellow-400/15 text-yellow-700 hover:bg-yellow-400/20 rounded-full">
+                                                  {review.rating}/5
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground">{formatCardDateTime(review.created_at)}</span>
+                                              </div>
+                                              <p className="mt-3 text-sm text-dark-slate-gray whitespace-pre-wrap leading-relaxed">
+                                                {review.review_text || "No review text provided."}
+                                              </p>
+                                            </div>
+                                          ))}
+                                        </AccordionContent>
+                                      </AccordionItem>
+                                    </Accordion>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {visiblePrescriptions.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-soft-coral/15 shadow-sm bg-white">
+                      <CardHeader className="border-b border-soft-coral/10 bg-white py-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
+                            <Pill className="w-5 h-5 text-soft-coral" />
+                            Prescriptions
+                          </CardTitle>
+                          <Badge className="bg-soft-coral/10 text-soft-coral hover:bg-soft-coral/15 rounded-full">
+                            {visiblePrescriptions.length}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-cool-gray/10 [&>*:first-child]:pt-2 sm:[&>*:first-child]:pt-3">
+                          {visiblePrescriptions.map((rx) => (
+                            <div key={rx.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                              <div className="flex items-start gap-4">
+                                <div className="w-14 shrink-0 rounded-2xl bg-soft-coral/10 border border-soft-coral/15 p-2 text-center">
+                                  <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">Start</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{formatDayNumber(rx.start_date)}</p>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                      <p className="font-semibold text-soft-blue text-sm sm:text-base">Prescription</p>
+                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(rx.start_date)} to {formatCardDate(rx.end_date)}</p>
+                                    </div>
+                                    <Badge className={rx.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : "bg-soft-blue/15 text-soft-blue hover:bg-soft-blue/20 rounded-full px-3"}>
+                                      {rx.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Valid till {formatCardDate(rx.end_date)}</span>
                                   </div>
                                 </div>
                               </div>
@@ -558,41 +823,40 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                     </Card>
                   )}
 
-                  {recentPrescriptions.length > 0 && (
-                    <Card className="overflow-hidden rounded-3xl border border-soft-coral/15 shadow-sm bg-white">
-                      <CardHeader className="bg-gradient-to-r from-soft-coral/10 to-transparent border-b border-soft-coral/10 pb-4">
+                  {isNutritionist && recentDietPlans.length > 0 && (
+                    <Card className="overflow-hidden rounded-3xl border border-mint-green/15 shadow-sm bg-white">
+                      <CardHeader className="border-b border-mint-green/10 bg-white py-4">
                         <div className="flex items-center justify-between gap-3">
                           <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
-                            <Pill className="w-5 h-5 text-soft-coral" />
-                            Prescriptions
+                            <Salad className="w-5 h-5 text-mint-green" />
+                            Diet Plans
                           </CardTitle>
-                          <Badge className="bg-soft-coral/10 text-soft-coral hover:bg-soft-coral/15 rounded-full">
-                            {recentPrescriptions.length}
+                          <Badge className="bg-mint-green/10 text-mint-green hover:bg-mint-green/15 rounded-full">
+                            {recentDietPlans.length}
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        <div className="divide-y divide-cool-gray/10">
-                          {recentPrescriptions.map((rx) => (
-                            <div key={rx.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
+                        <div className="divide-y divide-cool-gray/10 [&>*:first-child]:pt-2 sm:[&>*:first-child]:pt-3">
+                          {recentDietPlans.map((plan) => (
+                            <div key={plan.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
                               <div className="flex items-start gap-4">
-                                <div className="w-14 shrink-0 rounded-2xl bg-soft-coral/10 border border-soft-coral/15 p-2 text-center">
+                                <div className="w-14 shrink-0 rounded-2xl bg-mint-green/10 border border-mint-green/15 p-2 text-center">
                                   <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">Start</p>
-                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(rx.start_date).getDate()}</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{formatDayNumber(plan.start_date)}</p>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center justify-between gap-3">
                                     <div>
-                                      <p className="font-semibold text-soft-blue text-sm sm:text-base">Prescription #{rx.id.slice(0, 8)}</p>
-                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(rx.start_date)} → {formatCardDate(rx.end_date)}</p>
+                                      <p className="font-semibold text-soft-blue text-sm sm:text-base">Diet Plan</p>
+                                      <p className="text-xs text-muted-foreground mt-1">{formatCardDate(plan.start_date)} to {formatCardDate(plan.end_date)}</p>
                                     </div>
-                                    <Badge className={rx.status === "completed" ? "bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3" : "bg-soft-blue/15 text-soft-blue hover:bg-soft-blue/20 rounded-full px-3"}>
-                                      {rx.status}
+                                    <Badge className="bg-mint-green/15 text-mint-green hover:bg-mint-green/20 rounded-full px-3">
+                                      {plan.daily_calories ? `${plan.daily_calories} cal` : "Active"}
                                     </Badge>
                                   </div>
                                   <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Valid till {formatCardDate(rx.end_date)}</span>
-                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Prescription ID: {rx.id}</span>
+                                    <span className="rounded-full bg-cool-gray/10 px-2.5 py-1">Valid till {formatCardDate(plan.end_date)}</span>
                                   </div>
                                 </div>
                               </div>
@@ -605,7 +869,7 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
                   {recentLabBookings.length > 0 && (
                     <Card className="overflow-hidden rounded-3xl border border-mint-green/15 shadow-sm bg-white xl:col-span-2">
-                      <CardHeader className="bg-gradient-to-r from-mint-green/10 to-transparent border-b border-mint-green/10 pb-4">
+                      <CardHeader className="border-b border-mint-green/10 bg-white py-4">
                         <div className="flex items-center justify-between gap-3">
                           <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
                             <TestTube className="w-5 h-5 text-mint-green" />
@@ -617,17 +881,17 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        <div className="divide-y divide-cool-gray/10">
+                        <div className="divide-y divide-cool-gray/10 [&>*:first-child]:pt-2 sm:[&>*:first-child]:pt-3">
                           {recentLabBookings.map((booking) => (
                             <div key={booking.id} className="flex items-center justify-between gap-4 p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
                               <div className="flex items-center gap-4 min-w-0">
                                 <div className="w-14 shrink-0 rounded-2xl bg-mint-green/10 border border-mint-green/15 p-2 text-center">
                                   <p className="text-[10px] uppercase tracking-wide text-soft-coral font-bold">Lab</p>
-                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{new Date(booking.scheduled_date).getDate()}</p>
+                                  <p className="text-lg font-bold text-dark-slate-gray leading-none">{formatDayNumber(booking.scheduled_date)}</p>
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-soft-blue text-sm sm:text-base">Lab Test #{booking.test_id.slice(0, 6)}</p>
-                                  <p className="text-xs text-muted-foreground mt-1">{formatCardDate(booking.scheduled_date)} • {booking.scheduled_time}</p>
+                                  <p className="font-semibold text-soft-blue text-sm sm:text-base">Lab Booking</p>
+                                  <p className="text-xs text-muted-foreground mt-1">{formatCardDate(booking.scheduled_date)} - {booking.scheduled_time}</p>
                                   <p className="text-[11px] text-muted-foreground mt-2 truncate max-w-[240px] sm:max-w-md">{booking.location}</p>
                                 </div>
                               </div>
@@ -641,23 +905,22 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                     </Card>
                   )}
 
-                  {recentReviews.length > 0 && (
+                  {unlinkedReviews.length > 0 && (
                     <Card className="overflow-hidden rounded-3xl border border-yellow-400/20 shadow-sm bg-white xl:col-span-2">
                       <CardHeader className="bg-gradient-to-r from-yellow-400/10 to-transparent border-b border-yellow-400/10 pb-4">
                         <div className="flex items-center justify-between gap-3">
                           <CardTitle className="text-soft-coral flex items-center gap-2 text-lg">
                             <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                            Patient Reviews
+                            Unlinked Reviews
                           </CardTitle>
                           <Badge className="bg-yellow-400/10 text-yellow-700 hover:bg-yellow-400/15 rounded-full">
-                            {recentReviews.length}
+                            {unlinkedReviews.length}
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        <div className="divide-y divide-cool-gray/10">
-                          {recentReviews.map((review) => {
-                            const relatedAppointment = review.appointment_id ? appointmentsById[review.appointment_id] : undefined
+                        <div className="divide-y divide-cool-gray/10 [&>*:first-child]:pt-3 sm:[&>*:first-child]:pt-4">
+                          {unlinkedReviews.map((review) => {
                             return (
                               <div key={review.id} className="p-4 sm:p-5 hover:bg-cool-gray/5 transition-colors">
                                 <div className="flex flex-col gap-4">
@@ -673,10 +936,6 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
                                       </div>
                                       <p className="text-xs text-muted-foreground mt-2">{formatCardDateTime(review.created_at)}</p>
                                     </div>
-                                    <div className="text-right">
-                                      <p className="text-xs text-muted-foreground break-all">Review ID: {review.id.slice(0, 8)}</p>
-                                      <p className="text-xs text-muted-foreground break-all mt-1">Patient ID: {review.patient_id || "-"}</p>
-                                    </div>
                                   </div>
 
                                   <div className="rounded-2xl border border-cool-gray/10 bg-snow-white p-4 text-sm text-dark-slate-gray whitespace-pre-wrap leading-relaxed">
@@ -685,24 +944,10 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
                                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-soft-blue/5 border border-soft-blue/10 px-4 py-3">
                                     <div className="min-w-0">
-                                      <p className="text-xs font-semibold uppercase tracking-wide text-soft-blue">Linked appointment</p>
-                                      {relatedAppointment ? (
-                                        <p className="text-sm text-dark-slate-gray mt-1">
-                                          {relatedAppointment.type} • {formatCardDate(relatedAppointment.date)} • {relatedAppointment.time}
-                                        </p>
-                                      ) : (
-                                        <p className="text-sm text-muted-foreground mt-1">{review.appointment_id ? `Appointment ${review.appointment_id}` : "No appointment linked"}</p>
-                                      )}
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-soft-blue">Appointment</p>
+                                      <p className="text-sm text-muted-foreground mt-1">No matching appointment is available in the recent activity list.</p>
                                     </div>
 
-                                    {review.appointment_id && (
-                                      <Link
-                                        href={`#appointment-${review.appointment_id}`}
-                                        className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-medium text-soft-blue border border-soft-blue/15 shadow-sm hover:bg-soft-blue/5"
-                                      >
-                                        View appointment <Link2 className="h-3.5 w-3.5" />
-                                      </Link>
-                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -718,9 +963,6 @@ export default function WorkerReportPage({ worker, report, isLoading }: WorkerRe
 
             {/* ── Patient Reports & Warn ──────────────────────────────────────── */}
             {/* <PatientReportsSection workerId={worker.id} workerName={worker.name} /> */}
-
-          </div>
-        </div>
       </div>
     </div>
   )

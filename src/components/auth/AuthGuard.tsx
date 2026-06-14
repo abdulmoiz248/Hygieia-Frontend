@@ -16,13 +16,19 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("role") || Cookies.get("role") || null
-    const storedId = localStorage.getItem("id") || Cookies.get("id") || null
-    const storedToken = localStorage.getItem("token") || Cookies.get("token") || null
+    const storedRole = Cookies.get("role") || null
+    const storedId = Cookies.get("id") || null
+    const storedToken = Cookies.get("token") || null
 
     const role = normalizeRole(storedRole)
 
     if (!role || !storedId || !storedToken) {
+      Cookies.remove("token")
+      Cookies.remove("id")
+      Cookies.remove("role")
+      localStorage.removeItem("token")
+      localStorage.removeItem("id")
+      localStorage.removeItem("role")
       router.replace("/login")
       return
     }

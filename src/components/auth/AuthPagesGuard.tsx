@@ -16,18 +16,30 @@ export default function AuthPagesGuard({ children }: { children: React.ReactNode
   }
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("role") || Cookies.get("role") || null
-    const storedId = localStorage.getItem("id") || Cookies.get("id") || null
-    const storedToken = localStorage.getItem("token") || Cookies.get("token") || null
+    const cookieRole = Cookies.get("role") || null
+    const cookieId = Cookies.get("id") || null
+    const cookieToken = Cookies.get("token") || null
+    const storedRole = localStorage.getItem("role")
+    const storedId = localStorage.getItem("id")
+    const storedToken = localStorage.getItem("token")
 
-    const role = normalizeRole(storedRole)
+    const role = normalizeRole(cookieRole)
 
-    if (role && storedId && storedToken) {
+    if (role && cookieId && cookieToken) {
       localStorage.setItem("role", role)
-      localStorage.setItem("id", storedId)
-      localStorage.setItem("token", storedToken)
+      localStorage.setItem("id", cookieId)
+      localStorage.setItem("token", cookieToken)
       router.replace(`/${role}/dashboard`)
       return
+    }
+
+    if (cookieRole || cookieId || cookieToken || storedRole || storedId || storedToken) {
+      Cookies.remove("token")
+      Cookies.remove("id")
+      Cookies.remove("role")
+      localStorage.removeItem("token")
+      localStorage.removeItem("id")
+      localStorage.removeItem("role")
     }
 
     setReady(true)

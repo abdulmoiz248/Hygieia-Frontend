@@ -10,23 +10,23 @@ import Loader from "@/components/loader/loader"
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen]     = useState(false)
-  const [mounted, setMounted]                   = useState(false)
+  const [authChecked, setAuthChecked]           = useState(false)
 
   const { initAuth, isAuthenticated } = useAdminStore()
   const router = useRouter()
 
   useEffect(() => {
     initAuth()
-    setMounted(true)
-  }, [])
+    setAuthChecked(true)
+  }, [initAuth])
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    if (authChecked && !isAuthenticated) {
       router.replace("/login")
     }
-  }, [mounted, isAuthenticated])
+  }, [authChecked, isAuthenticated, router])
 
-  if (!mounted || !isAuthenticated) return <Loader />
+  if (!authChecked || !isAuthenticated) return <Loader />
 
   return (
     <div className="flex h-screen bg-snow-white">

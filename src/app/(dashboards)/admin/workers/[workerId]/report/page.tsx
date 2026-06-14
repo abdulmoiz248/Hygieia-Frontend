@@ -23,7 +23,7 @@ export default function WorkerReportRoutePage() {
 
   useEffect(() => {
     if (workerId) generateReport(workerId)
-  }, [workerId])
+  }, [workerId, generateReport])
 
   // Worker comes from cached list queries — resolves in <1ms, no spinner needed
   if (!worker) return null

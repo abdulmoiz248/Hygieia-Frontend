@@ -80,28 +80,28 @@ export function WorkerAnalyticsCharts({ analytics }: WorkerAnalyticsChartsProps)
     primarySeriesData = analytics.timeSeries.prescriptionsLast12Months!.map((item) => ({
       month: formatMonth(item.month),
       total: item.totalPrescriptions,
-      completed: item.completedPrescriptions,
+      active: item.activePrescriptions,
     }))
     primarySeriesTitle = "Prescriptions Trend"
-    primarySeriesDesc = "Total vs Completed prescriptions over the last 12 months"
+    primarySeriesDesc = "Total vs Active prescriptions over the last 12 months"
     primarySeriesConfig = {
       total: { label: "Total", color: "var(--color-soft-blue)" },
-      completed: { label: "Completed", color: "var(--color-mint-green)" },
+      active: { label: "Active", color: "var(--color-mint-green)" },
     }
     primaryDataKey1 = "total"
-    primaryDataKey2 = "completed"
+    primaryDataKey2 = "active"
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
       {/* Primary Trend Chart */}
       {primarySeriesData.length > 0 && (
-        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm">
-          <CardHeader>
+        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] flex flex-col">
+          <CardHeader className="min-h-[110px]">
             <CardTitle className="text-soft-blue">{primarySeriesTitle}</CardTitle>
             <CardDescription>{primarySeriesDesc}</CardDescription>
           </CardHeader>
-          <CardContent className="h-[280px]">
+          <CardContent className="h-[280px] flex-1">
             <ChartContainer
               config={primarySeriesConfig}
               className="w-full h-full flex-1"
@@ -123,12 +123,12 @@ export function WorkerAnalyticsCharts({ analytics }: WorkerAnalyticsChartsProps)
 
       {/* Patient Growth Chart */}
       {patientGrowthData.length > 0 && (
-        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm">
-          <CardHeader>
+        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] flex flex-col">
+          <CardHeader className="min-h-[110px]">
             <CardTitle className="text-soft-coral">Patient Growth</CardTitle>
             <CardDescription>Cumulative unique patients assigned</CardDescription>
           </CardHeader>
-          <CardContent className="h-[280px]">
+          <CardContent className="h-[280px] flex-1">
             <ChartContainer
               config={{
                 cumulative: { label: "Total Patients", color: "var(--color-soft-coral)" },
