@@ -711,15 +711,6 @@ if (assignedDietPlan) {
     return `${date} • ${time}`
   }
 
-  const getPrescriptionStatusStyle = (status?: string | null) => {
-    if (!status) return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
-    const normalized = status.toLowerCase()
-    if (normalized === "completed") return "bg-mint-green/20 text-mint-green border border-mint-green/30"
-    if (normalized === "active") return "bg-soft-coral/15 text-soft-coral border border-soft-coral/30"
-    if (normalized === "cancelled") return "bg-red-100 text-red-600 border border-red-200"
-    return "bg-soft-blue/15 text-soft-blue border border-soft-blue/25"
-  }
-
   if (isLoading) { return (
     <div className="flex items-center justify-center min-h-[400px]">
       <Loader />
