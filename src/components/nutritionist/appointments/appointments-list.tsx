@@ -1,14 +1,12 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { useSearchParams } from "next/navigation"
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, CheckCircle, Calendar, MapPin, Link, X, AlertCircle, CalendarDays, FileText, RefreshCw } from "lucide-react"
+import { Clock, CheckCircle, Calendar, MapPin, Link, X, AlertCircle, CalendarDays } from "lucide-react"
 import { useAppointmentStore } from "@/store/nutritionist/appointment-store"
-import useNutritionistStore from "@/store/nutritionist/userStore"
-import { AppointmentStatus, type Appointment } from "@/types/patient/appointment"
+import { AppointmentStatus } from "@/types/patient/appointment"
 import { useRouter } from "next/navigation"
 import {
   Dialog,
@@ -23,7 +21,6 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cancelAppointment } from "@/api/nutritionist/appointmentApi"
 import { toast } from "sonner"
-import api from "@/lib/axios"
 
 const CANCELLATION_REASONS = [
   { id: "emergency", label: "Personal Emergency" },
@@ -35,16 +32,7 @@ const CANCELLATION_REASONS = [
 
 export function AppointmentsList() {
   const { appointments, updateAppointmentStatus } = useAppointmentStore()
-  const nutritionistId =
-    useNutritionistStore((s) => s.profile?.id) ?? localStorage.getItem("id") ?? ""
   const router = useRouter()
-
-  const searchParams = useSearchParams()
-
-  const [activeFilter, setActiveFilter] = useState<"upcoming" | "completed">("upcoming")
-  const [completedAppointments, setCompletedAppointments] = useState<Appointment[]>([])
-  const [isFetchingCompleted, setIsFetchingCompleted] = useState(false)
-  const [completedFetched, setCompletedFetched] = useState(false)
 
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null)
@@ -52,55 +40,9 @@ export function AppointmentsList() {
   const [additionalNotes, setAdditionalNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const fetchCompletedAppointments = useCallback(async () => {
-    if (!nutritionistId) return
-
-    setIsFetchingCompleted(true)
-    try {
-      const res = await api.get("/appointments", {
-        params: { doctorId: nutritionistId, status: "completed" },
-      })
-      const data: Appointment[] = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-        ? res.data.data
-        : []
-      setCompletedAppointments(data)
-      setCompletedFetched(true)
-    } catch (err) {
-      console.error("Failed to fetch completed appointments", err)
-      toast.error("Could not load completed appointments.")
-    } finally {
-      setIsFetchingCompleted(false)
-    }
-  }, [nutritionistId])
-
-  // When redirected back from completing an appointment (?tab=completed),
-  // auto-switch to the completed tab and force a fresh fetch.
-  useEffect(() => {
-    if (searchParams.get("tab") === "completed") {
-      setActiveFilter("completed")
-      setCompletedFetched(false) // invalidate cache so fetchCompletedAppointments runs
-      // Clean the URL param without a full navigation
-      const url = new URL(window.location.href)
-      url.searchParams.delete("tab")
-      window.history.replaceState({}, "", url.toString())
-    }
-  }, [searchParams])
-
-  // Fetch when tab is switched to completed, or when nutritionistId finally resolves
-  useEffect(() => {
-    if (activeFilter === "completed" && !completedFetched && nutritionistId) {
-      fetchCompletedAppointments()
-    }
-  }, [activeFilter, completedFetched, nutritionistId, fetchCompletedAppointments])
-
-  const upcomingAppointments = appointments.filter(
+  const filteredAppointments = appointments.filter(
     (apt) => apt.status === AppointmentStatus.Upcoming
   )
-
-  const filteredAppointments =
-    activeFilter === "upcoming" ? upcomingAppointments : completedAppointments
 
   const appointmentsByMonth = filteredAppointments.reduce(
     (acc, apt) => {
@@ -178,107 +120,33 @@ export function AppointmentsList() {
     }
   }
 
-  const selectedAppointment = appointments.find(
-    (apt) => apt.id === selectedAppointmentId
-  )
+  const selectedAppointment = appointments.find((apt) => apt.id === selectedAppointmentId)
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-soft-coral mb-2">My Appointments</h1>
-        <p className="text-cool-gray text-base mb-5">Stay on top of your schedule</p>
-
-        {/* Filter tabs */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveFilter("upcoming")}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-              activeFilter === "upcoming"
-                ? "bg-soft-coral text-white shadow-sm"
-                : "bg-cool-gray/15 text-cool-gray hover:bg-cool-gray/25"
-            }`}
-          >
-            <Clock className="h-3.5 w-3.5" />
-            Upcoming
-            <span
-              className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                activeFilter === "upcoming"
-                  ? "bg-white/25 text-white"
-                  : "bg-cool-gray/20 text-cool-gray"
-              }`}
-            >
-              {upcomingAppointments.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveFilter("completed")}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-              activeFilter === "completed"
-                ? "bg-mint-green text-white shadow-sm"
-                : "bg-cool-gray/15 text-cool-gray hover:bg-cool-gray/25"
-            }`}
-          >
-            <CheckCircle className="h-3.5 w-3.5" />
-            Completed
-            <span
-              className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                activeFilter === "completed"
-                  ? "bg-white/25 text-white"
-                  : "bg-cool-gray/20 text-cool-gray"
-              }`}
-            >
-              {completedFetched ? completedAppointments.length : "—"}
-            </span>
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-soft-coral mb-2">
+          My Appointments{" "}
+          <span className="text-cool-gray">({filteredAppointments.length})</span>
+        </h1>
+        <p className="text-cool-gray text-base">Stay on top of your patient schedule</p>
       </div>
 
-      {/* Loading state for completed tab */}
-      {activeFilter === "completed" && isFetchingCompleted ? (
-        <div className="flex items-center justify-center py-20 gap-3 text-cool-gray">
-          <RefreshCw className="h-5 w-5 animate-spin" />
-          <span className="text-sm">Loading completed appointments…</span>
-        </div>
-      ) : filteredAppointments.length === 0 ? (
+      {filteredAppointments.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="p-12 text-center">
             <div className="flex flex-col items-center gap-4">
-              <div
-                className={`p-4 rounded-full ${
-                  activeFilter === "upcoming" ? "bg-soft-coral/10" : "bg-mint-green/10"
-                }`}
-              >
-                {activeFilter === "upcoming" ? (
-                  <Calendar className="h-8 w-8 text-soft-coral" />
-                ) : (
-                  <CheckCircle className="h-8 w-8 text-mint-green" />
-                )}
+              <div className="p-4 bg-soft-coral/10 rounded-full">
+                <Calendar className="h-8 w-8 text-soft-coral" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-dark-slate-gray mb-1">
-                  {activeFilter === "upcoming"
-                    ? "No upcoming appointments"
-                    : "No completed appointments"}
+                  No appointments yet
                 </h3>
                 <p className="text-sm text-cool-gray">
-                  {activeFilter === "upcoming"
-                    ? "Once patients book appointments, they'll appear here"
-                    : "Completed appointments will appear here"}
+                  Once patients book appointments, they&apos;ll appear here
                 </p>
               </div>
-              {activeFilter === "completed" && completedFetched && (
-                <button
-                  onClick={() => {
-                    setCompletedFetched(false)
-                    fetchCompletedAppointments()
-                  }}
-                  className="text-xs text-soft-blue underline underline-offset-2 hover:opacity-80"
-                >
-                  Refresh
-                </button>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -295,12 +163,12 @@ export function AppointmentsList() {
 
               <div className="grid grid-cols-1 justify-items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {monthAppointments.map((appointment) => {
-                  const canMarkDone = isTimeReached(appointment.date, appointment.time)
+                  const canComplete = isTimeReached(appointment.date, appointment.time)
 
                   return (
                     <Card
                       key={appointment.id}
-                      className="w-full max-w-[30rem] border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
+                      className="w-full max-w-[30rem] border-0 bg-white/40 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
                     >
                       <CardContent className="p-0">
                         <div className="relative h-full flex flex-col">
@@ -309,8 +177,10 @@ export function AppointmentsList() {
                               appointment.type === "consultation"
                                 ? "bg-soft-blue"
                                 : appointment.type === "follow-up"
-                                ? "bg-mint-green"
-                                : "bg-soft-coral"
+                                  ? "bg-mint-green"
+                                  : appointment.type === "emergency"
+                                    ? "bg-soft-coral"
+                                    : "bg-cool-gray"
                             }`}
                           />
 
@@ -368,52 +238,31 @@ export function AppointmentsList() {
                               )}
                             </div>
 
-                            {/* Actions — differ by tab */}
                             <div className="mt-auto flex flex-col gap-2">
-                              {activeFilter === "completed" ? (
-                                <Button
-                                  onClick={() =>
-                                    router.push(
-                                      `/nutritionist/appointments/${appointment.id}`
-                                    )
-                                  }
-                                  size="sm"
-                                  className="w-full rounded-lg shadow-sm font-medium text-xs bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
-                                >
-                                  <FileText className="h-3.5 w-3.5 mr-1.5" />
-                                  View Summary
-                                </Button>
-                              ) : (
-                                <>
-                                  <Button
-                                    onClick={() =>
-                                      router.push(
-                                        `/nutritionist/appointments/${appointment.id}`
-                                      )
-                                    }
-                                    size="sm"
-                                    disabled={!canMarkDone}
-                                    className={`w-full rounded-lg shadow-sm font-medium text-xs ${
-                                      canMarkDone
-                                        ? "bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
-                                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                    }`}
-                                  >
-                                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                                    Complete
-                                  </Button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      handleCancelClick(appointment.id)
-                                    }}
-                                    className="w-full rounded-lg py-2 shadow-sm font-bold text-xs bg-soft-coral text-white hover:opacity-90 transition-colors duration-200 flex items-center justify-center gap-1"
-                                  >
-                                    <X className="h-3 w-3" />
-                                    Cancel
-                                  </button>
-                                </>
-                              )}
+                              <Button
+                                onClick={() => router.push(`/nutritionist/appointments/${appointment.id}`)}
+                                size="sm"
+                                disabled={!canComplete}
+                                className={`w-full rounded-lg shadow-sm font-medium text-xs ${
+                                  canComplete
+                                    ? "bg-gradient-to-r from-mint-green to-soft-blue text-white hover:opacity-90"
+                                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                }`}
+                              >
+                                <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                <span>Complete</span>
+                              </Button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleCancelClick(appointment.id)
+                                }}
+                                className="w-full rounded-lg py-2 shadow-sm font-bold text-xs bg-soft-coral text-white hover:opacity-90 transition-colors duration-200 flex items-center justify-center gap-1"
+                              >
+                                <X className="h-3 w-3" />
+                                <span>Cancel</span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -427,7 +276,6 @@ export function AppointmentsList() {
         </div>
       )}
 
-      {/* Cancel Appointment Modal */}
       <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
         <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader className="flex-shrink-0">
@@ -468,10 +316,7 @@ export function AppointmentsList() {
                 {CANCELLATION_REASONS.map((reason) => (
                   <div key={reason.id} className="flex items-center space-x-2">
                     <RadioGroupItem value={reason.id} id={reason.id} />
-                    <Label
-                      htmlFor={reason.id}
-                      className="text-sm text-cool-gray cursor-pointer"
-                    >
+                    <Label htmlFor={reason.id} className="text-sm text-cool-gray cursor-pointer">
                       {reason.label}
                     </Label>
                   </div>
@@ -480,10 +325,7 @@ export function AppointmentsList() {
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="additional-notes"
-                className="text-sm font-medium text-dark-slate-gray"
-              >
+              <Label htmlFor="additional-notes" className="text-sm font-medium text-dark-slate-gray">
                 Additional Notes{" "}
                 <span className="text-cool-gray font-normal">(Optional)</span>
               </Label>

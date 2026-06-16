@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { User, ArrowRight, Heart, Brain, Activity, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTotalUsers } from "@/hooks/useTotalUsers"
+import { formatTotalUsers } from "@/lib/format-total-users"
 
 export default function MissionStats() {
   const heartbeatRef = useRef<SVGSVGElement>(null)
@@ -22,12 +23,7 @@ export default function MissionStats() {
 
   const router = useRouter()
 
-  // Format the live user count for display
-  const userDisplayValue = totalUsers !== undefined
-    ? totalUsers >= 1000
-      ? `${(totalUsers / 1000).toFixed(1)}K+`
-      : `${totalUsers}+`
-    : "5M+"
+  const userDisplayValue = formatTotalUsers(totalUsers)
 
   return (
     <section

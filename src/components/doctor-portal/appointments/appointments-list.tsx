@@ -131,7 +131,7 @@ export function AppointmentsList() {
     <div className="w-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-soft-coral mb-2">
-          Upcoming Appointments{" "}
+          My Appointments{" "}
           <span className="text-cool-gray">({filteredAppointments.length})</span>
         </h1>
         <p className="text-cool-gray text-base">Stay on top of your patient schedule</p>

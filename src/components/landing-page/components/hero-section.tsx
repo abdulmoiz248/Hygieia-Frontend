@@ -5,10 +5,14 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTotalUsers } from "@/hooks/useTotalUsers"
+import { formatTotalUsers } from "@/lib/format-total-users"
 
 export default function HeroSection() {
   const imageRef = useRef<HTMLDivElement>(null)
   const router=useRouter();
+  const { data: totalUsers } = useTotalUsers()
+  const userDisplayValue = formatTotalUsers(totalUsers)
 
   useEffect(() => {
     // Use CSS animations instead of anime.js
@@ -121,7 +125,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 1.2 }}
             className="hidden md:block absolute -left-16 top-1/4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
-            <div className="text-mint-green font-bold text-xl">95%</div>
+            <div className="text-mint-green font-bold text-xl">85%</div>
             <div className="text-xs text-gray-600">Accuracy</div>
           </motion.div>
 
@@ -131,7 +135,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 1.4 }}
             className=" hidden md:block absolute -right-16 top-2/3 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg"
           >
-            <div className="text-[#34C759] font-bold text-xl">5M+</div>
+            <div className="text-[#34C759] font-bold text-xl">{userDisplayValue}</div>
             <div className="text-xs text-mint-green">Users</div>
           </motion.div>
         </div>

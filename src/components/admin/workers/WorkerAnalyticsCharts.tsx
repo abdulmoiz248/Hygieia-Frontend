@@ -5,7 +5,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
   Bar,
   BarChart,
   Area,
@@ -96,26 +95,24 @@ export function WorkerAnalyticsCharts({ analytics }: WorkerAnalyticsChartsProps)
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
       {/* Primary Trend Chart */}
       {primarySeriesData.length > 0 && (
-        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] flex flex-col">
-          <CardHeader className="min-h-[110px]">
+        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] overflow-hidden flex flex-col">
+          <CardHeader className="shrink-0 space-y-2 pb-3">
             <CardTitle className="text-soft-blue">{primarySeriesTitle}</CardTitle>
             <CardDescription>{primarySeriesDesc}</CardDescription>
           </CardHeader>
-          <CardContent className="h-[280px] flex-1">
+          <CardContent className="min-h-0 flex-1 px-5 pb-5 pt-0">
             <ChartContainer
               config={primarySeriesConfig}
-              className="w-full h-full flex-1"
+              className="h-full min-h-[250px] w-full"
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={primarySeriesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-cool-gray)" strokeOpacity={0.2} />
-                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tick={{fill: "var(--color-dark-slate-gray)"}} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{fill: "var(--color-dark-slate-gray)"}} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey={primaryDataKey1} fill="var(--color-soft-blue)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey={primaryDataKey2} fill="var(--color-mint-green)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <BarChart data={primarySeriesData} margin={{ top: 12, right: 14, left: -12, bottom: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-cool-gray)" strokeOpacity={0.2} />
+                <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "var(--color-dark-slate-gray)" }} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "var(--color-dark-slate-gray)" }} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey={primaryDataKey1} fill="var(--color-soft-blue)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey={primaryDataKey2} fill="var(--color-mint-green)" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -123,40 +120,38 @@ export function WorkerAnalyticsCharts({ analytics }: WorkerAnalyticsChartsProps)
 
       {/* Patient Growth Chart */}
       {patientGrowthData.length > 0 && (
-        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] flex flex-col">
-          <CardHeader className="min-h-[110px]">
+        <Card className="border-secondary/20 bg-cool-gray/5 hover-lift shadow-sm h-[390px] overflow-hidden flex flex-col">
+          <CardHeader className="shrink-0 space-y-2 pb-3">
             <CardTitle className="text-soft-coral">Patient Growth</CardTitle>
             <CardDescription>Cumulative unique patients assigned</CardDescription>
           </CardHeader>
-          <CardContent className="h-[280px] flex-1">
+          <CardContent className="min-h-0 flex-1 px-5 pb-5 pt-0">
             <ChartContainer
               config={{
                 cumulative: { label: "Total Patients", color: "var(--color-soft-coral)" },
               }}
-              className="w-full h-full flex-1"
+              className="h-full min-h-[250px] w-full"
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={patientGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-soft-coral)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="var(--color-soft-coral)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-cool-gray)" strokeOpacity={0.2} />
-                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tick={{fill: "var(--color-dark-slate-gray)"}} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{fill: "var(--color-dark-slate-gray)"}} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area
-                    type="monotone"
-                    dataKey="cumulative"
-                    stroke="var(--color-soft-coral)"
-                    fillOpacity={1}
-                    fill="url(#colorCumulative)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <AreaChart data={patientGrowthData} margin={{ top: 12, right: 14, left: -12, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-soft-coral)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-soft-coral)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-cool-gray)" strokeOpacity={0.2} />
+                <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "var(--color-dark-slate-gray)" }} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "var(--color-dark-slate-gray)" }} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="cumulative"
+                  stroke="var(--color-soft-coral)"
+                  fillOpacity={1}
+                  fill="url(#colorCumulative)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
             </ChartContainer>
           </CardContent>
         </Card>

@@ -36,7 +36,7 @@ export default function LegalDocumentPage({
         className="min-h-screen"
         style={{
           background:
-            "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-snow-white) 28%, var(--color-snow-white) 78%, var(--color-mint-green) 100%)",
+            "linear-gradient(to bottom, var(--color-mint-green) 0%, var(--color-snow-white) 28%, var(--color-snow-white) 100%)",
         }}
       >
         <div className="container mx-auto max-w-7xl px-4 pb-16 pt-24">
