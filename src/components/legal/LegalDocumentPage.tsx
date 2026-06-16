@@ -107,7 +107,7 @@ export default function LegalDocumentPage({
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer waveFill="fill-snow-white" />
     </>
   )
 }

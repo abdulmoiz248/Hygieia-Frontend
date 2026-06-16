@@ -26,7 +26,7 @@ export default function LandingPage() {
       <Testimonials />
       <BlogNewsletter />
       <Faq />
-      <Footer/>
+      <Footer waveFill="fill-snow-white" />
       <FloatingAvatar />
     </main>
   )
